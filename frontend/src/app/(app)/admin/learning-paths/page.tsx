@@ -1,116 +1,77 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { AcademicCapIcon, PlusIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { useState } from 'react';
+import { AcademicCapIcon, PlusIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
-import api from '@/lib/api/client';
-import { endpoints } from '@/lib/api/endpoints';
-import { useAuthStore } from '@/store/authStore';
-import type { Course, LearningPath, LearningPathCourse } from '@/types/course';
 import ConfirmDialog from '@/components/admin/ConfirmDialog';
 import LearningPathCard from '@/components/admin/LearningPathCard';
 import LearningPathModal from '@/components/admin/LearningPathModal';
+import AddPathCourseModal from '@/components/admin/learning-paths/AddPathCourseModal';
+import Spinner from '@/components/common/Spinner';
+import { apiErrorMessage } from '@/lib/api/errors';
+import { type LearningPathInput, useLearningPaths } from '@/lib/hooks/admin/useLearningPaths';
+import { useErrorToast } from '@/lib/hooks/useErrorToast';
+import { useAuthStore } from '@/store/authStore';
 import { isAdminRole } from '@/types/auth';
+import type { LearningPath } from '@/types/course';
 
 export default function AdminLearningPathsPage() {
   const { student } = useAuthStore();
   const canDelete = isAdminRole(student?.role);
-  const [paths, setPaths] = useState<LearningPath[]>([]);
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [pathCourses, setPathCourses] = useState<Record<number, LearningPathCourse[]>>({});
-  const [modal, setModal] = useState<{ open: boolean; path?: LearningPath }>({ open: false });
-  const [courseModalPathId, setCourseModalPathId] = useState<number | null>(null);
-  const [selectedCourseId, setSelectedCourseId] = useState('');
+  const paths = useLearningPaths();
+  const [editing, setEditing] = useState<{ path?: LearningPath } | null>(null);
+  const [addingToPathId, setAddingToPathId] = useState<number | null>(null);
   const [pathToDelete, setPathToDelete] = useState<LearningPath | null>(null);
   const [courseToRemove, setCourseToRemove] = useState<{ pathId: number; courseId: number } | null>(null);
-  const [loading, setLoading] = useState(true);
 
-  const loadPathCourses = async (pathId: number) => {
-    const { data } = await api.get<LearningPathCourse[]>(endpoints.learningPaths.courses(pathId));
-    setPathCourses((prev) => ({ ...prev, [pathId]: data }));
+  useErrorToast(paths.error, 'Erro ao carregar trilhas.');
+
+  const availableCourses = (pathId: number) => {
+    const linkedIds = new Set((paths.pathCourses[pathId] ?? []).map((item) => item.course_id));
+    return paths.courses.filter((course) => !linkedIds.has(course.id));
   };
 
-  const load = async () => {
-    const [pathRes, courseRes] = await Promise.all([
-      api.get<LearningPath[]>(endpoints.learningPaths.list),
-      api.get<Course[]>(endpoints.courses.list),
-    ]);
-    setPaths(pathRes.data);
-    setCourses(courseRes.data);
-    setLoading(false);
-    await Promise.all(pathRes.data.map((p) => loadPathCourses(p.id)));
-  };
-
-  useEffect(() => { load().catch(() => toast.error('Erro ao carregar trilhas.')); }, []);
-
-  const savePath = async (data: { name: string; description: string | null }) => {
+  const savePath = async (input: LearningPathInput) => {
     try {
-      if (modal.path) {
-        await api.patch(endpoints.learningPaths.detail(modal.path.id), data);
-        toast.success('Trilha atualizada.');
-      } else {
-        await api.post(endpoints.learningPaths.list, data);
-        toast.success('Trilha criada.');
-      }
-      setModal({ open: false });
-      await load();
+      await paths.savePath(editing?.path?.id ?? null, input);
+      toast.success(editing?.path ? 'Trilha atualizada.' : 'Trilha criada.');
+      setEditing(null);
     } catch { toast.error('Erro ao salvar trilha.'); }
   };
 
   const deletePath = async () => {
     if (!pathToDelete) return;
     try {
-      await api.delete(endpoints.learningPaths.detail(pathToDelete.id));
+      await paths.deletePath(pathToDelete.id);
       toast.success('Trilha excluída.');
       setPathToDelete(null);
-      await load();
-    }
-    catch { toast.error('Erro ao excluir trilha.'); }
+    } catch { toast.error('Erro ao excluir trilha.'); }
   };
 
   const openAddCourse = (pathId: number) => {
-    const linkedIds = new Set((pathCourses[pathId] ?? []).map((item) => item.course_id));
-    const options = courses.filter((c) => !linkedIds.has(c.id));
-    if (!options.length) { toast.error('Não há cursos disponíveis para adicionar.'); return; }
-    setCourseModalPathId(pathId);
-    setSelectedCourseId('');
+    if (!availableCourses(pathId).length) { toast.error('Não há cursos disponíveis para adicionar.'); return; }
+    setAddingToPathId(pathId);
   };
 
-  const addCourse = async () => {
-    if (!courseModalPathId || !selectedCourseId) return;
-    const linkedIds = new Set((pathCourses[courseModalPathId] ?? []).map((item) => item.course_id));
-    const options = courses.filter((c) => !linkedIds.has(c.id));
-    const courseId = Number(selectedCourseId);
-    if (!Number.isInteger(courseId) || !options.some((c) => c.id === courseId)) { toast.error('Curso inválido.'); return; }
+  const addCourse = async (courseId: number) => {
+    if (!addingToPathId) return;
     try {
-      const order = (pathCourses[courseModalPathId]?.length ?? 0) + 1;
-      await api.post(endpoints.learningPaths.courses(courseModalPathId), { course_id: courseId, order });
+      await paths.addCourse(addingToPathId, courseId);
       toast.success('Curso adicionado.');
-      await loadPathCourses(courseModalPathId);
-      setCourseModalPathId(null);
-      setSelectedCourseId('');
-    } catch (e: any) { toast.error(e?.response?.data?.detail ?? 'Erro ao adicionar curso.'); }
+      setAddingToPathId(null);
+    } catch (error) { toast.error(apiErrorMessage(error, 'Erro ao adicionar curso.')); }
   };
 
   const removeCourse = async () => {
     if (!courseToRemove) return;
     try {
-      await api.delete(`${endpoints.learningPaths.courses(courseToRemove.pathId)}/${courseToRemove.courseId}`);
+      await paths.removeCourse(courseToRemove.pathId, courseToRemove.courseId);
       toast.success('Curso removido.');
-      await loadPathCourses(courseToRemove.pathId);
       setCourseToRemove(null);
-    }
-    catch { toast.error('Erro ao remover curso.'); }
+    } catch { toast.error('Erro ao remover curso.'); }
   };
 
-  if (loading) return (
-    <div className="flex items-center justify-center py-20">
-      <svg className="h-8 w-8 animate-spin text-indigo-600" fill="none" viewBox="0 0 24 24">
-        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-      </svg>
-    </div>
-  );
+  if (paths.loading && paths.paths.length === 0) return <Spinner />;
 
   return (
     <div className="space-y-6">
@@ -119,27 +80,27 @@ export default function AdminLearningPathsPage() {
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Trilhas</h1>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Sequências de cursos para jornadas de aprendizagem.</p>
         </div>
-        <button onClick={() => setModal({ open: true })} className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700">
+        <button onClick={() => setEditing({})} className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700">
           <PlusIcon className="h-4 w-4" /><span>Nova trilha</span>
         </button>
       </div>
 
-      {paths.length === 0 ? (
+      {paths.paths.length === 0 ? (
         <div className="rounded-xl border border-dashed border-gray-300 bg-white p-10 text-center dark:border-gray-600 dark:bg-gray-800">
           <AcademicCapIcon className="mx-auto mb-3 h-12 w-12 text-gray-400" />
           <p className="text-gray-500 dark:text-gray-400">Nenhuma trilha criada.</p>
         </div>
       ) : (
         <div className="space-y-3">
-          {paths.map((path) => (
-            <LearningPathCard key={path.id} path={path} courses={courses} pathCourses={pathCourses[path.id] ?? []}
-              canDelete={canDelete ?? false} onEdit={(p) => setModal({ open: true, path: p })} onDelete={() => setPathToDelete(path)}
+          {paths.paths.map((path) => (
+            <LearningPathCard key={path.id} path={path} courses={paths.courses} pathCourses={paths.pathCourses[path.id] ?? []}
+              canDelete={canDelete} onEdit={(p) => setEditing({ path: p })} onDelete={() => setPathToDelete(path)}
               onAddCourse={openAddCourse} onRemoveCourse={(pathId, courseId) => setCourseToRemove({ pathId, courseId })} />
           ))}
         </div>
       )}
 
-      {modal.open && <LearningPathModal path={modal.path} onClose={() => setModal({ open: false })} onSave={savePath} />}
+      {editing && <LearningPathModal path={editing.path} onClose={() => setEditing(null)} onSave={savePath} />}
       {pathToDelete && (
         <ConfirmDialog
           title="Excluir trilha"
@@ -160,30 +121,8 @@ export default function AdminLearningPathsPage() {
           onConfirm={removeCourse}
         />
       )}
-      {courseModalPathId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 py-6">
-          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl dark:bg-gray-800">
-            <div className="mb-5 flex items-start justify-between gap-4">
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Adicionar curso</h2>
-                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Escolha um curso para incluir na trilha.</p>
-              </div>
-              <button type="button" onClick={() => setCourseModalPathId(null)} aria-label="Fechar modal" className="rounded-lg p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-700 dark:hover:text-white">
-                <XMarkIcon className="h-5 w-5" />
-              </button>
-            </div>
-            <select value={selectedCourseId} onChange={(e) => setSelectedCourseId(e.target.value)} className="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-900 dark:text-white">
-              <option value="">Selecione um curso</option>
-              {courses
-                .filter((course) => !(pathCourses[courseModalPathId] ?? []).some((item) => item.course_id === course.id))
-                .map((course) => <option key={course.id} value={course.id}>{course.name}</option>)}
-            </select>
-            <div className="mt-5 flex justify-end gap-3">
-              <button type="button" onClick={() => setCourseModalPathId(null)} className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">Cancelar</button>
-              <button type="button" onClick={addCourse} className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700">Adicionar</button>
-            </div>
-          </div>
-        </div>
+      {addingToPathId && (
+        <AddPathCourseModal availableCourses={availableCourses(addingToPathId)} onAdd={addCourse} onClose={() => setAddingToPathId(null)} />
       )}
     </div>
   );

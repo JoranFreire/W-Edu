@@ -15,7 +15,7 @@ from app.models.student import (
 )
 from app.repositories.student import OrganizationRepository, ProfileRepository, StudentRepository
 from app.repositories.student import InstructorAvailabilityRepository, InstructorRatingRepository
-from app.services.institution import InstitutionService
+from app.services.membership import MembershipService
 from app.schemas.student import (
     InstructorProfileUpdate,
     InstructorAvailabilityCreate,
@@ -55,7 +55,7 @@ class StudentService:
         )
         self.db.add(student)
         self.db.flush()
-        InstitutionService(self.db).add_member(institution_id, student)
+        MembershipService(self.db).add_member(institution_id, student)
         student = self.repo.create(student)
         self.ensure_default_profile(student)
         return student
@@ -83,25 +83,17 @@ class StudentService:
             setattr(student, field, value)
         institution_id = bound_institution_id(self.db)
         if institution_id is not None:
-            InstitutionService(self.db).sync_member_role(institution_id, student)
+            MembershipService(self.db).sync_member_role(institution_id, student)
         student = self.repo.update(student)
         self.ensure_default_profile(student)
         return student
 
     def delete(self, student_id: int) -> None:
         student = self.get_or_404(student_id)
-        institution_id = bound_institution_id(self.db)
-        memberships = InstitutionService(self.db).membership_repo.list_all_for_user(student.id)
-        others = [m for m in memberships if m.institution_id != institution_id]
-        if institution_id is not None and others:
-            # Usuario continua ativo em outras instituicoes: remove apenas o vinculo com esta.
-            for membership in memberships:
-                if membership.institution_id == institution_id:
-                    self.db.delete(membership)
+        # Usuario de outras instituicoes perde so o vinculo com a ativa; senao, e excluido.
+        if not MembershipService(self.db).detach(bound_institution_id(self.db), student):
             self.db.commit()
             return
-        for membership in memberships:
-            self.db.delete(membership)
         self.repo.delete(student)
 
     def ensure_default_profile(self, student: Student) -> None:

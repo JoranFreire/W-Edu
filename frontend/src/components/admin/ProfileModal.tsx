@@ -5,11 +5,12 @@ import toast from 'react-hot-toast';
 import api from '@/lib/api/client';
 import type { InstructorAvailability, InstructorProfile, InstructorRating, StudentProfile, User } from '@/types/auth';
 import { roleLabels } from '@/types/auth';
+import { apiErrorMessage } from '@/lib/api/errors';
+import { dayLabels } from '@/lib/dates';
 
 const roleLabel: Record<string, string> = roleLabels;
 
 const inputCls = 'block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500';
-const dayLabels = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
 
 export default function ProfileModal({ user, onClose, onSaved }: {
   user: User;
@@ -26,7 +27,7 @@ export default function ProfileModal({ user, onClose, onSaved }: {
   const [newRating, setNewRating] = useState({ score: 5, comment: '' });
 
   useEffect(() => {
-    const requests: Promise<any>[] = [
+    const requests: Promise<unknown>[] = [
       api.get<StudentProfile>(`/admin/users/${user.id}/student-profile`).then((r) => setStudentProfile(r.data)),
     ];
     if (user.role === 'instructor') {
@@ -60,8 +61,8 @@ export default function ProfileModal({ user, onClose, onSaved }: {
       toast.success('Perfil atualizado.');
       onSaved();
       onClose();
-    } catch (e: any) {
-      toast.error(e.response?.data?.detail ?? 'Erro ao salvar perfil.');
+    } catch (e) {
+      toast.error(apiErrorMessage(e, 'Erro ao salvar perfil.'));
     } finally {
       setSaving(false);
     }
@@ -72,7 +73,7 @@ export default function ProfileModal({ user, onClose, onSaved }: {
       await api.post(`/admin/users/${user.id}/availability`, newAvailability);
       await reloadAvailability();
       toast.success('Disponibilidade adicionada.');
-    } catch (e: any) { toast.error(e.response?.data?.detail ?? 'Erro ao adicionar disponibilidade.'); }
+    } catch (e) { toast.error(apiErrorMessage(e, 'Erro ao adicionar disponibilidade.')); }
   };
 
   const updateAvailability = async (slot: InstructorAvailability, payload: Partial<InstructorAvailability>) => {
@@ -80,7 +81,7 @@ export default function ProfileModal({ user, onClose, onSaved }: {
       await api.patch(`/admin/users/availability/${slot.id}`, payload);
       await reloadAvailability();
       toast.success('Disponibilidade atualizada.');
-    } catch (e: any) { toast.error(e.response?.data?.detail ?? 'Erro ao atualizar disponibilidade.'); }
+    } catch (e) { toast.error(apiErrorMessage(e, 'Erro ao atualizar disponibilidade.')); }
   };
 
   const deleteAvailability = async (slot: InstructorAvailability) => {
@@ -88,7 +89,7 @@ export default function ProfileModal({ user, onClose, onSaved }: {
       await api.delete(`/admin/users/availability/${slot.id}`);
       await reloadAvailability();
       toast.success('Disponibilidade removida.');
-    } catch (e: any) { toast.error(e.response?.data?.detail ?? 'Erro ao remover disponibilidade.'); }
+    } catch (e) { toast.error(apiErrorMessage(e, 'Erro ao remover disponibilidade.')); }
   };
 
   const addRating = async () => {
@@ -97,7 +98,7 @@ export default function ProfileModal({ user, onClose, onSaved }: {
       const { data } = await api.get(`/admin/users/${user.id}/ratings`);
       setRatings(data);
       toast.success('Avaliação registrada.');
-    } catch (e: any) { toast.error(e.response?.data?.detail ?? 'Erro ao registrar avaliação.'); }
+    } catch (e) { toast.error(apiErrorMessage(e, 'Erro ao registrar avaliação.')); }
   };
 
   return (

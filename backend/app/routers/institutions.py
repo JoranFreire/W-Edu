@@ -6,6 +6,7 @@ from app.dependencies import get_current_admin, get_current_institution, get_cur
 from app.models.institution import Institution
 from app.models.student import Student
 from app.schemas.institution import CampusCreate, CampusOut, CampusUpdate, InstitutionOut, InstitutionUpdate
+from app.services.campus import CampusService
 from app.services.institution import InstitutionService
 
 router = APIRouter()
@@ -28,19 +29,19 @@ def update_current(
 
 @router.get("/campuses", response_model=list[CampusOut])
 def list_campuses(db: Session = Depends(get_db), _: Student = Depends(get_current_student)):
-    return InstitutionService(db).list_campuses()
+    return CampusService(db).list()
 
 
 @router.post("/campuses", response_model=CampusOut, status_code=201)
 def create_campus(data: CampusCreate, db: Session = Depends(get_db), _: Student = Depends(get_current_admin)):
-    return InstitutionService(db).create_campus(data)
+    return CampusService(db).create(data)
 
 
 @router.patch("/campuses/{campus_id}", response_model=CampusOut)
 def update_campus(campus_id: int, data: CampusUpdate, db: Session = Depends(get_db), _: Student = Depends(get_current_admin)):
-    return InstitutionService(db).update_campus(campus_id, data)
+    return CampusService(db).update(campus_id, data)
 
 
 @router.delete("/campuses/{campus_id}", status_code=204)
 def delete_campus(campus_id: int, db: Session = Depends(get_db), _: Student = Depends(get_current_admin)):
-    InstitutionService(db).delete_campus(campus_id)
+    CampusService(db).delete(campus_id)

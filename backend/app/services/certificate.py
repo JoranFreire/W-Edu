@@ -53,7 +53,7 @@ class CertificateService:
         return self.rule_repo.update(rule)
 
     def evaluate(self, course_id: int, student_id: int) -> CertificateEligibilityOut:
-        course = self._get_course_or_404(course_id)
+        self._get_course_or_404(course_id)
         self._get_student_or_404(student_id)
         rule = self.get_rule(course_id)
 

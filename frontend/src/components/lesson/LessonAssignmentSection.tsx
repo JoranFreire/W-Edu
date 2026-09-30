@@ -6,6 +6,8 @@ import toast from 'react-hot-toast';
 import api from '@/lib/api/client';
 import { endpoints } from '@/lib/api/endpoints';
 import type { AssignmentSubmission } from '@/types/assignment';
+import { apiErrorMessage } from '@/lib/api/errors';
+import { saveBlob } from '@/lib/files/saveBlob';
 
 const statusLabels: Record<AssignmentSubmission['status'], string> = {
   submitted: 'Enviada',
@@ -44,8 +46,8 @@ export default function LessonAssignmentSection({ lessonId }: { lessonId: number
       setSubmission(data);
       setFile(null);
       toast.success('Entrega enviada.');
-    } catch (error: any) {
-      toast.error(error.response?.data?.detail || 'Erro ao enviar entrega.');
+    } catch (error) {
+      toast.error(apiErrorMessage(error, 'Erro ao enviar entrega.'));
     } finally {
       setSubmitting(false);
     }
@@ -55,12 +57,7 @@ export default function LessonAssignmentSection({ lessonId }: { lessonId: number
     if (!submission?.file_name) return;
     try {
       const { data } = await api.get(endpoints.assignments.download(submission.id), { responseType: 'blob' });
-      const url = URL.createObjectURL(data);
-      const anchor = document.createElement('a');
-      anchor.href = url;
-      anchor.download = submission.file_name;
-      anchor.click();
-      URL.revokeObjectURL(url);
+      saveBlob(data, submission.file_name);
     } catch {
       toast.error('Erro ao baixar arquivo.');
     }

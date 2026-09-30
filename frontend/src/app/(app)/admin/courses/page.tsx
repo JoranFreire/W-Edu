@@ -13,6 +13,8 @@ import LessonsPanel from '@/components/admin/LessonsPanel';
 import ModulesPanel from '@/components/admin/ModulesPanel';
 import PrerequisitesPanel from '@/components/admin/PrerequisitesPanel';
 import { isAdminRole } from '@/types/auth';
+import TabNav from '@/components/common/TabNav';
+import Spinner from '@/components/common/Spinner';
 
 type CourseTab = 'modules' | 'lessons' | 'prerequisites';
 
@@ -118,14 +120,7 @@ export default function AdminCoursesPage() {
     { id: 'prerequisites' as CourseTab, label: 'Pré-requisitos', icon: ListBulletIcon, badge: prerequisites.length },
   ];
 
-  if (loading) return (
-    <div className="flex items-center justify-center py-20">
-      <svg className="animate-spin h-8 w-8 text-indigo-600" fill="none" viewBox="0 0 24 24">
-        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-      </svg>
-    </div>
-  );
+  if (loading) return <Spinner />;
 
   return (
     <div className="space-y-6">
@@ -206,39 +201,7 @@ export default function AdminCoursesPage() {
             </button>
           </div>
 
-          <div className="border-b border-gray-200 dark:border-gray-700">
-            <nav className="-mb-px flex gap-6 overflow-x-auto" role="tablist" aria-label="Gestão do curso">
-              {tabs.map((tab) => {
-                const Icon = tab.icon;
-                const active = activeTab === tab.id;
-                return (
-                  <button
-                    key={tab.id}
-                    type="button"
-                    role="tab"
-                    aria-selected={active}
-                    aria-controls={`course-${tab.id}`}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`flex shrink-0 items-center gap-2 border-b-2 px-1 py-4 text-sm font-medium transition-colors ${
-                      active
-                        ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                        : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
-                    }`}
-                  >
-                    <Icon className="h-5 w-5" />
-                    <span>{tab.label}</span>
-                    <span className={`inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-xs font-medium ${
-                      active
-                        ? 'bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300'
-                        : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
-                    }`}>
-                      {tab.badge}
-                    </span>
-                  </button>
-                );
-              })}
-            </nav>
-          </div>
+          <TabNav tabs={tabs} active={activeTab} onChange={setActiveTab} ariaLabel="Gestão do curso" idPrefix="course" />
 
           {detailLoading ? (
             <div className="flex items-center justify-center rounded-xl border border-gray-200 bg-white py-16 dark:border-gray-700 dark:bg-gray-800">

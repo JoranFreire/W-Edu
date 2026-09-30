@@ -1,250 +1,64 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import toast from 'react-hot-toast';
-import { AcademicCapIcon, BuildingOffice2Icon, CalendarDaysIcon, ClockIcon, MapPinIcon, PlusIcon, UserIcon, XMarkIcon } from '@heroicons/react/24/outline';
-import api from '@/lib/api/client';
-import { endpoints } from '@/lib/api/endpoints';
-import type { User } from '@/types/auth';
-import type { Course } from '@/types/course';
-import type { AttendanceRecord, AttendanceStatus, CheckinToken, ClassOffering, InstructorAgenda, InstructorAgendaSuggestion, Location, MeetingAttendanceReportRow, MeetingAttendanceSummary, MeetingType, Room, ScheduledMeeting } from '@/types/schedule';
+import { AcademicCapIcon, BuildingOffice2Icon, MapPinIcon, UserIcon } from '@heroicons/react/24/outline';
 import CheckinQrModal from '@/components/admin/CheckinQrModal';
 import ClassOfferingForm from '@/components/admin/ClassOfferingForm';
 import ClassOfferingsList from '@/components/admin/ClassOfferingsList';
 import LocationForm from '@/components/admin/LocationForm';
 import RoomForm from '@/components/admin/RoomForm';
+import InstructorAgendaPanel from '@/components/admin/schedule/InstructorAgendaPanel';
+import LocationsList from '@/components/admin/schedule/LocationsList';
+import MeetingFormModal, { type MeetingSlot } from '@/components/admin/schedule/MeetingFormModal';
+import RoomsList from '@/components/admin/schedule/RoomsList';
+import Modal from '@/components/common/Modal';
+import SectionHeader from '@/components/common/SectionHeader';
+import TabNav, { type TabItem } from '@/components/common/TabNav';
+import Spinner from '@/components/common/Spinner';
+import { toDateTimeLocal } from '@/lib/dates';
+import { useCheckinToken } from '@/lib/hooks/admin/useCheckinToken';
+import { useClassMeetings } from '@/lib/hooks/admin/useClassMeetings';
+import { useScheduleSetup } from '@/lib/hooks/admin/useScheduleSetup';
+import type { ClassOffering, InstructorAgendaSuggestion } from '@/types/schedule';
 
 type SetupTab = 'classes' | 'instructors' | 'rooms' | 'locations';
-const toDateTimeLocal = (value: string) => value.slice(0, 16);
-const toApiDateTime = (value: string) => new Date(value).toISOString();
-const dayLabels = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+type CreateModal = 'class' | 'room' | 'location' | null;
 
 export default function AdminSchedulePage() {
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [locations, setLocations] = useState<Location[]>([]);
-  const [rooms, setRooms] = useState<Room[]>([]);
-  const [classes, setClasses] = useState<ClassOffering[]>([]);
-  const [users, setUsers] = useState<User[]>([]);
-  const [instructorAgenda, setInstructorAgenda] = useState<InstructorAgenda | null>(null);
-  const [agendaLoading, setAgendaLoading] = useState(false);
-  const [meetings, setMeetings] = useState<Record<number, ScheduledMeeting[]>>({});
-  const [attendance, setAttendance] = useState<Record<number, AttendanceRecord[]>>({});
-  const [attendanceReports, setAttendanceReports] = useState<Record<number, MeetingAttendanceReportRow[]>>({});
-  const [summaries, setSummaries] = useState<Record<number, MeetingAttendanceSummary>>({});
-  const [loading, setLoading] = useState(true);
-  const [activeSetupTab, setActiveSetupTab] = useState<SetupTab>('classes');
-  const [classModalOpen, setClassModalOpen] = useState(false);
-  const [roomModalOpen, setRoomModalOpen] = useState(false);
-  const [locationModalOpen, setLocationModalOpen] = useState(false);
+  const setup = useScheduleSetup();
+  const meetings = useClassMeetings();
+  const checkin = useCheckinToken();
+  const [activeTab, setActiveTab] = useState<SetupTab>('classes');
+  const [createModal, setCreateModal] = useState<CreateModal>(null);
   const [meetingClass, setMeetingClass] = useState<ClassOffering | null>(null);
-  const [checkinToken, setCheckinToken] = useState<CheckinToken | null>(null);
-  const [checkinMeeting, setCheckinMeeting] = useState<ScheduledMeeting | null>(null);
-  const [meetingForm, setMeetingForm] = useState({
-    title: '',
-    room_id: '',
-    starts_at: '',
-    ends_at: '',
-    type: 'live' as MeetingType,
-  });
-  const [pendingMeetingSlot, setPendingMeetingSlot] = useState<{ starts_at: string; ends_at: string } | null>(null);
-  const [agendaForm, setAgendaForm] = useState({
-    instructor_id: '',
-    range_start: toDateTimeLocal(new Date().toISOString()),
-    range_end: toDateTimeLocal(new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString()),
-    duration_minutes: 60,
-  });
-  const instructors = users.filter((user) => user.role === 'instructor' && user.is_active);
+  const [pendingSlot, setPendingSlot] = useState<MeetingSlot | null>(null);
 
-  const load = async () => {
-    const [courseRes, locationRes, roomRes, classRes, userRes] = await Promise.all([
-      api.get<Course[]>(endpoints.courses.list),
-      api.get<Location[]>(endpoints.schedule.locations),
-      api.get<Room[]>(endpoints.schedule.rooms),
-      api.get<ClassOffering[]>(endpoints.schedule.classes),
-      api.get<User[]>('/admin/users'),
-    ]);
-    setCourses(courseRes.data);
-    setLocations(locationRes.data);
-    setRooms(roomRes.data);
-    setClasses(classRes.data);
-    setUsers(userRes.data);
-    setLoading(false);
+  const closeCreateModal = () => setCreateModal(null);
+  const afterCreate = () => {
+    setCreateModal(null);
+    setup.reload();
   };
 
-  useEffect(() => { load(); }, []);
-
-  const openMeetingModal = (cls: ClassOffering) => {
-    setMeetingClass(cls);
-    setMeetingForm({
-      title: '',
-      room_id: cls.room_id ? String(cls.room_id) : '',
-      starts_at: pendingMeetingSlot?.starts_at ?? toDateTimeLocal(cls.starts_at),
-      ends_at: pendingMeetingSlot?.ends_at ?? toDateTimeLocal(cls.ends_at),
-      type: cls.room_id ? 'in_person' : 'live',
-    });
-    setPendingMeetingSlot(null);
-  };
-
-  const createMeeting = async (event: React.FormEvent) => {
-    event.preventDefault();
-    if (!meetingClass) return;
-    try {
-      const { data } = await api.post<ScheduledMeeting>(endpoints.schedule.meetings, {
-        class_offering_id: meetingClass.id,
-        room_id: meetingForm.room_id ? Number(meetingForm.room_id) : null,
-        title: meetingForm.title,
-        starts_at: new Date(meetingForm.starts_at).toISOString(),
-        ends_at: new Date(meetingForm.ends_at).toISOString(),
-        type: meetingForm.type,
-      });
-      toast.success('Encontro criado.');
-      setMeetings((prev) => ({ ...prev, [meetingClass.id]: [...(prev[meetingClass.id] ?? []), data] }));
-      setMeetingClass(null);
-    } catch (error: any) {
-      toast.error(error.response?.data?.detail || 'Erro ao criar encontro.');
-    }
-  };
-
-  const loadMeetings = async (classId: number) => {
-    const { data } = await api.get<ScheduledMeeting[]>(endpoints.schedule.classMeetings(classId));
-    setMeetings((prev) => ({ ...prev, [classId]: data }));
-  };
-
-  const loadInstructorAgenda = async (event?: React.FormEvent) => {
-    event?.preventDefault();
-    if (!agendaForm.instructor_id) {
-      setInstructorAgenda(null);
-      return;
-    }
-    setAgendaLoading(true);
-    try {
-      const { data } = await api.get<InstructorAgenda>(endpoints.schedule.instructorAgenda(Number(agendaForm.instructor_id)), {
-        params: {
-          range_start: toApiDateTime(agendaForm.range_start),
-          range_end: toApiDateTime(agendaForm.range_end),
-          duration_minutes: agendaForm.duration_minutes,
-        },
-      });
-      setInstructorAgenda(data);
-    } catch (error: any) {
-      toast.error(error.response?.data?.detail || 'Erro ao carregar agenda do instrutor.');
-    } finally {
-      setAgendaLoading(false);
-    }
-  };
-
-  const useSuggestion = (suggestion: InstructorAgendaSuggestion) => {
-    setPendingMeetingSlot({
-      starts_at: toDateTimeLocal(suggestion.starts_at),
-      ends_at: toDateTimeLocal(suggestion.ends_at),
-    });
-    setActiveSetupTab('classes');
+  const pickSuggestion = (suggestion: InstructorAgendaSuggestion) => {
+    setPendingSlot({ starts_at: toDateTimeLocal(suggestion.starts_at), ends_at: toDateTimeLocal(suggestion.ends_at) });
+    setActiveTab('classes');
     toast.success('Horário selecionado. Escolha uma turma e crie o encontro.');
   };
 
-  const generateCheckinToken = async (meeting: ScheduledMeeting) => {
-    try {
-      const { data } = await api.post<CheckinToken>(endpoints.schedule.checkinTokens(meeting.id), { valid_minutes: 60 });
-      setCheckinToken(data);
-      setCheckinMeeting(meeting);
-    } catch { toast.error('Erro ao gerar token de check-in.'); }
+  const closeMeetingModal = () => {
+    setMeetingClass(null);
+    setPendingSlot(null);
   };
 
-  const checkinUrl = checkinToken && typeof window !== 'undefined'
-    ? `${window.location.origin}/check-in/${checkinToken.token}`
-    : '';
+  if (setup.loading && setup.classes.length === 0) return <Spinner />;
 
-  const copyCheckinUrl = async () => {
-    if (!checkinUrl) return;
-    try {
-      await navigator.clipboard.writeText(checkinUrl);
-      toast.success('Link de check-in copiado.');
-    } catch {
-      toast.error('Não foi possível copiar o link.');
-    }
-  };
-
-  const loadAttendance = async (meetingId: number) => {
-    try {
-      const { data } = await api.get<AttendanceRecord[]>(endpoints.schedule.attendance(meetingId));
-      setAttendance((prev) => ({ ...prev, [meetingId]: data }));
-    } catch { toast.error('Erro ao carregar presença.'); }
-  };
-
-  const loadAttendanceReport = async (meetingId: number) => {
-    try {
-      const { data } = await api.get<MeetingAttendanceReportRow[]>(endpoints.schedule.attendanceReport(meetingId));
-      setAttendanceReports((prev) => ({ ...prev, [meetingId]: data }));
-    } catch { toast.error('Erro ao carregar relatório de presença.'); }
-  };
-
-  const markManualAttendance = async (meeting: ScheduledMeeting, studentId: number, statusValue: AttendanceStatus) => {
-    try {
-      await api.post<AttendanceRecord>(endpoints.schedule.attendance(meeting.id), {
-        student_id: studentId,
-        status: statusValue,
-        method: 'manual',
-      });
-      await Promise.all([
-        loadAttendanceReport(meeting.id),
-        loadAttendance(meeting.id),
-        loadSummary(meeting.id),
-      ]);
-      toast.success('Presença atualizada.');
-    } catch (error: any) {
-      toast.error(error.response?.data?.detail || 'Erro ao atualizar presença.');
-    }
-  };
-
-  const savePracticalAssessment = async (meeting: ScheduledMeeting, studentId: number, score: number, feedback: string | null) => {
-    try {
-      await api.post(endpoints.schedule.practicalAssessments(meeting.id), {
-        student_id: studentId,
-        score,
-        status: 'reviewed',
-        feedback,
-      });
-      await loadAttendanceReport(meeting.id);
-      toast.success('Avaliação prática salva.');
-    } catch (error: any) {
-      toast.error(error.response?.data?.detail || 'Erro ao salvar avaliação prática.');
-    }
-  };
-
-
-  const closeMeeting = async (meeting: ScheduledMeeting) => {
-    try {
-      const { data } = await api.post<ScheduledMeeting>(endpoints.schedule.closeMeeting(meeting.id));
-      setMeetings((prev) => ({
-        ...prev,
-        [meeting.class_offering_id]: (prev[meeting.class_offering_id] ?? []).map((m) => (m.id === meeting.id ? data : m)),
-      }));
-      toast.success('Encontro encerrado.');
-    } catch { toast.error('Erro ao encerrar encontro.'); }
-  };
-
-  const loadSummary = async (meetingId: number) => {
-    try {
-      const { data } = await api.get<MeetingAttendanceSummary>(endpoints.schedule.meetingSummary(meetingId));
-      setSummaries((prev) => ({ ...prev, [meetingId]: data }));
-    } catch { toast.error('Erro ao carregar resumo.'); }
-  };
-
-  const setupTabs = [
-    { id: 'classes' as SetupTab, label: 'Turmas', icon: AcademicCapIcon, badge: classes.length },
-    { id: 'instructors' as SetupTab, label: 'Instrutores', icon: UserIcon, badge: instructors.length },
-    { id: 'rooms' as SetupTab, label: 'Salas', icon: BuildingOffice2Icon, badge: rooms.length },
-    { id: 'locations' as SetupTab, label: 'Unidades', icon: MapPinIcon, badge: locations.length },
+  const tabs: TabItem<SetupTab>[] = [
+    { id: 'classes', label: 'Turmas', icon: AcademicCapIcon, badge: setup.classes.length },
+    { id: 'instructors', label: 'Instrutores', icon: UserIcon, badge: setup.instructors.length },
+    { id: 'rooms', label: 'Salas', icon: BuildingOffice2Icon, badge: setup.rooms.length },
+    { id: 'locations', label: 'Unidades', icon: MapPinIcon, badge: setup.locations.length },
   ];
-
-  if (loading) return (
-    <div className="flex items-center justify-center py-20">
-      <svg className="animate-spin h-8 w-8 text-indigo-600" fill="none" viewBox="0 0 24 24">
-        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-      </svg>
-    </div>
-  );
 
   return (
     <div className="space-y-6">
@@ -253,446 +67,83 @@ export default function AdminSchedulePage() {
         <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Unidades, salas, ofertas de turma e encontros presenciais ou lives.</p>
       </div>
       <div className="space-y-5">
-        <div className="border-b border-gray-200 dark:border-gray-700">
-          <nav className="-mb-px flex gap-6 overflow-x-auto" role="tablist" aria-label="Configurações da agenda">
-            {setupTabs.map((tab) => {
-              const Icon = tab.icon;
-              const active = activeSetupTab === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  type="button"
-                  role="tab"
-                  aria-selected={active}
-                  aria-controls={`schedule-setup-${tab.id}`}
-                  onClick={() => setActiveSetupTab(tab.id)}
-                  className={`flex shrink-0 items-center gap-2 border-b-2 px-1 py-4 text-sm font-medium transition-colors ${
-                    active
-                      ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                      : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
-                  }`}
-                >
-                  <Icon className="h-5 w-5" />
-                  <span>{tab.label}</span>
-                  <span
-                    className={`inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-xs font-medium ${
-                      active
-                        ? 'bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300'
-                        : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
-                    }`}
-                  >
-                    {tab.badge}
-                  </span>
-                </button>
-              );
-            })}
-          </nav>
-        </div>
+        <TabNav tabs={tabs} active={activeTab} onChange={setActiveTab} ariaLabel="Configurações da agenda" idPrefix="schedule-setup" />
 
-        <div id={`schedule-setup-${activeSetupTab}`} role="tabpanel">
-          {activeSetupTab === 'classes' && (
-            <div className="space-y-4">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Turmas cadastradas</h2>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    Gerencie ofertas, encontros e presenças em um só lugar.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setClassModalOpen(true)}
-                  className="inline-flex items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700"
-                >
-                  <PlusIcon className="h-4 w-4" />
-                  <span>Adicionar turma</span>
-                </button>
-              </div>
-              <ClassOfferingsList classes={classes} courses={courses} rooms={rooms} meetings={meetings} attendance={attendance} attendanceReports={attendanceReports} summaries={summaries}
+        <div id={`schedule-setup-${activeTab}`} role="tabpanel" className="space-y-4">
+          {activeTab === 'classes' && (
+            <>
+              <SectionHeader
+                title="Turmas cadastradas"
+                description="Gerencie ofertas, encontros e presenças em um só lugar."
+                actionLabel="Adicionar turma"
+                onAction={() => setCreateModal('class')}
+              />
+              <ClassOfferingsList
+                classes={setup.classes} courses={setup.courses} rooms={setup.rooms}
+                meetings={meetings.meetings} attendance={meetings.attendance}
+                attendanceReports={meetings.attendanceReports} summaries={meetings.summaries}
                 showHeader={false}
-                onCreateMeeting={openMeetingModal} onLoadMeetings={loadMeetings} onGenerateCheckin={generateCheckinToken}
-                onLoadAttendance={loadAttendance} onLoadAttendanceReport={loadAttendanceReport} onMarkAttendance={markManualAttendance} onSavePracticalAssessment={savePracticalAssessment} onLoadSummary={loadSummary} onCloseMeeting={closeMeeting} />
-            </div>
+                onCreateMeeting={setMeetingClass} onLoadMeetings={meetings.loadMeetings} onGenerateCheckin={checkin.generate}
+                onLoadAttendance={meetings.loadAttendance} onLoadAttendanceReport={meetings.loadAttendanceReport}
+                onMarkAttendance={meetings.markAttendance} onSavePracticalAssessment={meetings.savePracticalAssessment}
+                onLoadSummary={meetings.loadSummary} onCloseMeeting={meetings.closeMeeting}
+              />
+            </>
           )}
-          {activeSetupTab === 'instructors' && (
-            <div className="space-y-4">
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Agenda do professor</h2>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Consulte disponibilidade, encontros confirmados e horários livres sugeridos.
-                </p>
-              </div>
-              <form onSubmit={loadInstructorAgenda} className="grid grid-cols-1 gap-3 rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800 md:grid-cols-[1.3fr_1fr_1fr_120px_auto]">
-                <select
-                  value={agendaForm.instructor_id}
-                  onChange={(e) => setAgendaForm((prev) => ({ ...prev, instructor_id: e.target.value }))}
-                  className="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-900 dark:text-white"
-                >
-                  <option value="">Selecione o instrutor</option>
-                  {instructors.map((instructor) => <option key={instructor.id} value={instructor.id}>{instructor.name}</option>)}
-                </select>
-                <input
-                  type="datetime-local"
-                  value={agendaForm.range_start}
-                  onChange={(e) => setAgendaForm((prev) => ({ ...prev, range_start: e.target.value }))}
-                  className="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-900 dark:text-white"
-                />
-                <input
-                  type="datetime-local"
-                  value={agendaForm.range_end}
-                  onChange={(e) => setAgendaForm((prev) => ({ ...prev, range_end: e.target.value }))}
-                  className="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-900 dark:text-white"
-                />
-                <input
-                  type="number"
-                  min={15}
-                  max={480}
-                  step={15}
-                  value={agendaForm.duration_minutes}
-                  onChange={(e) => setAgendaForm((prev) => ({ ...prev, duration_minutes: Number(e.target.value) }))}
-                  className="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-900 dark:text-white"
-                />
-                <button type="submit" className="inline-flex items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700 disabled:opacity-60" disabled={agendaLoading || !agendaForm.instructor_id}>
-                  <CalendarDaysIcon className="h-4 w-4" />
-                  <span>{agendaLoading ? 'Carregando' : 'Consultar'}</span>
-                </button>
-              </form>
-
-              {instructorAgenda && (
-                <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
-                  <div className="rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
-                    <h3 className="font-semibold text-gray-900 dark:text-white">Disponibilidade semanal</h3>
-                    <div className="mt-3 space-y-2">
-                      {instructorAgenda.availability.length === 0 ? (
-                        <p className="text-sm text-gray-500 dark:text-gray-400">Nenhuma disponibilidade cadastrada.</p>
-                      ) : instructorAgenda.availability.map((slot) => (
-                        <div key={slot.id} className="flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2 text-sm dark:bg-gray-900">
-                          <span className="text-gray-700 dark:text-gray-300">{dayLabels[slot.day_of_week]}</span>
-                          <span className={slot.is_active ? 'text-emerald-700 dark:text-emerald-300' : 'text-gray-400'}>
-                            {slot.start_time} - {slot.end_time}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
-                    <h3 className="font-semibold text-gray-900 dark:text-white">Encontros agendados</h3>
-                    <div className="mt-3 space-y-2">
-                      {instructorAgenda.meetings.length === 0 ? (
-                        <p className="text-sm text-gray-500 dark:text-gray-400">Nenhum encontro no período.</p>
-                      ) : instructorAgenda.meetings.map((meeting) => (
-                        <div key={meeting.id} className="rounded-lg border border-gray-100 p-3 dark:border-gray-700">
-                          <p className="text-sm font-medium text-gray-900 dark:text-white">{meeting.title}</p>
-                          <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">{meeting.course_name} · {meeting.class_name}</p>
-                          <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                            {new Date(meeting.starts_at).toLocaleString()} - {new Date(meeting.ends_at).toLocaleTimeString()}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
-                    <h3 className="font-semibold text-gray-900 dark:text-white">Horários sugeridos</h3>
-                    <div className="mt-3 space-y-2">
-                      {instructorAgenda.suggestions.length === 0 ? (
-                        <p className="text-sm text-gray-500 dark:text-gray-400">Sem horários livres para a duração informada.</p>
-                      ) : instructorAgenda.suggestions.slice(0, 12).map((suggestion) => (
-                        <button
-                          key={`${suggestion.starts_at}-${suggestion.ends_at}`}
-                          type="button"
-                          onClick={() => useSuggestion(suggestion)}
-                          className="flex w-full items-center justify-between rounded-lg border border-gray-100 px-3 py-2 text-left text-sm transition-colors hover:border-indigo-200 hover:bg-indigo-50 dark:border-gray-700 dark:hover:border-indigo-700 dark:hover:bg-indigo-950/30"
-                        >
-                          <span className="text-gray-700 dark:text-gray-300">{new Date(suggestion.starts_at).toLocaleString()}</span>
-                          <ClockIcon className="h-4 w-4 text-indigo-600" />
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
+          {activeTab === 'instructors' && (
+            <InstructorAgendaPanel instructors={setup.instructors} onPickSuggestion={pickSuggestion} />
           )}
-          {activeSetupTab === 'rooms' && (
-            <div className="space-y-4">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Salas cadastradas</h2>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    Organize espaços físicos, capacidade e vínculo com unidades.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setRoomModalOpen(true)}
-                  className="inline-flex items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700"
-                >
-                  <PlusIcon className="h-4 w-4" />
-                  <span>Adicionar sala</span>
-                </button>
-              </div>
-
-              <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
-                {rooms.length === 0 ? (
-                  <p className="p-5 text-sm text-gray-500 dark:text-gray-400">Nenhuma sala cadastrada.</p>
-                ) : (
-                  <div className="divide-y divide-gray-100 dark:divide-gray-700">
-                    {rooms.map((room) => {
-                      const location = locations.find((item) => item.id === room.location_id);
-                      return (
-                        <div key={room.id} className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-                          <div className="flex items-center gap-3">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-50 dark:bg-indigo-900/20">
-                              <BuildingOffice2Icon className="h-5 w-5 text-indigo-600" />
-                            </div>
-                            <div>
-                              <p className="font-medium text-gray-900 dark:text-white">{room.name}</p>
-                              <p className="text-xs text-gray-500 dark:text-gray-400">
-                                {location?.name ?? `Unidade #${room.location_id}`} · {room.capacity} lugares
-                              </p>
-                            </div>
-                          </div>
-                          <span className={`w-fit rounded-full px-2.5 py-1 text-xs font-medium ${
-                            room.is_active
-                              ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300'
-                              : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300'
-                          }`}>
-                            {room.is_active ? 'Ativa' : 'Inativa'}
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            </div>
+          {activeTab === 'rooms' && (
+            <>
+              <SectionHeader
+                title="Salas cadastradas"
+                description="Organize espaços físicos, capacidade e vínculo com unidades."
+                actionLabel="Adicionar sala"
+                onAction={() => setCreateModal('room')}
+              />
+              <RoomsList rooms={setup.rooms} locations={setup.locations} />
+            </>
           )}
-          {activeSetupTab === 'locations' && (
-            <div className="space-y-4">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Unidades cadastradas</h2>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    Mantenha os polos e unidades disponíveis para aulas presenciais.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setLocationModalOpen(true)}
-                  className="inline-flex items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700"
-                >
-                  <PlusIcon className="h-4 w-4" />
-                  <span>Adicionar unidade</span>
-                </button>
-              </div>
-
-              <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
-                {locations.length === 0 ? (
-                  <p className="p-5 text-sm text-gray-500 dark:text-gray-400">Nenhuma unidade cadastrada.</p>
-                ) : (
-                  <div className="divide-y divide-gray-100 dark:divide-gray-700">
-                    {locations.map((location) => {
-                      const roomCount = rooms.filter((room) => room.location_id === location.id).length;
-                      return (
-                        <div key={location.id} className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-                          <div className="flex items-center gap-3">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-50 dark:bg-indigo-900/20">
-                              <MapPinIcon className="h-5 w-5 text-indigo-600" />
-                            </div>
-                            <div>
-                              <p className="font-medium text-gray-900 dark:text-white">{location.name}</p>
-                              <p className="text-xs text-gray-500 dark:text-gray-400">
-                                {location.address || 'Endereço não informado'} · {roomCount} {roomCount === 1 ? 'sala' : 'salas'}
-                              </p>
-                            </div>
-                          </div>
-                          <span className={`w-fit rounded-full px-2.5 py-1 text-xs font-medium ${
-                            location.is_active
-                              ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300'
-                              : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300'
-                          }`}>
-                            {location.is_active ? 'Ativa' : 'Inativa'}
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            </div>
+          {activeTab === 'locations' && (
+            <>
+              <SectionHeader
+                title="Unidades cadastradas"
+                description="Mantenha os polos e unidades disponíveis para aulas presenciais."
+                actionLabel="Adicionar unidade"
+                onAction={() => setCreateModal('location')}
+              />
+              <LocationsList locations={setup.locations} rooms={setup.rooms} />
+            </>
           )}
         </div>
       </div>
-      {classModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 py-6">
-          <div className="w-full max-w-2xl rounded-xl bg-white p-6 shadow-xl dark:bg-gray-800">
-            <div className="mb-5 flex items-start justify-between gap-4">
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Adicionar turma</h2>
-                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Defina curso, período, capacidade e sala.</p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setClassModalOpen(false)}
-                aria-label="Fechar modal"
-                className="rounded-lg p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-700 dark:hover:text-white"
-              >
-                <XMarkIcon className="h-5 w-5" />
-              </button>
-            </div>
-            <ClassOfferingForm
-              courses={courses}
-              rooms={rooms}
-              instructors={instructors}
-              variant="plain"
-              onCancel={() => setClassModalOpen(false)}
-              onCreated={() => {
-                setClassModalOpen(false);
-                load();
-              }}
-            />
-          </div>
-        </div>
+
+      {createModal === 'class' && (
+        <Modal title="Adicionar turma" description="Defina curso, período, capacidade e sala." size="xl" onClose={closeCreateModal}>
+          <ClassOfferingForm courses={setup.courses} rooms={setup.rooms} instructors={setup.instructors} variant="plain" onCancel={closeCreateModal} onCreated={afterCreate} />
+        </Modal>
       )}
-      {roomModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 py-6">
-          <div className="w-full max-w-lg rounded-xl bg-white p-6 shadow-xl dark:bg-gray-800">
-            <div className="mb-5 flex items-start justify-between gap-4">
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Adicionar sala</h2>
-                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Vincule a sala a uma unidade e defina sua capacidade.</p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setRoomModalOpen(false)}
-                aria-label="Fechar modal"
-                className="rounded-lg p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-700 dark:hover:text-white"
-              >
-                <XMarkIcon className="h-5 w-5" />
-              </button>
-            </div>
-            <RoomForm
-              locations={locations}
-              variant="plain"
-              onCancel={() => setRoomModalOpen(false)}
-              onCreated={() => {
-                setRoomModalOpen(false);
-                load();
-              }}
-            />
-          </div>
-        </div>
+      {createModal === 'room' && (
+        <Modal title="Adicionar sala" description="Vincule a sala a uma unidade e defina sua capacidade." onClose={closeCreateModal}>
+          <RoomForm locations={setup.locations} variant="plain" onCancel={closeCreateModal} onCreated={afterCreate} />
+        </Modal>
       )}
-      {locationModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 py-6">
-          <div className="w-full max-w-lg rounded-xl bg-white p-6 shadow-xl dark:bg-gray-800">
-            <div className="mb-5 flex items-start justify-between gap-4">
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Adicionar unidade</h2>
-                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Crie uma unidade para organizar salas e encontros presenciais.</p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setLocationModalOpen(false)}
-                aria-label="Fechar modal"
-                className="rounded-lg p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-700 dark:hover:text-white"
-              >
-                <XMarkIcon className="h-5 w-5" />
-              </button>
-            </div>
-            <LocationForm
-              variant="plain"
-              onCancel={() => setLocationModalOpen(false)}
-              onCreated={() => {
-                setLocationModalOpen(false);
-                load();
-              }}
-            />
-          </div>
-        </div>
+      {createModal === 'location' && (
+        <Modal title="Adicionar unidade" description="Crie uma unidade para organizar salas e encontros presenciais." onClose={closeCreateModal}>
+          <LocationForm variant="plain" onCancel={closeCreateModal} onCreated={afterCreate} />
+        </Modal>
       )}
       {meetingClass && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 py-6">
-          <div className="w-full max-w-lg rounded-xl bg-white p-6 shadow-xl dark:bg-gray-800">
-            <div className="mb-5 flex items-start justify-between gap-4">
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Criar encontro</h2>
-                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{meetingClass.name}</p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setMeetingClass(null)}
-                aria-label="Fechar modal"
-                className="rounded-lg p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-700 dark:hover:text-white"
-              >
-                <XMarkIcon className="h-5 w-5" />
-              </button>
-            </div>
-            <form onSubmit={createMeeting} className="space-y-4">
-              <input
-                value={meetingForm.title}
-                onChange={(e) => setMeetingForm((prev) => ({ ...prev, title: e.target.value }))}
-                required
-                placeholder="Título do encontro"
-                className="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-900 dark:text-white"
-              />
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <input
-                  type="datetime-local"
-                  value={meetingForm.starts_at}
-                  onChange={(e) => setMeetingForm((prev) => ({ ...prev, starts_at: e.target.value }))}
-                  required
-                  className="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-900 dark:text-white"
-                />
-                <input
-                  type="datetime-local"
-                  value={meetingForm.ends_at}
-                  onChange={(e) => setMeetingForm((prev) => ({ ...prev, ends_at: e.target.value }))}
-                  required
-                  className="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-900 dark:text-white"
-                />
-              </div>
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <select
-                  value={meetingForm.type}
-                  onChange={(e) => setMeetingForm((prev) => ({ ...prev, type: e.target.value as MeetingType }))}
-                  className="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-900 dark:text-white"
-                >
-                  <option value="live">Live</option>
-                  <option value="in_person">Presencial</option>
-                  <option value="hybrid">Híbrido</option>
-                </select>
-                <select
-                  value={meetingForm.room_id}
-                  onChange={(e) => setMeetingForm((prev) => ({ ...prev, room_id: e.target.value }))}
-                  className="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-900 dark:text-white"
-                >
-                  <option value="">Sem sala</option>
-                  {rooms.map((room) => <option key={room.id} value={room.id}>{room.name}</option>)}
-                </select>
-              </div>
-              <div className="flex justify-end gap-3 pt-2">
-                <button type="button" onClick={() => setMeetingClass(null)} className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
-                  Cancelar
-                </button>
-                <button className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700">
-                  Criar encontro
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-      {checkinToken && (
-        <CheckinQrModal
-          token={checkinToken}
-          meeting={checkinMeeting}
-          checkinUrl={checkinUrl}
-          onCopy={copyCheckinUrl}
-          onClose={() => { setCheckinToken(null); setCheckinMeeting(null); }}
+        <MeetingFormModal
+          classOffering={meetingClass}
+          rooms={setup.rooms}
+          slot={pendingSlot}
+          onSubmit={meetings.createMeeting}
+          onClose={closeMeetingModal}
         />
+      )}
+      {checkin.token && (
+        <CheckinQrModal token={checkin.token} meeting={checkin.meeting} checkinUrl={checkin.url} onCopy={checkin.copyUrl} onClose={checkin.clear} />
       )}
     </div>
   );

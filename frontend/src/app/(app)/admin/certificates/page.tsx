@@ -14,6 +14,10 @@ import CertificateIssuancePanel from '@/components/admin/CertificateIssuancePane
 import CertificateRuleForm from '@/components/admin/CertificateRuleForm';
 import CertificatesList from '@/components/admin/CertificatesList';
 import CertificateValidationPanel from '@/components/admin/CertificateValidationPanel';
+import { apiErrorMessage } from '@/lib/api/errors';
+import { saveBlob } from '@/lib/files/saveBlob';
+import TabNav from '@/components/common/TabNav';
+import Spinner from '@/components/common/Spinner';
 
 type CertificateTab = 'rules' | 'issue' | 'validation' | 'issued';
 
@@ -104,9 +108,8 @@ export default function AdminCertificatesPage() {
       const { data } = await api.post<CertificateIssueResult>(endpoints.certificates.issue(Number(selectedCourseId), Number(studentId)));
       toast.success(`Certificado emitido: ${data.validation_code}`);
       await loadCourseData(Number(selectedCourseId));
-    } catch (e: any) {
-      const detail = e?.response?.data?.detail;
-      toast.error(typeof detail === 'string' ? detail : 'Erro ao emitir certificado.');
+    } catch (e) {
+      toast.error(apiErrorMessage(e, 'Erro ao emitir certificado.'));
     }
   };
 
@@ -118,7 +121,7 @@ export default function AdminCertificatesPage() {
       setCertificateToRevoke(null);
       setRevokeReason('');
       await loadCourseData(Number(selectedCourseId));
-    } catch (e: any) { toast.error(e?.response?.data?.detail ?? 'Erro ao revogar certificado.'); }
+    } catch (e) { toast.error(apiErrorMessage(e, 'Erro ao revogar certificado.')); }
   };
 
   const checkEligibility = async () => {
@@ -143,12 +146,7 @@ export default function AdminCertificatesPage() {
   const downloadCertificate = async (certificate: Certificate) => {
     try {
       const { data } = await api.get(endpoints.certificates.download(certificate.id), { responseType: 'blob' });
-      const url = URL.createObjectURL(data);
-      const anchor = document.createElement('a');
-      anchor.href = url;
-      anchor.download = `certificado-${certificate.validation_code}.pdf`;
-      anchor.click();
-      URL.revokeObjectURL(url);
+      saveBlob(data, `certificado-${certificate.validation_code}.pdf`);
     } catch {
       toast.error('Erro ao baixar certificado.');
     }
@@ -161,14 +159,7 @@ export default function AdminCertificatesPage() {
     { id: 'issued' as CertificateTab, label: 'Emitidos', icon: ListBulletIcon, badge: certificates.length },
   ];
 
-  if (loading) return (
-    <div className="flex items-center justify-center py-20">
-      <svg className="animate-spin h-8 w-8 text-indigo-600" fill="none" viewBox="0 0 24 24">
-        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-      </svg>
-    </div>
-  );
+  if (loading) return <Spinner />;
 
   return (
     <div className="space-y-6">
@@ -250,43 +241,7 @@ export default function AdminCertificatesPage() {
 
       {selectedCourseId && rule && !courseLoading && (
         <div className="space-y-5">
-          <div className="border-b border-gray-200 dark:border-gray-700">
-            <nav className="-mb-px flex gap-6 overflow-x-auto" role="tablist" aria-label="Gestão de certificados">
-              {tabs.map((tab) => {
-                const Icon = tab.icon;
-                const active = activeTab === tab.id;
-                return (
-                  <button
-                    key={tab.id}
-                    type="button"
-                    role="tab"
-                    aria-selected={active}
-                    aria-controls={`certificates-${tab.id}`}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`flex shrink-0 items-center gap-2 border-b-2 px-1 py-4 text-sm font-medium transition-colors ${
-                      active
-                        ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                        : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
-                    }`}
-                  >
-                    <Icon className="h-5 w-5" />
-                    <span>{tab.label}</span>
-                    {tab.badge !== undefined && (
-                      <span
-                        className={`inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-xs font-medium ${
-                          active
-                            ? 'bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300'
-                            : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
-                        }`}
-                      >
-                        {tab.badge}
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-            </nav>
-          </div>
+          <TabNav tabs={tabs} active={activeTab} onChange={setActiveTab} ariaLabel="Gestão de certificados" idPrefix="certificates" />
 
           <div id={`certificates-${activeTab}`} role="tabpanel" className="max-w-3xl">
             {activeTab === 'rules' && <CertificateRuleForm rule={rule} onChange={setRule} onSave={saveRule} />}

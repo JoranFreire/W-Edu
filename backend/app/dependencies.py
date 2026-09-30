@@ -8,18 +8,14 @@ from app.core.tenancy import bind_institution
 from app.models.institution import Institution
 from app.models.student import ADMIN_ROLES, Student, UserRole
 from app.repositories.student import StudentRepository
-from app.services.institution import InstitutionService
+from app.services.tenant_access import TenantAccessService
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 INSTITUTION_HEADER = "X-Institution"
 
 
-def get_current_student(
-    request: Request,
-    token: str = Depends(oauth2_scheme),
-    db: Session = Depends(get_db),
-) -> Student:
+def _authenticate(token: str, db: Session) -> tuple[Student, dict]:
     payload = decode_access_payload(token)
     student_id = payload.get("sub") if payload else None
     if not student_id:
@@ -27,10 +23,24 @@ def get_current_student(
     student = StudentRepository(db).get_by_id(int(student_id))
     if not student or not student.is_active:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Usuário não encontrado")
+    return student, payload
+
+
+def _activate_institution(request: Request, db: Session, student: Student, payload: dict) -> None:
+    """Resolve a instituicao da requisicao (header ou token) e vincula a sessao do banco."""
     requested = request.headers.get(INSTITUTION_HEADER) or payload.get("inst")
-    institution = InstitutionService(db).resolve_for_user(student, requested)
+    institution = TenantAccessService(db).resolve_for_user(student, requested)
     bind_institution(db, institution.id)
     request.state.institution = institution
+
+
+def get_current_student(
+    request: Request,
+    token: str = Depends(oauth2_scheme),
+    db: Session = Depends(get_db),
+) -> Student:
+    student, payload = _authenticate(token, db)
+    _activate_institution(request, db, student, payload)
     return student
 
 

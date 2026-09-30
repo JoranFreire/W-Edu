@@ -7,7 +7,8 @@ from app.models.student import Student
 from app.schemas.auth import LoginRequest, TokenOut
 from app.schemas.institution import MembershipOut, SwitchInstitutionRequest
 from app.services.auth import AuthService
-from app.services.institution import InstitutionService
+from app.services.membership import MembershipService
+from app.services.tenant_access import TenantAccessService
 
 router = APIRouter()
 
@@ -20,7 +21,7 @@ def login(data: LoginRequest, db: Session = Depends(get_db)):
 
 @router.get("/institutions", response_model=list[MembershipOut])
 def my_institutions(db: Session = Depends(get_db), current: Student = Depends(get_current_student)):
-    return InstitutionService(db).list_memberships(current)
+    return MembershipService(db).list_active(current)
 
 
 @router.post("/switch-institution", response_model=TokenOut)
@@ -29,6 +30,6 @@ def switch_institution(
     db: Session = Depends(get_db),
     current: Student = Depends(get_current_student),
 ):
-    service = InstitutionService(db)
+    service = TenantAccessService(db)
     institution = service.resolve_for_user(current, data.institution)
     return TokenOut(access_token=service.issue_token(current, institution), institution=institution)

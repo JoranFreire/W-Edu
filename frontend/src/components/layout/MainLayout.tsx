@@ -6,30 +6,22 @@ import { Sidebar } from './Sidebar';
 import { TopBar } from './TopBar';
 import { canAccessPath } from '@/lib/auth/permissions';
 import { applyBranding } from '@/lib/institution/branding';
+import { useStoredValue } from '@/lib/hooks/useStoredValue';
 import { useAuthStore } from '@/store/authStore';
 
 export function MainLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const { student, institution } = useAuthStore();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [storedCollapsed, setStoredCollapsed] = useStoredValue('w-edu-sidebar-collapsed');
+  const sidebarCollapsed = storedCollapsed === 'true';
   const hasAccess = canAccessPath(student?.role, pathname);
 
   useEffect(() => {
     applyBranding(institution?.branding);
   }, [institution?.branding]);
 
-  useEffect(() => {
-    setSidebarCollapsed(localStorage.getItem('w-edu-sidebar-collapsed') === 'true');
-  }, []);
-
-  const toggleSidebarCollapsed = () => {
-    setSidebarCollapsed((current) => {
-      const next = !current;
-      localStorage.setItem('w-edu-sidebar-collapsed', String(next));
-      return next;
-    });
-  };
+  const toggleSidebarCollapsed = () => setStoredCollapsed(String(!sidebarCollapsed));
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">

@@ -1,4 +1,5 @@
-import app.core.tenancy  # noqa: F401 — registra os filtros multi-tenant
+import app.core.tenancy  # noqa: F401 — registra o filtro de leitura multi-tenant
+import app.core.tenant_integrity  # noqa: F401 — registra as regras de gravacao multi-tenant
 from app.models.student import (
     InstructorAvailability,
     InstructorProfile,

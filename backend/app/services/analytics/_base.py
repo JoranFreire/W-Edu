@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.models.quiz import Quiz, QuizAttempt
 from app.models.lesson import Lesson
-from app.models.schedule import AttendanceRecord, AttendanceStatus, ClassEnrollment, ClassEnrollmentStatus, ClassOffering
+from app.models.schedule import AttendanceRecord, AttendanceStatus, ClassEnrollment, ClassOffering
 from app.models.student import Student, UserRole
 
 

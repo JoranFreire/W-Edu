@@ -9,6 +9,7 @@ import api from '@/lib/api/client';
 import { endpoints } from '@/lib/api/endpoints';
 import type { Certificate } from '@/types/certificate';
 import type { Course } from '@/types/course';
+import { saveBlob } from '@/lib/files/saveBlob';
 
 export default function CertificatesPage() {
   const [certificates, setCertificates] = useState<Certificate[]>([]);
@@ -32,12 +33,7 @@ export default function CertificatesPage() {
   const downloadCertificate = async (certificate: Certificate) => {
     try {
       const { data } = await api.get(endpoints.certificates.download(certificate.id), { responseType: 'blob' });
-      const url = URL.createObjectURL(data);
-      const anchor = document.createElement('a');
-      anchor.href = url;
-      anchor.download = `certificado-${certificate.validation_code}.pdf`;
-      anchor.click();
-      URL.revokeObjectURL(url);
+      saveBlob(data, `certificado-${certificate.validation_code}.pdf`);
     } catch {
       toast.error('Erro ao baixar certificado.');
     }

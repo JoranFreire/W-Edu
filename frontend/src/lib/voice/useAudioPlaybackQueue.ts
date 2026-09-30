@@ -25,43 +25,47 @@ export function useAudioPlaybackQueue() {
   }, [resetQueue]);
 
   const playNext = useCallback(() => {
-    const playbackCtx = playbackAudioCtxRef.current;
-    if (!playbackCtx) {
-      isPlayingRef.current = false;
-      return;
-    }
-    if (audioQueueRef.current.length === 0) {
-      isPlayingRef.current = false;
-      currentSourceRef.current = null;
-      return;
-    }
+    // Toca os blobs em sequencia: ao terminar (ou falhar) um, avanca para o proximo.
+    const playFromQueue = () => {
+      const playbackCtx = playbackAudioCtxRef.current;
+      if (!playbackCtx) {
+        isPlayingRef.current = false;
+        return;
+      }
+      if (audioQueueRef.current.length === 0) {
+        isPlayingRef.current = false;
+        currentSourceRef.current = null;
+        return;
+      }
 
-    isPlayingRef.current = true;
-    const blob = audioQueueRef.current.shift()!;
-    const generation = playbackGenerationRef.current;
+      isPlayingRef.current = true;
+      const blob = audioQueueRef.current.shift()!;
+      const generation = playbackGenerationRef.current;
 
-    void blob.arrayBuffer()
-      .then((buffer) => playbackCtx.decodeAudioData(buffer))
-      .then((audioBuffer) => {
-        if (playbackGenerationRef.current !== generation) return;
+      void blob.arrayBuffer()
+        .then((buffer) => playbackCtx.decodeAudioData(buffer))
+        .then((audioBuffer) => {
+          if (playbackGenerationRef.current !== generation) return;
 
-        const source = playbackCtx.createBufferSource();
-        source.buffer = audioBuffer;
-        source.connect(playbackCtx.destination);
-        source.onended = () => {
-          if (currentSourceRef.current === source) {
-            currentSourceRef.current.disconnect();
-            currentSourceRef.current = null;
-          }
-          playNext();
-        };
-        currentSourceRef.current = source;
-        source.start();
-      })
-      .catch(() => {
-        if (playbackGenerationRef.current !== generation) return;
-        playNext();
-      });
+          const source = playbackCtx.createBufferSource();
+          source.buffer = audioBuffer;
+          source.connect(playbackCtx.destination);
+          source.onended = () => {
+            if (currentSourceRef.current === source) {
+              currentSourceRef.current.disconnect();
+              currentSourceRef.current = null;
+            }
+            playFromQueue();
+          };
+          currentSourceRef.current = source;
+          source.start();
+        })
+        .catch(() => {
+          if (playbackGenerationRef.current !== generation) return;
+          playFromQueue();
+        });
+    };
+    playFromQueue();
   }, []);
 
   const prepare = useCallback(async () => {

@@ -7,7 +7,7 @@ from app.models.document import Document
 from app.models.enrollment import Enrollment
 from app.models.finance import Charge, ChargeStatus, Subscription, SubscriptionStatus
 from app.models.progress import Progress, ProgressStatus
-from app.models.schedule import AttendanceRecord, AttendanceStatus, ClassEnrollment, ClassOffering, ScheduledMeeting
+from app.models.schedule import ClassEnrollment, ClassOffering, ScheduledMeeting
 from app.models.student import Organization, Student, UserRole
 from app.schemas.analytics import AnalyticsOverviewOut
 from ._base import AnalyticsBase

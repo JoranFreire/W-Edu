@@ -5,6 +5,7 @@ from app.core.database import get_db
 from app.dependencies import get_current_super_admin
 from app.models.student import Student
 from app.schemas.institution import CampusOut, InstitutionCreate, InstitutionOut, PlatformInstitutionUpdate
+from app.services.campus import CampusService
 from app.services.institution import InstitutionService
 
 router = APIRouter()
@@ -38,5 +39,5 @@ def update_institution(
 
 @router.get("/institutions/{institution_id}/campuses", response_model=list[CampusOut])
 def list_institution_campuses(institution_id: int, db: Session = Depends(get_db), _: Student = Depends(get_current_super_admin)):
-    service = InstitutionService(db)
-    return service.list_campuses(service.get_or_404(institution_id).id)
+    institution = InstitutionService(db).get_or_404(institution_id)
+    return CampusService(db).list(institution.id)

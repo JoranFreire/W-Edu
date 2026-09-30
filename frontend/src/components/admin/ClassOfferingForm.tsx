@@ -5,9 +5,8 @@ import { AcademicCapIcon, PlusIcon } from '@heroicons/react/24/outline';
 import type { Course } from '@/types/course';
 import type { User } from '@/types/auth';
 import type { ClassOffering, Room } from '@/types/schedule';
+import { toApiDateTime, toDateTimeLocal } from '@/lib/dates';
 
-const toDateTimeLocal = (v: string) => v.slice(0, 16);
-const toApiDateTime = (v: string) => new Date(v).toISOString();
 
 export default function ClassOfferingForm({ courses, rooms, instructors = [], onCreated, onCancel, variant = 'card' }: {
   courses: Course[];
@@ -17,12 +16,12 @@ export default function ClassOfferingForm({ courses, rooms, instructors = [], on
   onCancel?: () => void;
   variant?: 'card' | 'plain';
 }) {
-  const [form, setForm] = useState({
+  const [form, setForm] = useState(() => ({
     course_id: '', name: '',
     starts_at: toDateTimeLocal(new Date().toISOString()),
     ends_at: toDateTimeLocal(new Date(Date.now() + 60 * 60 * 1000).toISOString()),
     capacity: 20, status: 'open' as ClassOffering['status'], room_id: '', instructor_id: '',
-  });
+  }));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

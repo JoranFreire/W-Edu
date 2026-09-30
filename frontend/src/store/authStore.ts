@@ -4,6 +4,7 @@ import type { Student, AuthTokens, LoginCredentials } from '@/types/auth';
 import type { Institution, InstitutionSummary, Membership } from '@/types/institution';
 import api from '@/lib/api/client';
 import { endpoints } from '@/lib/api/endpoints';
+import { apiErrorMessage } from '@/lib/api/errors';
 
 interface AuthState {
   student: Student | null;
@@ -47,8 +48,8 @@ export const useAuthStore = create<AuthState>()(
 
           set({ student, tokens, institution: tokens.institution, isAuthenticated: true, isLoading: false, error: null });
           get().fetchInstitution();
-        } catch (error: any) {
-          const msg = error.response?.data?.detail || 'Falha ao fazer login. Verifique suas credenciais.';
+        } catch (error) {
+          const msg = apiErrorMessage(error, 'Falha ao fazer login. Verifique suas credenciais.');
           set({ student: null, tokens: null, institution: null, memberships: [], isAuthenticated: false, isLoading: false, error: msg });
           throw error;
         }

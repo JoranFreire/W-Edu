@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.dependencies import get_current_admin, get_current_admin_or_company_manager, get_current_student
-from app.models.student import ADMIN_ROLES, Student, UserRole
+from app.models.student import ADMIN_ROLES, Student
 from app.schemas.finance import (
     BillingPlanCreate,
     BillingPlanOut,

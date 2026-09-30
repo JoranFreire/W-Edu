@@ -7,6 +7,7 @@ import { CheckCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/ou
 import api from '@/lib/api/client';
 import { endpoints } from '@/lib/api/endpoints';
 import type { AttendanceRecord } from '@/types/schedule';
+import { apiErrorMessage } from '@/lib/api/errors';
 
 type CheckinState = 'loading' | 'success' | 'error';
 
@@ -27,8 +28,7 @@ export default function CheckInPage() {
       })
       .catch((error) => {
         setState('error');
-        const detail = error.response?.data?.detail;
-        setMessage(typeof detail === 'string' ? detail : 'Não foi possível registrar o check-in.');
+        setMessage(apiErrorMessage(error, 'Não foi possível registrar o check-in.'));
       });
   }, [token]);
 
