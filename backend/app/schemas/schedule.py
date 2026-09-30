@@ -65,6 +65,9 @@ class ClassOfferingCreate(BaseModel):
     location_id: int | None = None
     room_id: int | None = None
     instructor_id: int | None = None
+    term_id: int | None = None
+    subject_id: int | None = None
+    class_group_id: int | None = None
 
 
 class ClassOfferingUpdate(BaseModel):
@@ -77,6 +80,9 @@ class ClassOfferingUpdate(BaseModel):
     location_id: int | None = None
     room_id: int | None = None
     instructor_id: int | None = None
+    term_id: int | None = None
+    subject_id: int | None = None
+    class_group_id: int | None = None
 
 
 class ClassOfferingOut(BaseModel):
@@ -90,6 +96,9 @@ class ClassOfferingOut(BaseModel):
     location_id: int | None
     room_id: int | None
     instructor_id: int | None
+    term_id: int | None
+    subject_id: int | None
+    class_group_id: int | None
     created_at: datetime
 
     model_config = {"from_attributes": True}

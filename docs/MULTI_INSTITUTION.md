@@ -117,6 +117,8 @@ Implementado na Fase 12 (entrega 1), em `/academic`: `academic_units` a `curricu
 - matriz em `draft` (editavel) -> `active` (uma por programa; ativar outra arquiva a anterior) -> `archived` (vale para quem ja ingressou); alterar uma matriz vigente = nova versao copiada;
 - componente pode sobrescrever carga horaria e creditos da disciplina; o detalhe da matriz traz totais e pendencias (pre-requisito no mesmo periodo ou depois, fora da matriz, periodo alem da duracao do programa).
 
+Implementado na Fase 12 (entrega 2): `academic_terms`, `grading_periods`, `calendar_events`, `program_enrollments`, `class_groups` e `class_group_members` (alocacao do aluno na turma-grupo), com TenantMixin e RLS; `class_offerings` ganhou `term_id`, `subject_id` e `class_group_id` (a turma-grupo define o periodo). O resumo do calendario conta dias letivos como dias uteis menos feriados/recessos, mais dias letivos extras. Ainda pendente: tornar `class_offerings.course_id` opcional para ofertas so de disciplina.
+
 As estruturas atuais sao estendidas, nao substituidas:
 
 - `class_offerings` ganha `term_id`, `subject_id` e `class_group_id`, todos nullable. Uma oferta pode ser de curso livre (como hoje) ou de disciplina.

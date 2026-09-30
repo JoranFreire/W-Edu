@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from sqlalchemy import or_
 
 from app.models.academic import CurriculumComponent, Subject

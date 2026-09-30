@@ -41,6 +41,7 @@ python scripts/check_api_permissions.py
 python scripts/check_tenant_isolation.py        # DATABASE_URL=postgresql://... para rodar no Postgres
 python scripts/check_certificate_flow.py
 python scripts/check_curriculum_flow.py
+python scripts/check_academic_calendar_flow.py
 python scripts/check_rls.py                     # Postgres com superusuario em DATABASE_URL; cria role/banco proprios
 alembic upgrade head && alembic check           # migration alinhada aos models
 ```

@@ -72,7 +72,16 @@ Este documento registra a regra operacional por papel. A nomenclatura `User` e `
 | Criar matriz, nova versao, componentes, ativar/arquivar | Nao | Nao | Sim | Nao | Sim |
 | Excluir matriz em rascunho | Nao | Nao | Nao | Nao | Sim |
 
+| Ver periodos letivos, etapas, calendario e turmas-grupo | Sim | Sim | Sim | Sim | Sim |
+| Criar/editar periodo, etapa, evento e turma-grupo; mudar situacao | Nao | Nao | Sim | Nao | Sim |
+| Excluir periodo planejado, etapa aberta e turma-grupo vazia | Nao | Nao | Nao | Nao | Sim |
+| Listar/criar matriculas no programa e mudar situacao | Nao | Nao | Sim | Nao | Sim |
+| Ver as proprias matriculas no programa (`/me`) | Sim | Sim | Sim | Sim | Sim |
+| Ver alunos da turma-grupo e alocar/remover | Nao | Nao | Sim | Nao | Sim |
+
 Regras: codigo de programa e de disciplina e unico por instituicao; so matrizes em rascunho sao editaveis; ativar uma matriz arquiva a vigente do mesmo programa; disciplina usada em matriz nao pode ser excluida (desative-a).
+
+Calendario e turmas: periodo `planned -> open -> closed` (reabertura permitida); encerrar o periodo encerra as etapas e bloqueia edicao de etapas, eventos do periodo e alocacao de alunos. Matricula no programa usa a matriz vigente por padrao, gera numero `ano + codigo do programa + sequencial` e segue as transicoes `active <-> locked`, `active/locked -> dropped | transferred | cancelled`, `active -> graduated` (finais nao reabrem). Cada matricula ativa fica em no maximo uma turma-grupo por periodo, respeitando as vagas.
 
 ## Agenda e Presencial
 

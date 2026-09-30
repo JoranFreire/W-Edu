@@ -91,6 +91,10 @@ class ClassOffering(TenantMixin, Base):
     location_id: Mapped[int | None] = mapped_column(ForeignKey("locations.id"), nullable=True, index=True)
     room_id: Mapped[int | None] = mapped_column(ForeignKey("rooms.id"), nullable=True, index=True)
     instructor_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True, index=True)
+    # Vinculos academicos opcionais (Fase 12): oferta de disciplina num periodo e turma-grupo.
+    term_id: Mapped[int | None] = mapped_column(ForeignKey("academic_terms.id"), nullable=True, index=True)
+    subject_id: Mapped[int | None] = mapped_column(ForeignKey("subjects.id"), nullable=True, index=True)
+    class_group_id: Mapped[int | None] = mapped_column(ForeignKey("class_groups.id"), nullable=True, index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     course: Mapped["Course"] = relationship()

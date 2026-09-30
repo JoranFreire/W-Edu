@@ -9,6 +9,7 @@ from app.repositories.schedule import ClassOfferingRepository, LocationRepositor
 from app.repositories.student import StudentRepository
 from app.schemas.schedule import ClassJoinOut, ClassOfferingCreate, ClassOfferingUpdate
 from app.services.notifications.events import NotificationEventService
+from app.services.schedule_pkg.academic_links import AcademicLinks, OfferingAcademicLinks
 
 
 class ClassOfferingService:
@@ -19,11 +20,13 @@ class ClassOfferingService:
         self.room_repo = RoomRepository(db)
         self.student_repo = StudentRepository(db)
         self.notification_service = NotificationEventService(db)
+        self.academic_links = OfferingAcademicLinks(db)
 
     def create(self, data: ClassOfferingCreate) -> ClassOffering:
         self._validate_refs(data.course_id, data.location_id, data.room_id, data.instructor_id)
         self._validate_dates(data.starts_at, data.ends_at)
-        class_offering = self.repo.create(ClassOffering(**data.model_dump()))
+        links = self.academic_links.resolve(AcademicLinks(data.term_id, data.subject_id, data.class_group_id))
+        class_offering = self.repo.create(ClassOffering(**{**data.model_dump(), **links.__dict__}))
         course = self.course_repo.get_by_id(class_offering.course_id)
         if course:
             self.notification_service.publish(
@@ -58,6 +61,14 @@ class ClassOfferingService:
             payload.get("instructor_id", class_offering.instructor_id),
         )
         self._validate_dates(payload.get("starts_at", class_offering.starts_at), payload.get("ends_at", class_offering.ends_at))
+        links = self.academic_links.resolve(
+            AcademicLinks(
+                payload.get("term_id", class_offering.term_id),
+                payload.get("subject_id", class_offering.subject_id),
+                payload.get("class_group_id", class_offering.class_group_id),
+            )
+        )
+        payload.update(links.__dict__)
         for field, value in payload.items():
             setattr(class_offering, field, value)
         return self.repo.update(class_offering)

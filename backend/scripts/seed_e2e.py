@@ -22,6 +22,7 @@ import app.models  # noqa: F401
 from app.core.database import SessionLocal
 from app.core.security import hash_password
 from app.core.tenancy import bind_institution
+from app.models.academic import ComponentKind, Curriculum, CurriculumComponent, CurriculumStatus, Program, ProgramLevel, ProgramStatus, Subject
 from app.models.course import Course
 from app.models.enrollment import Enrollment
 from app.models.institution import Campus, Institution, InstitutionMembership, InstitutionType
@@ -38,6 +39,11 @@ def _user(name: str, email: str, role: UserRole, password_hash: str) -> Student:
 
 
 def seed() -> None:
+    seed_base()
+    seed_academic()
+
+
+def seed_base() -> None:
     with SessionLocal() as db:
         if db.query(Institution).filter(Institution.slug == "escola-alfa").first():
             print("Dados de e2e ja existem; nada a fazer.")
@@ -85,6 +91,28 @@ def seed() -> None:
         db.add(Course(name="Direito Civil", description="Curso de direito"))
         db.commit()
     print("Dados de e2e criados.")
+
+
+E2E_PROGRAM_CODE = "EF-E2E"
+
+
+def seed_academic() -> None:
+    """Programa com matriz vigente na Escola Alfa, base dos testes de matricula e turmas."""
+    with SessionLocal() as db:
+        alfa = db.query(Institution).filter(Institution.slug == "escola-alfa").one()
+        bind_institution(db, alfa.id)
+        if db.query(Program).filter(Program.code == E2E_PROGRAM_CODE).first():
+            return
+        program = Program(code=E2E_PROGRAM_CODE, name="Fundamental E2E", level=ProgramLevel.basic, duration_terms=9, status=ProgramStatus.active)
+        subject = Subject(code="MAT-E2E", name="Matemática E2E", hours=160)
+        db.add_all([program, subject])
+        db.flush()
+        curriculum = Curriculum(program_id=program.id, version="1", status=CurriculumStatus.active)
+        db.add(curriculum)
+        db.flush()
+        db.add(CurriculumComponent(curriculum_id=curriculum.id, subject_id=subject.id, term_number=6, kind=ComponentKind.mandatory))
+        db.commit()
+    print("Base academica de e2e criada.")
 
 
 if __name__ == "__main__":

@@ -29,10 +29,11 @@ test('abas de salas e agenda do instrutor', async ({ page }) => {
 
 /** Horario de 30 min variando a cada execucao, para nao colidir com encontros ja criados no instrutor. */
 function uniqueSlot() {
-  const minutes = Math.floor(Date.now() / 60_000);
+  // Varia por segundo (reexecucoes no mesmo minuto nao colidem): 200 dias x 14 horas x 2 meias-horas.
+  const seconds = Math.floor(Date.now() / 1000);
   const start = new Date();
-  start.setDate(start.getDate() + 1 + (minutes % 50));
-  start.setHours(6 + (minutes % 14), (minutes % 2) * 30, 0, 0);
+  start.setDate(start.getDate() + 1 + (seconds % 200));
+  start.setHours(6 + (Math.floor(seconds / 200) % 14), (Math.floor(seconds / 2800) % 2) * 30, 0, 0);
   const end = new Date(start.getTime() + 30 * 60_000);
   const local = (date: Date) => {
     const pad = (n: number) => String(n).padStart(2, '0');
