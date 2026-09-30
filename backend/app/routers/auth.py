@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.dependencies import get_current_student
+from app.dependencies import get_current_student, requested_institution_ref
 from app.models.student import Student
 from app.schemas.auth import LoginRequest, TokenOut
 from app.schemas.institution import MembershipOut, SwitchInstitutionRequest
@@ -14,8 +14,12 @@ router = APIRouter()
 
 
 @router.post("/login", response_model=TokenOut)
-def login(data: LoginRequest, db: Session = Depends(get_db)):
-    token, institution = AuthService(db).login(data.email, data.password, data.institution)
+def login(
+    data: LoginRequest,
+    db: Session = Depends(get_db),
+    institution_ref: str | None = Depends(requested_institution_ref),
+):
+    token, institution = AuthService(db).login(data.email, data.password, data.institution or institution_ref)
     return TokenOut(access_token=token, institution=institution)
 
 

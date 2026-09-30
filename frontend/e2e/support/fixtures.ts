@@ -2,7 +2,10 @@ import { test as base, expect, type Page } from '@playwright/test';
 import { E2E_PASSWORD } from './users';
 
 export async function login(page: Page, email: string, password = E2E_PASSWORD) {
-  await page.goto('/login');
+  // Mantem a pagina de login ja aberta (ex.: em um subdominio); senao abre a do baseURL.
+  if (!new URL(page.url() === 'about:blank' ? 'http://x/' : page.url()).pathname.startsWith('/login')) {
+    await page.goto('/login');
+  }
   await page.fill('input[name="email"]', email);
   await page.fill('input[name="password"]', password);
   await page.click('button[type="submit"]');

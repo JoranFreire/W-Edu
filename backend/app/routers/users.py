@@ -1,8 +1,8 @@
-from fastapi import APIRouter, Depends, Header, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.dependencies import INSTITUTION_HEADER, ensure_super_admin_boundary, get_current_user
+from app.dependencies import ensure_super_admin_boundary, requested_institution_ref, get_current_user
 from app.models.student import ADMIN_ROLES, User, UserRole
 from app.schemas.student import (
     InstructorAvailabilityCreate,
@@ -28,9 +28,9 @@ router = APIRouter()
 def create_user(
     data: UserCreate,
     db: Session = Depends(get_db),
-    institution_ref: str | None = Header(default=None, alias=INSTITUTION_HEADER),
+    institution_ref: str | None = Depends(requested_institution_ref),
 ):
-    # Cadastro publico: sempre aluno, sem empresa, na instituicao do header (ou padrao).
+    # Cadastro publico: sempre aluno, sem empresa, na instituicao do header/subdominio (ou padrao).
     institution = InstitutionService(db).get_public(institution_ref)
     data = data.model_copy(update={"role": UserRole.student, "organization_id": None})
     return UserService(db).create(data, institution.id)

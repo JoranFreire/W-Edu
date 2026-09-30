@@ -4,6 +4,7 @@ import type { Student, AuthTokens, LoginCredentials } from '@/types/auth';
 import type { Institution, InstitutionSummary, Membership } from '@/types/institution';
 import api from '@/lib/api/client';
 import { endpoints } from '@/lib/api/endpoints';
+import { institutionLoginUrl } from '@/lib/institution/subdomain';
 import { apiErrorMessage } from '@/lib/api/errors';
 
 interface AuthState {
@@ -85,6 +86,12 @@ export const useAuthStore = create<AuthState>()(
       },
 
       switchInstitution: async (slug) => {
+        // Com subdominios, cada instituicao tem sua origem (e sessao): vai para o login dela.
+        const loginUrl = institutionLoginUrl(slug);
+        if (loginUrl) {
+          window.location.href = loginUrl;
+          return;
+        }
         const { data: tokens } = await api.post<AuthTokens>(endpoints.auth.switchInstitution, { institution: slug });
         localStorage.setItem('access_token', tokens.access_token);
         set({ tokens, institution: tokens.institution });

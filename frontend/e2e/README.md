@@ -24,6 +24,10 @@ npm run test:e2e                     # sobe `next start` se não houver servidor
 npx playwright show-report           # relatório HTML (traces e screenshots de falhas)
 ```
 
-Variáveis opcionais: `E2E_BASE_URL` (padrão `http://localhost:3000`) e `PLAYWRIGHT_CHROMIUM_EXECUTABLE` (Chromium já instalado, em vez do baixado pelo Playwright).
+Variáveis opcionais:
+
+- `E2E_BASE_URL` (padrão `http://localhost:3000`);
+- `PLAYWRIGHT_CHROMIUM_EXECUTABLE` (Chromium já instalado, em vez do baixado pelo Playwright);
+- `E2E_TENANT_BASE_DOMAIN=localhost` ativa os testes de instituição por subdomínio (`e2e/subdomain.spec.ts`); a API precisa rodar com `TENANT_BASE_DOMAIN=localhost`.
 
 Os testes criam registros com sufixo único, então o mesmo banco pode ser reutilizado entre execuções.

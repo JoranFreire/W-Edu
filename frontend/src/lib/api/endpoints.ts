@@ -6,6 +6,7 @@ export const endpoints = {
     switchInstitution: '/auth/switch-institution',
   },
   institutions: {
+    public: '/institutions/public',
     current: '/institutions/current',
     campuses: '/institutions/campuses',
     campus: (id: number) => `/institutions/campuses/${id}`,

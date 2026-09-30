@@ -10,6 +10,9 @@ class Settings(BaseSettings):
     DB_MAX_OVERFLOW: int = 10
     DB_POOL_TIMEOUT_SECONDS: int = 10
     DB_POOL_RECYCLE_SECONDS: int = 1800
+    # Dominio base para instituicao por subdominio (ex.: "wedu.com.br" -> escola.wedu.com.br). Vazio desativa.
+    TENANT_BASE_DOMAIN: str | None = None
+    TENANT_RESERVED_SUBDOMAINS: list[str] = ["www", "app", "api", "admin"]
     REDIS_URL: str = "redis://localhost:6379/2"
     SECRET_KEY: str = "change-me-in-production"
     ALGORITHM: str = "HS256"

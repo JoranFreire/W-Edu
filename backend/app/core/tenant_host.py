@@ -1,0 +1,18 @@
+"""Identificacao da instituicao pelo subdominio (ex.: escola-alfa.wedu.com.br)."""
+
+from app.core.config import settings
+
+
+def slug_from_host(host: str | None, base_domain: str | None = None) -> str | None:
+    """Slug do subdominio imediatamente abaixo do dominio base; None fora dele ou em subdominio reservado."""
+    base = (base_domain if base_domain is not None else settings.TENANT_BASE_DOMAIN) or ""
+    if not host or not base:
+        return None
+    hostname = host.split(",")[0].strip().split(":")[0].lower().rstrip(".")
+    suffix = "." + base.lower().strip(".")
+    if not hostname.endswith(suffix):
+        return None
+    label = hostname[: -len(suffix)]
+    if not label or "." in label or label in settings.TENANT_RESERVED_SUBDOMAINS:
+        return None
+    return label

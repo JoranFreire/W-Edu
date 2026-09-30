@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.security import decode_access_payload
 from app.core.tenancy import bind_institution
+from app.core.tenant_host import slug_from_host
 from app.models.institution import Institution
 from app.models.student import ADMIN_ROLES, Student, UserRole
 from app.repositories.student import StudentRepository
@@ -26,9 +27,15 @@ def _authenticate(token: str, db: Session) -> tuple[Student, dict]:
     return student, payload
 
 
+def requested_institution_ref(request: Request) -> str | None:
+    """Instituicao pedida explicitamente pela requisicao: header `X-Institution` ou subdominio."""
+    host = request.headers.get("x-forwarded-host") or request.headers.get("host")
+    return request.headers.get(INSTITUTION_HEADER) or slug_from_host(host)
+
+
 def _activate_institution(request: Request, db: Session, student: Student, payload: dict) -> None:
-    """Resolve a instituicao da requisicao (header ou token) e vincula a sessao do banco."""
-    requested = request.headers.get(INSTITUTION_HEADER) or payload.get("inst")
+    """Resolve a instituicao (header, subdominio ou token) e vincula a sessao do banco."""
+    requested = requested_institution_ref(request) or payload.get("inst")
     institution = TenantAccessService(db).resolve_for_user(student, requested)
     bind_institution(db, institution.id)
     request.state.institution = institution

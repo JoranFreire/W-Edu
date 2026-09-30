@@ -16,6 +16,7 @@ if "DATABASE_URL" not in os.environ:
     DB_PATH = Path(tempfile.gettempdir()) / f"wedu_tenant_check_{os.getpid()}.sqlite3"
     os.environ["DATABASE_URL"] = f"sqlite:///{DB_PATH}"
 os.environ["NOTIFICATION_WORKER_ENABLED"] = "false"
+os.environ["TENANT_BASE_DOMAIN"] = "wedu.test"
 
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
@@ -30,6 +31,7 @@ import starlette.routing
 import app.models  # noqa: F401
 from app.core.database import Base, SessionLocal, engine
 from app.core.security import hash_password
+from app.core.tenant_host import slug_from_host
 from app.models.attendance import Attendance
 from app.models.institution import Institution, InstitutionMembership
 from app.models.session import Session as VoiceSession
@@ -249,6 +251,33 @@ async def run() -> int:
             institution_a = db.query(Institution).filter(Institution.slug == "escola-a").one().id
             attendance = db.query(Attendance).filter(Attendance.lesson_id == lesson_a).one()
             c.expect(attendance.institution_id == institution_a, f"webhook attendance tenant: {attendance.institution_id}")
+
+        # Instituicao pelo subdominio (TENANT_BASE_DOMAIN=wedu.test).
+        host_b = {"Host": "faculdade-b.wedu.test"}
+        r = await client.post("/auth/login", json={"email": "prof@example.com", "password": PASSWORD}, headers=host_b)
+        prof_host_b = {"Authorization": f"Bearer {r.json()['access_token']}", **host_b}
+        c.expect(r.json()["institution"]["slug"] == "faculdade-b", f"login on subdomain picks it: {r.json().get('institution')}")
+        r = await client.get("/courses", headers=prof_host_b)
+        c.expect([x["name"] for x in r.json()] == ["Direito B"], f"subdomain scopes requests: {r.json()}")
+        r = await client.get("/courses", headers={**admin_a, "X-Forwarded-Host": "faculdade-b.wedu.test"})
+        c.expect(r.status_code == 403, f"admin A blocked on B subdomain: {r.status_code}")
+        r = await client.get("/institutions/public", headers={"X-Forwarded-Host": "escola-a.wedu.test:443"})
+        c.expect(r.status_code == 200 and r.json()["slug"] == "escola-a", f"public branding by host: {r.text}")
+        r = await client.get("/institutions/public")
+        c.expect(r.status_code == 404, f"no public branding without subdomain: {r.status_code}")
+        r = await client.post(
+            "/users",
+            json={"name": "Via host", "email": "host@example.com", "password": PASSWORD},
+            headers={"Host": "faculdade-b.wedu.test"},
+        )
+        c.expect(r.status_code == 201, f"public signup on subdomain: {r.status_code} {r.text}")
+        r = await client.get("/auth/institutions", headers=await c.login("host@example.com"))
+        c.expect([m["institution"]["slug"] for m in r.json()] == ["faculdade-b"], f"signup joins subdomain institution: {r.json()}")
+        for host, expected in [
+            ("escola-a.wedu.test", "escola-a"), ("ESCOLA-A.wedu.test:8080", "escola-a"), ("www.wedu.test", None),
+            ("wedu.test", None), ("a.b.wedu.test", None), ("escola-a.outro.test", None), (None, None),
+        ]:
+            c.expect(slug_from_host(host) == expected, f"slug_from_host({host!r}) -> {slug_from_host(host)!r}")
 
     if c.failures:
         print("Tenant isolation check failed:")

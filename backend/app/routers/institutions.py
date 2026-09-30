@@ -1,15 +1,23 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.dependencies import get_current_admin, get_current_institution, get_current_student
+from app.dependencies import get_current_admin, get_current_institution, get_current_student, requested_institution_ref
 from app.models.institution import Institution
 from app.models.student import Student
-from app.schemas.institution import CampusCreate, CampusOut, CampusUpdate, InstitutionOut, InstitutionUpdate
+from app.schemas.institution import CampusCreate, CampusOut, CampusUpdate, InstitutionOut, InstitutionSummary, InstitutionUpdate
 from app.services.campus import CampusService
 from app.services.institution import InstitutionService
 
 router = APIRouter()
+
+
+@router.get("/public", response_model=InstitutionSummary)
+def get_public(db: Session = Depends(get_db), institution_ref: str | None = Depends(requested_institution_ref)):
+    """Marca da instituicao do subdominio/header, para telas publicas (login)."""
+    if not institution_ref:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Instituição não informada")
+    return InstitutionService(db).get_public(institution_ref)
 
 
 @router.get("/current", response_model=InstitutionOut)
