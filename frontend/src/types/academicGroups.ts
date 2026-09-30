@@ -15,6 +15,8 @@ export interface ProgramEnrollment {
   status_changed_at: string;
   curriculum_id: number;
   entry_term_id: number | null;
+  concluded_on?: string | null;
+  ceremony_on?: string | null;
   student: PersonSummary;
   program: { id: number; code: string; name: string };
 }

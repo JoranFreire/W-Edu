@@ -1,4 +1,4 @@
-import type { CreditTransferStatus, EnrollmentEventKind, TranscriptStatus } from '@/types/secretariat';
+import type { CreditTransferStatus, DeclarationKind, EnrollmentEventKind, TranscriptStatus } from '@/types/secretariat';
 
 export const enrollmentEventLabels: Record<EnrollmentEventKind, string> = {
   enrolled: 'Matrícula',
@@ -25,4 +25,10 @@ export const transcriptStatusLabels: Record<TranscriptStatus, string> = {
   in_progress: 'Em curso',
   failed: 'Reprovada',
   pending: 'A cursar',
+};
+
+export const declarationKindLabels: Record<DeclarationKind, string> = {
+  enrollment: 'Matrícula',
+  attendance: 'Frequência',
+  completion: 'Conclusão',
 };

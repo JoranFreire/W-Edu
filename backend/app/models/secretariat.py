@@ -1,9 +1,9 @@
 """Secretaria academica: movimentacoes da matricula, rematricula e aproveitamento de estudos."""
 
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 import enum
 
-from sqlalchemy import JSON, DateTime, Enum as SAEnum, Float, ForeignKey, Integer, String, Text, UniqueConstraint
+from sqlalchemy import JSON, Date, DateTime, Enum as SAEnum, Float, ForeignKey, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
@@ -25,6 +25,12 @@ class EnrollmentEventKind(str, enum.Enum):
     transferred_internal = "transferred_internal"  # mudanca de programa na instituicao
     curriculum_changed = "curriculum_changed"    # migracao de matriz
     graduated = "graduated"
+
+
+class DeclarationKind(str, enum.Enum):
+    enrollment = "enrollment"    # matricula regular
+    attendance = "attendance"    # frequencia no periodo
+    completion = "completion"    # conclusao do programa
 
 
 class CreditTransferOrigin(str, enum.Enum):
@@ -90,3 +96,22 @@ class CreditTransfer(TenantMixin, Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
     subject: Mapped["Subject"] = relationship()
+
+
+class AcademicDeclaration(TenantMixin, Base):
+    """Declaracao emitida pela secretaria: texto congelado na emissao, assinado e validavel por codigo."""
+
+    __tablename__ = "academic_declarations"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    program_enrollment_id: Mapped[int] = mapped_column(ForeignKey("program_enrollments.id"), index=True)
+    kind: Mapped[DeclarationKind] = mapped_column(SAEnum(DeclarationKind))
+    term_id: Mapped[int | None] = mapped_column(ForeignKey("academic_terms.id"))
+    validation_code: Mapped[str] = mapped_column(String(40), unique=True, index=True)
+    title: Mapped[str] = mapped_column(String(120))
+    lines: Mapped[list] = mapped_column(JSON, default=list)
+    issued_by_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"))
+    issued_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+    signature_hash: Mapped[str] = mapped_column(String(128))
+    revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    revoked_reason: Mapped[str | None] = mapped_column(Text)

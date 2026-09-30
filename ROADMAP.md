@@ -4,7 +4,7 @@
 
 **Fase:** 2 — Voz com Professor IA (em andamento)  
 **Ultima atualizacao:** 2026-09-30  
-**Proximo marco:** Fase 14 — Secretaria Academica, entrega 2 (declaracoes com validacao publica e conclusao do programa). Entrega 1 concluida.
+**Proximo marco:** Fase 15 — Perfil Escola Basica (Fase 14 concluida).
 
 ## Visao Alvo
 
@@ -282,9 +282,9 @@ Objetivo: estrutura comum a escola, universidade e profissionalizante.
 - [x] Matricula, rematricula, trancamento, cancelamento e transferencia.
 - [x] Aproveitamento de estudos.
 - [x] Historico escolar e boletim.
-- [ ] Declaracoes (matricula, frequencia, conclusao) com validacao publica.
+- [x] Declaracoes (matricula, frequencia, conclusao) com validacao publica.
 - [x] CR/IRA e integralizacao curricular.
-- [ ] Conclusao do programa.
+- [x] Conclusao do programa (com colacao de grau).
 
 ### Fase 15 — Perfil Escola Basica
 

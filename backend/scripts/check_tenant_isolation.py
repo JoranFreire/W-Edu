@@ -323,6 +323,14 @@ async def run() -> int:
             c.expect(r.status_code == 404, f"B cannot read A enrollment {path}: {r.status_code}")
         r = await client.post(f"/secretariat/enrollments/{enrollment_a}/lock", json={}, headers=admin_b)
         c.expect(r.status_code == 404, f"B cannot lock A enrollment: {r.status_code}")
+        r = await client.post(f"/secretariat/enrollments/{enrollment_a}/declarations", json={"kind": "enrollment"}, headers=admin_b)
+        c.expect(r.status_code == 404, f"B cannot issue declaration for A: {r.status_code}")
+        r = await client.post(f"/secretariat/enrollments/{enrollment_a}/declarations", json={"kind": "enrollment"}, headers=admin_a)
+        declaration_a = r.json()
+        r = await client.get(f"/secretariat/declarations/{declaration_a.get('id')}/pdf", headers=admin_b)
+        c.expect(r.status_code == 404, f"B cannot download A declaration: {r.status_code}")
+        r = await client.get(f"/secretariat/declarations/validate/{declaration_a.get('validation_code')}")
+        c.expect(r.json().get("valid") is True and r.json().get("institution_name") == "Escola A", f"public validation names the issuer: {r.text}")
 
         # Webhook sem usuario logado: registros herdam a instituicao da aula.
         with SessionLocal() as db:

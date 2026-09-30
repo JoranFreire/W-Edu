@@ -37,6 +37,7 @@ export function useEnrollmentFile(enrollmentId: number) {
     file: data,
     loading,
     error,
+    reload,
     move: (action: MovementAction, reason: string | null) =>
       run(() => api.post(endpoints.secretariat.action(enrollmentId, action), { reason })),
     reenroll: (termId: number, termNumber: number | null) =>

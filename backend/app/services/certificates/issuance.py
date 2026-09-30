@@ -1,9 +1,9 @@
 from datetime import datetime, timezone
-import secrets
 
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.core.signing import validation_code
 from app.models.certificate import Certificate
 from app.models.notification import NotificationEventType
 from app.repositories.certificate import CertificateRepository
@@ -77,19 +77,16 @@ class CertificateIssuanceService:
         return self.repo.create(Certificate(
             student_id=student_id,
             course_id=course_id,
-            validation_code=_generate_code(),
+            validation_code=validation_code(),
             issued_by_id=issued_by_id,
         ))
 
     def _reissue(self, certificate: Certificate, issued_by_id: int | None) -> Certificate:
         """Reemite um certificado revogado com novo codigo."""
-        certificate.validation_code = _generate_code()
+        certificate.validation_code = validation_code()
         certificate.issued_at = datetime.now(timezone.utc)
         certificate.revoked_at = None
         certificate.revoked_reason = None
         certificate.issued_by_id = issued_by_id
         return self.repo.update(certificate)
 
-
-def _generate_code() -> str:
-    return secrets.token_urlsafe(12).replace("-", "").replace("_", "")

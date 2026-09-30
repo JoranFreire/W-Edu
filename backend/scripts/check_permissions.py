@@ -153,6 +153,15 @@ EXPECTED: list[ExpectedRoute] = [
     ("GET", "/secretariat/enrollments/{enrollment_id}/transcript", "get_current_secretariat"),
     ("GET", "/secretariat/my/transcripts", "get_current_student"),
     ("GET", "/secretariat/students", "get_current_secretariat"),
+    ("GET", "/secretariat/enrollments/{enrollment_id}/declarations", "get_current_secretariat"),
+    ("POST", "/secretariat/enrollments/{enrollment_id}/declarations", "get_current_secretariat"),
+    ("GET", "/secretariat/declarations/{declaration_id}/pdf", "get_current_secretariat"),
+    ("POST", "/secretariat/declarations/{declaration_id}/revoke", "get_current_admin_or_coordinator"),
+    ("GET", "/secretariat/my/declarations", "get_current_student"),
+    ("GET", "/secretariat/my/declarations/{declaration_id}/pdf", "get_current_student"),
+    ("GET", "/secretariat/enrollments/{enrollment_id}/conclusion", "get_current_secretariat"),
+    ("POST", "/secretariat/enrollments/{enrollment_id}/conclusion", "get_current_secretariat"),
+    ("PUT", "/secretariat/enrollments/{enrollment_id}/ceremony", "get_current_secretariat"),
 ]
 
 

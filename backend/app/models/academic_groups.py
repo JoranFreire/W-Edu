@@ -47,6 +47,9 @@ class ProgramEnrollment(TenantMixin, Base):
     status_changed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
     # Transferencia interna: matricula de origem (outro programa da instituicao).
     transferred_from_id: Mapped[int | None] = mapped_column(ForeignKey("program_enrollments.id"), index=True)
+    # Conclusao do programa e colacao de grau (Fase 14).
+    concluded_on: Mapped[date | None] = mapped_column(Date)
+    ceremony_on: Mapped[date | None] = mapped_column(Date)
 
     student: Mapped["Student"] = relationship()
     program: Mapped["Program"] = relationship()
