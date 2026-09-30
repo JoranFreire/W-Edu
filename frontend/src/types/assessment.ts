@@ -92,3 +92,43 @@ export interface DiaryAttendanceRow {
   justified: boolean;
   note: string | null;
 }
+
+export type ClassEnrollmentResult = 'in_progress' | 'recovery' | 'approved' | 'failed' | 'failed_attendance';
+
+export interface PeriodResult {
+  grading_period_id: number;
+  average: number | null;
+  absences: number;
+}
+
+export interface FinalResultRow {
+  class_enrollment_id: number;
+  student: PersonSummary;
+  periods: PeriodResult[];
+  average: number | null;
+  recovery_score: number | null;
+  final_grade: number | null;
+  attendance_rate: number | null;
+  result: ClassEnrollmentResult;
+}
+
+export interface OfferingResults {
+  scheme: GradingScheme;
+  closed_period_ids: number[];
+  pending_period_ids: number[];
+  finalized: boolean;
+  rows: FinalResultRow[];
+}
+
+export interface ReportCardEntry {
+  class_offering_id: number;
+  offering_name: string;
+  periods: { name: string; average: number | null; absences: number }[];
+  final_grade: number | null;
+  recovery_score: number | null;
+  attendance_rate: number | null;
+  result: ClassEnrollmentResult;
+  finalized: boolean;
+  passing_grade: number;
+  min_attendance: number;
+}

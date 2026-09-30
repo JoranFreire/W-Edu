@@ -2,11 +2,12 @@
 
 import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { BookOpenIcon, ChartBarIcon, ClipboardDocumentListIcon } from '@heroicons/react/24/outline';
+import { BookOpenIcon, ChartBarIcon, ClipboardDocumentListIcon, TrophyIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 import AssessmentPlanPanel from '@/components/teaching/AssessmentPlanPanel';
 import DiaryPanel from '@/components/teaching/DiaryPanel';
 import GradebookTable from '@/components/teaching/GradebookTable';
+import ResultsPanel from '@/components/teaching/ResultsPanel';
 import BackButton from '@/components/common/BackButton';
 import Spinner from '@/components/common/Spinner';
 import TabNav, { type TabItem } from '@/components/common/TabNav';
@@ -19,19 +20,20 @@ import { useErrorToast } from '@/lib/hooks/useErrorToast';
 import { useAuthStore } from '@/store/authStore';
 import { isAdminRole } from '@/types/auth';
 
-type TeachingTab = 'gradebook' | 'assessments' | 'diary';
+type TeachingTab = 'gradebook' | 'assessments' | 'diary' | 'results';
 
 const tabs: TabItem<TeachingTab>[] = [
   { id: 'gradebook', label: 'Boletim', icon: ChartBarIcon },
   { id: 'assessments', label: 'Avaliações e notas', icon: ClipboardDocumentListIcon },
   { id: 'diary', label: 'Aulas e chamada', icon: BookOpenIcon },
+  { id: 'results', label: 'Resultado', icon: TrophyIcon },
 ];
 
 export default function TeachingOfferingPage() {
   const router = useRouter();
   const offeringId = Number(useParams<{ offeringId: string }>().offeringId);
   const role = useAuthStore((state) => state.student?.role);
-  const canSync = isAdminRole(role) || role === 'coordinator';
+  const isCoordination = isAdminRole(role) || role === 'coordinator';
   const { offering, error, syncGroup } = useTeachingOffering(offeringId);
   const { periods } = useOfferingPeriods(offering?.term_id);
   const { gradebook, reload } = useGradebook(offeringId);
@@ -54,7 +56,7 @@ export default function TeachingOfferingPage() {
       <BackButton label="Minhas turmas" onClick={() => router.push('/teaching')} />
       <div className="flex flex-wrap items-start justify-between gap-3">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{offering.name}</h1>
-        {canSync && offering.class_group_id && (
+        {isCoordination && offering.class_group_id && (
           <button onClick={handleSync} className={secondaryButtonCls}>Sincronizar alunos da turma-grupo</button>
         )}
       </div>
@@ -65,6 +67,7 @@ export default function TeachingOfferingPage() {
         )}
         {tab === 'assessments' && <AssessmentPlanPanel offeringId={offeringId} periods={periods} onGradesChanged={reload} />}
         {tab === 'diary' && <DiaryPanel offeringId={offeringId} onAttendanceChanged={reload} />}
+        {tab === 'results' && <ResultsPanel offeringId={offeringId} periods={periods} isCoordination={isCoordination} onChanged={reload} />}
       </div>
     </div>
   );

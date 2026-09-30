@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 import enum
 
-from sqlalchemy import Boolean, DateTime, Enum as SAEnum, ForeignKey, Integer, String, Text, UniqueConstraint
+from sqlalchemy import Boolean, DateTime, Enum as SAEnum, Float, ForeignKey, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
@@ -20,6 +20,14 @@ class ClassEnrollmentStatus(str, enum.Enum):
     active = "active"
     cancelled = "cancelled"
     completed = "completed"
+
+
+class ClassEnrollmentResult(str, enum.Enum):
+    in_progress = "in_progress"
+    recovery = "recovery"                    # abaixo da media, aguardando recuperacao
+    approved = "approved"
+    failed = "failed"
+    failed_attendance = "failed_attendance"  # reprovado por falta
 
 
 class MeetingType(str, enum.Enum):
@@ -122,6 +130,13 @@ class ClassEnrollment(TenantMixin, Base):
         default=ClassEnrollmentStatus.active,
     )
     enrolled_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    # Resultado final (Fase 13): calculado a partir das etapas, frequencia e recuperacao.
+    final_grade: Mapped[float | None] = mapped_column(Float)
+    recovery_score: Mapped[float | None] = mapped_column(Float)
+    attendance_rate: Mapped[float | None] = mapped_column(Float)
+    result: Mapped[ClassEnrollmentResult] = mapped_column(
+        SAEnum(ClassEnrollmentResult), default=ClassEnrollmentResult.in_progress, server_default=ClassEnrollmentResult.in_progress.value
+    )
 
     class_offering: Mapped["ClassOffering"] = relationship(back_populates="enrollments")
     student: Mapped["Student"] = relationship()

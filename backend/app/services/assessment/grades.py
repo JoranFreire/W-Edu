@@ -32,12 +32,12 @@ class GradeService:
                 score=entries[enrollment.id].score if enrollment.id in entries else None,
                 notes=entries[enrollment.id].notes if enrollment.id in entries else None,
             )
-            for enrollment in self.offerings.active_enrollments(item.class_offering_id)
+            for enrollment in self.offerings.roster(item.class_offering_id)
         ]
 
     def save(self, item_id: int, grades: list[GradeInput], user: Student) -> list[GradeRow]:
         item = self.items.get_editable(item_id, user)
-        valid_ids = {enrollment.id for enrollment in self.offerings.active_enrollments(item.class_offering_id)}
+        valid_ids = {enrollment.id for enrollment in self.offerings.roster(item.class_offering_id)}
         for grade in grades:
             if grade.class_enrollment_id not in valid_ids:
                 raise bad_request("Aluno não pertence à turma")
@@ -51,7 +51,7 @@ class GradeService:
         item = self.items.get_editable(item_id, user)
         if item.kind != AssessmentKind.quiz or item.quiz_id is None:
             raise bad_request("Avaliação não está vinculada a um quiz")
-        enrollments = self.offerings.active_enrollments(item.class_offering_id)
+        enrollments = self.offerings.roster(item.class_offering_id)
         best = self.repo.best_quiz_scores(item.quiz_id, [e.student_id for e in enrollments])
         existing = self.repo.by_item(item_id)
         scores = {

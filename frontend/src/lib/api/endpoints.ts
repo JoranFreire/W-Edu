@@ -63,6 +63,12 @@ export const endpoints = {
     diary: (offeringId: number) => `/assessment/offerings/${offeringId}/diary`,
     diaryEntry: (id: number) => `/assessment/diary-entries/${id}`,
     diaryAttendance: (id: number) => `/assessment/diary-entries/${id}/attendance`,
+    closePeriod: (offeringId: number, periodId: number) => `/assessment/offerings/${offeringId}/periods/${periodId}/close`,
+    results: (offeringId: number) => `/assessment/offerings/${offeringId}/results`,
+    computeResults: (offeringId: number) => `/assessment/offerings/${offeringId}/results/compute`,
+    recovery: (offeringId: number) => `/assessment/offerings/${offeringId}/recovery`,
+    finalize: (offeringId: number) => `/assessment/offerings/${offeringId}/finalize`,
+    myReportCard: '/assessment/my/report-card',
   },
   courses: {
     list: '/courses',

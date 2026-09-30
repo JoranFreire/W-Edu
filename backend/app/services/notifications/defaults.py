@@ -26,6 +26,10 @@ DEFAULT_TEMPLATES = {
         "Novo conteúdo publicado",
         "A aula {lesson_title} foi publicada no curso {course_name}.",
     ),
+    (NotificationEventType.grades_published, NotificationChannel.internal): (
+        "Boletim disponível",
+        "O resultado final de {class_name} foi publicado: {result_label}.",
+    ),
     (NotificationEventType.meeting_reminder, NotificationChannel.internal): (
         "Lembrete de encontro",
         "Você tem um encontro em {starts_at}: {meeting_title}.",

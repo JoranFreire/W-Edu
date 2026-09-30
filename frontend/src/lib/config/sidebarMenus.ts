@@ -13,6 +13,7 @@ export const studentMenu: MenuItem[] = [
   { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
   { name: 'Meus Cursos', href: '/courses', icon: BookOpenIcon },
   { name: 'Progresso', href: '/progress', icon: ChartBarIcon },
+  { name: 'Boletim', href: '/report-card', icon: ChartBarIcon },
   { name: 'Certificados', href: '/certificates', icon: ShieldCheckIcon },
   { name: 'Sessões de Voz', href: '/sessions', icon: MicrophoneIcon },
   { name: 'Configurações', href: '/settings', icon: Cog6ToothIcon },
