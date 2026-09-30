@@ -19,7 +19,7 @@ from app.models.progress import Progress, ProgressStatus
 from app.models.quiz import QuizAttempt
 from app.models.schedule import AttendanceRecord, AttendanceStatus, ClassEnrollment, ClassEnrollmentStatus, ClassOffering, ScheduledMeeting
 from app.models.schedule import PracticalAssessmentRecord, PracticalAssessmentStatus
-from app.models.student import Student
+from app.models.student import ADMIN_ROLES, Student, UserRole
 from app.repositories.certificate import CertificateRepository, CourseCompletionRuleRepository
 from app.repositories.course import CourseRepository
 from app.repositories.lesson import LessonRepository
@@ -136,7 +136,7 @@ class CertificateService:
         certificate = self.repo.get_by_id(certificate_id)
         if not certificate:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Certificado não encontrado")
-        if current.role not in {"admin", "coordinator"} and certificate.student_id != current.id:
+        if current.role not in ADMIN_ROLES | {UserRole.coordinator} and certificate.student_id != current.id:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Acesso restrito ao titular do certificado")
         if certificate.revoked_at is not None:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Certificado revogado")

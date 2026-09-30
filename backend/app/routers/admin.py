@@ -2,8 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.dependencies import get_current_academic_staff, get_current_admin, get_current_admin_or_coordinator
-from app.models.student import Student
+from app.dependencies import ensure_super_admin_boundary, get_current_academic_staff, get_current_admin, get_current_admin_or_coordinator
+from app.models.student import ADMIN_ROLES, Student
 from app.models.student import UserRole
 from app.schemas.student import StudentOut, StudentCreate
 from app.schemas.student import (
@@ -30,11 +30,11 @@ from app.schemas.enrollment import EnrollmentOut
 router = APIRouter()
 
 MANAGEABLE_ACADEMIC_ROLES = {UserRole.student, UserRole.instructor}
-PRIVILEGED_ROLES = {UserRole.admin, UserRole.coordinator, UserRole.company_manager}
+PRIVILEGED_ROLES = ADMIN_ROLES | {UserRole.coordinator, UserRole.company_manager, UserRole.secretary}
 
 
 def ensure_academic_user_scope(current: Student, target: Student) -> None:
-    if current.role == UserRole.admin:
+    if current.role in ADMIN_ROLES:
         return
     if current.role == UserRole.company_manager and target.organization_id != current.organization_id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Usuário fora da empresa")
@@ -63,6 +63,7 @@ def list_all_students(db: Session = Depends(get_db), current: Student = Depends(
 @router.post("/students", response_model=StudentOut, status_code=201)
 @router.post("/users", response_model=StudentOut, status_code=201)
 def create_student(data: StudentCreate, db: Session = Depends(get_db), current: Student = Depends(get_current_academic_staff)):
+    ensure_super_admin_boundary(current, data.role)
     if current.role in {UserRole.company_manager, UserRole.coordinator}:
         if data.role in PRIVILEGED_ROLES:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Perfil sem permissão para criar este papel")
@@ -79,6 +80,7 @@ def update_student(
     db: Session = Depends(get_db),
     current: Student = Depends(get_current_academic_staff),
 ):
+    ensure_super_admin_boundary(current, data.role, StudentService(db).get_or_404(student_id))
     if current.role in {UserRole.company_manager, UserRole.coordinator}:
         target = StudentService(db).get_or_404(student_id)
         ensure_academic_user_scope(current, target)
@@ -91,7 +93,8 @@ def update_student(
 
 @router.delete("/students/{student_id}", status_code=204)
 @router.delete("/users/{student_id}", status_code=204)
-def delete_student(student_id: int, db: Session = Depends(get_db), _: Student = Depends(get_current_admin)):
+def delete_student(student_id: int, db: Session = Depends(get_db), current: Student = Depends(get_current_admin)):
+    ensure_super_admin_boundary(current, target=StudentService(db).get_or_404(student_id))
     StudentService(db).delete(student_id)
 
 

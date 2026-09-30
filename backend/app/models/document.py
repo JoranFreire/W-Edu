@@ -5,6 +5,7 @@ from sqlalchemy import Boolean, DateTime, Enum as SAEnum, ForeignKey, Integer, S
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
+from app.core.tenancy import TenantMixin
 
 
 class DocumentType(str, enum.Enum):
@@ -22,7 +23,7 @@ class DocumentStatus(str, enum.Enum):
     archived = "archived"
 
 
-class Document(Base):
+class Document(TenantMixin, Base):
     __tablename__ = "documents"
 
     id: Mapped[int] = mapped_column(primary_key=True)

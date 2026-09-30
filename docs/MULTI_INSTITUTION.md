@@ -45,8 +45,10 @@ campuses                 id, institution_id, name, address, is_active
 - Coluna `institution_id` em todas as tabelas raiz: `courses`, `learning_paths`, `locations`, `class_offerings`, `organizations`, `billing_plans`, `documents`, `notification_templates`, `certificates` e as novas tabelas academicas.
 - As tabelas filhas herdam o isolamento pelo pai. Exemplo: `lessons` via `courses`.
 - Resolucao do tenant: subdominio (`escola-x.wedu.com.br`) ou header `X-Institution`, validado contra o claim `inst` do JWT.
-- Uma dependencia `get_current_institution` injetada nos routers e um filtro obrigatorio na camada de repositories.
+- Uma dependencia `get_current_institution` injetada nos routers e um filtro obrigatorio aplicado pelo ORM.
 - Numa etapa posterior, Row Level Security no PostgreSQL como segunda barreira.
+
+**Implementado (Fase 11, backend):** `app/core/tenancy.py` guarda a instituicao ativa em `Session.info` na autenticacao. Com ela vinculada, toda consulta a models com `TenantMixin` recebe `institution_id = <ativa>` (inclusive relationships e `Session.get`), inserts recebem a instituicao automaticamente e usuarios ficam restritos aos membros da instituicao. Consultas globais deliberadas usam `execution_options(**UNSCOPED)`. Sessoes sem instituicao (worker de notificacoes, rotas publicas) nao sao filtradas. Nesta etapa `users.role` continua sendo o papel efetivo; `institution_memberships.role` e mantido sincronizado e passa a ser a fonte quando os papeis por instituicao forem ativados.
 
 ### 2.3 Papeis
 

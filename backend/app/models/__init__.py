@@ -1,3 +1,4 @@
+import app.core.tenancy  # noqa: F401 — registra os filtros multi-tenant
 from app.models.student import (
     InstructorAvailability,
     InstructorProfile,
@@ -7,6 +8,7 @@ from app.models.student import (
     StudentProfile,
     User,
 )
+from app.models.institution import Campus, Institution, InstitutionMembership
 from app.models.course import Course, CourseModule, LearningPath, LearningPathCourse, CoursePrerequisite
 from app.models.course import CourseCompletionRule
 from app.models.lesson import Lesson
@@ -35,7 +37,7 @@ from app.models.schedule import (
 )
 
 __all__ = [
-    "User", "Student", "Organization", "StudentProfile", "InstructorProfile", "InstructorAvailability", "InstructorRating",
+    "User", "Student", "Organization", "Institution", "InstitutionMembership", "Campus", "StudentProfile", "InstructorProfile", "InstructorAvailability", "InstructorRating",
     "Course", "CourseModule", "LearningPath", "LearningPathCourse", "CoursePrerequisite", "CourseCompletionRule", "Lesson", "Enrollment",
     "Progress", "Session", "Attendance", "AssignmentSubmission",
     "Quiz", "QuizQuestion", "QuizAttempt", "Certificate", "ChatConversation", "ChatMessage", "NotificationTemplate", "NotificationEvent", "BillingPlan", "Subscription", "Charge",

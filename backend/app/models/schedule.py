@@ -5,6 +5,7 @@ from sqlalchemy import Boolean, DateTime, Enum as SAEnum, ForeignKey, Integer, S
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
+from app.core.tenancy import TenantMixin
 
 
 class ClassStatus(str, enum.Enum):
@@ -46,15 +47,17 @@ class PracticalAssessmentStatus(str, enum.Enum):
     returned = "returned"
 
 
-class Location(Base):
+class Location(TenantMixin, Base):
     __tablename__ = "locations"
 
     id: Mapped[int] = mapped_column(primary_key=True)
+    campus_id: Mapped[int | None] = mapped_column(ForeignKey("campuses.id"), nullable=True, index=True)
     name: Mapped[str] = mapped_column(String(200))
     address: Mapped[str | None] = mapped_column(Text)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
+    campus: Mapped["Campus | None"] = relationship(back_populates="locations")
     rooms: Mapped[list["Room"]] = relationship(back_populates="location", cascade="all, delete-orphan")
     class_offerings: Mapped[list["ClassOffering"]] = relationship(back_populates="location")
 
@@ -75,7 +78,7 @@ class Room(Base):
     scheduled_meetings: Mapped[list["ScheduledMeeting"]] = relationship(back_populates="room")
 
 
-class ClassOffering(Base):
+class ClassOffering(TenantMixin, Base):
     __tablename__ = "class_offerings"
 
     id: Mapped[int] = mapped_column(primary_key=True)

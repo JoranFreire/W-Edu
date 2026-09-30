@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from app.core.storage import store_assignment_file
 from app.models.assignment import AssignmentSubmission, AssignmentSubmissionStatus
 from app.models.lesson import LessonType
-from app.models.student import Student, UserRole
+from app.models.student import ADMIN_ROLES, Student, UserRole
 from app.repositories.assignment import AssignmentSubmissionRepository
 from app.schemas.assignment import AssignmentReviewIn
 from app.services.lesson import LessonService
@@ -77,7 +77,7 @@ class AssignmentSubmissionService:
         submission = self.repo.get_by_id(submission_id)
         if not submission:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Entrega não encontrada")
-        if current.role not in {UserRole.admin, UserRole.coordinator} and submission.student_id != current.id:
+        if current.role not in ADMIN_ROLES | {UserRole.coordinator} and submission.student_id != current.id:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Acesso restrito")
         if not submission.file_path:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Entrega sem arquivo")

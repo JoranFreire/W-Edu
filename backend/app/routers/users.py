@@ -1,9 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, Header, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.dependencies import get_current_user
-from app.models.student import User, UserRole
+from app.dependencies import INSTITUTION_HEADER, ensure_super_admin_boundary, get_current_user
+from app.models.student import ADMIN_ROLES, User, UserRole
 from app.schemas.student import (
     InstructorAvailabilityCreate,
     InstructorAvailabilityOut,
@@ -18,14 +18,22 @@ from app.schemas.student import (
     UserOut,
     UserUpdate,
 )
+from app.services.institution import InstitutionService
 from app.services.student import UserService
 
 router = APIRouter()
 
 
 @router.post("", response_model=UserOut, status_code=201)
-def create_user(data: UserCreate, db: Session = Depends(get_db)):
-    return UserService(db).create(data)
+def create_user(
+    data: UserCreate,
+    db: Session = Depends(get_db),
+    institution_ref: str | None = Header(default=None, alias=INSTITUTION_HEADER),
+):
+    # Cadastro publico: sempre aluno, sem empresa, na instituicao do header (ou padrao).
+    institution = InstitutionService(db).get_public(institution_ref)
+    data = data.model_copy(update={"role": UserRole.student, "organization_id": None})
+    return UserService(db).create(data, institution.id)
 
 
 @router.get("/me", response_model=UserOut)
@@ -45,10 +53,11 @@ def update_user(
     db: Session = Depends(get_db),
     current: User = Depends(get_current_user),
 ):
-    if current.id != user_id and current.role != UserRole.admin:
+    if current.id != user_id and current.role not in ADMIN_ROLES:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Usuário fora do seu escopo")
-    if current.role != UserRole.admin:
+    if current.role not in ADMIN_ROLES:
         data = UserUpdate(name=data.name, email=data.email)
+    ensure_super_admin_boundary(current, data.role, UserService(db).get_or_404(user_id))
     return UserService(db).update(user_id, data)
 
 
@@ -58,8 +67,9 @@ def delete_user(
     db: Session = Depends(get_db),
     current: User = Depends(get_current_user),
 ):
-    if current.role != UserRole.admin:
+    if current.role not in ADMIN_ROLES:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Acesso restrito a administradores")
+    ensure_super_admin_boundary(current, target=UserService(db).get_or_404(user_id))
     UserService(db).delete(user_id)
 
 
@@ -75,7 +85,7 @@ def update_student_profile(
     db: Session = Depends(get_db),
     current: User = Depends(get_current_user),
 ):
-    if current.id != user_id and current.role != UserRole.admin:
+    if current.id != user_id and current.role not in ADMIN_ROLES:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Usuário fora do seu escopo")
     return UserService(db).update_student_profile(user_id, data)
 
@@ -92,7 +102,7 @@ def update_instructor_profile(
     db: Session = Depends(get_db),
     current: User = Depends(get_current_user),
 ):
-    if current.id != user_id and current.role != UserRole.admin:
+    if current.id != user_id and current.role not in ADMIN_ROLES:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Usuário fora do seu escopo")
     return UserService(db).update_instructor_profile(user_id, data)
 
@@ -109,7 +119,7 @@ def add_instructor_availability(
     db: Session = Depends(get_db),
     current: User = Depends(get_current_user),
 ):
-    if current.id != user_id and current.role != UserRole.admin:
+    if current.id != user_id and current.role not in ADMIN_ROLES:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Usuário fora do seu escopo")
     return UserService(db).add_instructor_availability(user_id, data)
 
@@ -124,7 +134,7 @@ def update_instructor_availability(
     availability = UserService(db).availability_repo.get_by_id(availability_id)
     if not availability:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Disponibilidade não encontrada")
-    if current.id != availability.instructor_profile.student_id and current.role != UserRole.admin:
+    if current.id != availability.instructor_profile.student_id and current.role not in ADMIN_ROLES:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Usuário fora do seu escopo")
     return UserService(db).update_instructor_availability(availability_id, data)
 
@@ -139,7 +149,7 @@ def delete_instructor_availability(
     availability = service.availability_repo.get_by_id(availability_id)
     if not availability:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Disponibilidade não encontrada")
-    if current.id != availability.instructor_profile.student_id and current.role != UserRole.admin:
+    if current.id != availability.instructor_profile.student_id and current.role not in ADMIN_ROLES:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Usuário fora do seu escopo")
     service.delete_instructor_availability(availability_id)
 

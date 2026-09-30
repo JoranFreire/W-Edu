@@ -2,7 +2,9 @@ from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.security import hash_password
+from app.core.tenancy import bound_institution_id
 from app.models.student import (
+    ADMIN_ROLES,
     InstructorAvailability,
     InstructorProfile,
     InstructorRating,
@@ -13,6 +15,7 @@ from app.models.student import (
 )
 from app.repositories.student import OrganizationRepository, ProfileRepository, StudentRepository
 from app.repositories.student import InstructorAvailabilityRepository, InstructorRatingRepository
+from app.services.institution import InstitutionService
 from app.schemas.student import (
     InstructorProfileUpdate,
     InstructorAvailabilityCreate,
@@ -28,13 +31,17 @@ from app.schemas.student import (
 
 class StudentService:
     def __init__(self, db: Session):
+        self.db = db
         self.repo = StudentRepository(db)
         self.org_repo = OrganizationRepository(db)
         self.profile_repo = ProfileRepository(db)
         self.availability_repo = InstructorAvailabilityRepository(db)
         self.rating_repo = InstructorRatingRepository(db)
 
-    def create(self, data: StudentCreate) -> Student:
+    def create(self, data: StudentCreate, institution_id: int | None = None) -> Student:
+        institution_id = institution_id or bound_institution_id(self.db)
+        if institution_id is None:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Instituição não informada")
         if self.repo.get_by_email(data.email):
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="E-mail já cadastrado")
         if data.organization_id and not self.org_repo.get_by_id(data.organization_id):
@@ -46,6 +53,9 @@ class StudentService:
             role=data.role,
             organization_id=data.organization_id,
         )
+        self.db.add(student)
+        self.db.flush()
+        InstitutionService(self.db).add_member(institution_id, student)
         student = self.repo.create(student)
         self.ensure_default_profile(student)
         return student
@@ -71,12 +81,27 @@ class StudentService:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Empresa não encontrada")
         for field, value in payload.items():
             setattr(student, field, value)
+        institution_id = bound_institution_id(self.db)
+        if institution_id is not None:
+            InstitutionService(self.db).sync_member_role(institution_id, student)
         student = self.repo.update(student)
         self.ensure_default_profile(student)
         return student
 
     def delete(self, student_id: int) -> None:
         student = self.get_or_404(student_id)
+        institution_id = bound_institution_id(self.db)
+        memberships = InstitutionService(self.db).membership_repo.list_all_for_user(student.id)
+        others = [m for m in memberships if m.institution_id != institution_id]
+        if institution_id is not None and others:
+            # Usuario continua ativo em outras instituicoes: remove apenas o vinculo com esta.
+            for membership in memberships:
+                if membership.institution_id == institution_id:
+                    self.db.delete(membership)
+            self.db.commit()
+            return
+        for membership in memberships:
+            self.db.delete(membership)
         self.repo.delete(student)
 
     def ensure_default_profile(self, student: Student) -> None:
@@ -196,7 +221,7 @@ class OrganizationService:
         return self.repo.list_all()
 
     def list_for_user(self, current: Student) -> list[Organization]:
-        if current.role in {UserRole.admin, UserRole.coordinator}:
+        if current.role in ADMIN_ROLES | {UserRole.coordinator}:
             return self.repo.list_all()
         if current.organization_id is None:
             return []

@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.core.storage import store_uploaded_document
 from app.models.document import Document, DocumentVersion
-from app.models.student import Student, UserRole
+from app.models.student import ADMIN_ROLES, Student, UserRole
 from app.repositories.document import DocumentRepository, DocumentVersionRepository
 from app.repositories.student import StudentRepository
 from app.schemas.document import DocumentCreate, DocumentUpdate, DocumentVersionCreate
@@ -150,7 +150,7 @@ class DocumentService:
         return FileResponse(path, filename=version.file_name or path.name, media_type=version.mime_type or "application/octet-stream")
 
     def _can_access(self, current: Student, document: Document) -> bool:
-        if current.role == UserRole.admin:
+        if current.role in ADMIN_ROLES:
             return True
         if current.role == UserRole.company_manager:
             if current.organization_id is None:
@@ -165,7 +165,7 @@ class DocumentService:
         return document.student_id == current.id
 
     def _validate_scope(self, data: DocumentCreate, current: Student) -> None:
-        if current.role == UserRole.admin:
+        if current.role in ADMIN_ROLES:
             return
         if current.role == UserRole.company_manager:
             if current.organization_id is None:

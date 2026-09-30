@@ -237,15 +237,18 @@ checkin_tokens
 
 Objetivo: uma instalacao atendendo varias instituicoes com dados isolados.
 
-- [ ] Criar `institutions` com tipo (`school`, `university`, `vocational`, `corporate`, `mixed`), settings e branding.
-- [ ] Criar `institution_memberships` (usuario pode atuar em mais de uma instituicao).
-- [ ] Criar `campuses` e vincular `locations` ao campus.
-- [ ] Adicionar `institution_id` nas tabelas raiz com backfill para instituicao padrao.
-- [ ] Resolver tenant por subdominio/header validado contra claim `inst` do JWT.
-- [ ] Filtro obrigatorio por instituicao na camada de repositories.
-- [ ] Novos papeis: `super_admin`, `institution_admin`, `secretary`, `guardian`.
+- [x] Criar `institutions` com tipo (`school`, `university`, `vocational`, `corporate`, `mixed`), settings e branding.
+- [x] Criar `institution_memberships` (usuario pode atuar em mais de uma instituicao).
+- [x] Criar `campuses` e vincular `locations` ao campus.
+- [x] Adicionar `institution_id` nas tabelas raiz com backfill para instituicao padrao.
+- [x] Resolver tenant por header `X-Institution` validado contra membership e claim `inst` do JWT.
+- [ ] Resolver tenant por subdominio.
+- [x] Filtro obrigatorio por instituicao (eventos do ORM em `app/core/tenancy.py`, sem depender de cada repository).
+- [ ] Isolar acesso direto por id a tabelas filhas (aulas, modulos, inscricoes etc.) validando o pai.
+- [x] Novos papeis: `super_admin`, `institution_admin`, `secretary`, `guardian`.
 - [ ] Atualizar matriz e verificadores de permissao com escopo de instituicao.
-- [ ] Admin da plataforma (super admin) para criar/gerir instituicoes.
+- [x] API da plataforma (super admin) para criar/gerir instituicoes (`/platform/institutions`).
+- [ ] Telas do admin da plataforma.
 - [ ] Seletor de instituicao e branding por tenant no frontend.
 - [ ] Avaliar Row Level Security no PostgreSQL como segunda barreira.
 

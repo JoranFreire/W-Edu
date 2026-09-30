@@ -1,4 +1,6 @@
 from sqlalchemy.orm import Session
+
+from app.core.tenancy import UNSCOPED
 from app.models.student import (
     InstructorAvailability,
     InstructorProfile,
@@ -17,7 +19,8 @@ class StudentRepository:
         return self.db.get(Student, student_id)
 
     def get_by_email(self, email: str) -> Student | None:
-        return self.db.query(Student).filter(Student.email == email).first()
+        # E-mail e unico na plataforma inteira, nao apenas na instituicao ativa.
+        return self.db.query(Student).execution_options(**UNSCOPED).filter(Student.email == email).first()
 
     def list_all(self) -> list[Student]:
         return self.db.query(Student).order_by(Student.created_at.desc()).all()

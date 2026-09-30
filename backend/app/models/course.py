@@ -4,6 +4,7 @@ from sqlalchemy import ForeignKey, Integer, String, Text, DateTime, Enum as SAEn
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
+from app.core.tenancy import TenantMixin
 
 
 class CourseModality(str, enum.Enum):
@@ -12,7 +13,7 @@ class CourseModality(str, enum.Enum):
     hybrid = "hybrid"
 
 
-class Course(Base):
+class Course(TenantMixin, Base):
     __tablename__ = "courses"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -64,7 +65,7 @@ class CourseModule(Base):
     lessons: Mapped[list["Lesson"]] = relationship(back_populates="module", order_by="Lesson.order")
 
 
-class LearningPath(Base):
+class LearningPath(TenantMixin, Base):
     __tablename__ = "learning_paths"
 
     id: Mapped[int] = mapped_column(primary_key=True)

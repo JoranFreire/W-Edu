@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.dependencies import get_current_admin, get_current_admin_or_company_manager, get_current_student
-from app.models.student import Student, UserRole
+from app.models.student import ADMIN_ROLES, Student, UserRole
 from app.schemas.finance import (
     BillingPlanCreate,
     BillingPlanOut,
@@ -38,7 +38,7 @@ def update_plan(plan_id: int, data: BillingPlanUpdate, db: Session = Depends(get
 @router.get("/subscriptions", response_model=list[SubscriptionOut])
 def list_subscriptions(db: Session = Depends(get_db), current: Student = Depends(get_current_admin_or_company_manager)):
     service = FinanceService(db)
-    if current.role == UserRole.admin:
+    if current.role in ADMIN_ROLES:
         return service.list_subscriptions()
     return service.list_my_subscriptions(current)
 
@@ -56,7 +56,7 @@ def update_subscription(subscription_id: int, data: SubscriptionUpdate, db: Sess
 @router.get("/charges", response_model=list[ChargeOut])
 def list_charges(db: Session = Depends(get_db), current: Student = Depends(get_current_admin_or_company_manager)):
     service = FinanceService(db)
-    if current.role == UserRole.admin:
+    if current.role in ADMIN_ROLES:
         return service.list_charges()
     return service.list_my_charges(current)
 

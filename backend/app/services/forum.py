@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.models.enrollment import Enrollment
 from app.models.forum import ForumPost, ForumThread
-from app.models.student import Student, UserRole
+from app.models.student import ADMIN_ROLES, Student, UserRole
 from app.repositories.course import CourseRepository
 from app.repositories.enrollment import EnrollmentRepository
 from app.repositories.forum import ForumRepository
@@ -55,7 +55,7 @@ class ForumService:
         return course
 
     def _ensure_course_access(self, course_id: int, current: Student) -> None:
-        if current.role in {UserRole.admin, UserRole.coordinator, UserRole.instructor}:
+        if current.role in ADMIN_ROLES | {UserRole.coordinator, UserRole.instructor}:
             return
         if self.enrollment_repo.get_by_student_and_course(current.id, course_id):
             return

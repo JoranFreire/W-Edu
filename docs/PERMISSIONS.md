@@ -8,7 +8,19 @@ Este documento registra a regra operacional por papel. A nomenclatura `User` e `
 - `instructor`: instrutor.
 - `coordinator`: coordenacao academica.
 - `company_manager`: gestor de empresa B2B.
-- `admin`: administrador global.
+- `admin`: administrador da instituicao (papel legado, equivalente a `institution_admin`).
+- `institution_admin`: administrador da instituicao.
+- `super_admin`: administrador da plataforma; acessa qualquer instituicao e gere instituicoes em `/platform`.
+- `secretary` e `guardian`: reservados para as fases de secretaria e escola basica; ainda sem permissoes especificas.
+
+## Instituicoes (multi-tenant)
+
+- Todo acesso autenticado roda dentro de uma instituicao ativa: header `X-Institution` (slug ou id) ou claim `inst` do JWT; sem nenhum dos dois, a primeira membership ativa do usuario.
+- O usuario precisa de membership ativa na instituicao; `super_admin` acessa qualquer uma.
+- Nas colunas "Admin" das tabelas abaixo leia `admin`, `institution_admin` ou `super_admin`, sempre dentro da instituicao ativa.
+- Somente `super_admin` atribui o papel `super_admin` ou altera/exclui um super admin.
+- Cadastro publico (`POST /users`) sempre cria `student`, sem empresa, na instituicao do header (ou na padrao).
+- Excluir usuario que pertence a outras instituicoes remove apenas o vinculo com a instituicao ativa.
 
 ## Regras Gerais
 
