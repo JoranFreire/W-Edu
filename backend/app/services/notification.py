@@ -252,8 +252,9 @@ class NotificationService:
         return template
 
     def _ensure_default_templates(self) -> None:
+        existing = {(template.key, template.channel) for template in self.template_repo.list_all()}
         for (event_type, channel), (title_template, body_template) in self.DEFAULT_TEMPLATES.items():
-            if self.template_repo.get_by_key_and_channel(event_type.value, channel):
+            if (event_type.value, channel) in existing:
                 continue
             self.template_repo.create(
                 NotificationTemplate(

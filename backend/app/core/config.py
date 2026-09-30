@@ -5,6 +5,11 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     DATABASE_URL: str = "postgresql://postgres:postgres@localhost:5432/wedu"
+    # Conexoes por processo da API: com N workers o banco recebe ate N * (POOL_SIZE + MAX_OVERFLOW).
+    DB_POOL_SIZE: int = 10
+    DB_MAX_OVERFLOW: int = 10
+    DB_POOL_TIMEOUT_SECONDS: int = 10
+    DB_POOL_RECYCLE_SECONDS: int = 1800
     REDIS_URL: str = "redis://localhost:6379/2"
     SECRET_KEY: str = "change-me-in-production"
     ALGORITHM: str = "HS256"

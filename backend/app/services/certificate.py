@@ -6,7 +6,7 @@ import secrets
 import unicodedata
 
 from fastapi import HTTPException, status
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from app.core.storage import certificates_storage_dir
 from app.core.config import settings
@@ -66,7 +66,7 @@ class CertificateService:
         if not enrollment:
             reasons.append("Aluno não está matriculado no curso")
 
-        lessons = self.lesson_repo.list_by_course(course_id)
+        lessons = self._lessons_with_quiz(course_id)
         progress_percent = self._progress_percent(student_id, lessons)
         if rule.require_lessons_complete and progress_percent < rule.minimum_progress_percent:
             reasons.append("Progresso insuficiente")
@@ -168,6 +168,11 @@ class CertificateService:
             rule = self.get_rule(course_id)
             if not rule.auto_issue:
                 return None
+            # Caminho rapido: progresso insuficiente e o caso mais comum durante o curso.
+            if rule.require_lessons_complete:
+                progress_percent = self._progress_percent(student_id, self.lesson_repo.list_by_course(course_id))
+                if progress_percent < rule.minimum_progress_percent:
+                    return None
             return self.issue(course_id, student_id)
         except HTTPException:
             return None
@@ -210,6 +215,15 @@ class CertificateService:
             require_attendance=course.modality in {CourseModality.in_person, CourseModality.hybrid},
             minimum_attendance_percent=75,
             auto_issue=True,
+        )
+
+    def _lessons_with_quiz(self, course_id: int) -> list[Lesson]:
+        return (
+            self.db.query(Lesson)
+            .options(selectinload(Lesson.quiz))
+            .filter(Lesson.course_id == course_id)
+            .order_by(Lesson.order)
+            .all()
         )
 
     def _progress_percent(self, student_id: int, lessons: list[Lesson]) -> int:
