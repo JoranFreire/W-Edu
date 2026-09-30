@@ -248,8 +248,8 @@ Objetivo: uma instalacao atendendo varias instituicoes com dados isolados.
 - [x] Novos papeis: `super_admin`, `institution_admin`, `secretary`, `guardian`.
 - [ ] Atualizar matriz e verificadores de permissao com escopo de instituicao.
 - [x] API da plataforma (super admin) para criar/gerir instituicoes (`/platform/institutions`).
-- [ ] Telas do admin da plataforma.
-- [ ] Seletor de instituicao e branding por tenant no frontend.
+- [x] Telas do admin da plataforma (`/platform/institutions`).
+- [x] Seletor de instituicao, branding por tenant (nome, cor, logo) e tela de instituicao/campi no frontend.
 - [ ] Avaliar Row Level Security no PostgreSQL como segunda barreira.
 
 ### Fase 12 — Nucleo Academico Formal

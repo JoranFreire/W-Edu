@@ -10,10 +10,11 @@ import type { Course, LearningPath, LearningPathCourse } from '@/types/course';
 import ConfirmDialog from '@/components/admin/ConfirmDialog';
 import LearningPathCard from '@/components/admin/LearningPathCard';
 import LearningPathModal from '@/components/admin/LearningPathModal';
+import { isAdminRole } from '@/types/auth';
 
 export default function AdminLearningPathsPage() {
   const { student } = useAuthStore();
-  const canDelete = student?.role === 'admin';
+  const canDelete = isAdminRole(student?.role);
   const [paths, setPaths] = useState<LearningPath[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
   const [pathCourses, setPathCourses] = useState<Record<number, LearningPathCourse[]>>({});

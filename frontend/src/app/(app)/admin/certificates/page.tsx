@@ -8,7 +8,7 @@ import api from '@/lib/api/client';
 import { endpoints } from '@/lib/api/endpoints';
 import { useAuthStore } from '@/store/authStore';
 import type { Course, Enrollment } from '@/types/course';
-import type { Student } from '@/types/auth';
+import { type Student, isAdminRole } from '@/types/auth';
 import type { Certificate, CertificateEligibility, CertificateIssueResult, CertificateRule } from '@/types/certificate';
 import CertificateIssuancePanel from '@/components/admin/CertificateIssuancePanel';
 import CertificateRuleForm from '@/components/admin/CertificateRuleForm';
@@ -19,7 +19,7 @@ type CertificateTab = 'rules' | 'issue' | 'validation' | 'issued';
 
 export default function AdminCertificatesPage() {
   const { student } = useAuthStore();
-  const canRevoke = student?.role === 'admin';
+  const canRevoke = isAdminRole(student?.role);
   const [courses, setCourses] = useState<Course[]>([]);
   const [students, setStudents] = useState<Student[]>([]);
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);

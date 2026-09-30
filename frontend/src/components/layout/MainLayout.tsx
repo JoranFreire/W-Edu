@@ -5,14 +5,19 @@ import { usePathname } from 'next/navigation';
 import { Sidebar } from './Sidebar';
 import { TopBar } from './TopBar';
 import { canAccessPath } from '@/lib/auth/permissions';
+import { applyBranding } from '@/lib/institution/branding';
 import { useAuthStore } from '@/store/authStore';
 
 export function MainLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const { student } = useAuthStore();
+  const { student, institution } = useAuthStore();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const hasAccess = canAccessPath(student?.role, pathname);
+
+  useEffect(() => {
+    applyBranding(institution?.branding);
+  }, [institution?.branding]);
 
   useEffect(() => {
     setSidebarCollapsed(localStorage.getItem('w-edu-sidebar-collapsed') === 'true');

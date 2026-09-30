@@ -7,7 +7,7 @@ import api from '@/lib/api/client';
 import { endpoints } from '@/lib/api/endpoints';
 import { useAuthStore } from '@/store/authStore';
 import type { BillingPlan, Charge, Subscription } from '@/types/finance';
-import type { Student, Organization } from '@/types/auth';
+import { type Student, type Organization, isAdminRole } from '@/types/auth';
 import type { Course } from '@/types/course';
 import type { ClassOffering } from '@/types/schedule';
 import BillingPlanForm from '@/components/admin/BillingPlanForm';
@@ -21,7 +21,7 @@ type FinanceTab = 'plans' | 'subscriptions' | 'charges';
 
 export default function AdminFinancePage() {
   const { student } = useAuthStore();
-  const isAdmin = student?.role === 'admin';
+  const isAdmin = isAdminRole(student?.role);
   const [plans, setPlans] = useState<BillingPlan[]>([]);
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [charges, setCharges] = useState<Charge[]>([]);

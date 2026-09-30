@@ -5,7 +5,7 @@ import { BuildingOfficeIcon, PlusIcon, UserGroupIcon, XMarkIcon } from '@heroico
 import toast from 'react-hot-toast';
 import api from '@/lib/api/client';
 import { useAuthStore } from '@/store/authStore';
-import type { Organization, User, UserRole } from '@/types/auth';
+import { type Organization, type User, type UserRole, isAdminRole, roleLabels } from '@/types/auth';
 import EditOrganizationModal from '@/components/admin/EditOrganizationModal';
 import EditUserModal from '@/components/admin/EditUserModal';
 import NewUserModal from '@/components/admin/NewUserModal';
@@ -14,19 +14,18 @@ import OrganizationsSection from '@/components/admin/OrganizationsSection';
 import ProfileModal from '@/components/admin/ProfileModal';
 import UsersList from '@/components/admin/UsersList';
 
-const roleLabel: Record<UserRole, string> = {
-  student: 'Aluno', instructor: 'Instrutor', coordinator: 'Coordenador', company_manager: 'Gestor empresa', admin: 'Admin',
-};
-const roleOptions = Object.entries(roleLabel) as Array<[UserRole, string]>;
+const institutionRoles: UserRole[] = ['student', 'instructor', 'coordinator', 'company_manager', 'secretary', 'institution_admin'];
+const roleOptions = institutionRoles.map((role) => [role, roleLabels[role]] as [UserRole, string]);
+const superAdminRoleOptions: Array<[UserRole, string]> = [...roleOptions, ['super_admin', roleLabels.super_admin]];
 const manageableRoleOptions = roleOptions.filter(([role]) => role === 'student' || role === 'instructor');
 type PeopleTab = 'users' | 'organizations';
 
 export default function AdminStudentsPage() {
   const { student } = useAuthStore();
-  const isAdmin = student?.role === 'admin';
+  const isAdmin = isAdminRole(student?.role);
   const canDelete = isAdmin;
-  const availableRoles = isAdmin ? roleOptions : manageableRoleOptions;
-  const canManageUser = (user: User) => user.role !== 'admin' && (isAdmin || user.role === 'student' || user.role === 'instructor');
+  const availableRoles = student?.role === 'super_admin' ? superAdminRoleOptions : isAdmin ? roleOptions : manageableRoleOptions;
+  const canManageUser = (user: User) => !isAdminRole(user.role) && (isAdmin || user.role === 'student' || user.role === 'instructor');
 
   const [users, setUsers] = useState<User[]>([]);
   const [organizations, setOrganizations] = useState<Organization[]>([]);

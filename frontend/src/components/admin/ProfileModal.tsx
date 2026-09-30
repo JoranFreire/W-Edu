@@ -4,10 +4,9 @@ import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import api from '@/lib/api/client';
 import type { InstructorAvailability, InstructorProfile, InstructorRating, StudentProfile, User } from '@/types/auth';
+import { roleLabels } from '@/types/auth';
 
-const roleLabel: Record<string, string> = {
-  student: 'Aluno', instructor: 'Instrutor', coordinator: 'Coordenador', company_manager: 'Gestor empresa', admin: 'Admin',
-};
+const roleLabel: Record<string, string> = roleLabels;
 
 const inputCls = 'block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500';
 const dayLabels = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];

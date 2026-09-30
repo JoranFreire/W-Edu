@@ -1,8 +1,10 @@
 import type { ComponentType } from 'react';
+import type { UserRole } from '@/types/auth';
 import {
   HomeIcon, BookOpenIcon, ChartBarIcon, MicrophoneIcon, Cog6ToothIcon,
   UsersIcon, AcademicCapIcon, CalendarDaysIcon, ChatBubbleLeftRightIcon,
   BanknotesIcon, Squares2X2Icon, MapIcon, ShieldCheckIcon, DocumentTextIcon,
+  BuildingLibraryIcon, GlobeAltIcon,
 } from '@heroicons/react/24/outline';
 
 interface MenuItem { name: string; href: string; icon: ComponentType<{ className?: string }> }
@@ -27,9 +29,15 @@ export const adminMenu: MenuItem[] = [
   { name: 'Documentos', href: '/admin/documents', icon: DocumentTextIcon },
   { name: 'Relatórios', href: '/admin/analytics', icon: ChartBarIcon },
   { name: 'Usuários', href: '/admin/users', icon: UsersIcon },
+  { name: 'Instituição', href: '/admin/institution', icon: BuildingLibraryIcon },
   { name: 'Catálogo', href: '/courses', icon: Squares2X2Icon },
   { name: 'Meus certificados', href: '/certificates', icon: ShieldCheckIcon },
   { name: 'Configurações', href: '/settings', icon: Cog6ToothIcon },
+];
+
+export const superAdminMenu: MenuItem[] = [
+  { name: 'Plataforma', href: '/platform/institutions', icon: GlobeAltIcon },
+  ...adminMenu,
 ];
 
 export const coordinatorMenu: MenuItem[] = [
@@ -55,3 +63,11 @@ export const companyManagerMenu: MenuItem[] = [
   { name: 'Meus certificados', href: '/certificates', icon: ShieldCheckIcon },
   { name: 'Configurações', href: '/settings', icon: Cog6ToothIcon },
 ];
+
+export function menuForRole(role: UserRole | undefined): MenuItem[] {
+  if (role === 'super_admin') return superAdminMenu;
+  if (role === 'admin' || role === 'institution_admin') return adminMenu;
+  if (role === 'coordinator') return coordinatorMenu;
+  if (role === 'company_manager') return companyManagerMenu;
+  return studentMenu;
+}

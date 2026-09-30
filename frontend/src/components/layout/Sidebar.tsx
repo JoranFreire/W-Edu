@@ -5,7 +5,8 @@ import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 import { useAuthStore } from '@/store/authStore';
-import { studentMenu, adminMenu, coordinatorMenu, companyManagerMenu } from '@/lib/config/sidebarMenus';
+import { menuForRole } from '@/lib/config/sidebarMenus';
+import { institutionDisplayName } from '@/lib/institution/branding';
 
 interface SidebarProps {
   open: boolean;
@@ -16,16 +17,19 @@ interface SidebarProps {
 
 export function Sidebar({ open, collapsed, onClose, onToggleCollapse }: SidebarProps) {
   const pathname = usePathname();
-  const { student } = useAuthStore();
-  const isAdminArea = student?.role === 'admin' || student?.role === 'coordinator' || student?.role === 'company_manager';
-  const menuItems =
-    student?.role === 'admin'
-      ? adminMenu
-      : student?.role === 'coordinator'
-        ? coordinatorMenu
-        : student?.role === 'company_manager'
-          ? companyManagerMenu
-          : studentMenu;
+  const { student, institution } = useAuthStore();
+  const menuItems = menuForRole(student?.role);
+  const isAdminArea = menuItems !== menuForRole('student');
+  const displayName = institutionDisplayName(institution);
+  const logoUrl = institution?.branding?.logo_url;
+  const logo = logoUrl ? (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src={logoUrl} alt="" className="w-8 h-8 rounded-lg object-contain bg-white" />
+  ) : (
+    <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
+      <span className="text-white font-bold text-lg">{displayName.charAt(0).toUpperCase()}</span>
+    </div>
+  );
 
   useEffect(() => {
     if (open) {
@@ -76,21 +80,17 @@ export function Sidebar({ open, collapsed, onClose, onToggleCollapse }: SidebarP
   const header = (mobile = false) => (
     <div className="h-16 flex items-center justify-between px-4 border-b border-gray-800">
       {(!collapsed || mobile) && (
-        <Link href="/dashboard" className="flex items-center space-x-2" onClick={mobile ? onClose : undefined}>
-          <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-lg">E</span>
-          </div>
-          <div>
-            <span className="text-xl font-bold text-white">W-Edu</span>
-            {isAdminArea && <span className="ml-2 text-xs text-indigo-400 font-medium">Gestão</span>}
+        <Link href="/dashboard" className="flex min-w-0 items-center space-x-2" onClick={mobile ? onClose : undefined}>
+          {logo}
+          <div className="min-w-0">
+            <span className="block truncate text-lg font-bold text-white" title={displayName}>{displayName}</span>
+            {isAdminArea && <span className="block text-xs text-indigo-400 font-medium">Gestão</span>}
           </div>
         </Link>
       )}
       {collapsed && !mobile && (
         <Link href="/dashboard" className="flex items-center justify-center w-full">
-          <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-lg">E</span>
-          </div>
+          {logo}
         </Link>
       )}
       {!mobile && (

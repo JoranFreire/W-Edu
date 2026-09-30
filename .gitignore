@@ -35,3 +35,4 @@ Thumbs.db
 
 # Load test
 backend/loadtest/seed.json
+*.tsbuildinfo

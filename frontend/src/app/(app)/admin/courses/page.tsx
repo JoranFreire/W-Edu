@@ -12,6 +12,7 @@ import ConfirmDialog from '@/components/admin/ConfirmDialog';
 import LessonsPanel from '@/components/admin/LessonsPanel';
 import ModulesPanel from '@/components/admin/ModulesPanel';
 import PrerequisitesPanel from '@/components/admin/PrerequisitesPanel';
+import { isAdminRole } from '@/types/auth';
 
 type CourseTab = 'modules' | 'lessons' | 'prerequisites';
 
@@ -23,7 +24,7 @@ const modalityLabels: Record<Course['modality'], string> = {
 
 export default function AdminCoursesPage() {
   const { student } = useAuthStore();
-  const canDelete = student?.role === 'admin';
+  const canDelete = isAdminRole(student?.role);
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [courseModal, setCourseModal] = useState<{ open: boolean; course?: Course }>({ open: false });

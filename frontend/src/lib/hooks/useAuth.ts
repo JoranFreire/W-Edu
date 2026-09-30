@@ -14,6 +14,15 @@ export function useAuth() {
     }
   }, [store.student]);
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (localStorage.getItem('access_token') && store.student) {
+      store.fetchInstitution();
+    }
+    // Atualiza instituicao/branding uma vez por carregamento de pagina.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [store.student?.id]);
+
   return {
     ...store,
     isLoading: store.isLoading || !store._hasHydrated,

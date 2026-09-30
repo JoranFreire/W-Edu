@@ -28,7 +28,9 @@ export default function LoginPage() {
     try {
       setSubmitting(true);
       clearError();
-      await login(data);
+      // Link de acesso de uma instituicao especifica: /login?instituicao=<slug>
+      const institution = new URLSearchParams(window.location.search).get('instituicao') || undefined;
+      await login({ ...data, institution });
       router.push('/dashboard');
     } catch {
       // error handled by store
