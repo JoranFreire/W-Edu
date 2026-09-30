@@ -33,6 +33,9 @@ export interface ClassOffering {
   location_id: number | null;
   room_id: number | null;
   instructor_id: number | null;
+  term_id: number | null;
+  subject_id: number | null;
+  class_group_id: number | null;
   created_at: string;
 }
 

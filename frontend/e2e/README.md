@@ -1,6 +1,6 @@
 # Testes de navegador (Playwright)
 
-Cobrem os fluxos principais do frontend contra a API real: multi-instituição, estrutura acadêmica (programas, disciplinas, matriz curricular), agenda, financeiro, trilhas, comunicação, relatórios, cursos, certificados, usuários e conta.
+Cobrem os fluxos principais do frontend contra a API real: multi-instituição, estrutura acadêmica (programas, disciplinas, matriz curricular, períodos letivos, calendário, matrículas e turmas), agenda, financeiro, trilhas, comunicação, relatórios, cursos, certificados, usuários e conta.
 
 ## Preparar
 
@@ -27,6 +27,7 @@ npx playwright show-report           # relatório HTML (traces e screenshots de 
 Variáveis opcionais:
 
 - `E2E_BASE_URL` (padrão `http://localhost:3000`);
+- `E2E_API_URL` (padrão `http://localhost:8000`), usada para preparar dados pela API (`e2e/support/api.ts`);
 - `PLAYWRIGHT_CHROMIUM_EXECUTABLE` (Chromium já instalado, em vez do baixado pelo Playwright);
 - `E2E_TENANT_BASE_DOMAIN=localhost` ativa os testes de instituição por subdomínio (`e2e/subdomain.spec.ts`); a API precisa rodar com `TENANT_BASE_DOMAIN=localhost`.
 

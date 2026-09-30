@@ -4,7 +4,7 @@
 
 **Fase:** 2 — Voz com Professor IA (em andamento)  
 **Ultima atualizacao:** 2026-09-30  
-**Proximo marco:** Fase 12 — Nucleo Academico Formal, entrega 2 (periodos letivos, calendario, turma-grupo e matricula no programa). Entrega 1 (estrutura curricular) concluida.
+**Proximo marco:** Fase 13 — Avaliacao, Diario e Frequencia (Fase 12 concluida).
 
 ## Visao Alvo
 
@@ -261,12 +261,12 @@ Objetivo: estrutura comum a escola, universidade e profissionalizante.
 - [x] Disciplinas com ementa, carga horaria, creditos e vinculo opcional a curso EAD.
 - [x] Pre-requisitos e equivalencias entre disciplinas.
 - [x] Matriz curricular versionada com componentes por serie/semestre.
-- [ ] Periodos letivos e etapas de avaliacao (bimestre, trimestre, N1/N2).
-- [ ] Calendario academico (dias letivos, feriados, recessos, provas).
-- [ ] Matricula no programa com numero de matricula e status.
-- [ ] Turma-grupo (ex.: 7o ano A) com turno e professor responsavel.
-- [ ] Estender `class_offerings` com periodo, disciplina e turma-grupo.
-- [ ] Presets de nomenclatura por tipo de instituicao no frontend (feito para a estrutura curricular; falta aplicar em turmas e periodos).
+- [x] Periodos letivos e etapas de avaliacao (bimestre, trimestre, N1/N2).
+- [x] Calendario academico (dias letivos, feriados, recessos, provas).
+- [x] Matricula no programa com numero de matricula e status.
+- [x] Turma-grupo (ex.: 7o ano A) com turno e professor responsavel.
+- [x] Estender `class_offerings` com periodo, disciplina e turma-grupo.
+- [x] Presets de nomenclatura por tipo de instituicao no frontend (`useTerminology`).
 
 ### Fase 13 — Avaliacao, Diario e Frequencia
 

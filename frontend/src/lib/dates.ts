@@ -5,3 +5,6 @@ export const toDateTimeLocal = (value: string) => value.slice(0, 16);
 export const toApiDateTime = (value: string) => new Date(value).toISOString();
 
 export const dayLabels = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+
+/** 'AAAA-MM-DD' -> 'DD/MM/AAAA' sem converter fuso (datas puras do calendario academico). */
+export const formatIsoDate = (value: string) => value.split('-').reverse().join('/');

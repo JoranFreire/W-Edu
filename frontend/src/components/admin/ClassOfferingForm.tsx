@@ -2,11 +2,17 @@
 
 import { useState } from 'react';
 import { AcademicCapIcon, PlusIcon } from '@heroicons/react/24/outline';
-import type { Course } from '@/types/course';
-import type { User } from '@/types/auth';
-import type { ClassOffering, Room } from '@/types/schedule';
+import toast from 'react-hot-toast';
+import OfferingAcademicFields, { type OfferingAcademicValue } from '@/components/admin/schedule/OfferingAcademicFields';
+import { inputCls, primaryButtonCls, secondaryButtonCls } from '@/components/common/formStyles';
+import { apiErrorMessage } from '@/lib/api/errors';
 import { toApiDateTime, toDateTimeLocal } from '@/lib/dates';
+import { useCreateClassOffering } from '@/lib/hooks/admin/useCreateClassOffering';
+import type { User } from '@/types/auth';
+import type { Course } from '@/types/course';
+import type { ClassOffering, Room } from '@/types/schedule';
 
+const optionalId = (value: string) => (value ? Number(value) : null);
 
 export default function ClassOfferingForm({ courses, rooms, instructors = [], onCreated, onCancel, variant = 'card' }: {
   courses: Course[];
@@ -16,33 +22,36 @@ export default function ClassOfferingForm({ courses, rooms, instructors = [], on
   onCancel?: () => void;
   variant?: 'card' | 'plain';
 }) {
+  const { create } = useCreateClassOffering();
   const [form, setForm] = useState(() => ({
     course_id: '', name: '',
     starts_at: toDateTimeLocal(new Date().toISOString()),
     ends_at: toDateTimeLocal(new Date(Date.now() + 60 * 60 * 1000).toISOString()),
     capacity: 20, status: 'open' as ClassOffering['status'], room_id: '', instructor_id: '',
   }));
+  const [academic, setAcademic] = useState<OfferingAcademicValue>({ term_id: '', subject_id: '', class_group_id: '' });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const { default: api } = await import('@/lib/api/client');
-    const { endpoints } = await import('@/lib/api/endpoints');
-    const toast = (await import('react-hot-toast')).default;
     try {
-      await api.post(endpoints.schedule.classes, {
+      await create({
         course_id: Number(form.course_id), name: form.name,
         starts_at: toApiDateTime(form.starts_at), ends_at: toApiDateTime(form.ends_at),
         capacity: form.capacity, status: form.status,
-        room_id: form.room_id ? Number(form.room_id) : null,
-        instructor_id: form.instructor_id ? Number(form.instructor_id) : null,
+        room_id: optionalId(form.room_id),
+        instructor_id: optionalId(form.instructor_id),
+        term_id: optionalId(academic.term_id),
+        subject_id: optionalId(academic.subject_id),
+        class_group_id: optionalId(academic.class_group_id),
       });
       setForm((p) => ({ ...p, name: '' }));
       toast.success('Turma criada.');
       onCreated();
-    } catch { toast.error('Erro ao criar turma.'); }
+    } catch (error) {
+      toast.error(apiErrorMessage(error, 'Erro ao criar turma.'));
+    }
   };
 
-  const inputCls = 'block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500';
   const formCls = variant === 'card'
     ? 'bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 space-y-3'
     : 'space-y-4';
@@ -75,13 +84,10 @@ export default function ClassOfferingForm({ courses, rooms, instructors = [], on
         <option value="">Sem instrutor</option>
         {instructors.map((instructor) => <option key={instructor.id} value={instructor.id}>{instructor.name}</option>)}
       </select>
+      <OfferingAcademicFields value={academic} onChange={setAcademic} />
       <div className={variant === 'plain' ? 'flex justify-end gap-3 pt-2' : ''}>
-        {onCancel && (
-          <button type="button" onClick={onCancel} className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white">
-            Cancelar
-          </button>
-        )}
-        <button className={`flex items-center justify-center space-x-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors ${variant === 'card' ? 'w-full' : ''}`}>
+        {onCancel && <button type="button" onClick={onCancel} className={secondaryButtonCls}>Cancelar</button>}
+        <button className={`${primaryButtonCls} ${variant === 'card' ? 'w-full' : ''}`}>
           <PlusIcon className="w-4 h-4" /><span>Criar turma</span>
         </button>
       </div>

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from app.models.academic import Curriculum, Program, ProgramLevel, ProgramStatus
 from app.repositories.academic._base import Repository
 

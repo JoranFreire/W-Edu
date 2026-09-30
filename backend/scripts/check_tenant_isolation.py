@@ -268,6 +268,28 @@ async def run() -> int:
         r = await client.get("/academic/programs", headers=admin_b)
         c.expect([p["code"] for p in r.json()] == ["DIR"], f"B lists only own programs: {r.json()}")
 
+        # Periodos, turmas-grupo e matriculas no programa.
+        term = {"name": "2027", "starts_on": "2027-02-01", "ends_on": "2027-12-15"}
+        term_a = (await client.post("/academic/terms", json=term, headers=admin_a)).json().get("id")
+        r = await client.post("/academic/terms", json=term, headers=admin_b)
+        c.expect(r.status_code == 201, f"same term name per tenant: {r.status_code} {r.text}")
+        r = await client.post(
+            "/academic/calendar-events", json={"kind": "holiday", "title": "X", "starts_on": "2027-03-01", "term_id": term_a}, headers=admin_b
+        )
+        c.expect(r.status_code == 404, f"B cannot add event to A term: {r.status_code}")
+        r = await client.post(
+            "/academic/class-groups", json={"program_id": program_a, "term_id": term_a, "name": "6A"}, headers=admin_b
+        )
+        c.expect(r.status_code == 404, f"B cannot create group on A program/term: {r.status_code}")
+        with SessionLocal() as db:
+            aluno_a_id = db.query(Student).filter(Student.email == "aluno-a@example.com").one().id
+        r = await client.post(
+            "/academic/program-enrollments", json={"student_id": aluno_a_id, "program_id": program_a}, headers=admin_b
+        )
+        c.expect(r.status_code == 404, f"B cannot enroll A student in A program: {r.status_code}")
+        r = await client.get("/academic/terms", headers=admin_a)
+        c.expect(len(r.json()) == 1, f"A lists only own terms: {r.json()}")
+
         # Webhook sem usuario logado: registros herdam a instituicao da aula.
         with SessionLocal() as db:
             aluno_a = db.query(Student).filter(Student.email == "aluno-a@example.com").one().id

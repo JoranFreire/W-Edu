@@ -19,6 +19,8 @@ from app.models.academic import (
     SubjectEquivalence,
     SubjectPrerequisite,
 )
+from app.models.academic_calendar import AcademicTerm, CalendarEvent, GradingPeriod
+from app.models.academic_groups import ClassGroup, ClassGroupMember, ProgramEnrollment
 from app.models.course import Course, CourseModule, LearningPath, LearningPathCourse, CoursePrerequisite
 from app.models.course import CourseCompletionRule
 from app.models.lesson import Lesson
@@ -60,4 +62,5 @@ __all__ = [
     "Location", "Room", "ClassOffering", "ClassEnrollment", "WaitlistEntry", "ScheduledMeeting",
     "AttendanceRecord", "CheckinToken", "PracticalAssessmentRecord", "Document", "DocumentVersion", "ForumThread", "ForumPost",
     "AcademicUnit", "Program", "Subject", "SubjectPrerequisite", "SubjectEquivalence", "Curriculum", "CurriculumComponent",
+    "AcademicTerm", "GradingPeriod", "CalendarEvent", "ProgramEnrollment", "ClassGroup", "ClassGroupMember",
 ]
