@@ -11,7 +11,8 @@ Este documento registra a regra operacional por papel. A nomenclatura `User` e `
 - `admin`: administrador da instituicao (papel legado, equivalente a `institution_admin`).
 - `institution_admin`: administrador da instituicao.
 - `super_admin`: administrador da plataforma; acessa qualquer instituicao e gere instituicoes em `/platform`.
-- `secretary` e `guardian`: reservados para as fases de secretaria e escola basica; ainda sem permissoes especificas.
+- `secretary`: secretaria academica (matriculas, movimentacoes, aproveitamento e historico).
+- `guardian`: reservado para a fase de escola basica; ainda sem permissoes especificas.
 
 ## Instituicoes (multi-tenant)
 
@@ -97,6 +98,20 @@ Calendario e turmas: periodo `planned -> open -> closed` (reabertura permitida);
 | Ver o proprio boletim (`/assessment/my/report-card`) | Sim | Sim | Sim | Sim | Sim |
 
 Etapa encerrada na instituicao, etapa fechada na turma ou periodo letivo encerrado bloqueia notas e itens da etapa e o diario das datas dentro dela; turma finalizada bloqueia tudo. Faltas justificadas nao contam na frequencia. O boletim do aluno mostra so etapas fechadas e, apos a publicacao, o resultado final.
+
+## Secretaria Academica (`/secretariat`)
+
+| Recurso | Student | Instructor | Coordinator | Secretary | Admin |
+| --- | --- | --- | --- | --- | --- |
+| Listar e criar matriculas no programa | Nao | Nao | Sim | Sim | Sim |
+| Rematricula, trancamento, reativacao, cancelamento, evasao | Nao | Nao | Sim | Sim | Sim |
+| Transferencia interna/externa e mudanca de matriz | Nao | Nao | Sim | Sim | Sim |
+| Registrar aproveitamento de estudos | Nao | Nao | Sim | Sim | Sim |
+| Deferir/indeferir aproveitamento | Nao | Nao | Sim | Nao | Sim |
+| Historico escolar e linha do tempo da matricula | Nao | Nao | Sim | Sim | Sim |
+| Proprio historico (`/secretariat/my/transcripts`) | Sim | Sim | Sim | Sim | Sim |
+
+Toda movimentacao fica registrada em `program_enrollment_events` (quem, quando, justificativa), inclusive mudancas feitas pela rota `/academic/program-enrollments/{id}/status`.
 
 ## Agenda e Presencial
 

@@ -2,6 +2,7 @@ import { isAdminRole, type UserRole } from '@/types/auth';
 
 const coordinatorAdminPaths = [
   '/admin/academic',
+  '/admin/secretariat',
   '/admin/courses',
   '/admin/learning-paths',
   '/admin/schedule',
@@ -31,5 +32,6 @@ export function canAccessPath(role: UserRole | undefined, pathname: string) {
   if (isAdminRole(role)) return true;
   if (role === 'coordinator') return coordinatorAdminPaths.some((path) => matchesPath(pathname, path));
   if (role === 'company_manager') return companyManagerAdminPaths.some((path) => matchesPath(pathname, path));
+  if (role === 'secretary') return matchesPath(pathname, '/admin/secretariat');
   return false;
 }

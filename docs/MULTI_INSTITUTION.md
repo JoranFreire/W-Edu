@@ -170,6 +170,8 @@ Implementado na Fase 13 (entrega 1), em `/assessment`: `grading_schemes` (com fa
 - Declaracoes: matricula, frequencia e conclusao. Geradas pelo motor de PDF e pela assinatura de integridade dos certificados atuais, com validacao publica por codigo.
 - Colacao e conclusao do programa.
 
+Implementado na Fase 14 (entrega 1), em `/secretariat`: `program_enrollment_events` (linha do tempo), `term_registrations` (rematricula por periodo), `credit_transfers` (aproveitamento, registrado pela secretaria e decidido pela coordenacao) e `program_enrollments.transferred_from_id` (transferencia interna abre nova matricula vinculada). O historico escolar cruza a matriz do aluno com as cursadas (`class_enrollments` com resultado, contando disciplinas equivalentes) e os aproveitamentos aprovados; CR ponderado por creditos (senao carga horaria) e integralizacao pela carga obrigatoria cumprida (`services/secretariat/transcript_rules.py`). Pendente (entrega 2): declaracoes com validacao publica e conclusao/colacao.
+
 ---
 
 ## 6. Perfis Especificos

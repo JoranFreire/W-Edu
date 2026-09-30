@@ -4,7 +4,7 @@
 
 **Fase:** 2 — Voz com Professor IA (em andamento)  
 **Ultima atualizacao:** 2026-09-30  
-**Proximo marco:** Fase 14 — Secretaria Academica (Fase 13 concluida, exceto importar notas de trabalho e avaliacao pratica).
+**Proximo marco:** Fase 14 — Secretaria Academica, entrega 2 (declaracoes com validacao publica e conclusao do programa). Entrega 1 concluida.
 
 ## Visao Alvo
 
@@ -279,11 +279,11 @@ Objetivo: estrutura comum a escola, universidade e profissionalizante.
 
 ### Fase 14 — Secretaria Academica
 
-- [ ] Matricula, rematricula, trancamento, cancelamento e transferencia.
-- [ ] Aproveitamento de estudos.
-- [ ] Historico escolar e boletim.
+- [x] Matricula, rematricula, trancamento, cancelamento e transferencia.
+- [x] Aproveitamento de estudos.
+- [x] Historico escolar e boletim.
 - [ ] Declaracoes (matricula, frequencia, conclusao) com validacao publica.
-- [ ] CR/IRA e integralizacao curricular.
+- [x] CR/IRA e integralizacao curricular.
 - [ ] Conclusao do programa.
 
 ### Fase 15 — Perfil Escola Basica
