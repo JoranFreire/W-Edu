@@ -6,7 +6,7 @@ from app.models.notification import NotificationEventType
 from app.repositories.course import CourseModuleRepository, CourseRepository
 from app.repositories.lesson import LessonRepository
 from app.schemas.lesson import LessonCreate, LessonUpdate
-from app.services.notification import NotificationService
+from app.services.notifications.events import NotificationEventService
 
 
 class LessonService:
@@ -14,7 +14,7 @@ class LessonService:
         self.repo = LessonRepository(db)
         self.module_repo = CourseModuleRepository(db)
         self.course_repo = CourseRepository(db)
-        self.notification_service = NotificationService(db)
+        self.notification_service = NotificationEventService(db)
 
     def create(self, data: LessonCreate) -> Lesson:
         self._validate_module(data.course_id, data.module_id)

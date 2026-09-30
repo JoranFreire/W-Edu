@@ -11,7 +11,7 @@ Vale para todo código tocado, novo ou antigo. Ao alterar um arquivo que mistura
 - Service: uma área de negócio por classe (ex.: `TenantAccessService`, `MembershipService`, `CampusService`, `InstitutionService`).
 - Repository: só acesso a dados.
 - Policy (`app/policies/`): regras de autorização que dependem dos dados (ex.: escopo de usuários).
-- Áreas grandes viram pacote com um módulo por responsabilidade (ex.: `app/services/certificates/`, `app/routers/admin/`).
+- Áreas grandes viram pacote com um módulo por responsabilidade (ex.: `app/services/certificates/`, `app/services/notifications/`, `app/routers/admin/`).
 - Infraestrutura transversal em `app/core/` com um módulo por preocupação (ex.: `tenancy.py` filtra leitura; `tenant_integrity.py` valida gravação).
 
 **Frontend**
@@ -45,6 +45,7 @@ Frontend (`frontend/`):
 npx tsc --noEmit
 npm run lint      # ESLint flat config (next lint não existe no Next 16)
 npm run build
+npm run test:e2e  # Playwright; exige API com banco do scripts/seed_e2e.py (ver frontend/e2e/README.md)
 ```
 
 Teste de carga: `backend/loadtest/README.md`.

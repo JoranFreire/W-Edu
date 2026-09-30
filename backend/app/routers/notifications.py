@@ -12,19 +12,21 @@ from app.schemas.notification import (
     NotificationTemplateOut,
     NotificationTemplateUpdate,
 )
-from app.services.notification import NotificationService
+from app.services.notifications.delivery import NotificationDeliveryService
+from app.services.notifications.events import NotificationEventService
+from app.services.notifications.templates import NotificationTemplateService
 
 router = APIRouter()
 
 
 @router.get("/templates", response_model=list[NotificationTemplateOut])
 def list_templates(db: Session = Depends(get_db), _: Student = Depends(get_current_admin_or_coordinator)):
-    return NotificationService(db).list_templates()
+    return NotificationTemplateService(db).list()
 
 
 @router.post("/templates", response_model=NotificationTemplateOut, status_code=201)
 def create_template(data: NotificationTemplateCreate, db: Session = Depends(get_db), _: Student = Depends(get_current_admin_or_coordinator)):
-    return NotificationService(db).create_template(data)
+    return NotificationTemplateService(db).create(data)
 
 
 @router.patch("/templates/{key}/{channel}", response_model=NotificationTemplateOut)
@@ -35,22 +37,22 @@ def update_template(
     db: Session = Depends(get_db),
     _: Student = Depends(get_current_admin_or_coordinator),
 ):
-    return NotificationService(db).update_template(key, channel, data)
+    return NotificationTemplateService(db).update(key, channel, data)
 
 
 @router.get("/events", response_model=list[NotificationEventOut])
 def list_events(limit: int = 100, db: Session = Depends(get_db), _: Student = Depends(get_current_admin_or_coordinator)):
-    return NotificationService(db).list_events(limit=limit)
+    return NotificationEventService(db).list(limit=limit)
 
 
 @router.post("/events", response_model=NotificationEventOut, status_code=201)
 def create_event(data: NotificationEventCreate, db: Session = Depends(get_db), _: Student = Depends(get_current_admin_or_coordinator)):
-    return NotificationService(db).create_event(data)
+    return NotificationEventService(db).create(data)
 
 
 @router.post("/events/{event_id}/mark-sent", response_model=NotificationEventOut)
 def mark_sent(event_id: int, db: Session = Depends(get_db), _: Student = Depends(get_current_admin_or_coordinator)):
-    return NotificationService(db).mark_sent(event_id)
+    return NotificationEventService(db).mark_sent(event_id)
 
 
 @router.post("/events/{event_id}/mark-failed", response_model=NotificationEventOut)
@@ -60,9 +62,9 @@ def mark_failed(
     db: Session = Depends(get_db),
     _: Student = Depends(get_current_admin_or_coordinator),
 ):
-    return NotificationService(db).mark_failed(event_id, error_message)
+    return NotificationEventService(db).mark_failed(event_id, error_message)
 
 
 @router.post("/events/process-due", response_model=list[NotificationEventOut])
 def process_due(limit: int = 100, db: Session = Depends(get_db), _: Student = Depends(get_current_admin_or_coordinator)):
-    return NotificationService(db).process_due(limit=limit)
+    return NotificationDeliveryService(db).process_due(limit=limit)

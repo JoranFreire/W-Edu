@@ -4,7 +4,7 @@ from contextlib import suppress
 
 from app.core.config import settings
 from app.core.database import SessionLocal
-from app.services.notification import NotificationService
+from app.services.notifications.delivery import NotificationDeliveryService
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +25,7 @@ async def run_notification_worker(stop_event: asyncio.Event) -> None:
 def _process_batch() -> None:
     db = SessionLocal()
     try:
-        processed = NotificationService(db).process_due(limit=settings.NOTIFICATION_WORKER_BATCH_SIZE)
+        processed = NotificationDeliveryService(db).process_due(limit=settings.NOTIFICATION_WORKER_BATCH_SIZE)
         if processed:
             logger.info("Notification worker processed %s event(s)", len(processed))
     except Exception:

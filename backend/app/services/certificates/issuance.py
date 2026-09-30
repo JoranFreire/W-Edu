@@ -13,7 +13,7 @@ from app.services.certificates.eligibility import CertificateEligibilityService
 from app.services.certificates.pdf import CertificatePdfService
 from app.services.certificates.rules import CertificateRuleService
 from app.services.certificates.signature import CertificateSigner
-from app.services.notification import NotificationService
+from app.services.notifications.events import NotificationEventService
 
 
 class CertificateIssuanceService:
@@ -27,7 +27,7 @@ class CertificateIssuanceService:
         self.eligibility = CertificateEligibilityService(db)
         self.signer = CertificateSigner(db)
         self.pdf = CertificatePdfService(db)
-        self.notifications = NotificationService(db)
+        self.notifications = NotificationEventService(db)
 
     def issue(self, course_id: int, student_id: int, issued_by_id: int | None = None) -> Certificate:
         evaluation = self.eligibility.evaluate(course_id, student_id)
