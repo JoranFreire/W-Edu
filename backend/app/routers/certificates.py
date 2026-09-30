@@ -14,14 +14,18 @@ from app.schemas.certificate import (
     CertificateRuleUpdate,
     CertificateValidationOut,
 )
-from app.services.certificate import CertificateService
+from app.services.certificates.eligibility import CertificateEligibilityService
+from app.services.certificates.issuance import CertificateIssuanceService
+from app.services.certificates.queries import CertificateQueryService
+from app.services.certificates.rules import CertificateRuleService
+from app.services.certificates.signature import CertificateSigner
 
 router = APIRouter()
 
 
 @router.get("/rules/{course_id}", response_model=CertificateRuleOut)
 def get_rule(course_id: int, db: Session = Depends(get_db), _: Student = Depends(get_current_admin_or_coordinator)):
-    return CertificateService(db).get_rule(course_id)
+    return CertificateRuleService(db).get_rule(course_id)
 
 
 @router.patch("/rules/{course_id}", response_model=CertificateRuleOut)
@@ -31,7 +35,7 @@ def update_rule(
     db: Session = Depends(get_db),
     _: Student = Depends(get_current_admin_or_coordinator),
 ):
-    return CertificateService(db).update_rule(course_id, data)
+    return CertificateRuleService(db).update_rule(course_id, data)
 
 
 @router.get("/courses/{course_id}/students/{student_id}/eligibility", response_model=CertificateEligibilityOut)
@@ -41,7 +45,7 @@ def check_eligibility(
     db: Session = Depends(get_db),
     _: Student = Depends(get_current_admin_or_coordinator),
 ):
-    return CertificateService(db).evaluate(course_id, student_id)
+    return CertificateEligibilityService(db).evaluate(course_id, student_id)
 
 
 @router.post("/courses/{course_id}/students/{student_id}/issue", response_model=CertificateIssueOut)
@@ -51,13 +55,13 @@ def issue_certificate(
     db: Session = Depends(get_db),
     current: Student = Depends(get_current_admin_or_coordinator),
 ):
-    certificate = CertificateService(db).issue(course_id, student_id, issued_by_id=current.id)
+    certificate = CertificateIssuanceService(db).issue(course_id, student_id, issued_by_id=current.id)
     return CertificateIssueOut(issued=True, certificate_id=certificate.id, validation_code=certificate.validation_code)
 
 
 @router.get("/courses/{course_id}/certificates", response_model=list[CertificateOut])
 def list_course_certificates(course_id: int, db: Session = Depends(get_db), _: Student = Depends(get_current_admin_or_coordinator)):
-    return CertificateService(db).list_by_course(course_id)
+    return CertificateQueryService(db).list_by_course(course_id)
 
 
 @router.post("/{certificate_id}/revoke", response_model=CertificateOut)
@@ -67,17 +71,17 @@ def revoke_certificate(
     db: Session = Depends(get_db),
     _: Student = Depends(get_current_admin),
 ):
-    return CertificateService(db).revoke(certificate_id, data.reason)
+    return CertificateIssuanceService(db).revoke(certificate_id, data.reason)
 
 
 @router.get("/students/me", response_model=list[CertificateOut])
 def my_certificates(db: Session = Depends(get_db), current: Student = Depends(get_current_student)):
-    return CertificateService(db).list_by_student(current.id)
+    return CertificateQueryService(db).list_by_student(current.id)
 
 
 @router.get("/students/{student_id}", response_model=list[CertificateOut])
 def list_student_certificates(student_id: int, db: Session = Depends(get_db), _: Student = Depends(get_current_admin_or_coordinator)):
-    return CertificateService(db).list_by_student(student_id)
+    return CertificateQueryService(db).list_by_student(student_id)
 
 
 @router.get("/{certificate_id}/download")
@@ -86,7 +90,7 @@ def download_certificate(
     db: Session = Depends(get_db),
     current: Student = Depends(get_current_student),
 ):
-    certificate = CertificateService(db).get_for_download(certificate_id, current)
+    certificate = CertificateQueryService(db).get_for_download(certificate_id, current)
     return FileResponse(
         certificate.pdf_url,
         media_type="application/pdf",
@@ -96,8 +100,7 @@ def download_certificate(
 
 @router.get("/validate/{code}", response_model=CertificateValidationOut)
 def validate_certificate(code: str, db: Session = Depends(get_db)):
-    service = CertificateService(db)
-    valid, certificate, message = service.validate_code(code)
+    valid, certificate, message = CertificateQueryService(db).validate_code(code)
     course_name = certificate.course.name if certificate and certificate.course else None
     student_name = certificate.student.name if certificate and certificate.student else None
     return CertificateValidationOut(
@@ -106,5 +109,5 @@ def validate_certificate(code: str, db: Session = Depends(get_db)):
         message=message,
         course_name=course_name,
         student_name=student_name,
-        signature_valid=bool(certificate and service.verify_signature(certificate)),
+        signature_valid=bool(certificate and CertificateSigner(db).verify_signature(certificate)),
     )

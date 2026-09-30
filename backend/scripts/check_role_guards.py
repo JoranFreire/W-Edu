@@ -14,7 +14,7 @@ if str(ROOT) not in sys.path:
 
 from app.dependencies import get_current_academic_staff, get_current_admin, get_current_admin_or_company_manager, get_current_admin_or_coordinator
 from app.models.student import UserRole
-from app.routers.admin import ensure_academic_user_scope
+from app.policies.user_scope import ensure_academic_user_scope
 
 
 def fake_user(role: UserRole, organization_id: int | None = None):

@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from app.models.schedule import AttendanceMethod, AttendanceRecord, AttendanceStatus, CheckinToken, ClassEnrollmentStatus, PracticalAssessmentRecord
 from app.repositories.schedule import AttendanceRecordRepository, CheckinTokenRepository, ClassOfferingRepository, PracticalAssessmentRepository
 from app.repositories.student import StudentRepository
-from app.services.certificate import CertificateService
+from app.services.certificates.issuance import CertificateIssuanceService
 from app.services.notification import NotificationService
 from app.models.notification import NotificationEventType
 from app.schemas.schedule import MeetingAttendanceReportRow, PracticalAssessmentRecordCreate
@@ -22,7 +22,7 @@ class AttendanceRecordService:
         self.class_repo = ClassOfferingRepository(db)
         self.meeting_service = ScheduledMeetingService(db)
         self.student_repo = StudentRepository(db)
-        self.certificate_service = CertificateService(db)
+        self.certificate_service = CertificateIssuanceService(db)
         self.notification_service = NotificationService(db)
 
     def generate_checkin_token(self, meeting_id: int, valid_minutes: int) -> CheckinToken:

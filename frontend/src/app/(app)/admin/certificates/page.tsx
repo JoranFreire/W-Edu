@@ -1,165 +1,24 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { AcademicCapIcon, ArrowLeftIcon, CheckBadgeIcon, ListBulletIcon, QrCodeIcon, ShieldCheckIcon, XMarkIcon } from '@heroicons/react/24/outline';
-import { QRCodeSVG } from 'qrcode.react';
-import toast from 'react-hot-toast';
-import api from '@/lib/api/client';
-import { endpoints } from '@/lib/api/endpoints';
-import { useAuthStore } from '@/store/authStore';
-import type { Course, Enrollment } from '@/types/course';
-import { type Student, isAdminRole } from '@/types/auth';
-import type { Certificate, CertificateEligibility, CertificateIssueResult, CertificateRule } from '@/types/certificate';
-import CertificateIssuancePanel from '@/components/admin/CertificateIssuancePanel';
-import CertificateRuleForm from '@/components/admin/CertificateRuleForm';
-import CertificatesList from '@/components/admin/CertificatesList';
-import CertificateValidationPanel from '@/components/admin/CertificateValidationPanel';
-import { apiErrorMessage } from '@/lib/api/errors';
-import { saveBlob } from '@/lib/files/saveBlob';
-import TabNav from '@/components/common/TabNav';
+import { useState } from 'react';
+import { AcademicCapIcon } from '@heroicons/react/24/outline';
+import CourseCertificationPanel from '@/components/admin/certificates/CourseCertificationPanel';
+import BackButton from '@/components/common/BackButton';
 import Spinner from '@/components/common/Spinner';
-
-type CertificateTab = 'rules' | 'issue' | 'validation' | 'issued';
+import CourseCard from '@/components/courses/CourseCard';
+import { useCertificateCatalog } from '@/lib/hooks/admin/useCertificateCatalog';
+import { useErrorToast } from '@/lib/hooks/useErrorToast';
+import { useAuthStore } from '@/store/authStore';
+import { isAdminRole } from '@/types/auth';
+import type { Course } from '@/types/course';
 
 export default function AdminCertificatesPage() {
   const { student } = useAuthStore();
-  const canRevoke = isAdminRole(student?.role);
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [students, setStudents] = useState<Student[]>([]);
-  const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
-  const [selectedCourseId, setSelectedCourseId] = useState('');
-  const [rule, setRule] = useState<CertificateRule | null>(null);
-  const [certificates, setCertificates] = useState<Certificate[]>([]);
-  const [studentId, setStudentId] = useState('');
-  const [eligibility, setEligibility] = useState<CertificateEligibility | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [courseLoading, setCourseLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<CertificateTab>('rules');
-  const [certificateToRevoke, setCertificateToRevoke] = useState<Certificate | null>(null);
-  const [certificateQr, setCertificateQr] = useState<Certificate | null>(null);
-  const [revokeReason, setRevokeReason] = useState('');
+  const catalog = useCertificateCatalog();
+  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
+  useErrorToast(catalog.error, 'Erro ao carregar cursos.');
 
-  const enrolledStudents = enrollments.map((e) => students.find((s) => s.id === e.student_id)).filter((s): s is Student => Boolean(s));
-  const selectedCourse = courses.find((course) => String(course.id) === selectedCourseId);
-  const modalityLabel: Record<Course['modality'], string> = {
-    online: 'Online',
-    in_person: 'Presencial',
-    hybrid: 'Híbrido',
-  };
-
-  useEffect(() => {
-    Promise.all([api.get<Course[]>(endpoints.courses.list), api.get<Student[]>('/admin/users')])
-      .then(([c, s]) => { setCourses(c.data); setStudents(s.data); })
-      .finally(() => setLoading(false));
-  }, []);
-
-  const loadCourseData = async (courseId: number) => {
-    const [ruleRes, certRes, enrollmentRes] = await Promise.all([
-      api.get<CertificateRule>(endpoints.certificates.rule(courseId)),
-      api.get<Certificate[]>(endpoints.certificates.courseCertificates(courseId)),
-      api.get<Enrollment[]>(`/admin/enrollments/course/${courseId}`),
-    ]);
-    setRule(ruleRes.data);
-    setCertificates(certRes.data);
-    setEnrollments(enrollmentRes.data);
-    setStudentId('');
-    setEligibility(null);
-    setActiveTab('rules');
-  };
-
-  const selectCourse = async (courseId: number) => {
-    setSelectedCourseId(String(courseId));
-    setRule(null);
-    setCertificates([]);
-    setEnrollments([]);
-    setCourseLoading(true);
-    try {
-      await loadCourseData(courseId);
-    } catch {
-      toast.error('Erro ao carregar certificação do curso.');
-      setSelectedCourseId('');
-    } finally {
-      setCourseLoading(false);
-    }
-  };
-
-  const backToCourses = () => {
-    setSelectedCourseId('');
-    setRule(null);
-    setCertificates([]);
-    setEnrollments([]);
-    setStudentId('');
-    setEligibility(null);
-    setActiveTab('rules');
-  };
-
-  const saveRule = async () => {
-    if (!selectedCourseId || !rule) return;
-    try {
-      const { data } = await api.patch<CertificateRule>(endpoints.certificates.rule(Number(selectedCourseId)), rule);
-      setRule(data);
-      toast.success('Regra atualizada.');
-    } catch { toast.error('Erro ao salvar regra.'); }
-  };
-
-  const issueCertificate = async () => {
-    if (!selectedCourseId || !studentId) return;
-    try {
-      const { data } = await api.post<CertificateIssueResult>(endpoints.certificates.issue(Number(selectedCourseId), Number(studentId)));
-      toast.success(`Certificado emitido: ${data.validation_code}`);
-      await loadCourseData(Number(selectedCourseId));
-    } catch (e) {
-      toast.error(apiErrorMessage(e, 'Erro ao emitir certificado.'));
-    }
-  };
-
-  const revokeCertificate = async () => {
-    if (!certificateToRevoke) return;
-    try {
-      await api.post<Certificate>(endpoints.certificates.revoke(certificateToRevoke.id), { reason: revokeReason.trim() || null });
-      toast.success('Certificado revogado.');
-      setCertificateToRevoke(null);
-      setRevokeReason('');
-      await loadCourseData(Number(selectedCourseId));
-    } catch (e) { toast.error(apiErrorMessage(e, 'Erro ao revogar certificado.')); }
-  };
-
-  const checkEligibility = async () => {
-    if (!selectedCourseId || !studentId) return;
-    try {
-      const { data } = await api.get<CertificateEligibility>(endpoints.certificates.eligibility(Number(selectedCourseId), Number(studentId)));
-      setEligibility(data);
-    } catch { toast.error('Erro ao verificar elegibilidade.'); }
-  };
-
-  const validationUrl = (code: string) => typeof window === 'undefined' ? '' : `${window.location.origin}/validate-certificate?code=${encodeURIComponent(code)}`;
-
-  const copyValidationUrl = async (certificate: Certificate) => {
-    try {
-      await navigator.clipboard.writeText(validationUrl(certificate.validation_code));
-      toast.success('Link de validação copiado.');
-    } catch {
-      toast.error('Não foi possível copiar o link.');
-    }
-  };
-
-  const downloadCertificate = async (certificate: Certificate) => {
-    try {
-      const { data } = await api.get(endpoints.certificates.download(certificate.id), { responseType: 'blob' });
-      saveBlob(data, `certificado-${certificate.validation_code}.pdf`);
-    } catch {
-      toast.error('Erro ao baixar certificado.');
-    }
-  };
-
-  const tabs = [
-    { id: 'rules' as CertificateTab, label: 'Regras', icon: ShieldCheckIcon },
-    { id: 'issue' as CertificateTab, label: 'Emitir', icon: CheckBadgeIcon, badge: enrolledStudents.length },
-    { id: 'validation' as CertificateTab, label: 'Validação', icon: QrCodeIcon },
-    { id: 'issued' as CertificateTab, label: 'Emitidos', icon: ListBulletIcon, badge: certificates.length },
-  ];
-
-  if (loading) return <Spinner />;
+  if (catalog.loading) return <Spinner />;
 
   return (
     <div className="space-y-6">
@@ -168,154 +27,41 @@ export default function AdminCertificatesPage() {
         <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Regras de aprovação, emissão e validação pública.</p>
       </div>
 
-      {!selectedCourseId && (
+      {!selectedCourse ? (
         <div className="space-y-4">
           <div className="flex items-center gap-2">
             <AcademicCapIcon className="w-5 h-5 text-indigo-600" />
             <h2 className="font-semibold text-gray-900 dark:text-white">Selecione um curso</h2>
           </div>
-          {courses.length === 0 ? (
+          {catalog.courses.length === 0 ? (
             <div className="rounded-xl border border-gray-200 bg-white p-5 text-sm text-gray-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400">
               Nenhum curso cadastrado.
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-              {courses.map((course) => (
-                <button
+              {catalog.courses.map((course) => (
+                <CourseCard
                   key={course.id}
-                  type="button"
-                  onClick={() => selectCourse(course.id)}
-                  className="group rounded-xl border border-gray-200 bg-white p-5 text-left transition-colors hover:border-indigo-300 hover:bg-indigo-50/40 dark:border-gray-700 dark:bg-gray-800 dark:hover:border-indigo-700 dark:hover:bg-indigo-900/10"
-                >
-                  <div className="mb-4 flex items-start justify-between gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-50 dark:bg-indigo-900/20">
-                      <AcademicCapIcon className="h-5 w-5 text-indigo-600" />
-                    </div>
-                    <span className="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-600 dark:bg-gray-700 dark:text-gray-300">
-                      {modalityLabel[course.modality]}
-                    </span>
-                  </div>
-                  <h3 className="line-clamp-2 font-semibold text-gray-900 group-hover:text-indigo-700 dark:text-white dark:group-hover:text-indigo-300">
-                    {course.name}
-                  </h3>
-                  <p className="mt-2 line-clamp-2 min-h-10 text-sm text-gray-500 dark:text-gray-400">
-                    {course.description || 'Gerencie regras, emissão e validação dos certificados deste curso.'}
-                  </p>
-                  <span className="mt-4 inline-flex text-sm font-medium text-indigo-600 dark:text-indigo-400">
-                    Gerenciar certificados
-                  </span>
-                </button>
+                  course={course}
+                  emptyDescription="Gerencie regras, emissão e validação dos certificados deste curso."
+                  onClick={() => setSelectedCourse(course)}
+                  footer={<span className="mt-4 inline-flex text-sm font-medium text-indigo-600 dark:text-indigo-400">Gerenciar certificados</span>}
+                />
               ))}
             </div>
           )}
         </div>
-      )}
-
-      {selectedCourseId && (
-        <div className="space-y-5">
-          <button
-            type="button"
-            onClick={backToCourses}
-            className="inline-flex items-center gap-2 rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
-          >
-            <ArrowLeftIcon className="h-4 w-4" />
-            <span>Voltar para cursos</span>
-          </button>
-          <div>
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">{selectedCourse?.name ?? 'Curso selecionado'}</h2>
-            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-              Configure e acompanhe certificados deste curso.
-            </p>
-          </div>
-        </div>
-      )}
-
-      {courseLoading && (
-        <div className="flex items-center justify-center rounded-xl border border-gray-200 bg-white py-16 dark:border-gray-700 dark:bg-gray-800">
-          <svg className="h-7 w-7 animate-spin text-indigo-600" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-          </svg>
-        </div>
-      )}
-
-      {selectedCourseId && rule && !courseLoading && (
-        <div className="space-y-5">
-          <TabNav tabs={tabs} active={activeTab} onChange={setActiveTab} ariaLabel="Gestão de certificados" idPrefix="certificates" />
-
-          <div id={`certificates-${activeTab}`} role="tabpanel" className="max-w-3xl">
-            {activeTab === 'rules' && <CertificateRuleForm rule={rule} onChange={setRule} onSave={saveRule} />}
-            {activeTab === 'issue' && (
-              <CertificateIssuancePanel enrolledStudents={enrolledStudents} studentId={studentId} eligibility={eligibility}
-                onStudentChange={setStudentId} onCheckEligibility={checkEligibility} onIssue={issueCertificate} />
-            )}
-            {activeTab === 'validation' && <CertificateValidationPanel />}
-            {activeTab === 'issued' && (
-              <CertificatesList certificates={certificates} students={students} canRevoke={canRevoke ?? false} onRevoke={setCertificateToRevoke} onDownload={downloadCertificate} onShowQr={setCertificateQr} />
-            )}
-          </div>
-        </div>
-      )}
-      {certificateQr && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 py-6">
-          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl dark:bg-gray-800">
-            <div className="mb-5 flex items-start justify-between gap-4">
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">QR Code de validação</h2>
-                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{certificateQr.validation_code}</p>
-              </div>
-              <button type="button" onClick={() => setCertificateQr(null)} aria-label="Fechar modal" className="rounded-lg p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-700 dark:hover:text-white">
-                <XMarkIcon className="h-5 w-5" />
-              </button>
-            </div>
-            <div className="flex flex-col items-center gap-4">
-              <div className="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700">
-                <QRCodeSVG value={validationUrl(certificateQr.validation_code)} size={220} level="M" includeMargin />
-              </div>
-              <p className="w-full break-all rounded-lg bg-gray-50 p-3 text-xs text-gray-600 dark:bg-gray-900 dark:text-gray-300">
-                {validationUrl(certificateQr.validation_code)}
-              </p>
-              <div className="flex w-full justify-end gap-3">
-                <button type="button" onClick={() => setCertificateQr(null)} className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
-                  Fechar
-                </button>
-                <button type="button" onClick={() => copyValidationUrl(certificateQr)} className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700">
-                  Copiar link
-                </button>
-              </div>
+      ) : (
+        <>
+          <div className="space-y-5">
+            <BackButton label="Voltar para cursos" onClick={() => setSelectedCourse(null)} />
+            <div>
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">{selectedCourse.name}</h2>
+              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Configure e acompanhe certificados deste curso.</p>
             </div>
           </div>
-        </div>
-      )}
-      {certificateToRevoke && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 py-6">
-          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl dark:bg-gray-800">
-            <div className="mb-5 flex items-start justify-between gap-4">
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Revogar certificado</h2>
-                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Informe o motivo da revogação, se houver.</p>
-              </div>
-              <button type="button" onClick={() => setCertificateToRevoke(null)} aria-label="Fechar modal" className="rounded-lg p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-700 dark:hover:text-white">
-                <XMarkIcon className="h-5 w-5" />
-              </button>
-            </div>
-            <textarea
-              value={revokeReason}
-              onChange={(e) => setRevokeReason(e.target.value)}
-              rows={4}
-              placeholder="Motivo opcional"
-              className="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-900 dark:text-white"
-            />
-            <div className="mt-5 flex justify-end gap-3">
-              <button type="button" onClick={() => setCertificateToRevoke(null)} className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
-                Cancelar
-              </button>
-              <button type="button" onClick={revokeCertificate} className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700">
-                Revogar
-              </button>
-            </div>
-          </div>
-        </div>
+          <CourseCertificationPanel key={selectedCourse.id} courseId={selectedCourse.id} students={catalog.students} canRevoke={isAdminRole(student?.role)} />
+        </>
       )}
     </div>
   );

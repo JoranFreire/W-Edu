@@ -10,6 +10,8 @@ Vale para todo código tocado, novo ou antigo. Ao alterar um arquivo que mistura
 - Router: só HTTP (parâmetros, dependências de permissão, status). Sem regra de negócio.
 - Service: uma área de negócio por classe (ex.: `TenantAccessService`, `MembershipService`, `CampusService`, `InstitutionService`).
 - Repository: só acesso a dados.
+- Policy (`app/policies/`): regras de autorização que dependem dos dados (ex.: escopo de usuários).
+- Áreas grandes viram pacote com um módulo por responsabilidade (ex.: `app/services/certificates/`, `app/routers/admin/`).
 - Infraestrutura transversal em `app/core/` com um módulo por preocupação (ex.: `tenancy.py` filtra leitura; `tenant_integrity.py` valida gravação).
 
 **Frontend**
@@ -34,6 +36,7 @@ python scripts/check_permissions.py
 python scripts/check_role_guards.py
 python scripts/check_api_permissions.py
 python scripts/check_tenant_isolation.py        # DATABASE_URL=postgresql://... para rodar no Postgres
+python scripts/check_certificate_flow.py
 alembic upgrade head && alembic check           # migration alinhada aos models
 ```
 

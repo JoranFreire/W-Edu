@@ -9,7 +9,7 @@ import api from '@/lib/api/client';
 import { endpoints } from '@/lib/api/endpoints';
 import type { Certificate } from '@/types/certificate';
 import type { Course } from '@/types/course';
-import { saveBlob } from '@/lib/files/saveBlob';
+import { downloadCertificatePdf } from '@/lib/certificates/links';
 
 export default function CertificatesPage() {
   const [certificates, setCertificates] = useState<Certificate[]>([]);
@@ -30,14 +30,6 @@ export default function CertificatesPage() {
   const courseName = (courseId: number) => courses.find((course) => course.id === courseId)?.name ?? `Curso #${courseId}`;
   const validationUrl = (code: string) => typeof window === 'undefined' ? '' : `${window.location.origin}/validate-certificate?code=${encodeURIComponent(code)}`;
 
-  const downloadCertificate = async (certificate: Certificate) => {
-    try {
-      const { data } = await api.get(endpoints.certificates.download(certificate.id), { responseType: 'blob' });
-      saveBlob(data, `certificado-${certificate.validation_code}.pdf`);
-    } catch {
-      toast.error('Erro ao baixar certificado.');
-    }
-  };
 
   if (loading) return (
     <div className="flex items-center justify-center py-20">
@@ -108,7 +100,7 @@ export default function CertificatesPage() {
               {!certificate.revoked_at && (
                 <button
                   type="button"
-                  onClick={() => downloadCertificate(certificate)}
+                  onClick={() => downloadCertificatePdf(certificate)}
                   className="mt-4 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
                 >
                   Baixar PDF
