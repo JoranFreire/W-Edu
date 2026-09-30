@@ -18,7 +18,9 @@ from app.dependencies import (
     get_current_admin,
     get_current_admin_or_company_manager,
     get_current_admin_or_coordinator,
+    get_current_secretariat,
     get_current_super_admin,
+    get_current_teaching_staff,
 )
 from app.models.student import ADMIN_ROLES, UserRole
 from app.policies.user_scope import ensure_academic_user_scope
@@ -101,6 +103,18 @@ def main() -> int:
             get_current_admin_or_company_manager,
             [*ADMIN_ROLES, UserRole.company_manager],
             [UserRole.student, UserRole.instructor, UserRole.coordinator, UserRole.secretary, UserRole.guardian],
+        ),
+        (
+            "teaching_staff",
+            get_current_teaching_staff,
+            [*ADMIN_ROLES, UserRole.coordinator, UserRole.instructor],
+            [UserRole.student, UserRole.company_manager, UserRole.secretary, UserRole.guardian],
+        ),
+        (
+            "secretariat",
+            get_current_secretariat,
+            [*ADMIN_ROLES, UserRole.coordinator, UserRole.secretary],
+            [UserRole.student, UserRole.instructor, UserRole.company_manager, UserRole.guardian],
         ),
     ]
 

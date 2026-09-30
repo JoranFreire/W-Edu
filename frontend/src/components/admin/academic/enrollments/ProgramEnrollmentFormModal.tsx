@@ -11,11 +11,11 @@ import { useSubmitting } from '@/lib/hooks/useSubmitting';
 import { useTerminology } from '@/lib/hooks/useTerminology';
 import type { Program } from '@/types/academic';
 import type { AcademicTerm } from '@/types/academicCalendar';
-import type { User } from '@/types/auth';
+import type { PersonSummary } from '@/types/academicGroups';
 
 /** Nova matricula: aluno, programa, periodo de ingresso e numero opcional (senao gerado). */
 export default function ProgramEnrollmentFormModal({ students, programs, terms, onSave, onClose }: {
-  students: User[];
+  students: PersonSummary[];
   programs: Program[];
   terms: AcademicTerm[];
   onSave: (input: ProgramEnrollmentInput) => Promise<void>;

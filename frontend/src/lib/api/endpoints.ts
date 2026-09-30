@@ -70,6 +70,17 @@ export const endpoints = {
     finalize: (offeringId: number) => `/assessment/offerings/${offeringId}/finalize`,
     myReportCard: '/assessment/my/report-card',
   },
+  secretariat: {
+    students: '/secretariat/students',
+    enrollment: (id: number) => `/secretariat/enrollments/${id}`,
+    action: (id: number, action: string) => `/secretariat/enrollments/${id}/${action}`,
+    registrations: (id: number) => `/secretariat/enrollments/${id}/registrations`,
+    events: (id: number) => `/secretariat/enrollments/${id}/events`,
+    creditTransfers: (id: number) => `/secretariat/enrollments/${id}/credit-transfers`,
+    creditDecision: (transferId: number) => `/secretariat/credit-transfers/${transferId}/decision`,
+    transcript: (id: number) => `/secretariat/enrollments/${id}/transcript`,
+    myTranscripts: '/secretariat/my/transcripts',
+  },
   courses: {
     list: '/courses',
     detail: (id: number) => `/courses/${id}`,

@@ -50,3 +50,15 @@ export async function createOfferingWithStudent(request: APIRequestContext, name
   if (!join.ok()) throw new Error(`join: ${join.status()} ${await join.text()}`);
   return offering;
 }
+
+/** Periodo letivo aberto (rematricula exige periodo nao encerrado). */
+export async function createOpenTerm(request: APIRequestContext, name: string, institution = 'escola-alfa') {
+  const admin = await adminHeaders(request, institution);
+  const response = await request.post(`${API_URL}/academic/terms`, {
+    headers: admin, data: { name, kind: 'year', starts_on: '2032-02-01', ends_on: '2032-12-15' },
+  });
+  if (!response.ok()) throw new Error(`createTerm: ${response.status()} ${await response.text()}`);
+  const term: { id: number } = await response.json();
+  await request.post(`${API_URL}/academic/terms/${term.id}/status`, { headers: admin, data: { status: 'open' } });
+  return term;
+}

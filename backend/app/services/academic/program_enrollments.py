@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import date, datetime, timezone
+from datetime import date
 
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -14,7 +14,9 @@ from app.services.academic.errors import bad_request, conflict, not_found
 from app.services.academic.programs import ProgramService
 from app.services.academic.registration import registration_number, registration_prefix
 from app.services.academic.terms import AcademicTermService
-from app.services.academic.transitions import can_change_enrollment
+from app.models.secretariat import EnrollmentEventKind
+from app.services.secretariat.events import EnrollmentEventRecorder
+from app.services.secretariat.lifecycle import EnrollmentLifecycleService
 
 MAX_NUMBER_ATTEMPTS = 3
 
@@ -29,6 +31,8 @@ class ProgramEnrollmentService:
         self.students = StudentRepository(db)
         self.programs = ProgramService(db)
         self.terms = AcademicTermService(db)
+        self.events = EnrollmentEventRecorder(db)
+        self.lifecycle = EnrollmentLifecycleService(db)
 
     def list(
         self,
@@ -44,7 +48,7 @@ class ProgramEnrollmentService:
             raise not_found("Matrícula não encontrada")
         return enrollment
 
-    def create(self, data: ProgramEnrollmentCreate) -> ProgramEnrollment:
+    def create(self, data: ProgramEnrollmentCreate, user_id: int | None = None) -> ProgramEnrollment:
         if not self.students.get_by_id(data.student_id):
             raise not_found("Aluno não encontrado")
         program = self.programs.get_or_404(data.program_id)
@@ -70,6 +74,7 @@ class ProgramEnrollmentService:
             try:
                 with self.db.begin_nested():
                     self.repo.add(enrollment)
+                self.events.record(enrollment, EnrollmentEventKind.enrolled, user_id, term_id=data.entry_term_id)
                 self.repo.commit()
                 return self.get_or_404(enrollment.id)
             except IntegrityError:
@@ -78,15 +83,10 @@ class ProgramEnrollmentService:
                     raise conflict("Número de matrícula já utilizado")
         raise conflict("Não foi possível gerar o número de matrícula; tente novamente")
 
-    def change_status(self, enrollment_id: int, target: ProgramEnrollmentStatus) -> ProgramEnrollment:
-        enrollment = self.get_or_404(enrollment_id)
-        if not can_change_enrollment(enrollment.status, target):
-            raise conflict(f"Transição de {enrollment.status.value} para {target.value} não permitida")
-        if target == ProgramEnrollmentStatus.active and self.repo.get_open(enrollment.student_id, enrollment.program_id) not in (None, enrollment):
-            raise conflict("Aluno já possui outra matrícula aberta neste programa")
-        enrollment.status = target
-        enrollment.status_changed_at = datetime.now(timezone.utc)
-        return self.repo.save(enrollment)
+    def change_status(self, enrollment_id: int, target: ProgramEnrollmentStatus, user_id: int | None = None) -> ProgramEnrollment:
+        """Mudanca direta de situacao; a secretaria registra a movimentacao."""
+        self.lifecycle.transition(enrollment_id, target, user_id)
+        return self.get_or_404(enrollment_id)
 
     def _curriculum_for(self, program_id: int, curriculum_id: int | None) -> Curriculum:
         if curriculum_id is None:

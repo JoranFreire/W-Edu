@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.dependencies import get_current_admin_or_coordinator, get_current_student
+from app.dependencies import get_current_admin_or_coordinator, get_current_secretariat, get_current_student
 from app.models.academic_groups import ProgramEnrollmentStatus
 from app.models.student import Student
 from app.schemas.academic_groups import ProgramEnrollmentCreate, ProgramEnrollmentOut, ProgramEnrollmentStatusChange
@@ -17,7 +17,7 @@ def list_program_enrollments(
     status: ProgramEnrollmentStatus | None = None,
     student_id: int | None = None,
     db: Session = Depends(get_db),
-    _: Student = Depends(get_current_admin_or_coordinator),
+    _: Student = Depends(get_current_secretariat),
 ):
     return ProgramEnrollmentService(db).list(program_id=program_id, status=status, student_id=student_id)
 
@@ -31,9 +31,9 @@ def my_program_enrollments(db: Session = Depends(get_db), current: Student = Dep
 def create_program_enrollment(
     data: ProgramEnrollmentCreate,
     db: Session = Depends(get_db),
-    _: Student = Depends(get_current_admin_or_coordinator),
+    current: Student = Depends(get_current_secretariat),
 ):
-    return ProgramEnrollmentService(db).create(data)
+    return ProgramEnrollmentService(db).create(data, user_id=current.id)
 
 
 @router.post("/{enrollment_id}/status", response_model=ProgramEnrollmentOut)
@@ -41,6 +41,6 @@ def change_program_enrollment_status(
     enrollment_id: int,
     data: ProgramEnrollmentStatusChange,
     db: Session = Depends(get_db),
-    _: Student = Depends(get_current_admin_or_coordinator),
+    current: Student = Depends(get_current_admin_or_coordinator),
 ):
-    return ProgramEnrollmentService(db).change_status(enrollment_id, data.status)
+    return ProgramEnrollmentService(db).change_status(enrollment_id, data.status, user_id=current.id)

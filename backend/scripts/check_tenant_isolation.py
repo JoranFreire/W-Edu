@@ -310,6 +310,20 @@ async def run() -> int:
         r = await client.post(f"/assessment/offerings/{offering_a}/finalize", headers=admin_b)
         c.expect(r.status_code == 404, f"B cannot finalize A offering: {r.status_code}")
 
+        # Secretaria: matricula de A invisivel para B.
+        subject_ef = (await client.post("/academic/subjects", json={"code": "EF1", "name": "EF"}, headers=admin_a)).json()["id"]
+        curriculum_ef = (await client.post(f"/academic/programs/{program_a}/curricula", json={"version": "1"}, headers=admin_a)).json()["id"]
+        await client.post(f"/academic/curricula/{curriculum_ef}/components", json={"subject_id": subject_ef, "term_number": 1}, headers=admin_a)
+        await client.post(f"/academic/curricula/{curriculum_ef}/activate", headers=admin_a)
+        r = await client.post("/academic/program-enrollments", json={"student_id": aluno_a_id, "program_id": program_a}, headers=admin_a)
+        c.expect(r.status_code == 201, f"A enrolls own student: {r.status_code} {r.text}")
+        enrollment_a = r.json().get("id")
+        for path in ("transcript", "events"):
+            r = await client.get(f"/secretariat/enrollments/{enrollment_a}/{path}", headers=admin_b)
+            c.expect(r.status_code == 404, f"B cannot read A enrollment {path}: {r.status_code}")
+        r = await client.post(f"/secretariat/enrollments/{enrollment_a}/lock", json={}, headers=admin_b)
+        c.expect(r.status_code == 404, f"B cannot lock A enrollment: {r.status_code}")
+
         # Webhook sem usuario logado: registros herdam a instituicao da aula.
         with SessionLocal() as db:
             aluno_a = db.query(Student).filter(Student.email == "aluno-a@example.com").one().id
