@@ -42,6 +42,8 @@ class ProgramEnrollmentOut(BaseModel):
     status_changed_at: datetime
     curriculum_id: int
     entry_term_id: int | None
+    concluded_on: date | None = None
+    ceremony_on: date | None = None
     student: PersonSummary
     program: ProgramSummary
 

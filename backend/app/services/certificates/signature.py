@@ -1,14 +1,10 @@
 from datetime import datetime, timezone
-import hashlib
-import hmac
 
 from sqlalchemy.orm import Session
 
-from app.core.config import settings
+from app.core.signing import ALGORITHM, sign, verify
 from app.models.certificate import Certificate
 from app.repositories.certificate import CertificateRepository
-
-ALGORITHM = "HMAC-SHA256"
 
 
 class CertificateSigner:
@@ -27,17 +23,17 @@ class CertificateSigner:
         return self.repo.update(certificate)
 
     def verify_signature(self, certificate: Certificate) -> bool:
-        if not certificate.signature_hash:
-            return False
-        return hmac.compare_digest(certificate.signature_hash, self._signature_hash(certificate))
+        return verify(certificate.signature_hash, self._parts(certificate))
+
+    def _signature_hash(self, certificate: Certificate) -> str:
+        return sign(self._parts(certificate))
 
     @staticmethod
-    def _signature_hash(certificate: Certificate) -> str:
-        payload = "|".join([
+    def _parts(certificate: Certificate) -> list[str]:
+        return [
             str(certificate.id),
             str(certificate.student_id),
             str(certificate.course_id),
             certificate.validation_code,
             certificate.issued_at.isoformat(),
-        ])
-        return hmac.new(settings.SECRET_KEY.encode("utf-8"), payload.encode("utf-8"), hashlib.sha256).hexdigest()
+        ]

@@ -1,10 +1,10 @@
 from datetime import datetime
 from pathlib import Path
-import unicodedata
 
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.core.pdf import render_text_pdf
 from app.core.storage import certificates_storage_dir
 from app.models.certificate import Certificate
 from app.repositories.certificate import CertificateRepository
@@ -40,9 +40,7 @@ class CertificatePdfService:
 
 
 def render_certificate_pdf(*, student_name: str, course_name: str, issued_at: datetime, validation_code: str) -> bytes:
-    """PDF de uma pagina (A4) com fonte Helvetica, sem dependencias externas."""
-    lines = [
-        "CERTIFICADO",
+    return render_text_pdf("CERTIFICADO", [
         "Certificamos que",
         student_name,
         "concluiu o curso",
@@ -50,37 +48,4 @@ def render_certificate_pdf(*, student_name: str, course_name: str, issued_at: da
         f"Emitido em {issued_at.strftime('%d/%m/%Y')}",
         f"Codigo de validacao: {validation_code}",
         "Assinado digitalmente por W-Edu",
-    ]
-    stream_lines = ["BT", "/F1 26 Tf", "72 750 Td", f"({_pdf_text(lines[0])}) Tj", "/F1 13 Tf", "0 -54 Td"]
-    for line in lines[1:]:
-        stream_lines.append(f"({_pdf_text(line)}) Tj")
-        stream_lines.append("0 -32 Td")
-    stream_lines.append("ET")
-    stream = "\n".join(stream_lines).encode("ascii")
-
-    objects = [
-        b"<< /Type /Catalog /Pages 2 0 R >>",
-        b"<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
-        b"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>",
-        b"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
-        b"<< /Length " + str(len(stream)).encode("ascii") + b" >>\nstream\n" + stream + b"\nendstream",
-    ]
-    body = bytearray(b"%PDF-1.4\n")
-    offsets: list[int] = []
-    for index, obj in enumerate(objects, start=1):
-        offsets.append(len(body))
-        body.extend(f"{index} 0 obj\n".encode("ascii"))
-        body.extend(obj)
-        body.extend(b"\nendobj\n")
-    xref_offset = len(body)
-    body.extend(f"xref\n0 {len(objects) + 1}\n".encode("ascii"))
-    body.extend(b"0000000000 65535 f \n")
-    for offset in offsets:
-        body.extend(f"{offset:010d} 00000 n \n".encode("ascii"))
-    body.extend(f"trailer\n<< /Size {len(objects) + 1} /Root 1 0 R >>\nstartxref\n{xref_offset}\n%%EOF\n".encode("ascii"))
-    return bytes(body)
-
-
-def _pdf_text(value: str) -> str:
-    normalized = unicodedata.normalize("NFKD", value).encode("ascii", "ignore").decode("ascii")
-    return normalized.replace("\\", "\\\\").replace("(", "\\(").replace(")", "\\)")
+    ])

@@ -110,6 +110,11 @@ Etapa encerrada na instituicao, etapa fechada na turma ou periodo letivo encerra
 | Deferir/indeferir aproveitamento | Nao | Nao | Sim | Nao | Sim |
 | Historico escolar e linha do tempo da matricula | Nao | Nao | Sim | Sim | Sim |
 | Proprio historico (`/secretariat/my/transcripts`) | Sim | Sim | Sim | Sim | Sim |
+| Emitir declaracoes e baixar PDF | Nao | Nao | Sim | Sim | Sim |
+| Revogar declaracao | Nao | Nao | Sim | Nao | Sim |
+| Concluir programa e registrar colacao | Nao | Nao | Sim | Sim | Sim |
+| Proprias declaracoes (`/secretariat/my/declarations`) | Sim | Sim | Sim | Sim | Sim |
+| Validar declaracao por codigo (`/secretariat/declarations/validate/{code}`) | Publico | Publico | Publico | Publico | Publico |
 
 Toda movimentacao fica registrada em `program_enrollment_events` (quem, quando, justificativa), inclusive mudancas feitas pela rota `/academic/program-enrollments/{id}/status`.
 

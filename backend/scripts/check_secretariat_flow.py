@@ -2,7 +2,8 @@
 
 Enrollment movements with their timeline, re-enrollment per term, internal and
 external transfers, curriculum change, credit transfers and the transcript
-(CR and curriculum completion). Uses a temporary SQLite database by default
+(CR and curriculum completion), signed declarations with public validation and
+program conclusion (phase 14). Uses a temporary SQLite database by default
 (set DATABASE_URL to use PostgreSQL).
 """
 
@@ -36,6 +37,7 @@ from app.core.security import hash_password
 from app.core.tenancy import bind_institution
 from app.models.institution import Institution, InstitutionMembership
 from app.models.schedule import ClassEnrollment, ClassEnrollmentResult, ClassEnrollmentStatus
+from app.models.secretariat import AcademicDeclaration
 from app.models.student import Student, UserRole
 from main import app
 
@@ -60,6 +62,7 @@ USERS = (
     ("prof", UserRole.instructor),
     ("ana", UserRole.student),
     ("bia", UserRole.student),
+    ("caio", UserRole.student),
 )
 
 
@@ -82,12 +85,14 @@ def seed() -> tuple[int, dict[str, int]]:
     return institution_id, ids
 
 
-def seed_attempts(institution_id: int, student_id: int, offerings: dict[str, int]) -> None:
+DEFAULT_ATTEMPTS = (("S1", 8, ClassEnrollmentResult.approved), ("OLD", 6, ClassEnrollmentResult.approved), ("S3", 3, ClassEnrollmentResult.failed))
+
+
+def seed_attempts(institution_id: int, student_id: int, offerings: dict[str, int], attempts=DEFAULT_ATTEMPTS) -> None:
     """Cursadas ja concluidas (resultado publicado) nas ofertas de cada disciplina."""
     with SessionLocal() as db:
         bind_institution(db, institution_id)
-        for key, grade, result in (("S1", 8, ClassEnrollmentResult.approved), ("OLD", 6, ClassEnrollmentResult.approved),
-                                   ("S3", 3, ClassEnrollmentResult.failed)):
+        for key, grade, result in attempts:
             db.add(ClassEnrollment(class_offering_id=offerings[key], student_id=student_id, status=ClassEnrollmentStatus.completed,
                                    final_grade=grade, result=result, enrolled_at=datetime(2027, 2, 1, tzinfo=timezone.utc)))
         db.commit()
@@ -137,7 +142,7 @@ async def setup_structure(c: Checker, coord: dict) -> dict:
 
     course = await c.call("POST", "/courses", 201, "course", coord, json={"name": "Curso base"})
     offerings = {}
-    for key in ("S1", "OLD", "S3"):
+    for key in ("S1", "OLD", "S3", "E1"):
         offerings[key] = (await c.call("POST", "/schedule/classes", 201, f"offering {key}", coord, json={
             "course_id": course["id"], "name": f"Turma {key}", "capacity": 30, "term_id": term["id"], "subject_id": subjects[key],
             "starts_at": "2027-02-01T08:00:00Z", "ends_at": "2027-06-30T12:00:00Z",
@@ -220,6 +225,60 @@ async def check_credits_and_transcript(c: Checker, h: dict, ctx: dict, enrollmen
     c.expect(events[-1]["details"] == {"destination": "Universidade Y"} and events[2]["reason"] == "Viagem", f"event details: {events}")
 
 
+async def check_documents_and_conclusion(c: Checker, h: dict, ids: dict, ctx: dict, institution_id: int, client: httpx.AsyncClient) -> None:
+    sec, coord = h["secretaria"], h["coord"]
+    caio = await c.call("POST", "/academic/program-enrollments", 201, "enroll caio", sec, json={"student_id": ids["caio"], "program_id": ctx["programs"]["ECO"]})
+    base = f"/secretariat/enrollments/{caio['id']}"
+    enrollment_decl = await c.call("POST", f"{base}/declarations", 201, "enrollment declaration", sec, json={"kind": "enrollment", "term_id": ctx["term"]})
+    c.expect(enrollment_decl.get("lines", [])[-2:-1] == ["no periodo letivo 2027."], f"enrollment declaration text: {enrollment_decl.get('lines')}")
+    pdf = await client.get(f"/secretariat/declarations/{enrollment_decl['id']}/pdf", headers=sec)
+    c.expect(pdf.status_code == 200 and pdf.content.startswith(b"%PDF") and enrollment_decl["validation_code"].encode() in pdf.content,
+             f"declaration pdf: {pdf.status_code} {pdf.headers.get('content-type')}")
+    await c.call("POST", f"{base}/declarations", 400, "attendance needs term", sec, json={"kind": "attendance"})
+    await c.call("POST", f"{base}/declarations", 409, "completion before conclusion", sec, json={"kind": "completion"})
+
+    check = await c.call("GET", f"{base}/conclusion", 200, "conclusion check", sec)
+    c.expect(check.get("eligible") is False and check.get("integralization") == 0, f"not eligible yet: {check}")
+    await c.call("POST", f"{base}/conclusion", 409, "conclude blocked", sec, json={"concluded_on": "2027-12-15"})
+    seed_attempts(institution_id, ids["caio"], ctx["offerings"], (("E1", 7, ClassEnrollmentResult.approved),))
+    attendance = await c.call("POST", f"{base}/declarations", 201, "attendance declaration", sec, json={"kind": "attendance", "term_id": ctx["term"]})
+    c.expect("- Turma E1: sem aulas registradas" in attendance.get("lines", []), f"attendance lines: {attendance.get('lines')}")
+    check = await c.call("GET", f"{base}/conclusion", 200, "conclusion check after E1", sec)
+    c.expect(check.get("eligible") is True, f"eligible after completing curriculum: {check}")
+    await c.call("POST", f"{base}/conclusion", 400, "ceremony before conclusion", sec, json={"concluded_on": "2027-12-15", "ceremony_on": "2027-12-01"})
+    concluded = await c.call("POST", f"{base}/conclusion", 200, "conclude", sec, json={"concluded_on": "2027-12-15"})
+    c.expect((concluded.get("status"), concluded.get("concluded_on")) == ("graduated", "2027-12-15"), f"graduated: {concluded}")
+    await c.call("PUT", f"{base}/ceremony", 200, "ceremony date", sec, json={"ceremony_on": "2028-02-10"})
+    completion = await c.call("POST", f"{base}/declarations", 201, "completion declaration", sec, json={"kind": "completion"})
+    c.expect("Colacao de grau realizada em 10/02/2028." in completion.get("lines", []), f"completion lines: {completion.get('lines')}")
+    await c.call("POST", f"{base}/declarations", 409, "no enrollment declaration after graduation", sec, json={"kind": "enrollment"})
+    events = await c.call("GET", f"{base}/events", 200, "caio events", sec)
+    c.expect(events[-1]["kind"] == "graduated", f"graduation recorded: {events[-1]}")
+
+    public = await c.call("GET", f"/secretariat/declarations/validate/{completion['validation_code']}", 200, "public validation", {})
+    c.expect((public.get("valid"), public.get("student_name"), public.get("institution_name")) == (True, "Caio", "Faculdade"), f"valid declaration: {public}")
+    await c.call("POST", f"/secretariat/declarations/{enrollment_decl['id']}/revoke", 403, "secretary cannot revoke", sec, json={"reason": "x"})
+    await c.call("POST", f"/secretariat/declarations/{enrollment_decl['id']}/revoke", 200, "revoke", coord, json={"reason": "Emitida por engano"})
+    await c.call("POST", f"/secretariat/declarations/{enrollment_decl['id']}/revoke", 409, "revoke twice", coord, json={"reason": "x"})
+    revoked = await c.call("GET", f"/secretariat/declarations/validate/{enrollment_decl['validation_code']}", 200, "validate revoked", {})
+    c.expect(revoked.get("valid") is False and "revogada" in revoked.get("message", ""), f"revoked declaration: {revoked}")
+    with SessionLocal() as db:
+        tampered = db.query(AcademicDeclaration).filter(AcademicDeclaration.id == attendance["id"]).one()
+        tampered.lines = [*tampered.lines[:-1], "- Turma E1: 100,0%"]
+        db.commit()
+    forged = await c.call("GET", f"/secretariat/declarations/validate/{attendance['validation_code']}", 200, "validate tampered", {})
+    c.expect(forged.get("valid") is False and "adulterado" in forged.get("message", ""), f"tampered declaration: {forged}")
+    unknown = await c.call("GET", "/secretariat/declarations/validate/naoexiste", 200, "validate unknown", {})
+    c.expect(unknown.get("valid") is False, f"unknown code: {unknown}")
+
+    mine = await c.call("GET", "/secretariat/my/declarations", 200, "student declarations", h["caio"])
+    c.expect(len(mine) == 3, f"caio sees own declarations: {len(mine)}")
+    own_pdf = await client.get(f"/secretariat/my/declarations/{completion['id']}/pdf", headers=h["caio"])
+    c.expect(own_pdf.status_code == 200 and own_pdf.content.startswith(b"%PDF"), f"student downloads own pdf: {own_pdf.status_code}")
+    other = await client.get(f"/secretariat/my/declarations/{completion['id']}/pdf", headers=h["ana"])
+    c.expect(other.status_code == 404, f"other student cannot download: {other.status_code}")
+
+
 async def run() -> int:
     institution_id, ids = seed()
     transport = httpx.ASGITransport(app=app)
@@ -230,6 +289,7 @@ async def run() -> int:
         seed_attempts(institution_id, ids["ana"], ctx["offerings"])
         enrollments = await check_movements(c, h, ids, ctx)
         await check_credits_and_transcript(c, h, ctx, enrollments["ana"])
+        await check_documents_and_conclusion(c, h, ids, ctx, institution_id, client)
 
     if c.failures:
         print("Secretariat flow check failed:")

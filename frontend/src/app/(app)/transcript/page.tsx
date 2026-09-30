@@ -1,5 +1,6 @@
 'use client';
 
+import MyDeclarationsList from '@/components/secretariat/MyDeclarationsList';
 import TranscriptTable from '@/components/secretariat/TranscriptTable';
 import Spinner from '@/components/common/Spinner';
 import { sectionCls } from '@/components/common/formStyles';
@@ -29,6 +30,7 @@ export default function MyTranscriptPage() {
           <TranscriptTable transcript={transcript} termLabel={terms.term} />
         </section>
       ))}
+      <MyDeclarationsList />
     </div>
   );
 }

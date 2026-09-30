@@ -55,11 +55,32 @@ test('secretaria: matricula, rematricula, trancamento, aproveitamento e historic
   await page.getByRole('tab', { name: /Histórico escolar/ }).click();
   await expect(page.getByRole('row', { name: /MAT-E2E/ })).toContainText('Aproveitada');
 
+  // Com a matriz integralizada (aproveitamento), a secretaria conclui o programa e emite a declaracao.
+  await page.getByRole('tab', { name: /Documentos e conclusão/ }).click();
+  await page.getByLabel('Tipo de declaração').selectOption('enrollment');
+  await page.getByRole('button', { name: 'Emitir declaração' }).click();
+  await expectToast(page, 'Declaração emitida.');
+  await page.getByRole('button', { name: 'Concluir programa' }).click();
+  await expectToast(page, 'Programa concluído.');
+  await expect(page.getByText(/Concluído em/)).toBeVisible();
+  await page.getByLabel('Tipo de declaração').selectOption('completion');
+  await page.getByRole('button', { name: 'Emitir declaração' }).click();
+  await expectToast(page, 'Declaração emitida.');
+  const code = (await page.getByRole('listitem').filter({ hasText: 'Conclusão ·' }).locator('.font-mono').first().textContent())?.trim() ?? '';
+
+  await page.goto(`/validate-declaration?code=${code}`);
+  await expect(page.getByRole('status')).toContainText('Declaração válida');
+  await expect(page.getByRole('status')).toContainText(student.name);
+
   await page.evaluate(() => window.localStorage.clear());
   await login(page, student.email);
   await page.getByRole('link', { name: 'Histórico escolar' }).first().click();
   await expect(page.getByRole('row', { name: /MAT-E2E/ })).toContainText('Aproveitada');
   await expect(page.getByText('Escola Antiga')).toBeVisible();
+  await expect(page.getByText('Minhas declarações')).toBeVisible();
+  const download = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Baixar PDF' }).first().click();
+  expect((await download).suggestedFilename()).toMatch(/^declaracao_.*\.pdf$/);
 });
 
 test('aluno nao acessa a secretaria', async ({ page }) => {

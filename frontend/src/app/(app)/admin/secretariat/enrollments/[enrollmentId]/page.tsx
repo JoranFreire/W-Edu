@@ -2,8 +2,10 @@
 
 import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { AcademicCapIcon, ArrowsRightLeftIcon, ClockIcon } from '@heroicons/react/24/outline';
+import { AcademicCapIcon, ArrowsRightLeftIcon, ClockIcon, DocumentTextIcon } from '@heroicons/react/24/outline';
+import ConclusionPanel from '@/components/secretariat/ConclusionPanel';
 import CreditTransfersPanel from '@/components/secretariat/CreditTransfersPanel';
+import DeclarationsPanel from '@/components/secretariat/DeclarationsPanel';
 import EnrollmentTimeline from '@/components/secretariat/EnrollmentTimeline';
 import MovementActions from '@/components/secretariat/MovementActions';
 import TranscriptTable from '@/components/secretariat/TranscriptTable';
@@ -19,11 +21,12 @@ import { useTerminology } from '@/lib/hooks/useTerminology';
 import { useAuthStore } from '@/store/authStore';
 import { isAdminRole } from '@/types/auth';
 
-type FileTab = 'transcript' | 'credits' | 'timeline';
+type FileTab = 'transcript' | 'credits' | 'documents' | 'timeline';
 
 const tabs: TabItem<FileTab>[] = [
   { id: 'transcript', label: 'Histórico escolar', icon: AcademicCapIcon },
   { id: 'credits', label: 'Aproveitamento', icon: ArrowsRightLeftIcon },
+  { id: 'documents', label: 'Documentos e conclusão', icon: DocumentTextIcon },
   { id: 'timeline', label: 'Movimentações', icon: ClockIcon },
 ];
 
@@ -33,7 +36,7 @@ export default function EnrollmentFilePage() {
   const enrollmentId = Number(useParams<{ enrollmentId: string }>().enrollmentId);
   const role = useAuthStore((state) => state.student?.role);
   const canDecide = isAdminRole(role) || role === 'coordinator';
-  const { file, error, ...actions } = useEnrollmentFile(enrollmentId);
+  const { file, error, reload, ...actions } = useEnrollmentFile(enrollmentId);
   const { transcript, reload: reloadTranscript } = useTranscript(enrollmentId);
   const [tab, setTab] = useState<FileTab>('transcript');
   useErrorToast(error, 'Matrícula não encontrada.');
@@ -61,6 +64,12 @@ export default function EnrollmentFilePage() {
         )}
         {tab === 'credits' && (
           <CreditTransfersPanel enrollmentId={enrollmentId} pending={pending} canDecide={canDecide} editable={open} onChanged={reloadTranscript} />
+        )}
+        {tab === 'documents' && (
+          <div className="space-y-6">
+            <ConclusionPanel key={enrollment.status} enrollment={enrollment} onChanged={reload} />
+            <DeclarationsPanel enrollmentId={enrollmentId} canRevoke={canDecide} />
+          </div>
         )}
         {tab === 'timeline' && (
           <section className={`${sectionCls} grid grid-cols-1 gap-6 md:grid-cols-2`}>

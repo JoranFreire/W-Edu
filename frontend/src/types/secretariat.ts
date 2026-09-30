@@ -75,3 +75,37 @@ export interface Transcript {
     total_components: number;
   };
 }
+
+export type DeclarationKind = 'enrollment' | 'attendance' | 'completion';
+
+export interface Declaration {
+  id: number;
+  program_enrollment_id: number;
+  kind: DeclarationKind;
+  term_id: number | null;
+  title: string;
+  lines: string[];
+  validation_code: string;
+  issued_at: string;
+  revoked_at: string | null;
+  revoked_reason: string | null;
+}
+
+export interface DeclarationValidation {
+  valid: boolean;
+  message: string;
+  kind: DeclarationKind | null;
+  title: string | null;
+  student_name: string | null;
+  institution_name: string | null;
+  issued_at: string | null;
+}
+
+export interface ConclusionCheck {
+  eligible: boolean;
+  status: string;
+  integralization: number;
+  hours_done: number;
+  required_hours: number | null;
+  missing: string[];
+}

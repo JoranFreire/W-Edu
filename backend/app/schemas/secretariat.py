@@ -1,9 +1,9 @@
-from datetime import datetime
+from datetime import date, datetime
 
 from pydantic import BaseModel, Field
 
 from app.models.academic import ComponentKind
-from app.models.secretariat import CreditTransferOrigin, CreditTransferStatus, EnrollmentEventKind
+from app.models.secretariat import CreditTransferOrigin, CreditTransferStatus, DeclarationKind, EnrollmentEventKind
 
 
 class ReasonInput(BaseModel):
@@ -113,3 +113,55 @@ class TranscriptOut(BaseModel):
     status: str
     rows: list[TranscriptRow]
     summary: TranscriptSummary
+
+
+class DeclarationCreate(BaseModel):
+    kind: DeclarationKind
+    term_id: int | None = None
+
+
+class DeclarationRevoke(BaseModel):
+    reason: str = Field(min_length=1, max_length=500)
+
+
+class DeclarationOut(BaseModel):
+    id: int
+    program_enrollment_id: int
+    kind: DeclarationKind
+    term_id: int | None
+    title: str
+    lines: list[str]
+    validation_code: str
+    issued_at: datetime
+    revoked_at: datetime | None
+    revoked_reason: str | None
+
+    model_config = {"from_attributes": True}
+
+
+class DeclarationValidationOut(BaseModel):
+    valid: bool
+    message: str
+    kind: DeclarationKind | None = None
+    title: str | None = None
+    student_name: str | None = None
+    institution_name: str | None = None
+    issued_at: datetime | None = None
+
+
+class ConclusionCheckOut(BaseModel):
+    eligible: bool
+    status: str
+    integralization: float
+    hours_done: int
+    required_hours: int | None
+    missing: list[str]
+
+
+class ConclusionInput(BaseModel):
+    concluded_on: date
+    ceremony_on: date | None = None
+
+
+class CeremonyInput(BaseModel):
+    ceremony_on: date
