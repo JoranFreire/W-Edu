@@ -36,3 +36,7 @@ Thumbs.db
 # Load test
 backend/loadtest/seed.json
 *.tsbuildinfo
+
+# Playwright
+test-results/
+playwright-report/
