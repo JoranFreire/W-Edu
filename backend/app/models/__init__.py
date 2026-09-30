@@ -24,6 +24,7 @@ from app.models.academic_groups import ClassGroup, ClassGroupMember, ProgramEnro
 from app.models.assessment import AssessmentItem, GradeEntry, GradingScheme, OfferingPeriodClosure, PeriodResult
 from app.models.class_diary import ClassDiaryEntry, DiaryAttendance
 from app.models.guardians import StudentGuardian
+from app.models.school_life import AgendaItem, StudentOccurrence
 from app.models.secretariat import AcademicDeclaration, CreditTransfer, ProgramEnrollmentEvent, TermRegistration
 from app.models.course import Course, CourseModule, LearningPath, LearningPathCourse, CoursePrerequisite
 from app.models.course import CourseCompletionRule
@@ -68,5 +69,5 @@ __all__ = [
     "AcademicUnit", "Program", "Subject", "SubjectPrerequisite", "SubjectEquivalence", "Curriculum", "CurriculumComponent",
     "AcademicTerm", "GradingPeriod", "CalendarEvent", "ProgramEnrollment", "ClassGroup", "ClassGroupMember",
     "GradingScheme", "AssessmentItem", "GradeEntry", "ClassDiaryEntry", "DiaryAttendance",
-    "OfferingPeriodClosure", "PeriodResult", "ProgramEnrollmentEvent", "TermRegistration", "CreditTransfer", "AcademicDeclaration", "StudentGuardian",
+    "OfferingPeriodClosure", "PeriodResult", "ProgramEnrollmentEvent", "TermRegistration", "CreditTransfer", "AcademicDeclaration", "StudentGuardian", "StudentOccurrence", "AgendaItem",
 ]

@@ -36,6 +36,15 @@ class ClassGroupRepository(Repository[ClassGroup]):
     def has_offerings(self, group_id: int) -> bool:
         return self.db.query(ClassOffering.id).filter(ClassOffering.class_group_id == group_id).first() is not None
 
+    def taught_by(self, group_id: int, instructor_id: int) -> bool:
+        """O instrutor ministra alguma oferta ligada a turma-grupo."""
+        return (
+            self.db.query(ClassOffering.id)
+            .filter(ClassOffering.class_group_id == group_id, ClassOffering.instructor_id == instructor_id)
+            .first()
+            is not None
+        )
+
 
 class ClassGroupMemberRepository(Repository[ClassGroupMember]):
     model = ClassGroupMember
@@ -68,3 +77,24 @@ class ClassGroupMemberRepository(Repository[ClassGroupMember]):
             .filter(ClassGroupMember.program_enrollment_id == enrollment_id, ClassGroup.term_id == term_id)
             .first()
         )
+
+    def groups_of_student(self, student_id: int) -> list[ClassGroup]:
+        """Turmas-grupo em que o aluno esta alocado (por qualquer matricula no curso)."""
+        return (
+            self.db.query(ClassGroup)
+            .join(ClassGroupMember, ClassGroupMember.class_group_id == ClassGroup.id)
+            .join(ProgramEnrollment, ProgramEnrollment.id == ClassGroupMember.program_enrollment_id)
+            .filter(ProgramEnrollment.student_id == student_id)
+            .order_by(ClassGroup.id)
+            .all()
+        )
+
+    def student_ids(self, group_id: int) -> list[int]:
+        rows = (
+            self.db.query(ProgramEnrollment.student_id)
+            .join(ClassGroupMember, ClassGroupMember.program_enrollment_id == ProgramEnrollment.id)
+            .filter(ClassGroupMember.class_group_id == group_id)
+            .distinct()
+            .all()
+        )
+        return [row[0] for row in rows]

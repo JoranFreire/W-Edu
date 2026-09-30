@@ -337,6 +337,22 @@ async def run() -> int:
         c.expect(r.status_code == 404, f"B cannot link guardian to A student: {r.status_code}")
         r = await client.get(f"/guardians/students/{aluno_a_id}/links", headers=admin_b)
         c.expect(r.status_code == 404, f"B cannot list A guardians: {r.status_code}")
+
+        # Vida escolar: ocorrencias e agenda de A invisiveis para B.
+        r = await client.post("/school/occurrences", json={"student_id": aluno_a_id, "description": "x"}, headers=admin_b)
+        c.expect(r.status_code == 404, f"B cannot register occurrence for A student: {r.status_code}")
+        r = await client.post("/school/occurrences", json={"student_id": aluno_a_id, "description": "Atraso", "kind": "lateness"}, headers=admin_a)
+        occurrence_a = r.json().get("id")
+        r = await client.get(f"/school/students/{aluno_a_id}/occurrences", headers=admin_b)
+        c.expect(r.status_code == 404, f"B cannot list A occurrences: {r.status_code}")
+        r = await client.delete(f"/school/occurrences/{occurrence_a}", headers=admin_b)
+        c.expect(r.status_code == 404, f"B cannot remove A occurrence: {r.status_code}")
+        r = await client.post("/academic/class-groups", json={"program_id": program_a, "term_id": term_a, "name": "6A"}, headers=admin_a)
+        group_a = r.json().get("id")
+        r = await client.post(f"/school/class-groups/{group_a}/agenda", json={"title": "Invasora", "due_on": "2027-03-01"}, headers=admin_b)
+        c.expect(r.status_code == 404, f"B cannot publish on A agenda: {r.status_code}")
+        r = await client.get(f"/school/class-groups/{group_a}/agenda", headers=admin_b)
+        c.expect(r.status_code == 404, f"B cannot read A agenda: {r.status_code}")
         r = await client.get(f"/secretariat/declarations/validate/{declaration_a.get('validation_code')}")
         c.expect(r.json().get("valid") is True and r.json().get("institution_name") == "Escola A", f"public validation names the issuer: {r.text}")
 

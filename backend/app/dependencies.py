@@ -90,6 +90,13 @@ def get_current_secretariat(current: Student = Depends(get_current_student)) -> 
     return current
 
 
+def get_current_school_staff(current: Student = Depends(get_current_student)) -> Student:
+    """Equipe escolar (ocorrencias e agenda): administradores, coordenadores, instrutores e secretarios."""
+    if current.role not in ADMIN_ROLES | {UserRole.coordinator, UserRole.instructor, UserRole.secretary}:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Acesso restrito à equipe escolar")
+    return current
+
+
 def get_current_guardian(current: Student = Depends(get_current_student)) -> Student:
     """Portal do responsavel."""
     if current.role != UserRole.guardian:
