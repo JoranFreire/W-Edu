@@ -44,6 +44,7 @@ Maquina de desenvolvimento com 4 CPUs compartilhadas entre API (`--workers 4`), 
 | 100 usuarios, depois | 48 | 11 ms | 38 ms | 0 |
 | 300 usuarios entrando 30/s, antes | 66 | 23 ms | 9,3 s | 67 |
 | 300 usuarios entrando 3/s, depois | 110 | 12 ms | 45 ms | 0 |
+| 100 usuarios com RLS (usuario comum do Postgres) | 48 | 12 ms | 39 ms | 0 |
 
 Consultas SQL por requisicao, antes e depois: relatorio de presenca 207 -> 8, consumir aula 31 -> 10, check-in 45 -> 20.
 

@@ -13,6 +13,8 @@ filtradas. As regras de gravacao ficam em ``app.core.tenant_integrity``.
 Para uma consulta global deliberada use ``.execution_options(**UNSCOPED)``.
 """
 
+from collections.abc import Callable
+
 from sqlalchemy import ForeignKey, event, or_, select
 from sqlalchemy.orm import Mapped, ORMExecuteState, Session, declared_attr, mapped_column, with_loader_criteria
 
@@ -28,11 +30,23 @@ class TenantMixin:
         return mapped_column(ForeignKey("institutions.id"), index=True)
 
 
+BindHook = Callable[[Session, int | None], None]
+_bind_hooks: list[BindHook] = []
+
+
+def on_bind(hook: BindHook) -> BindHook:
+    """Registra funcao chamada sempre que a instituicao da sessao muda (ex.: RLS)."""
+    _bind_hooks.append(hook)
+    return hook
+
+
 def bind_institution(db: Session, institution_id: int | None) -> None:
     if institution_id is None:
         db.info.pop(INSTITUTION_KEY, None)
     else:
         db.info[INSTITUTION_KEY] = institution_id
+    for hook in _bind_hooks:
+        hook(db, institution_id)
 
 
 def bound_institution_id(db: Session) -> int | None:

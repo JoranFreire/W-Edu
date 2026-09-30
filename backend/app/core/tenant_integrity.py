@@ -84,9 +84,13 @@ def _institution_of(session: Session, target: type, related, value) -> int | Non
     if value is None:
         return None
     pk = inspect(target).primary_key[0]
-    return session.execute(
+    row = session.execute(
         select(target.institution_id).where(pk == value).execution_options(**UNSCOPED)
-    ).scalar_one_or_none()
+    ).first()
+    # Referencia a registro inexistente (ou invisivel) nunca e aceita como "sem pai".
+    if row is None:
+        raise _cross_tenant_error()
+    return row[0]
 
 
 def _is_member(session: Session, institution_id: int, related, value) -> bool:

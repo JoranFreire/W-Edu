@@ -37,6 +37,12 @@ from app.models.schedule import (
     WaitlistEntry,
 )
 
+from app.core.database import Base as _Base
+from app.core.tenant_rls import install_create_hooks as _install_rls, tenant_tables as _tenant_tables
+
+# Politicas de RLS criadas junto com as tabelas de instituicao (create_all); em producao, via migration.
+_install_rls(_tenant_tables(_Base))
+
 __all__ = [
     "User", "Student", "Organization", "Institution", "InstitutionMembership", "Campus", "StudentProfile", "InstructorProfile", "InstructorAvailability", "InstructorRating",
     "Course", "CourseModule", "LearningPath", "LearningPathCourse", "CoursePrerequisite", "CourseCompletionRule", "Lesson", "Enrollment",

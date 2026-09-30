@@ -25,7 +25,9 @@ Vale para todo código tocado, novo ou antigo. Ao alterar um arquivo que mistura
 ## Multi-tenant
 
 - Todo model de dados de instituição herda `TenantMixin`; o filtro por `institution_id` e o preenchimento no insert são automáticos (`app/core/tenancy.py`, `app/core/tenant_integrity.py`).
-- Consulta global deliberada: `.execution_options(**UNSCOPED)`, com comentário justificando.
+- Consulta global deliberada: `.execution_options(**UNSCOPED)`, com comentário justificando (suspende também o RLS durante a instrução).
+- Instituição da requisição: header `X-Institution` > subdomínio (`TENANT_BASE_DOMAIN`) > claim `inst` do token.
+- RLS no PostgreSQL (`app/core/tenant_rls.py`) é a segunda barreira; a aplicação nunca deve conectar como superusuário.
 - Papel efetivo ainda é `users.role`; `institution_memberships.role` é mantido em sincronia.
 
 ## Verificações antes de commitar
@@ -37,6 +39,7 @@ python scripts/check_role_guards.py
 python scripts/check_api_permissions.py
 python scripts/check_tenant_isolation.py        # DATABASE_URL=postgresql://... para rodar no Postgres
 python scripts/check_certificate_flow.py
+python scripts/check_rls.py                     # Postgres com superusuario em DATABASE_URL; cria role/banco proprios
 alembic upgrade head && alembic check           # migration alinhada aos models
 ```
 

@@ -4,7 +4,7 @@
 
 **Fase:** 2 — Voz com Professor IA (em andamento)  
 **Ultima atualizacao:** 2026-09-30  
-**Proximo marco:** Fase 11 — Multi-tenant (plataforma multi-instituicao)
+**Proximo marco:** Fase 12 — Nucleo Academico Formal (Fase 11 concluida)
 
 ## Visao Alvo
 
@@ -242,15 +242,15 @@ Objetivo: uma instalacao atendendo varias instituicoes com dados isolados.
 - [x] Criar `campuses` e vincular `locations` ao campus.
 - [x] Adicionar `institution_id` nas tabelas raiz com backfill para instituicao padrao.
 - [x] Resolver tenant por header `X-Institution` validado contra membership e claim `inst` do JWT.
-- [ ] Resolver tenant por subdominio.
+- [x] Resolver tenant por subdominio (`TENANT_BASE_DOMAIN`), com marca da instituicao no login.
 - [x] Filtro obrigatorio por instituicao (eventos do ORM em `app/core/tenancy.py`, sem depender de cada repository).
 - [x] Isolar tabelas filhas (aulas, modulos, inscricoes, encontros, cobrancas etc.) com `institution_id` proprio e validacao de referencias cruzadas na gravacao.
 - [x] Novos papeis: `super_admin`, `institution_admin`, `secretary`, `guardian`.
-- [ ] Atualizar matriz e verificadores de permissao com escopo de instituicao.
+- [x] Atualizar matriz e verificadores de permissao com escopo de instituicao.
 - [x] API da plataforma (super admin) para criar/gerir instituicoes (`/platform/institutions`).
 - [x] Telas do admin da plataforma (`/platform/institutions`).
 - [x] Seletor de instituicao, branding por tenant (nome, cor, logo) e tela de instituicao/campi no frontend.
-- [ ] Avaliar Row Level Security no PostgreSQL como segunda barreira.
+- [x] Row Level Security no PostgreSQL como segunda barreira (politica `tenant_isolation` em 38 tabelas; impacto de desempenho desprezivel).
 
 ### Fase 12 — Nucleo Academico Formal
 
