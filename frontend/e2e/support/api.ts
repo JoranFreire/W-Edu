@@ -20,7 +20,8 @@ export async function createStudent(request: APIRequestContext, name: string, in
     data: { name, email, password: E2E_PASSWORD, role: 'student' },
   });
   if (!response.ok()) throw new Error(`createStudent: ${response.status()} ${await response.text()}`);
-  return { name, email };
+  const { id }: { id: number } = await response.json();
+  return { id, name, email };
 }
 
 async function tokenHeaders(request: APIRequestContext, email: string, institution: string) {
@@ -61,4 +62,15 @@ export async function createOpenTerm(request: APIRequestContext, name: string, i
   const term: { id: number } = await response.json();
   await request.post(`${API_URL}/academic/terms/${term.id}/status`, { headers: admin, data: { status: 'open' } });
   return term;
+}
+
+/** Matricula do aluno no programa EF-E2E do seed (matriz vigente). */
+export async function enrollInSeedProgram(request: APIRequestContext, studentId: number, institution = 'escola-alfa') {
+  const admin = await adminHeaders(request, institution);
+  const programs: { id: number; code: string }[] = await (await request.get(`${API_URL}/academic/programs`, { headers: admin })).json();
+  const program = programs.find((item) => item.code === 'EF-E2E');
+  const response = await request.post(`${API_URL}/academic/program-enrollments`, { headers: admin, data: { student_id: studentId, program_id: program?.id } });
+  if (!response.ok()) throw new Error(`enroll: ${response.status()} ${await response.text()}`);
+  const enrollment: { id: number } = await response.json();
+  return enrollment;
 }

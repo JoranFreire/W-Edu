@@ -89,6 +89,14 @@ export const endpoints = {
     conclusion: (id: number) => `/secretariat/enrollments/${id}/conclusion`,
     ceremony: (id: number) => `/secretariat/enrollments/${id}/ceremony`,
   },
+  guardians: {
+    links: (studentId: number) => `/guardians/students/${studentId}/links`,
+    link: (linkId: number) => `/guardians/links/${linkId}`,
+    dependents: '/guardians/me/dependents',
+    reportCard: (studentId: number) => `/guardians/me/dependents/${studentId}/report-card`,
+    notices: (studentId: number) => `/guardians/me/dependents/${studentId}/notices`,
+    charges: (studentId: number) => `/guardians/me/dependents/${studentId}/charges`,
+  },
   courses: {
     list: '/courses',
     detail: (id: number) => `/courses/${id}`,

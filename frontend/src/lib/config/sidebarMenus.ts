@@ -4,7 +4,7 @@ import {
   HomeIcon, BookOpenIcon, ChartBarIcon, MicrophoneIcon, Cog6ToothIcon,
   UsersIcon, AcademicCapIcon, CalendarDaysIcon, ChatBubbleLeftRightIcon,
   BanknotesIcon, Squares2X2Icon, MapIcon, ShieldCheckIcon, DocumentTextIcon,
-  BuildingLibraryIcon, GlobeAltIcon, RectangleStackIcon, PencilSquareIcon, FolderOpenIcon, DocumentChartBarIcon,
+  BuildingLibraryIcon, GlobeAltIcon, RectangleStackIcon, PencilSquareIcon, FolderOpenIcon, DocumentChartBarIcon, UserGroupIcon,
 } from '@heroicons/react/24/outline';
 
 interface MenuItem { name: string; href: string; icon: ComponentType<{ className?: string }> }
@@ -73,6 +73,11 @@ export const secretaryMenu: MenuItem[] = [
   { name: 'Configurações', href: '/settings', icon: Cog6ToothIcon },
 ];
 
+export const guardianMenu: MenuItem[] = [
+  { name: 'Meus dependentes', href: '/guardian', icon: UserGroupIcon },
+  { name: 'Configurações', href: '/settings', icon: Cog6ToothIcon },
+];
+
 export const companyManagerMenu: MenuItem[] = [
   { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
   { name: 'Financeiro', href: '/admin/finance', icon: BanknotesIcon },
@@ -90,6 +95,7 @@ export function menuForRole(role: UserRole | undefined): MenuItem[] {
   if (role === 'coordinator') return coordinatorMenu;
   if (role === 'instructor') return instructorMenu;
   if (role === 'secretary') return secretaryMenu;
+  if (role === 'guardian') return guardianMenu;
   if (role === 'company_manager') return companyManagerMenu;
   return studentMenu;
 }

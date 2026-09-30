@@ -178,7 +178,7 @@ Implementado na Fase 14 (entrega 1), em `/secretariat`: `program_enrollment_even
 
 ### Escola basica
 
-- Responsaveis (`guardians`, `student_guardians` com parentesco, responsavel financeiro e autorizacao de retirada).
+- Responsaveis (`guardians`, `student_guardians` com parentesco, responsavel financeiro e autorizacao de retirada). Implementado na Fase 15 (entrega 1): `student_guardians` com TenantMixin e RLS; o responsavel e um usuario com papel `guardian`; portal em `/guardians/me/dependents` (boletim, historico, comunicados e, para o responsavel financeiro, cobrancas), com acesso restrito por `app/policies/guardian_access.py`.
 - Portal e app do responsavel: boletim, frequencia, comunicados e financeiro.
 - Ocorrencias disciplinares e agenda escolar.
 - Futuro: habilidades BNCC por disciplina e exportacao para o Educacenso.
