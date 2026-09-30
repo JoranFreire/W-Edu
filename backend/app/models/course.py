@@ -4,6 +4,7 @@ from sqlalchemy import ForeignKey, Integer, String, Text, DateTime, Enum as SAEn
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
+from app.core.tenancy import TenantMixin
 
 
 class CourseModality(str, enum.Enum):
@@ -12,7 +13,7 @@ class CourseModality(str, enum.Enum):
     hybrid = "hybrid"
 
 
-class Course(Base):
+class Course(TenantMixin, Base):
     __tablename__ = "courses"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -50,7 +51,7 @@ class Course(Base):
     charges: Mapped[list["Charge"]] = relationship(back_populates="course")
 
 
-class CourseModule(Base):
+class CourseModule(TenantMixin, Base):
     __tablename__ = "course_modules"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -64,7 +65,7 @@ class CourseModule(Base):
     lessons: Mapped[list["Lesson"]] = relationship(back_populates="module", order_by="Lesson.order")
 
 
-class LearningPath(Base):
+class LearningPath(TenantMixin, Base):
     __tablename__ = "learning_paths"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -79,7 +80,7 @@ class LearningPath(Base):
     )
 
 
-class LearningPathCourse(Base):
+class LearningPathCourse(TenantMixin, Base):
     __tablename__ = "learning_path_courses"
     __table_args__ = (UniqueConstraint("learning_path_id", "course_id"),)
 
@@ -92,7 +93,7 @@ class LearningPathCourse(Base):
     course: Mapped["Course"] = relationship(back_populates="path_links")
 
 
-class CoursePrerequisite(Base):
+class CoursePrerequisite(TenantMixin, Base):
     __tablename__ = "course_prerequisites"
     __table_args__ = (UniqueConstraint("course_id", "prerequisite_course_id"),)
 
@@ -110,7 +111,7 @@ class CoursePrerequisite(Base):
     )
 
 
-class CourseCompletionRule(Base):
+class CourseCompletionRule(TenantMixin, Base):
     __tablename__ = "course_completion_rules"
     __table_args__ = (UniqueConstraint("course_id"),)
 

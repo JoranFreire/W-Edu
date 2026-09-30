@@ -1,5 +1,5 @@
 from sqlalchemy import func
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from app.models.schedule import (
     AttendanceRecord,
@@ -183,6 +183,7 @@ class ScheduledMeetingRepository:
     def list_active_enrollments(self, class_id: int) -> list[ClassEnrollment]:
         return (
             self.db.query(ClassEnrollment)
+            .options(selectinload(ClassEnrollment.student))
             .filter(
                 ClassEnrollment.class_offering_id == class_id,
                 ClassEnrollment.status == ClassEnrollmentStatus.active,

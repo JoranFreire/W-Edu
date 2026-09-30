@@ -1,6 +1,8 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { createContext, useContext, useEffect, ReactNode } from 'react';
+import { usePrefersDarkScheme } from '@/lib/hooks/usePrefersDarkScheme';
+import { useStoredValue } from '@/lib/hooks/useStoredValue';
 
 type Theme = 'light' | 'dark';
 
@@ -10,22 +12,15 @@ const ThemeContext = createContext<{ theme: Theme; toggle: () => void }>({
 });
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setTheme] = useState<Theme>('light');
+  const [saved, setSaved] = useStoredValue('theme');
+  const prefersDark = usePrefersDarkScheme();
+  const theme: Theme = saved === 'dark' || saved === 'light' ? saved : prefersDark ? 'dark' : 'light';
 
   useEffect(() => {
-    const saved = localStorage.getItem('theme') as Theme | null;
-    const preferred = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    const initial = saved || preferred;
-    setTheme(initial);
-    document.documentElement.classList.toggle('dark', initial === 'dark');
-  }, []);
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+  }, [theme]);
 
-  const toggle = () => {
-    const next = theme === 'dark' ? 'light' : 'dark';
-    setTheme(next);
-    localStorage.setItem('theme', next);
-    document.documentElement.classList.toggle('dark', next === 'dark');
-  };
+  const toggle = () => setSaved(theme === 'dark' ? 'light' : 'dark');
 
   return <ThemeContext.Provider value={{ theme, toggle }}>{children}</ThemeContext.Provider>;
 }

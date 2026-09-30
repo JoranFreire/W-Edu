@@ -4,6 +4,7 @@ import 'chart.js/auto';
 
 import { Bar, Doughnut } from 'react-chartjs-2';
 import type { AnalyticsOverview, CourseAnalytics } from '@/types/analytics';
+import { courseModalityLabels } from '@/lib/courses/labels';
 
 const money = (v: number) => `R$ ${(v / 100).toFixed(2)}`;
 
@@ -13,11 +14,7 @@ export default function AnalyticsChartsSection({ overview, courses }: { overview
     acc[course.modality] = (acc[course.modality] ?? 0) + 1;
     return acc;
   }, {});
-  const modalityLabels: Record<string, string> = {
-    online: 'Online',
-    in_person: 'Presencial',
-    hybrid: 'Híbrido',
-  };
+  const modalityLabels: Record<string, string> = courseModalityLabels;
 
   const kpiData = {
     labels: ['Frequência', 'Conclusão', 'Engajamento'],

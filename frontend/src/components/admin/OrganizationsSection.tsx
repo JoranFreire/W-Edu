@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { BuildingOfficeIcon, PencilIcon, PlusIcon } from '@heroicons/react/24/outline';
 import type { Organization } from '@/types/auth';
+import { apiErrorMessage } from '@/lib/api/errors';
 
 export default function OrganizationsSection({ organizations, isAdmin, onCreated, onEdit, showCreateForm }: {
   organizations: Organization[];
@@ -27,7 +28,7 @@ export default function OrganizationsSection({ organizations, isAdmin, onCreated
       setName(''); setLegalName(''); setDocument(''); setContactEmail('');
       toast.success('Empresa criada!');
       onCreated();
-    } catch (e: any) { toast.error(e.response?.data?.detail ?? 'Erro ao criar empresa.'); }
+    } catch (e) { toast.error(apiErrorMessage(e, 'Erro ao criar empresa.')); }
   };
 
   return (

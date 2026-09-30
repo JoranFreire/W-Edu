@@ -2,7 +2,7 @@ from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.models.schedule import Room
-from app.repositories.schedule import LocationRepository, RoomRepository
+from app.repositories.schedule import RoomRepository
 from app.schemas.schedule import RoomCreate, RoomUpdate
 from .location import LocationService
 

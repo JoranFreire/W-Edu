@@ -5,6 +5,7 @@ export type AttendanceMethod = 'manual' | 'qr_code' | 'webhook' | 'biometric' | 
 
 export interface Location {
   id: number;
+  campus_id: number | null;
   name: string;
   address: string | null;
   is_active: boolean;

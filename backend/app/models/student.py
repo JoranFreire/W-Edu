@@ -1,9 +1,10 @@
 from datetime import datetime, timezone
 import enum
-from sqlalchemy import ForeignKey, String, Boolean, DateTime, Enum as SAEnum, Text
+from sqlalchemy import ForeignKey, String, Boolean, DateTime, Enum as SAEnum, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
+from app.core.tenancy import TenantMixin
 
 
 class UserRole(str, enum.Enum):
@@ -12,13 +13,22 @@ class UserRole(str, enum.Enum):
     coordinator = "coordinator"
     company_manager = "company_manager"
     admin = "admin"
+    super_admin = "super_admin"
+    institution_admin = "institution_admin"
+    secretary = "secretary"
+    guardian = "guardian"
 
 
-class Organization(Base):
+# `admin` e o papel legado equivalente a `institution_admin`; `super_admin` administra a plataforma.
+ADMIN_ROLES = frozenset({UserRole.admin, UserRole.institution_admin, UserRole.super_admin})
+
+
+class Organization(TenantMixin, Base):
     __tablename__ = "organizations"
+    __table_args__ = (UniqueConstraint("institution_id", "name"),)
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str] = mapped_column(String(200), unique=True, index=True)
+    name: Mapped[str] = mapped_column(String(200), index=True)
     legal_name: Mapped[str | None] = mapped_column(String(200))
     document: Mapped[str | None] = mapped_column(String(50), index=True)
     contact_email: Mapped[str | None] = mapped_column(String(200))

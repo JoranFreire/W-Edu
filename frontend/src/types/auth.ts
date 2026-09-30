@@ -1,4 +1,34 @@
-export type UserRole = 'student' | 'instructor' | 'coordinator' | 'company_manager' | 'admin';
+import type { InstitutionSummary } from '@/types/institution';
+
+export type UserRole =
+  | 'student'
+  | 'instructor'
+  | 'coordinator'
+  | 'company_manager'
+  | 'admin'
+  | 'institution_admin'
+  | 'super_admin'
+  | 'secretary'
+  | 'guardian';
+
+/** `admin` e o papel legado equivalente a `institution_admin`; `super_admin` administra a plataforma. */
+export const ADMIN_ROLES: UserRole[] = ['admin', 'institution_admin', 'super_admin'];
+
+export const roleLabels: Record<UserRole, string> = {
+  student: 'Aluno',
+  instructor: 'Instrutor',
+  coordinator: 'Coordenador',
+  company_manager: 'Gestor empresa',
+  admin: 'Admin',
+  institution_admin: 'Admin da instituição',
+  super_admin: 'Admin da plataforma',
+  secretary: 'Secretaria',
+  guardian: 'Responsável',
+};
+
+export function isAdminRole(role: UserRole | undefined | null): boolean {
+  return !!role && ADMIN_ROLES.includes(role);
+}
 
 export interface Student {
   id: number;
@@ -64,9 +94,11 @@ export interface InstructorRating {
 export interface AuthTokens {
   access_token: string;
   token_type: string;
+  institution: InstitutionSummary | null;
 }
 
 export interface LoginCredentials {
   email: string;
   password: string;
+  institution?: string;
 }

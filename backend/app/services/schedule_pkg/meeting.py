@@ -15,8 +15,8 @@ from app.schemas.schedule import (
     InstructorAgendaOut,
     InstructorAgendaSuggestionOut,
 )
-from app.services.certificate import CertificateService
-from app.services.notification import NotificationService
+from app.services.certificates.issuance import CertificateIssuanceService
+from app.services.notifications.events import NotificationEventService
 from .class_offering import ClassOfferingService
 
 
@@ -27,8 +27,8 @@ class ScheduledMeetingService:
         self.lesson_repo = LessonRepository(db)
         self.room_repo = RoomRepository(db)
         self.student_repo = StudentRepository(db)
-        self.certificate_service = CertificateService(db)
-        self.notification_service = NotificationService(db)
+        self.certificate_service = CertificateIssuanceService(db)
+        self.notification_service = NotificationEventService(db)
 
     def create(self, data: ScheduledMeetingCreate) -> ScheduledMeeting:
         class_offering = self.class_service.get_or_404(data.class_offering_id)

@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.models.chat import ChatConversation, ChatMessage
 from app.models.enrollment import Enrollment
-from app.models.student import Student, UserRole
+from app.models.student import ADMIN_ROLES, Student, UserRole
 from app.repositories.chat import ChatRepository
 from app.repositories.course import CourseRepository
 from app.repositories.enrollment import EnrollmentRepository
@@ -22,7 +22,7 @@ class ChatService:
         self.student_repo = StudentRepository(db)
 
     def list_conversations(self, current: Student) -> list[ChatConversationOut]:
-        conversations = self.repo.list_all() if current.role in {UserRole.admin, UserRole.coordinator} else self.repo.list_for_user(current.id)
+        conversations = self.repo.list_all() if current.role in ADMIN_ROLES | {UserRole.coordinator} else self.repo.list_for_user(current.id)
         return [self._conversation_out(conversation, include_messages=False) for conversation in conversations]
 
     def create_conversation(self, current: Student, data: ChatConversationCreate) -> ChatConversationOut:
@@ -64,12 +64,12 @@ class ChatService:
         if instructor_id is None:
             return None
         instructor = self.student_repo.get_by_id(instructor_id)
-        if not instructor or instructor.role not in {UserRole.instructor, UserRole.coordinator, UserRole.admin}:
+        if not instructor or instructor.role not in ADMIN_ROLES | {UserRole.instructor, UserRole.coordinator}:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Instrutor inválido")
         return instructor.id
 
     def _ensure_course_access(self, course_id: int, current: Student) -> None:
-        if current.role in {UserRole.admin, UserRole.coordinator, UserRole.instructor}:
+        if current.role in ADMIN_ROLES | {UserRole.coordinator, UserRole.instructor}:
             return
         if self.enrollment_repo.get_by_student_and_course(current.id, course_id):
             return
@@ -86,7 +86,7 @@ class ChatService:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Acesso ao chat restrito ao curso")
 
     def _ensure_conversation_access(self, conversation: ChatConversation, current: Student) -> None:
-        if current.role in {UserRole.admin, UserRole.coordinator}:
+        if current.role in ADMIN_ROLES | {UserRole.coordinator}:
             return
         if conversation.student_id == current.id or conversation.instructor_id == current.id:
             return

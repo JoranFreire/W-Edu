@@ -8,7 +8,7 @@ from app.repositories.course import CourseRepository
 from app.repositories.schedule import ClassOfferingRepository, LocationRepository, RoomRepository
 from app.repositories.student import StudentRepository
 from app.schemas.schedule import ClassJoinOut, ClassOfferingCreate, ClassOfferingUpdate
-from app.services.notification import NotificationService
+from app.services.notifications.events import NotificationEventService
 
 
 class ClassOfferingService:
@@ -18,7 +18,7 @@ class ClassOfferingService:
         self.location_repo = LocationRepository(db)
         self.room_repo = RoomRepository(db)
         self.student_repo = StudentRepository(db)
-        self.notification_service = NotificationService(db)
+        self.notification_service = NotificationEventService(db)
 
     def create(self, data: ClassOfferingCreate) -> ClassOffering:
         self._validate_refs(data.course_id, data.location_id, data.room_id, data.instructor_id)

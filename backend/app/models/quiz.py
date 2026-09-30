@@ -1,12 +1,12 @@
 from datetime import datetime, timezone
-from typing import Optional
 from sqlalchemy import ForeignKey, DateTime, Integer, Text, JSON, Boolean, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
+from app.core.tenancy import TenantMixin
 
 
-class Quiz(Base):
+class Quiz(TenantMixin, Base):
     __tablename__ = "quizzes"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -20,7 +20,7 @@ class Quiz(Base):
     attempts: Mapped[list["QuizAttempt"]] = relationship(back_populates="quiz", cascade="all, delete-orphan")
 
 
-class QuizQuestion(Base):
+class QuizQuestion(TenantMixin, Base):
     __tablename__ = "quiz_questions"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -33,7 +33,7 @@ class QuizQuestion(Base):
     quiz: Mapped["Quiz"] = relationship(back_populates="questions")
 
 
-class QuizAttempt(Base):
+class QuizAttempt(TenantMixin, Base):
     __tablename__ = "quiz_attempts"
     __table_args__ = (UniqueConstraint("student_id", "quiz_id", "attempted_at"),)
 

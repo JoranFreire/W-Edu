@@ -3,13 +3,16 @@
 ## Status Atual
 
 **Fase:** 2 — Voz com Professor IA (em andamento)  
-**Ultima atualizacao:** 2026-05-02
+**Ultima atualizacao:** 2026-09-30  
+**Proximo marco:** Fase 12 — Nucleo Academico Formal (Fase 11 concluida)
 
 ## Visao Alvo
 
 O W-Edu deve evoluir de LMS com professor IA para uma plataforma educacional hibrida, capaz de operar cursos online, presenciais e hibridos com trilhas, turmas, agenda, presenca, avaliacoes, certificacao, comunicacao via W-Omni, financeiro, documentos e analytics.
 
 Documento de referencia: [docs/PLATFORM_TARGET.md](docs/PLATFORM_TARGET.md)
+
+Evolucao multi-instituicao: o W-Edu passa a ser uma plataforma SaaS multi-tenant capaz de gerenciar escolas, universidades e cursos profissionalizantes, com nucleo academico generico configurado por tipo de instituicao. Documento de referencia: [docs/MULTI_INSTITUTION.md](docs/MULTI_INSTITUTION.md)
 
 ## Estado Atual do Produto
 
@@ -230,6 +233,83 @@ checkin_tokens
 - [ ] Avaliacao de performance por visao computacional.
 - [ ] Presenca automatica por reconhecimento facial.
 
+### Fase 11 — Multi-tenant (Instituicoes)
+
+Objetivo: uma instalacao atendendo varias instituicoes com dados isolados.
+
+- [x] Criar `institutions` com tipo (`school`, `university`, `vocational`, `corporate`, `mixed`), settings e branding.
+- [x] Criar `institution_memberships` (usuario pode atuar em mais de uma instituicao).
+- [x] Criar `campuses` e vincular `locations` ao campus.
+- [x] Adicionar `institution_id` nas tabelas raiz com backfill para instituicao padrao.
+- [x] Resolver tenant por header `X-Institution` validado contra membership e claim `inst` do JWT.
+- [x] Resolver tenant por subdominio (`TENANT_BASE_DOMAIN`), com marca da instituicao no login.
+- [x] Filtro obrigatorio por instituicao (eventos do ORM em `app/core/tenancy.py`, sem depender de cada repository).
+- [x] Isolar tabelas filhas (aulas, modulos, inscricoes, encontros, cobrancas etc.) com `institution_id` proprio e validacao de referencias cruzadas na gravacao.
+- [x] Novos papeis: `super_admin`, `institution_admin`, `secretary`, `guardian`.
+- [x] Atualizar matriz e verificadores de permissao com escopo de instituicao.
+- [x] API da plataforma (super admin) para criar/gerir instituicoes (`/platform/institutions`).
+- [x] Telas do admin da plataforma (`/platform/institutions`).
+- [x] Seletor de instituicao, branding por tenant (nome, cor, logo) e tela de instituicao/campi no frontend.
+- [x] Row Level Security no PostgreSQL como segunda barreira (politica `tenant_isolation` em 38 tabelas; impacto de desempenho desprezivel).
+
+### Fase 12 — Nucleo Academico Formal
+
+Objetivo: estrutura comum a escola, universidade e profissionalizante.
+
+- [ ] Unidades academicas (segmento, faculdade, departamento, eixo).
+- [ ] Programas (serie/etapa de ensino, graduacao, tecnico, livre).
+- [ ] Disciplinas com ementa, carga horaria, creditos e vinculo opcional a curso EAD.
+- [ ] Pre-requisitos e equivalencias entre disciplinas.
+- [ ] Matriz curricular versionada com componentes por serie/semestre.
+- [ ] Periodos letivos e etapas de avaliacao (bimestre, trimestre, N1/N2).
+- [ ] Calendario academico (dias letivos, feriados, recessos, provas).
+- [ ] Matricula no programa com numero de matricula e status.
+- [ ] Turma-grupo (ex.: 7o ano A) com turno e professor responsavel.
+- [ ] Estender `class_offerings` com periodo, disciplina e turma-grupo.
+- [ ] Presets de nomenclatura por tipo de instituicao no frontend.
+
+### Fase 13 — Avaliacao, Diario e Frequencia
+
+- [ ] Esquemas de avaliacao configuraveis (numerica/conceito, media, recuperacao, frequencia minima).
+- [ ] Plano de avaliacao por oferta e etapa, reaproveitando quiz, trabalho e avaliacao pratica.
+- [ ] Lancamento de notas pelo professor.
+- [ ] Diario de classe com conteudo ministrado e frequencia por disciplina.
+- [ ] Fechamento de etapa com calculo de media, faltas e bloqueio de edicao.
+- [ ] Resultado final por disciplina (aprovado, reprovado, reprovado por falta).
+
+### Fase 14 — Secretaria Academica
+
+- [ ] Matricula, rematricula, trancamento, cancelamento e transferencia.
+- [ ] Aproveitamento de estudos.
+- [ ] Historico escolar e boletim.
+- [ ] Declaracoes (matricula, frequencia, conclusao) com validacao publica.
+- [ ] CR/IRA e integralizacao curricular.
+- [ ] Conclusao do programa.
+
+### Fase 15 — Perfil Escola Basica
+
+- [ ] Responsaveis e vinculo aluno/responsavel (financeiro, retirada).
+- [ ] Portal do responsavel: boletim, frequencia, comunicados, financeiro.
+- [ ] Ocorrencias e agenda escolar.
+- [ ] Futuro: BNCC e exportacao Educacenso.
+
+### Fase 16 — Perfil Universidade
+
+- [ ] Janela de matricula por disciplina com pre-requisitos, choque de horario e vagas.
+- [ ] Creditos e integralizacao.
+- [ ] TCC, estagio e atividades complementares.
+- [ ] Futuro: ENADE e e-MEC.
+
+### Fase 17 — Perfil Profissionalizante e Financeiro Educacional
+
+- [ ] Programas tecnicos com estagio supervisionado e carga horaria minima.
+- [ ] Mensalidade por programa, turma-grupo ou credito.
+- [ ] Contratos de matricula/rematricula no GED.
+- [ ] Bolsas, descontos, multa e juros.
+- [ ] Responsavel financeiro distinto do aluno.
+- [ ] Planos SaaS por instituicao.
+- [ ] Futuro: SISTEC.
+
 ---
 
 ## Decisoes de Arquitetura
@@ -244,10 +324,14 @@ checkin_tokens
 | Auth | JWT | Stateless e compativel com outros servicos |
 | Arquitetura atual | Monolito modular | Mais rapido para estabilizar dominio |
 | Arquitetura futura | Microservicos | Extrair quando houver volume ou fronteira madura |
+| Tenancy | Multi-tenant por `institution_id` (banco compartilhado) | SaaS para varias instituicoes; RLS como segunda barreira |
+| Dominio academico | Nucleo generico + presets por tipo | Evita tres sistemas paralelos para escola, universidade e profissionalizante |
 
 ## Fronteiras de Servico Futuras
 
+- `tenant-service`: instituicoes, campi, memberships e configuracoes.
 - `user-service`: usuarios, empresas, perfis e permissoes.
+- `academic-service`: programas, matrizes, disciplinas, periodos, notas, diario e secretaria.
 - `course-service`: cursos, trilhas, modulos, aulas e pre-requisitos.
 - `schedule-service`: turmas, agenda, unidades, salas, instrutores, lista de espera e presenca.
 - `payment-service`: planos, cobrancas e gateways.
@@ -304,3 +388,6 @@ notification_events
 - Matricula em curso e inscricao em turma podem ser processos diferentes.
 - Certificado depende de regras verificaveis: progresso, provas, presenca e aprovacao pratica.
 - Comunicacao precisa nascer por eventos para nao ficar acoplada a telas ou rotas especificas.
+- Instituicao nao e empresa: `institutions` e o tenant; `organizations` continua sendo empresa cliente B2B dentro de uma instituicao.
+- Disciplina nao e curso: disciplina e componente curricular com carga/creditos; pode reaproveitar conteudo EAD de um curso.
+- Toda consulta nova deve ser filtrada por instituicao.

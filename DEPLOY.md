@@ -78,6 +78,19 @@ SMTP_FROM_EMAIL=noreply@exemplo.com
 SMTP_USE_TLS=true
 ```
 
+### Multi-instituição
+
+Instituição por subdomínio (ex.: `escola.wedu.com.br`): configure DNS curinga `*.wedu.com.br`, inclua `*.wedu.com.br` no `server_name` do nginx (e no certificado TLS) e defina:
+
+```env
+# backend/.env
+TENANT_BASE_DOMAIN=wedu.com.br
+# frontend (build): trocar de instituição navega para o subdomínio dela
+NEXT_PUBLIC_TENANT_BASE_DOMAIN=wedu.com.br
+```
+
+O isolamento no banco usa Row Level Security. A API deve conectar com um usuário **que não seja superusuário** do PostgreSQL (o `setup.sh` já cria o usuário `wedu`, dono do banco); superusuários ignoram as políticas.
+
 ## Portas internas
 | Serviço   | Porta |
 |-----------|-------|

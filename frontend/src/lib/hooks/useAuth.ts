@@ -5,14 +5,21 @@ import { useAuthStore } from '@/store/authStore';
 
 export function useAuth() {
   const store = useAuthStore();
+  const { student, fetchStudent, fetchInstitution } = store;
+  const studentId = student?.id;
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const token = localStorage.getItem('access_token');
-    if (token && !store.student) {
-      store.fetchStudent();
+    if (localStorage.getItem('access_token') && !student) {
+      fetchStudent();
     }
-  }, [store.student]);
+  }, [student, fetchStudent]);
+
+  // Atualiza instituicao/branding uma vez por usuario carregado.
+  useEffect(() => {
+    if (localStorage.getItem('access_token') && studentId) {
+      fetchInstitution();
+    }
+  }, [studentId, fetchInstitution]);
 
   return {
     ...store,

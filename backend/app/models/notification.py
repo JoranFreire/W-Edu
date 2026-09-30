@@ -1,10 +1,11 @@
 from datetime import datetime, timezone
 import enum
 
-from sqlalchemy import DateTime, Enum as SAEnum, ForeignKey, Integer, JSON, String, Text, UniqueConstraint
+from sqlalchemy import DateTime, Enum as SAEnum, ForeignKey, JSON, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base
+from app.core.tenancy import TenantMixin
 
 
 class NotificationChannel(str, enum.Enum):
@@ -30,9 +31,9 @@ class NotificationEventType(str, enum.Enum):
     certificate_issued = "certificate_issued"
 
 
-class NotificationTemplate(Base):
+class NotificationTemplate(TenantMixin, Base):
     __tablename__ = "notification_templates"
-    __table_args__ = (UniqueConstraint("key", "channel"),)
+    __table_args__ = (UniqueConstraint("institution_id", "key", "channel"),)
 
     id: Mapped[int] = mapped_column(primary_key=True)
     key: Mapped[str] = mapped_column(String(120), index=True)
@@ -48,7 +49,7 @@ class NotificationTemplate(Base):
     )
 
 
-class NotificationEvent(Base):
+class NotificationEvent(TenantMixin, Base):
     __tablename__ = "notification_events"
 
     id: Mapped[int] = mapped_column(primary_key=True)

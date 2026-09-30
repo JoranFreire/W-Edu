@@ -7,6 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { EnvelopeIcon, LockClosedIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import { useAuthStore } from '@/store/authStore';
+import LoginBrand from '@/components/auth/LoginBrand';
 
 const schema = z.object({
   email: z.string().email('E-mail inválido'),
@@ -28,7 +29,9 @@ export default function LoginPage() {
     try {
       setSubmitting(true);
       clearError();
-      await login(data);
+      // Link de acesso de uma instituicao especifica: /login?instituicao=<slug>
+      const institution = new URLSearchParams(window.location.search).get('instituicao') || undefined;
+      await login({ ...data, institution });
       router.push('/dashboard');
     } catch {
       // error handled by store
@@ -42,13 +45,7 @@ export default function LoginPage() {
       {/* Form */}
       <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 bg-white dark:bg-gray-900">
         <div className="max-w-md w-full space-y-8">
-          <div className="text-center">
-            <div className="mx-auto h-16 w-16 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
-              <span className="text-white text-2xl font-bold">E</span>
-            </div>
-            <h2 className="mt-6 text-3xl font-extrabold text-gray-900 dark:text-white">Bem-vindo ao W-Edu</h2>
-            <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">Entre com suas credenciais para continuar</p>
-          </div>
+          <LoginBrand />
 
           <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-6">
             {error && (

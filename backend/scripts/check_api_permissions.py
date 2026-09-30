@@ -31,7 +31,9 @@ import starlette.routing
 import app.models  # noqa: F401
 from app.core.database import Base, SessionLocal, engine, get_db
 from app.dependencies import get_current_student
+from app.core.tenancy import bind_institution
 from app.models.certificate import Certificate
+from app.models.institution import Institution, InstitutionMembership
 from app.models.student import Organization, Student, UserRole
 from main import app
 
@@ -73,12 +75,14 @@ class PermissionCheck:
     def __init__(self) -> None:
         self.current = fake_user(1, UserRole.admin)
         self.email_counter = 0
+        self.institution_id: int | None = None
 
     def override_current_student(self):
         return self.current
 
     def override_db(self):
         db = SessionLocal()
+        bind_institution(db, self.institution_id)
         try:
             yield db
         finally:
@@ -88,6 +92,11 @@ class PermissionCheck:
         Base.metadata.drop_all(bind=engine)
         Base.metadata.create_all(bind=engine)
         with SessionLocal() as db:
+            institution = Institution(slug="default", name="Instituicao Padrao")
+            db.add(institution)
+            db.flush()
+            self.institution_id = institution.id
+            bind_institution(db, institution.id)
             org1 = Organization(name="Org A")
             org2 = Organization(name="Org B")
             db.add_all([org1, org2])
@@ -131,6 +140,11 @@ class PermissionCheck:
                 ),
             }
             db.add_all(users.values())
+            db.flush()
+            db.add_all(
+                InstitutionMembership(institution_id=institution.id, user_id=user.id, role=user.role)
+                for user in users.values()
+            )
             db.commit()
             ids = {key: user.id for key, user in users.items()}
             ids["org1"] = org1.id
@@ -150,6 +164,7 @@ class PermissionCheck:
 
     def create_certificate(self, student_id: int, course_id: int, validation_code: str) -> None:
         with SessionLocal() as db:
+            bind_institution(db, self.institution_id)
             db.add(Certificate(student_id=student_id, course_id=course_id, validation_code=validation_code))
             db.commit()
 

@@ -8,14 +8,14 @@ from app.models.progress import Progress, ProgressStatus
 from app.repositories.lesson import LessonRepository
 from app.repositories.progress import ProgressRepository
 from app.schemas.progress import CourseProgressOut
-from app.services.certificate import CertificateService
+from app.services.certificates.issuance import CertificateIssuanceService
 
 
 class ProgressService:
     def __init__(self, db: Session):
         self.repo = ProgressRepository(db)
         self.lesson_repo = LessonRepository(db)
-        self.certificate_service = CertificateService(db)
+        self.certificate_service = CertificateIssuanceService(db)
 
     def mark(self, student_id: int, lesson_id: int, status: ProgressStatus) -> Progress:
         progress = self.repo.upsert(student_id, lesson_id, status)
@@ -25,7 +25,10 @@ class ProgressService:
         return progress
 
     def mark_consumed(self, student_id: int, lesson_id: int) -> Progress:
-        progress = self.repo.upsert(student_id, lesson_id, ProgressStatus.in_progress)
+        # Consumir o conteudo de novo nao pode rebaixar uma aula ja concluida.
+        existing = self.repo.get_by_student_and_lesson(student_id, lesson_id)
+        status = ProgressStatus.done if existing and existing.status == ProgressStatus.done else ProgressStatus.in_progress
+        progress = self.repo.upsert(student_id, lesson_id, status)
         if not progress.content_consumed_at:
             progress.content_consumed_at = datetime.now(timezone.utc)
             self.repo.db.commit()

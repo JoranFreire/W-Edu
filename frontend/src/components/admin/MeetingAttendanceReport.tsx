@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import type { AttendanceStatus, MeetingAttendanceReportRow } from '@/types/schedule';
 
 const statusLabels: Record<MeetingAttendanceReportRow['status'], string> = {
@@ -21,24 +21,27 @@ const actions: Array<{ status: AttendanceStatus; label: string }> = [
   { status: 'absent', label: 'Falta' },
 ];
 
+type PracticalDraft = { score: string; feedback: string };
+
+function buildDrafts(rows: MeetingAttendanceReportRow[]): Record<number, PracticalDraft> {
+  return Object.fromEntries(rows.map((row) => [
+    row.student_id,
+    { score: row.practical_score === null ? '' : String(row.practical_score), feedback: row.practical_feedback ?? '' },
+  ]));
+}
+
 export default function MeetingAttendanceReport({ rows, onMarkAttendance, onSavePractical }: {
   rows: MeetingAttendanceReportRow[];
   onMarkAttendance: (studentId: number, status: AttendanceStatus) => void;
   onSavePractical: (studentId: number, score: number, feedback: string | null) => void;
 }) {
-  const [drafts, setDrafts] = useState<Record<number, { score: string; feedback: string }>>(() =>
-    Object.fromEntries(rows.map((row) => [
-      row.student_id,
-      { score: row.practical_score === null ? '' : String(row.practical_score), feedback: row.practical_feedback ?? '' },
-    ]))
-  );
-
-  useEffect(() => {
-    setDrafts(Object.fromEntries(rows.map((row) => [
-      row.student_id,
-      { score: row.practical_score === null ? '' : String(row.practical_score), feedback: row.practical_feedback ?? '' },
-    ])));
-  }, [rows]);
+  const [drafts, setDrafts] = useState(() => buildDrafts(rows));
+  const [draftsSource, setDraftsSource] = useState(rows);
+  // Novo relatorio carregado: descarta rascunhos e parte dos valores salvos.
+  if (rows !== draftsSource) {
+    setDraftsSource(rows);
+    setDrafts(buildDrafts(rows));
+  }
 
   const draftFor = (row: MeetingAttendanceReportRow) =>
     drafts[row.student_id] ?? { score: row.practical_score === null ? '' : String(row.practical_score), feedback: row.practical_feedback ?? '' };

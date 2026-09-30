@@ -6,6 +6,7 @@ import { useAudioPlaybackQueue } from './useAudioPlaybackQueue';
 import { useMicrophoneStream } from './useMicrophoneStream';
 import { getMicrophoneErrorMessage, resolveBevoxWsUrl } from './voiceConfig';
 import type { Session, VoiceSessionStart } from '@/types/course';
+import { apiErrorMessage } from '@/lib/api/errors';
 
 export type VoiceState = 'idle' | 'connecting' | 'active';
 
@@ -68,10 +69,10 @@ export function useVoiceSession(lessonId: number, onSessionUpdate: (session: Ses
       startConfig = data;
       localSessionRef.current = data.session;
       onSessionUpdate(data.session);
-    } catch (error: any) {
+    } catch (error) {
       setState('idle');
       setStatusText('Pronto para conectar');
-      toast.error(error?.response?.data?.detail ?? 'Erro ao criar sessão de voz no W-Edu.');
+      toast.error(apiErrorMessage(error, 'Erro ao criar sessão de voz no W-Edu.'));
       return;
     }
 

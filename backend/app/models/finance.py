@@ -5,6 +5,7 @@ from sqlalchemy import Boolean, CheckConstraint, DateTime, Enum as SAEnum, Forei
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
+from app.core.tenancy import TenantMixin
 
 
 class BillingPeriod(str, enum.Enum):
@@ -37,9 +38,9 @@ class ChargeStatus(str, enum.Enum):
     refunded = "refunded"
 
 
-class BillingPlan(Base):
+class BillingPlan(TenantMixin, Base):
     __tablename__ = "billing_plans"
-    __table_args__ = (UniqueConstraint("name"),)
+    __table_args__ = (UniqueConstraint("institution_id", "name"),)
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(200), index=True)
@@ -59,7 +60,7 @@ class BillingPlan(Base):
     charges: Mapped[list["Charge"]] = relationship(back_populates="billing_plan")
 
 
-class Subscription(Base):
+class Subscription(TenantMixin, Base):
     __tablename__ = "subscriptions"
     __table_args__ = (
         UniqueConstraint("billing_plan_id", "student_id"),
@@ -86,7 +87,7 @@ class Subscription(Base):
     charges: Mapped[list["Charge"]] = relationship(back_populates="subscription")
 
 
-class Charge(Base):
+class Charge(TenantMixin, Base):
     __tablename__ = "charges"
 
     id: Mapped[int] = mapped_column(primary_key=True)

@@ -2,6 +2,18 @@ export const endpoints = {
   auth: {
     login: '/auth/login',
     me: '/users/me',
+    institutions: '/auth/institutions',
+    switchInstitution: '/auth/switch-institution',
+  },
+  institutions: {
+    public: '/institutions/public',
+    current: '/institutions/current',
+    campuses: '/institutions/campuses',
+    campus: (id: number) => `/institutions/campuses/${id}`,
+  },
+  platform: {
+    institutions: '/platform/institutions',
+    institution: (id: number) => `/platform/institutions/${id}`,
   },
   courses: {
     list: '/courses',

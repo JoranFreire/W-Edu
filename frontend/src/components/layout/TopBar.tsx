@@ -4,7 +4,8 @@ import { useMemo } from 'react';
 import { usePathname } from 'next/navigation';
 import { Bars3Icon, SunIcon, MoonIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline';
 import { useTheme } from '@/components/providers/ThemeProvider';
-import { adminMenu, companyManagerMenu, coordinatorMenu, studentMenu } from '@/lib/config/sidebarMenus';
+import { companyManagerMenu, coordinatorMenu, studentMenu, superAdminMenu } from '@/lib/config/sidebarMenus';
+import { InstitutionSwitcher } from './InstitutionSwitcher';
 import { useAuthStore } from '@/store/authStore';
 
 interface TopBarProps {
@@ -18,6 +19,10 @@ export function TopBar({ onMenuClick }: TopBarProps) {
   const roleLabel = student?.role
     ? {
         admin: 'Admin',
+        institution_admin: 'Admin da instituição',
+        super_admin: 'Admin da plataforma',
+        secretary: 'Secretaria',
+        guardian: 'Responsável',
         coordinator: 'Coordenação',
         company_manager: 'Gestão empresa',
         instructor: 'Instrutor',
@@ -25,7 +30,7 @@ export function TopBar({ onMenuClick }: TopBarProps) {
       }[student.role] || 'Conta'
     : 'Conta';
   const currentPage = useMemo(() => {
-    const menuItems = [...adminMenu, ...coordinatorMenu, ...companyManagerMenu, ...studentMenu];
+    const menuItems = [...superAdminMenu, ...coordinatorMenu, ...companyManagerMenu, ...studentMenu];
     const matches = menuItems
       .filter((item) => pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href)))
       .sort((a, b) => b.href.length - a.href.length);
@@ -52,6 +57,8 @@ export function TopBar({ onMenuClick }: TopBarProps) {
       </div>
 
       <div className="flex items-center space-x-3">
+        <InstitutionSwitcher />
+
         <button
           onClick={toggle}
           aria-label={theme === 'dark' ? 'Ativar tema claro' : 'Ativar tema escuro'}

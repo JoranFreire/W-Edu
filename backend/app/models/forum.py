@@ -4,9 +4,10 @@ from sqlalchemy import DateTime, ForeignKey, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
+from app.core.tenancy import TenantMixin
 
 
-class ForumThread(Base):
+class ForumThread(TenantMixin, Base):
     __tablename__ = "forum_threads"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -30,7 +31,7 @@ class ForumThread(Base):
     )
 
 
-class ForumPost(Base):
+class ForumPost(TenantMixin, Base):
     __tablename__ = "forum_posts"
 
     id: Mapped[int] = mapped_column(primary_key=True)

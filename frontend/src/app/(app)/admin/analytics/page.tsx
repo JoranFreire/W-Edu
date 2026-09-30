@@ -1,73 +1,30 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { ArrowPathIcon, ChartBarIcon, ClipboardDocumentCheckIcon, CurrencyDollarIcon, PresentationChartLineIcon, UserGroupIcon } from '@heroicons/react/24/outline';
-import toast from 'react-hot-toast';
-import api from '@/lib/api/client';
-import { endpoints } from '@/lib/api/endpoints';
-import type {
-  AnalyticsOverview,
-  AttendanceReportRow,
-  ClassPerformanceReportRow,
-  CompletionReportRow,
-  CourseAnalytics,
-  EngagementReportRow,
-  RoiReportRow,
-} from '@/types/analytics';
+import { useAnalyticsReports } from '@/lib/hooks/admin/useAnalyticsReports';
+import { useErrorToast } from '@/lib/hooks/useErrorToast';
 import AnalyticsOverviewSection from '@/components/admin/AnalyticsOverviewSection';
 import { AttendanceTable, CompletionTable, EngagementTable, PerformanceTable, RoiTable } from '@/components/admin/AnalyticsReportsTables';
+import Spinner from '@/components/common/Spinner';
 
 type ReportTab = 'completion' | 'attendance' | 'engagement' | 'performance' | 'roi';
 
 export default function AdminAnalyticsPage() {
-  const [overview, setOverview] = useState<AnalyticsOverview | null>(null);
-  const [courses, setCourses] = useState<CourseAnalytics[]>([]);
-  const [completionRows, setCompletionRows] = useState<CompletionReportRow[]>([]);
-  const [attendanceRows, setAttendanceRows] = useState<AttendanceReportRow[]>([]);
-  const [engagementRows, setEngagementRows] = useState<EngagementReportRow[]>([]);
-  const [performanceRows, setPerformanceRows] = useState<ClassPerformanceReportRow[]>([]);
-  const [roiRows, setRoiRows] = useState<RoiReportRow[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: reports, loading, error, reload } = useAnalyticsReports();
   const [activeTab, setActiveTab] = useState<ReportTab>('completion');
 
-  const load = async () => {
-    try {
-      setLoading(true);
-      const [overviewRes, courseRes, completionRes, attendanceRes, engagementRes, performanceRes, roiRes] = await Promise.all([
-        api.get<AnalyticsOverview>(endpoints.analytics.overview),
-        api.get<CourseAnalytics[]>(endpoints.analytics.courses),
-        api.get<CompletionReportRow[]>(endpoints.analytics.reports.completion),
-        api.get<AttendanceReportRow[]>(endpoints.analytics.reports.attendance),
-        api.get<EngagementReportRow[]>(endpoints.analytics.reports.engagement),
-        api.get<ClassPerformanceReportRow[]>(endpoints.analytics.reports.performance),
-        api.get<RoiReportRow[]>(endpoints.analytics.reports.roi),
-      ]);
-      setOverview(overviewRes.data); setCourses(courseRes.data);
-      setCompletionRows(completionRes.data); setAttendanceRows(attendanceRes.data);
-      setEngagementRows(engagementRes.data); setPerformanceRows(performanceRes.data);
-      setRoiRows(roiRes.data);
-    } catch { toast.error('Erro ao carregar relatórios.'); }
-    finally { setLoading(false); }
-  };
-
-  useEffect(() => { load(); }, []);
+  useErrorToast(error, 'Erro ao carregar relatórios.');
 
   const tabs = [
-    { id: 'completion' as ReportTab, label: 'Conclusão', icon: ClipboardDocumentCheckIcon, badge: completionRows.length },
-    { id: 'attendance' as ReportTab, label: 'Presença', icon: UserGroupIcon, badge: attendanceRows.length },
-    { id: 'engagement' as ReportTab, label: 'Engajamento', icon: ChartBarIcon, badge: engagementRows.length },
-    { id: 'performance' as ReportTab, label: 'Performance', icon: PresentationChartLineIcon, badge: performanceRows.length },
-    { id: 'roi' as ReportTab, label: 'ROI', icon: CurrencyDollarIcon, badge: roiRows.length },
+    { id: 'completion' as ReportTab, label: 'Conclusão', icon: ClipboardDocumentCheckIcon, badge: reports?.completion.length ?? 0 },
+    { id: 'attendance' as ReportTab, label: 'Presença', icon: UserGroupIcon, badge: reports?.attendance.length ?? 0 },
+    { id: 'engagement' as ReportTab, label: 'Engajamento', icon: ChartBarIcon, badge: reports?.engagement.length ?? 0 },
+    { id: 'performance' as ReportTab, label: 'Performance', icon: PresentationChartLineIcon, badge: reports?.performance.length ?? 0 },
+    { id: 'roi' as ReportTab, label: 'ROI', icon: CurrencyDollarIcon, badge: reports?.roi.length ?? 0 },
   ];
 
-  if (loading || !overview) return (
-    <div className="flex items-center justify-center py-20">
-      <svg className="animate-spin h-8 w-8 text-indigo-600" fill="none" viewBox="0 0 24 24">
-        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-      </svg>
-    </div>
-  );
+  if (loading || !reports) return <Spinner />;
 
   return (
     <div className="space-y-6">
@@ -76,12 +33,12 @@ export default function AdminAnalyticsPage() {
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Relatórios</h1>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Visão executiva de operação, conclusão, presença e receita.</p>
         </div>
-        <button onClick={load} className="inline-flex items-center gap-2 px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200">
+        <button onClick={reload} className="inline-flex items-center gap-2 px-3 py-2 text-sm rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200">
           <ArrowPathIcon className="w-4 h-4" /><span>Atualizar</span>
         </button>
       </div>
 
-      <AnalyticsOverviewSection overview={overview} courses={courses} />
+      <AnalyticsOverviewSection overview={reports.overview} courses={reports.courses} />
 
       <div className="rounded-xl border border-gray-200 bg-white p-5 dark:border-gray-700 dark:bg-gray-800">
         <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
@@ -129,11 +86,11 @@ export default function AdminAnalyticsPage() {
         </div>
 
         <div className="mt-5" id={`report-${activeTab}`}>
-          {activeTab === 'completion' && <CompletionTable rows={completionRows} />}
-          {activeTab === 'attendance' && <AttendanceTable rows={attendanceRows} />}
-          {activeTab === 'engagement' && <EngagementTable rows={engagementRows} />}
-          {activeTab === 'performance' && <PerformanceTable rows={performanceRows} />}
-          {activeTab === 'roi' && <RoiTable rows={roiRows} />}
+          {activeTab === 'completion' && <CompletionTable rows={reports.completion} />}
+          {activeTab === 'attendance' && <AttendanceTable rows={reports.attendance} />}
+          {activeTab === 'engagement' && <EngagementTable rows={reports.engagement} />}
+          {activeTab === 'performance' && <PerformanceTable rows={reports.performance} />}
+          {activeTab === 'roi' && <RoiTable rows={reports.roi} />}
         </div>
       </div>
     </div>

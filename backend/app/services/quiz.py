@@ -1,11 +1,11 @@
-from fastapi import HTTPException, status
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 from app.models.quiz import Quiz, QuizQuestion, QuizAttempt
 from app.repositories.quiz import QuizRepository, QuizQuestionRepository, QuizAttemptRepository
 from app.schemas.quiz import QuizCreate, QuizUpdate, QuizQuestionCreate, QuizQuestionUpdate, QuizAnswerSubmit
 from app.repositories.lesson import LessonRepository
-from app.services.certificate import CertificateService
+from app.services.certificates.issuance import CertificateIssuanceService
 
 
 class QuizService:
@@ -14,7 +14,7 @@ class QuizService:
         self.question_repo = QuizQuestionRepository(db)
         self.attempt_repo = QuizAttemptRepository(db)
         self.lesson_repo = LessonRepository(db)
-        self.certificate_service = CertificateService(db)
+        self.certificate_service = CertificateIssuanceService(db)
 
     # --- Admin ---
 

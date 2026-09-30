@@ -5,6 +5,7 @@ from sqlalchemy import Boolean, DateTime, Enum as SAEnum, ForeignKey, Integer, S
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
+from app.core.tenancy import TenantMixin
 
 
 class ClassStatus(str, enum.Enum):
@@ -46,20 +47,22 @@ class PracticalAssessmentStatus(str, enum.Enum):
     returned = "returned"
 
 
-class Location(Base):
+class Location(TenantMixin, Base):
     __tablename__ = "locations"
 
     id: Mapped[int] = mapped_column(primary_key=True)
+    campus_id: Mapped[int | None] = mapped_column(ForeignKey("campuses.id"), nullable=True, index=True)
     name: Mapped[str] = mapped_column(String(200))
     address: Mapped[str | None] = mapped_column(Text)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
+    campus: Mapped["Campus | None"] = relationship(back_populates="locations")
     rooms: Mapped[list["Room"]] = relationship(back_populates="location", cascade="all, delete-orphan")
     class_offerings: Mapped[list["ClassOffering"]] = relationship(back_populates="location")
 
 
-class Room(Base):
+class Room(TenantMixin, Base):
     __tablename__ = "rooms"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -75,7 +78,7 @@ class Room(Base):
     scheduled_meetings: Mapped[list["ScheduledMeeting"]] = relationship(back_populates="room")
 
 
-class ClassOffering(Base):
+class ClassOffering(TenantMixin, Base):
     __tablename__ = "class_offerings"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -100,7 +103,7 @@ class ClassOffering(Base):
     charges: Mapped[list["Charge"]] = relationship(back_populates="class_offering")
 
 
-class ClassEnrollment(Base):
+class ClassEnrollment(TenantMixin, Base):
     __tablename__ = "class_enrollments"
     __table_args__ = (UniqueConstraint("class_offering_id", "student_id"),)
 
@@ -117,7 +120,7 @@ class ClassEnrollment(Base):
     student: Mapped["Student"] = relationship()
 
 
-class WaitlistEntry(Base):
+class WaitlistEntry(TenantMixin, Base):
     __tablename__ = "waitlist_entries"
     __table_args__ = (UniqueConstraint("class_offering_id", "student_id"),)
 
@@ -131,7 +134,7 @@ class WaitlistEntry(Base):
     student: Mapped["Student"] = relationship()
 
 
-class ScheduledMeeting(Base):
+class ScheduledMeeting(TenantMixin, Base):
     __tablename__ = "scheduled_meetings"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -155,7 +158,7 @@ class ScheduledMeeting(Base):
     practical_assessments: Mapped[list["PracticalAssessmentRecord"]] = relationship(back_populates="meeting", cascade="all, delete-orphan")
 
 
-class AttendanceRecord(Base):
+class AttendanceRecord(TenantMixin, Base):
     __tablename__ = "attendance_records"
     __table_args__ = (UniqueConstraint("scheduled_meeting_id", "student_id"),)
 
@@ -173,7 +176,7 @@ class AttendanceRecord(Base):
     student: Mapped["Student"] = relationship()
 
 
-class CheckinToken(Base):
+class CheckinToken(TenantMixin, Base):
     __tablename__ = "checkin_tokens"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -186,7 +189,7 @@ class CheckinToken(Base):
     meeting: Mapped["ScheduledMeeting"] = relationship(back_populates="checkin_tokens")
 
 
-class PracticalAssessmentRecord(Base):
+class PracticalAssessmentRecord(TenantMixin, Base):
     __tablename__ = "practical_assessment_records"
     __table_args__ = (UniqueConstraint("scheduled_meeting_id", "student_id"),)
 

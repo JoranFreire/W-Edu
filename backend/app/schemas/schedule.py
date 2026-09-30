@@ -7,16 +7,19 @@ from app.models.schedule import AttendanceMethod, AttendanceStatus, ClassEnrollm
 class LocationCreate(BaseModel):
     name: str
     address: str | None = None
+    campus_id: int | None = None
 
 
 class LocationUpdate(BaseModel):
     name: str | None = None
     address: str | None = None
+    campus_id: int | None = None
     is_active: bool | None = None
 
 
 class LocationOut(BaseModel):
     id: int
+    campus_id: int | None
     name: str
     address: str | None
     is_active: bool

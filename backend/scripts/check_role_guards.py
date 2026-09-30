@@ -12,9 +12,16 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from app.dependencies import get_current_academic_staff, get_current_admin, get_current_admin_or_company_manager, get_current_admin_or_coordinator
-from app.models.student import UserRole
-from app.routers.admin import ensure_academic_user_scope
+from app.dependencies import (
+    ensure_super_admin_boundary,
+    get_current_academic_staff,
+    get_current_admin,
+    get_current_admin_or_company_manager,
+    get_current_admin_or_coordinator,
+    get_current_super_admin,
+)
+from app.models.student import ADMIN_ROLES, UserRole
+from app.policies.user_scope import ensure_academic_user_scope
 
 
 def fake_user(role: UserRole, organization_id: int | None = None):
@@ -75,24 +82,25 @@ def assert_scope_forbidden(name: str, current_role: UserRole, target_role: UserR
 def main() -> int:
     failures: list[str] = []
     checks = [
-        ("admin", get_current_admin, [UserRole.admin], [UserRole.student, UserRole.instructor, UserRole.coordinator, UserRole.company_manager]),
+        ("super_admin", get_current_super_admin, [UserRole.super_admin], [UserRole.admin, UserRole.institution_admin, UserRole.coordinator, UserRole.student]),
+        ("admin", get_current_admin, [*ADMIN_ROLES], [UserRole.student, UserRole.instructor, UserRole.coordinator, UserRole.company_manager, UserRole.secretary, UserRole.guardian]),
         (
             "admin_or_coordinator",
             get_current_admin_or_coordinator,
-            [UserRole.admin, UserRole.coordinator],
-            [UserRole.student, UserRole.instructor, UserRole.company_manager],
+            [*ADMIN_ROLES, UserRole.coordinator],
+            [UserRole.student, UserRole.instructor, UserRole.company_manager, UserRole.secretary, UserRole.guardian],
         ),
         (
             "academic_staff",
             get_current_academic_staff,
-            [UserRole.admin, UserRole.coordinator, UserRole.company_manager],
-            [UserRole.student, UserRole.instructor],
+            [*ADMIN_ROLES, UserRole.coordinator, UserRole.company_manager],
+            [UserRole.student, UserRole.instructor, UserRole.secretary, UserRole.guardian],
         ),
         (
             "admin_or_company_manager",
             get_current_admin_or_company_manager,
-            [UserRole.admin, UserRole.company_manager],
-            [UserRole.student, UserRole.instructor, UserRole.coordinator],
+            [*ADMIN_ROLES, UserRole.company_manager],
+            [UserRole.student, UserRole.instructor, UserRole.coordinator, UserRole.secretary, UserRole.guardian],
         ),
     ]
 
@@ -122,6 +130,9 @@ def main() -> int:
 
     scope_checks = [
         ("admin_can_manage_admin", assert_scope_allowed, UserRole.admin, UserRole.admin, None, None),
+        ("institution_admin_can_manage_coordinator", assert_scope_allowed, UserRole.institution_admin, UserRole.coordinator, None, None),
+        ("coordinator_cannot_manage_institution_admin", assert_scope_forbidden, UserRole.coordinator, UserRole.institution_admin, None, None),
+        ("coordinator_cannot_manage_secretary", assert_scope_forbidden, UserRole.coordinator, UserRole.secretary, None, None),
         ("coordinator_can_manage_student", assert_scope_allowed, UserRole.coordinator, UserRole.student, None, None),
         ("coordinator_can_manage_instructor", assert_scope_allowed, UserRole.coordinator, UserRole.instructor, None, None),
         ("coordinator_cannot_manage_admin", assert_scope_forbidden, UserRole.coordinator, UserRole.admin, None, None),
@@ -135,6 +146,23 @@ def main() -> int:
             fn(name, current_role, target_role, current_org, target_org)
         except AssertionError as exc:
             failures.append(str(exc))
+
+    # Somente super admin atribui ou altera o papel super_admin.
+    boundary_checks = [
+        ("super_admin_can_grant_super_admin", UserRole.super_admin, UserRole.super_admin, None, True),
+        ("institution_admin_cannot_grant_super_admin", UserRole.institution_admin, UserRole.super_admin, None, False),
+        ("institution_admin_cannot_edit_super_admin", UserRole.institution_admin, None, UserRole.super_admin, False),
+        ("institution_admin_can_edit_student", UserRole.institution_admin, UserRole.student, UserRole.student, True),
+    ]
+    for name, current_role, new_role, target_role, allowed in boundary_checks:
+        target = fake_user(target_role) if target_role else None
+        try:
+            ensure_super_admin_boundary(fake_user(current_role), new_role, target)
+            if not allowed:
+                failures.append(f"{name}: expected 403")
+        except HTTPException as exc:
+            if allowed or exc.status_code != 403:
+                failures.append(f"{name}: unexpected {exc.status_code}")
 
     if failures:
         print("Role guard check failed:")

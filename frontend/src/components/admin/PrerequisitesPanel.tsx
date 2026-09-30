@@ -7,6 +7,7 @@ import api from '@/lib/api/client';
 import { endpoints } from '@/lib/api/endpoints';
 import type { Course, CoursePrerequisite } from '@/types/course';
 import ConfirmDialog from './ConfirmDialog';
+import { apiErrorMessage } from '@/lib/api/errors';
 
 interface Props {
   courseId: number;
@@ -39,8 +40,8 @@ export default function PrerequisitesPanel({ courseId, courses, prerequisites, c
       toast.success('Pré-requisito adicionado.');
       setModalOpen(false);
       onChanged();
-    } catch (error: any) {
-      toast.error(error?.response?.data?.detail ?? 'Erro ao adicionar pré-requisito.');
+    } catch (error) {
+      toast.error(apiErrorMessage(error, 'Erro ao adicionar pré-requisito.'));
     }
   };
 

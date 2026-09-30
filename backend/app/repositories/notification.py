@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 from datetime import datetime
 from sqlalchemy import or_
+from sqlalchemy.exc import IntegrityError
 
 from app.models.notification import NotificationEvent, NotificationTemplate, NotificationChannel, NotificationStatus
 
@@ -24,6 +25,15 @@ class NotificationTemplateRepository:
         self.db.commit()
         self.db.refresh(template)
         return template
+
+    def create_if_missing(self, template: NotificationTemplate) -> None:
+        """Insere ignorando duplicidade (outra requisicao pode ter criado o mesmo template)."""
+        try:
+            with self.db.begin_nested():
+                self.db.add(template)
+        except IntegrityError:
+            pass
+        self.db.commit()
 
     def update(self, template: NotificationTemplate) -> NotificationTemplate:
         self.db.commit()
