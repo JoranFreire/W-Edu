@@ -25,7 +25,9 @@ class ClassOfferingService:
     def create(self, data: ClassOfferingCreate) -> ClassOffering:
         self._validate_refs(data.course_id, data.location_id, data.room_id, data.instructor_id)
         self._validate_dates(data.starts_at, data.ends_at)
-        links = self.academic_links.resolve(AcademicLinks(data.term_id, data.subject_id, data.class_group_id))
+        links = self.academic_links.resolve(
+            AcademicLinks(data.term_id, data.subject_id, data.class_group_id, data.grading_scheme_id)
+        )
         class_offering = self.repo.create(ClassOffering(**{**data.model_dump(), **links.__dict__}))
         course = self.course_repo.get_by_id(class_offering.course_id)
         if course:
@@ -66,6 +68,7 @@ class ClassOfferingService:
                 payload.get("term_id", class_offering.term_id),
                 payload.get("subject_id", class_offering.subject_id),
                 payload.get("class_group_id", class_offering.class_group_id),
+                payload.get("grading_scheme_id", class_offering.grading_scheme_id),
             )
         )
         payload.update(links.__dict__)

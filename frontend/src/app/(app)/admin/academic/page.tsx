@@ -1,10 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { BookOpenIcon, BuildingOffice2Icon, CalendarDaysIcon, ClipboardDocumentListIcon, IdentificationIcon, UserGroupIcon } from '@heroicons/react/24/outline';
+import { BookOpenIcon, BuildingOffice2Icon, CalendarDaysIcon, ChartBarIcon, ClipboardDocumentListIcon, IdentificationIcon, UserGroupIcon } from '@heroicons/react/24/outline';
 import ProgramsSection from '@/components/admin/academic/ProgramsSection';
 import ProgramEnrollmentsSection from '@/components/admin/academic/enrollments/ProgramEnrollmentsSection';
 import ClassGroupsSection from '@/components/admin/academic/groups/ClassGroupsSection';
+import GradingSchemesSection from '@/components/admin/academic/schemes/GradingSchemesSection';
 import TermsSection from '@/components/admin/academic/terms/TermsSection';
 import SubjectsSection from '@/components/admin/academic/SubjectsSection';
 import UnitsSection from '@/components/admin/academic/UnitsSection';
@@ -13,7 +14,7 @@ import { useTerminology } from '@/lib/hooks/useTerminology';
 import { useAuthStore } from '@/store/authStore';
 import { isAdminRole } from '@/types/auth';
 
-type AcademicTab = 'programs' | 'subjects' | 'terms' | 'groups' | 'enrollments' | 'units';
+type AcademicTab = 'programs' | 'subjects' | 'terms' | 'groups' | 'enrollments' | 'schemes' | 'units';
 
 export default function AdminAcademicPage() {
   const terms = useTerminology();
@@ -25,6 +26,7 @@ export default function AdminAcademicPage() {
     { id: 'terms', label: terms.academicTerms, icon: CalendarDaysIcon },
     { id: 'groups', label: 'Turmas', icon: UserGroupIcon },
     { id: 'enrollments', label: 'Matrículas', icon: IdentificationIcon },
+    { id: 'schemes', label: 'Avaliação', icon: ChartBarIcon },
     { id: 'units', label: 'Unidades', icon: BuildingOffice2Icon },
   ];
 
@@ -41,6 +43,7 @@ export default function AdminAcademicPage() {
         {tab === 'terms' && <TermsSection />}
         {tab === 'groups' && <ClassGroupsSection canDelete={canDelete} />}
         {tab === 'enrollments' && <ProgramEnrollmentsSection />}
+        {tab === 'schemes' && <GradingSchemesSection canDelete={canDelete} />}
         {tab === 'units' && <UnitsSection canDelete={canDelete} />}
       </div>
     </div>

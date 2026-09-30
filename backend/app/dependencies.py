@@ -76,6 +76,13 @@ def get_current_admin_or_coordinator(current: Student = Depends(get_current_stud
     return current
 
 
+def get_current_teaching_staff(current: Student = Depends(get_current_student)) -> Student:
+    """Quem lanca notas e diario: administradores, coordenadores e instrutores (escopo por oferta na policy)."""
+    if current.role not in ADMIN_ROLES | {UserRole.coordinator, UserRole.instructor}:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Acesso restrito a docentes e coordenação")
+    return current
+
+
 def get_current_academic_staff(current: Student = Depends(get_current_student)) -> Student:
     if current.role not in ADMIN_ROLES | {UserRole.coordinator, UserRole.company_manager}:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Acesso restrito")

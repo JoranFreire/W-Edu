@@ -1,6 +1,6 @@
 # Testes de navegador (Playwright)
 
-Cobrem os fluxos principais do frontend contra a API real: multi-instituição, estrutura acadêmica (programas, disciplinas, matriz curricular, períodos letivos, calendário, matrículas e turmas), agenda, financeiro, trilhas, comunicação, relatórios, cursos, certificados, usuários e conta.
+Cobrem os fluxos principais do frontend contra a API real: multi-instituição, estrutura acadêmica (programas, disciplinas, matriz curricular, períodos letivos, calendário, matrículas e turmas), diário de classe (avaliações, notas e chamada), agenda, financeiro, trilhas, comunicação, relatórios, cursos, certificados, usuários e conta.
 
 ## Preparar
 

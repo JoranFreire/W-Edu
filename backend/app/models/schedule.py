@@ -95,9 +95,12 @@ class ClassOffering(TenantMixin, Base):
     term_id: Mapped[int | None] = mapped_column(ForeignKey("academic_terms.id"), nullable=True, index=True)
     subject_id: Mapped[int | None] = mapped_column(ForeignKey("subjects.id"), nullable=True, index=True)
     class_group_id: Mapped[int | None] = mapped_column(ForeignKey("class_groups.id"), nullable=True, index=True)
+    # Esquema de notas da oferta; vazio usa o padrao da instituicao (Fase 13).
+    grading_scheme_id: Mapped[int | None] = mapped_column(ForeignKey("grading_schemes.id"), nullable=True, index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     course: Mapped["Course"] = relationship()
+    term: Mapped["AcademicTerm | None"] = relationship()
     location: Mapped["Location | None"] = relationship(back_populates="class_offerings")
     room: Mapped["Room | None"] = relationship(back_populates="class_offerings")
     instructor: Mapped["Student | None"] = relationship()

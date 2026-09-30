@@ -36,6 +36,7 @@ export interface ClassOffering {
   term_id: number | null;
   subject_id: number | null;
   class_group_id: number | null;
+  grading_scheme_id: number | null;
   created_at: string;
 }
 

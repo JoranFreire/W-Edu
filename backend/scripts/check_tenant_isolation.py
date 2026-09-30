@@ -290,6 +290,22 @@ async def run() -> int:
         r = await client.get("/academic/terms", headers=admin_a)
         c.expect(len(r.json()) == 1, f"A lists only own terms: {r.json()}")
 
+        # Avaliacao e diario: esquemas por instituicao e ofertas de outra instituicao invisiveis.
+        for headers in (admin_a, admin_b):
+            r = await client.post("/assessment/grading-schemes", json={"name": "Padrão", "is_default": True}, headers=headers)
+            c.expect(r.status_code == 201, f"same scheme name per tenant: {r.status_code} {r.text}")
+        r = await client.get("/assessment/teaching/offerings", headers=admin_a)
+        offering_a = r.json()[0]["id"] if r.status_code == 200 and r.json() else None
+        c.expect(offering_a is not None, f"A has a teaching offering: {r.status_code} {r.text[:120]}")
+        r = await client.get(f"/assessment/offerings/{offering_a}/gradebook", headers=admin_b)
+        c.expect(r.status_code == 404, f"B cannot read A gradebook: {r.status_code}")
+        r = await client.post(f"/assessment/offerings/{offering_a}/items", json={"name": "Invasora"}, headers=admin_b)
+        c.expect(r.status_code == 404, f"B cannot add item to A offering: {r.status_code}")
+        r = await client.post(f"/assessment/offerings/{offering_a}/diary", json={"date": "2027-03-01", "content_taught": "x"}, headers=admin_b)
+        c.expect(r.status_code == 404, f"B cannot write A diary: {r.status_code}")
+        r = await client.get("/assessment/grading-schemes", headers=admin_b)
+        c.expect(len(r.json()) == 1, f"B lists only own schemes: {r.json()}")
+
         # Webhook sem usuario logado: registros herdam a instituicao da aula.
         with SessionLocal() as db:
             aluno_a = db.query(Student).filter(Student.email == "aluno-a@example.com").one().id
