@@ -32,3 +32,6 @@ Thumbs.db
 # IDE
 .vscode/
 .idea/
+
+# Load test
+backend/loadtest/seed.json
