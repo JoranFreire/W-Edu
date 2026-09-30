@@ -152,6 +152,8 @@ class_diary_entries      id, offering_id, date, lesson_count, content_taught, in
 diary_attendance         id, diary_entry_id, enrollment_id, present, absences, justification
 ```
 
+Implementado na Fase 13 (entrega 1), em `/assessment`: `grading_schemes` (com faixas de conceito e esquema padrao da instituicao; `class_offerings.grading_scheme_id` sobrescreve), `assessment_items`, `grade_entries`, `class_diary_entries` e `diary_attendance`, com TenantMixin e RLS. O boletim parcial calcula na hora a media por etapa (aritmetica ou ponderada, normalizada para a escala do esquema), a media geral e a frequencia. Instrutores so operam as turmas que ministram (`app/policies/offering_access.py`); bloqueios por etapa em `app/policies/assessment_locks.py`. Pendente (entrega 2): `period_results`, recuperacao, resultado final e boletim do aluno.
+
 - Os itens de avaliacao podem apontar para o quiz, o trabalho ou a avaliacao pratica que ja existem, e a nota entra automaticamente.
 - O diario de classe reaproveita `scheduled_meetings` quando o encontro estiver agendado.
 - Fechamento de etapa: calcula a media e as faltas, bloqueia a edicao e dispara um evento de notificacao (boletim disponivel).

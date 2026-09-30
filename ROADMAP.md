@@ -4,7 +4,7 @@
 
 **Fase:** 2 — Voz com Professor IA (em andamento)  
 **Ultima atualizacao:** 2026-09-30  
-**Proximo marco:** Fase 13 — Avaliacao, Diario e Frequencia (Fase 12 concluida).
+**Proximo marco:** Fase 13 — Avaliacao, Diario e Frequencia, entrega 2 (fechamento de etapa, recuperacao e resultado final). Entrega 1 (lancamentos) concluida.
 
 ## Visao Alvo
 
@@ -270,11 +270,11 @@ Objetivo: estrutura comum a escola, universidade e profissionalizante.
 
 ### Fase 13 — Avaliacao, Diario e Frequencia
 
-- [ ] Esquemas de avaliacao configuraveis (numerica/conceito, media, recuperacao, frequencia minima).
-- [ ] Plano de avaliacao por oferta e etapa, reaproveitando quiz, trabalho e avaliacao pratica.
-- [ ] Lancamento de notas pelo professor.
-- [ ] Diario de classe com conteudo ministrado e frequencia por disciplina.
-- [ ] Fechamento de etapa com calculo de media, faltas e bloqueio de edicao.
+- [x] Esquemas de avaliacao configuraveis (numerica/conceito, media, recuperacao, frequencia minima).
+- [ ] Plano de avaliacao por oferta e etapa, reaproveitando quiz, trabalho e avaliacao pratica (feito: plano por etapa e importacao do quiz; falta importar trabalho e avaliacao pratica).
+- [x] Lancamento de notas pelo professor.
+- [x] Diario de classe com conteudo ministrado e frequencia por disciplina.
+- [ ] Fechamento de etapa com calculo de media, faltas e bloqueio de edicao (feito: bloqueio e previa das medias/faltas; falta consolidar em `period_results` e avisar o aluno).
 - [ ] Resultado final por disciplina (aprovado, reprovado, reprovado por falta).
 
 ### Fase 14 — Secretaria Academica

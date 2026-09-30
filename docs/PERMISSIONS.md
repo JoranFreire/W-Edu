@@ -83,6 +83,18 @@ Regras: codigo de programa e de disciplina e unico por instituicao; so matrizes 
 
 Calendario e turmas: periodo `planned -> open -> closed` (reabertura permitida); encerrar o periodo encerra as etapas e bloqueia edicao de etapas, eventos do periodo e alocacao de alunos. Matricula no programa usa a matriz vigente por padrao, gera numero `ano + codigo do programa + sequencial` e segue as transicoes `active <-> locked`, `active/locked -> dropped | transferred | cancelled`, `active -> graduated` (finais nao reabrem). Cada matricula ativa fica em no maximo uma turma-grupo por periodo, respeitando as vagas.
 
+## Avaliacao e Diario (`/assessment`)
+
+| Recurso | Student | Instructor | Coordinator | Company Manager | Admin |
+| --- | --- | --- | --- | --- | --- |
+| Ver esquemas de avaliacao | Sim | Sim | Sim | Sim | Sim |
+| Criar/editar esquema | Nao | Nao | Sim | Nao | Sim |
+| Excluir esquema sem turmas | Nao | Nao | Nao | Nao | Sim |
+| Plano de avaliacoes, notas, boletim, diario e chamada | Nao | Turmas que ministra | Todas | Nao | Todas |
+| Inscrever alunos da turma-grupo na oferta | Nao | Nao | Sim | Nao | Sim |
+
+Etapa encerrada (ou periodo letivo encerrado) bloqueia notas e itens da etapa e o diario das datas dentro dela. Faltas justificadas nao contam na frequencia.
+
 ## Agenda e Presencial
 
 | Recurso | Student | Instructor | Coordinator | Company Manager | Admin |

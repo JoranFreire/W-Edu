@@ -1,10 +1,11 @@
-"""Vinculos academicos opcionais de uma oferta: periodo letivo, disciplina e turma-grupo."""
+"""Vinculos academicos opcionais de uma oferta: periodo letivo, disciplina, turma-grupo e esquema de notas."""
 
 from dataclasses import dataclass
 
 from sqlalchemy.orm import Session
 
 from app.repositories.academic import AcademicTermRepository, ClassGroupRepository, SubjectRepository
+from app.repositories.assessment import GradingSchemeRepository
 from app.services.academic.errors import bad_request, not_found
 
 
@@ -13,6 +14,7 @@ class AcademicLinks:
     term_id: int | None
     subject_id: int | None
     class_group_id: int | None
+    grading_scheme_id: int | None = None
 
 
 class OfferingAcademicLinks:
@@ -20,6 +22,7 @@ class OfferingAcademicLinks:
         self.terms = AcademicTermRepository(db)
         self.subjects = SubjectRepository(db)
         self.groups = ClassGroupRepository(db)
+        self.schemes = GradingSchemeRepository(db)
 
     def resolve(self, links: AcademicLinks) -> AcademicLinks:
         """Valida as referencias; a turma-grupo define o periodo quando ele nao vem informado."""
@@ -35,4 +38,6 @@ class OfferingAcademicLinks:
             raise not_found("Período letivo não encontrado")
         if links.subject_id is not None and not self.subjects.get_by_id(links.subject_id):
             raise not_found("Disciplina não encontrada")
-        return AcademicLinks(term_id=term_id, subject_id=links.subject_id, class_group_id=links.class_group_id)
+        if links.grading_scheme_id is not None and not self.schemes.get_by_id(links.grading_scheme_id):
+            raise not_found("Esquema de avaliação não encontrado")
+        return AcademicLinks(term_id, links.subject_id, links.class_group_id, links.grading_scheme_id)

@@ -68,6 +68,7 @@ class ClassOfferingCreate(BaseModel):
     term_id: int | None = None
     subject_id: int | None = None
     class_group_id: int | None = None
+    grading_scheme_id: int | None = None
 
 
 class ClassOfferingUpdate(BaseModel):
@@ -83,6 +84,7 @@ class ClassOfferingUpdate(BaseModel):
     term_id: int | None = None
     subject_id: int | None = None
     class_group_id: int | None = None
+    grading_scheme_id: int | None = None
 
 
 class ClassOfferingOut(BaseModel):
@@ -99,6 +101,7 @@ class ClassOfferingOut(BaseModel):
     term_id: int | None
     subject_id: int | None
     class_group_id: int | None
+    grading_scheme_id: int | None
     created_at: datetime
 
     model_config = {"from_attributes": True}

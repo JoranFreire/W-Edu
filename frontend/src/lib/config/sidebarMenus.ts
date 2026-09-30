@@ -4,7 +4,7 @@ import {
   HomeIcon, BookOpenIcon, ChartBarIcon, MicrophoneIcon, Cog6ToothIcon,
   UsersIcon, AcademicCapIcon, CalendarDaysIcon, ChatBubbleLeftRightIcon,
   BanknotesIcon, Squares2X2Icon, MapIcon, ShieldCheckIcon, DocumentTextIcon,
-  BuildingLibraryIcon, GlobeAltIcon, RectangleStackIcon,
+  BuildingLibraryIcon, GlobeAltIcon, RectangleStackIcon, PencilSquareIcon,
 } from '@heroicons/react/24/outline';
 
 interface MenuItem { name: string; href: string; icon: ComponentType<{ className?: string }> }
@@ -21,6 +21,7 @@ export const studentMenu: MenuItem[] = [
 export const adminMenu: MenuItem[] = [
   { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
   { name: 'Acadêmico', href: '/admin/academic', icon: RectangleStackIcon },
+  { name: 'Diário de classe', href: '/teaching', icon: PencilSquareIcon },
   { name: 'Cursos', href: '/admin/courses', icon: AcademicCapIcon },
   { name: 'Trilhas', href: '/admin/learning-paths', icon: MapIcon },
   { name: 'Agenda', href: '/admin/schedule', icon: CalendarDaysIcon },
@@ -44,6 +45,7 @@ export const superAdminMenu: MenuItem[] = [
 export const coordinatorMenu: MenuItem[] = [
   { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
   { name: 'Acadêmico', href: '/admin/academic', icon: RectangleStackIcon },
+  { name: 'Diário de classe', href: '/teaching', icon: PencilSquareIcon },
   { name: 'Cursos', href: '/admin/courses', icon: AcademicCapIcon },
   { name: 'Trilhas', href: '/admin/learning-paths', icon: MapIcon },
   { name: 'Agenda', href: '/admin/schedule', icon: CalendarDaysIcon },
@@ -53,6 +55,12 @@ export const coordinatorMenu: MenuItem[] = [
   { name: 'Catálogo', href: '/courses', icon: Squares2X2Icon },
   { name: 'Meus certificados', href: '/certificates', icon: ShieldCheckIcon },
   { name: 'Configurações', href: '/settings', icon: Cog6ToothIcon },
+];
+
+export const instructorMenu: MenuItem[] = [
+  { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
+  { name: 'Diário de classe', href: '/teaching', icon: PencilSquareIcon },
+  ...studentMenu.filter((item) => item.href !== '/dashboard'),
 ];
 
 export const companyManagerMenu: MenuItem[] = [
@@ -70,6 +78,7 @@ export function menuForRole(role: UserRole | undefined): MenuItem[] {
   if (role === 'super_admin') return superAdminMenu;
   if (role === 'admin' || role === 'institution_admin') return adminMenu;
   if (role === 'coordinator') return coordinatorMenu;
+  if (role === 'instructor') return instructorMenu;
   if (role === 'company_manager') return companyManagerMenu;
   return studentMenu;
 }
