@@ -10,6 +10,15 @@ from app.models.student import (
     User,
 )
 from app.models.institution import Campus, Institution, InstitutionMembership
+from app.models.academic import (
+    AcademicUnit,
+    Curriculum,
+    CurriculumComponent,
+    Program,
+    Subject,
+    SubjectEquivalence,
+    SubjectPrerequisite,
+)
 from app.models.course import Course, CourseModule, LearningPath, LearningPathCourse, CoursePrerequisite
 from app.models.course import CourseCompletionRule
 from app.models.lesson import Lesson
@@ -50,4 +59,5 @@ __all__ = [
     "Quiz", "QuizQuestion", "QuizAttempt", "Certificate", "ChatConversation", "ChatMessage", "NotificationTemplate", "NotificationEvent", "BillingPlan", "Subscription", "Charge",
     "Location", "Room", "ClassOffering", "ClassEnrollment", "WaitlistEntry", "ScheduledMeeting",
     "AttendanceRecord", "CheckinToken", "PracticalAssessmentRecord", "Document", "DocumentVersion", "ForumThread", "ForumPost",
+    "AcademicUnit", "Program", "Subject", "SubjectPrerequisite", "SubjectEquivalence", "Curriculum", "CurriculumComponent",
 ]

@@ -1,6 +1,7 @@
 import { isAdminRole, type UserRole } from '@/types/auth';
 
 const coordinatorAdminPaths = [
+  '/admin/academic',
   '/admin/courses',
   '/admin/learning-paths',
   '/admin/schedule',

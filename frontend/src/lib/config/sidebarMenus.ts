@@ -4,7 +4,7 @@ import {
   HomeIcon, BookOpenIcon, ChartBarIcon, MicrophoneIcon, Cog6ToothIcon,
   UsersIcon, AcademicCapIcon, CalendarDaysIcon, ChatBubbleLeftRightIcon,
   BanknotesIcon, Squares2X2Icon, MapIcon, ShieldCheckIcon, DocumentTextIcon,
-  BuildingLibraryIcon, GlobeAltIcon,
+  BuildingLibraryIcon, GlobeAltIcon, RectangleStackIcon,
 } from '@heroicons/react/24/outline';
 
 interface MenuItem { name: string; href: string; icon: ComponentType<{ className?: string }> }
@@ -20,6 +20,7 @@ export const studentMenu: MenuItem[] = [
 
 export const adminMenu: MenuItem[] = [
   { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
+  { name: 'Acadêmico', href: '/admin/academic', icon: RectangleStackIcon },
   { name: 'Cursos', href: '/admin/courses', icon: AcademicCapIcon },
   { name: 'Trilhas', href: '/admin/learning-paths', icon: MapIcon },
   { name: 'Agenda', href: '/admin/schedule', icon: CalendarDaysIcon },
@@ -42,6 +43,7 @@ export const superAdminMenu: MenuItem[] = [
 
 export const coordinatorMenu: MenuItem[] = [
   { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
+  { name: 'Acadêmico', href: '/admin/academic', icon: RectangleStackIcon },
   { name: 'Cursos', href: '/admin/courses', icon: AcademicCapIcon },
   { name: 'Trilhas', href: '/admin/learning-paths', icon: MapIcon },
   { name: 'Agenda', href: '/admin/schedule', icon: CalendarDaysIcon },

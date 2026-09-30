@@ -11,7 +11,7 @@ import type { Institution } from '@/types/institution';
 import BrandingFields, { type BrandingValues } from './BrandingFields';
 import BrandingPreview from './BrandingPreview';
 import InstitutionDataFields, { type InstitutionDataValues } from './InstitutionDataFields';
-import { sectionCls } from './formStyles';
+import { sectionCls } from '@/components/common/formStyles';
 
 function SectionTitle({ icon: Icon, title }: { icon: typeof BuildingLibraryIcon; title: string }) {
   return (
