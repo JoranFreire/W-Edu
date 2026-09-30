@@ -60,6 +60,20 @@ Este documento registra a regra operacional por papel. A nomenclatura `User` e `
 | Criar/editar quiz e questoes | Nao | Nao | Sim | Nao | Sim |
 | Excluir quiz e questoes | Nao | Nao | Nao | Nao | Sim |
 
+## Estrutura Curricular (`/academic`)
+
+| Recurso | Student | Instructor | Coordinator | Company Manager | Admin |
+| --- | --- | --- | --- | --- | --- |
+| Ver unidades, programas, disciplinas e matrizes | Sim | Sim | Sim | Sim | Sim |
+| Criar/editar unidade, programa e disciplina | Nao | Nao | Sim | Nao | Sim |
+| Excluir unidade, programa e disciplina | Nao | Nao | Nao | Nao | Sim |
+| Incluir pre-requisito/equivalencia | Nao | Nao | Sim | Nao | Sim |
+| Remover pre-requisito/equivalencia | Nao | Nao | Nao | Nao | Sim |
+| Criar matriz, nova versao, componentes, ativar/arquivar | Nao | Nao | Sim | Nao | Sim |
+| Excluir matriz em rascunho | Nao | Nao | Nao | Nao | Sim |
+
+Regras: codigo de programa e de disciplina e unico por instituicao; so matrizes em rascunho sao editaveis; ativar uma matriz arquiva a vigente do mesmo programa; disciplina usada em matriz nao pode ser excluida (desative-a).
+
 ## Agenda e Presencial
 
 | Recurso | Student | Instructor | Coordinator | Company Manager | Admin |

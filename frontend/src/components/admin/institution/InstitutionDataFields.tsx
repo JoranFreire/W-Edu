@@ -1,5 +1,5 @@
 import { type InstitutionType, institutionTypeLabels } from '@/types/institution';
-import { inputCls, labelCls } from './formStyles';
+import { inputCls, labelCls } from '@/components/common/formStyles';
 
 export interface InstitutionDataValues {
   name: string;

@@ -240,6 +240,34 @@ async def run() -> int:
         r = await client.patch(f"/users/availability/{availability_id}", json={"end_time": "13:00"}, headers=admin_b)
         c.expect(r.status_code == 404, f"B cannot edit A instructor availability: {r.status_code}")
 
+        # Estrutura curricular: mesmo codigo por instituicao, sem referencias cruzadas.
+        subject_ids = {}
+        for key, headers in (("a", admin_a), ("b", admin_b)):
+            r = await client.post("/academic/subjects", json={"code": "MAT1", "name": f"Matematica {key}"}, headers=headers)
+            c.expect(r.status_code == 201, f"same subject code per tenant ({key}): {r.status_code} {r.text}")
+            subject_ids[key] = r.json().get("id")
+        r = await client.get(f"/academic/subjects/{subject_ids['a']}", headers=admin_b)
+        c.expect(r.status_code == 404, f"B cannot read A subject: {r.status_code}")
+        r = await client.post(
+            f"/academic/subjects/{subject_ids['b']}/prerequisites", json={"subject_id": subject_ids["a"]}, headers=admin_b
+        )
+        c.expect(r.status_code == 404, f"B cannot require A subject: {r.status_code}")
+        r = await client.post("/academic/subjects", json={"code": "X", "name": "X", "course_id": course_a}, headers=admin_b)
+        c.expect(r.status_code == 404, f"B subject cannot reuse A course: {r.status_code}")
+        r = await client.post("/academic/programs", json={"code": "EF2", "name": "Fundamental II", "level": "basic"}, headers=admin_a)
+        program_a = r.json().get("id")
+        r = await client.post(f"/academic/programs/{program_a}/curricula", json={"version": "1"}, headers=admin_b)
+        c.expect(r.status_code == 404, f"B cannot add curriculum to A program: {r.status_code}")
+        r = await client.post("/academic/programs", json={"code": "DIR", "name": "Direito"}, headers=admin_b)
+        r = await client.post(f"/academic/programs/{r.json().get('id')}/curricula", json={"version": "1"}, headers=admin_b)
+        curriculum_b = r.json().get("id")
+        r = await client.post(
+            f"/academic/curricula/{curriculum_b}/components", json={"subject_id": subject_ids["a"], "term_number": 1}, headers=admin_b
+        )
+        c.expect(r.status_code == 404, f"B curriculum cannot use A subject: {r.status_code}")
+        r = await client.get("/academic/programs", headers=admin_b)
+        c.expect([p["code"] for p in r.json()] == ["DIR"], f"B lists only own programs: {r.json()}")
+
         # Webhook sem usuario logado: registros herdam a instituicao da aula.
         with SessionLocal() as db:
             aluno_a = db.query(Student).filter(Student.email == "aluno-a@example.com").one().id

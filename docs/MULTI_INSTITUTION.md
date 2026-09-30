@@ -110,6 +110,13 @@ program_enrollments      id, student_id, program_id, curriculum_id, entry_term_i
 class_groups             id, institution_id, program_id, term_id, curriculum_term_number, name, shift, capacity, homeroom_teacher_id
 ```
 
+Implementado na Fase 12 (entrega 1), em `/academic`: `academic_units` a `curriculum_components`, todas com `TenantMixin` e RLS. Regras:
+
+- codigo de programa e de disciplina unico por instituicao;
+- pre-requisitos sem ciclos; equivalencia simetrica, gravada uma vez (`subject_id < equivalent_subject_id`);
+- matriz em `draft` (editavel) -> `active` (uma por programa; ativar outra arquiva a anterior) -> `archived` (vale para quem ja ingressou); alterar uma matriz vigente = nova versao copiada;
+- componente pode sobrescrever carga horaria e creditos da disciplina; o detalhe da matriz traz totais e pendencias (pre-requisito no mesmo periodo ou depois, fora da matriz, periodo alem da duracao do programa).
+
 As estruturas atuais sao estendidas, nao substituidas:
 
 - `class_offerings` ganha `term_id`, `subject_id` e `class_group_id`, todos nullable. Uma oferta pode ser de curso livre (como hoje) ou de disciplina.

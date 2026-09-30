@@ -7,7 +7,7 @@ import { apiErrorMessage } from '@/lib/api/errors';
 import { useCampuses } from '@/lib/hooks/admin/useCampuses';
 import { useErrorToast } from '@/lib/hooks/useErrorToast';
 import type { Campus } from '@/types/institution';
-import { inputCls, sectionCls } from './formStyles';
+import { inputCls, sectionCls } from '@/components/common/formStyles';
 
 export default function CampusesSection() {
   const { campuses, error, create, setActive, remove } = useCampuses();

@@ -1,5 +1,5 @@
 import { isValidBrandColor } from '@/lib/institution/branding';
-import { inputCls, labelCls } from './formStyles';
+import { inputCls, labelCls } from '@/components/common/formStyles';
 
 export const DEFAULT_BRAND_COLOR = '#4f46e5';
 
