@@ -28,8 +28,8 @@ class TeachingOfferingService:
         ensure_can_teach(user, offering)
         return offering
 
-    def active_enrollments(self, offering_id: int) -> list[ClassEnrollment]:
-        return self.repo.active_enrollments(offering_id)
+    def roster(self, offering_id: int) -> list[ClassEnrollment]:
+        return self.repo.roster(offering_id)
 
     def sync_group_enrollments(self, offering_id: int, user: Student) -> SyncEnrollmentsResult:
         """Inscreve na oferta os alunos da turma-grupo vinculada (escola: a turma herda as disciplinas)."""

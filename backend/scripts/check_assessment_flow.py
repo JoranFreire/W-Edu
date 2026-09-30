@@ -1,4 +1,4 @@
-"""Exercise grading schemes, assessment plan, grades, class diary and locks (phase 13, delivery 1).
+"""Exercise grading schemes, assessment plan, grades, class diary, period closing and final results (phase 13).
 
 Uses a temporary SQLite database by default (set DATABASE_URL to use PostgreSQL).
 """
@@ -32,10 +32,13 @@ from app.core.database import Base, SessionLocal, engine
 from app.core.security import hash_password
 from app.core.tenancy import bind_institution
 from app.models.institution import Institution, InstitutionMembership
+from app.models.notification import NotificationEvent, NotificationEventType
 from app.models.lesson import Lesson
 from app.models.quiz import Quiz, QuizAttempt
 from app.models.schedule import AttendanceRecord, AttendanceStatus, ScheduledMeeting
 from app.models.student import Student, UserRole
+from app.schemas.assessment import GradingSchemeOut
+from app.services.assessment.result_rules import decide
 from main import app
 
 
@@ -252,6 +255,80 @@ async def check_diary(c: Checker, h: dict[str, dict], ctx: dict, grades: dict[st
     await c.call("POST", diary, 201, "diary in open period", prof, json={"date": "2027-05-10", "content_taught": "Porcentagem"})
     await c.call("PUT", f"/assessment/items/{grades['quiz']}/grades", 200, "open period still editable", prof,
                  json=[{"class_enrollment_id": grades["bia"], "score": 7}])
+    return first["id"]
+
+
+def check_result_rules(c: Checker) -> None:
+    scheme = GradingSchemeOut(id=None, name="t", scale="numeric", min_value=0, max_value=10, passing_grade=6, formula="weighted",
+                              recovery_enabled=True, min_attendance=75, concepts=[], is_default=False)
+    cases = [
+        ((7, None, 90), (7, "approved")),
+        ((4, None, 90), (4, "recovery")),
+        ((4, 7, 90), (7, "approved")),
+        ((4, 5, 90), (5, "failed")),
+        ((8, None, 60), (8, "failed_attendance")),
+        ((None, None, None), (None, "in_progress")),
+    ]
+    for args, (grade, result) in cases:
+        outcome = decide(*args, scheme)
+        c.expect((outcome.final_grade, outcome.result.value) == (grade, result), f"decide{args} -> {outcome}")
+    no_recovery = scheme.model_copy(update={"recovery_enabled": False})
+    c.expect(decide(4, None, 90, no_recovery).result.value == "failed", "without recovery a low grade fails directly")
+
+
+async def check_results(c: Checker, h: dict[str, dict], ctx: dict, grades: dict[str, int], first_entry: int) -> None:
+    prof, coord, offering = h["prof"], h["coord"], ctx["offering"]
+    base = f"/assessment/offerings/{offering}"
+    await c.call("POST", f"{base}/results/compute", 409, "results need all periods closed", prof)
+
+    # Coordenacao reabre o 1o bimestre para justificar as faltas de Bia e encerra de novo.
+    await c.call("POST", f"/academic/grading-periods/{ctx['p1']}/status", 200, "reopen period 1", coord, json={"status": "open"})
+    await c.call("PUT", f"/assessment/diary-entries/{first_entry}/attendance", 200, "justify bia", prof,
+                 json=[{"class_enrollment_id": grades["bia"], "absences": 2, "justified": True}])
+    await c.call("POST", f"/academic/grading-periods/{ctx['p1']}/status", 200, "close period 1 again", coord, json={"status": "closed"})
+    await c.call("PUT", f"/assessment/items/{grades['quiz']}/grades", 200, "bia low quiz", prof,
+                 json=[{"class_enrollment_id": grades["bia"], "score": 3}])
+
+    closed = await c.call("POST", f"{base}/periods/{ctx['p2']}/close", 200, "close period 2 in offering", prof)
+    c.expect(closed.get("closed_students") == 2, f"closure consolidates both students: {closed}")
+    await c.call("POST", f"{base}/periods/{ctx['p2']}/close", 409, "period already closed", prof)
+    await c.call("PUT", f"/assessment/items/{grades['quiz']}/grades", 409, "closed in offering locks grades", prof,
+                 json=[{"class_enrollment_id": grades["bia"], "score": 9}])
+    await c.call("DELETE", f"{base}/periods/{ctx['p2']}/close", 403, "instructor cannot reopen", prof)
+
+    results = await c.call("POST", f"{base}/results/compute", 200, "compute results", prof)
+    rows = {row["student"]["name"]: row for row in results["rows"]}
+    c.expect(results["pending_period_ids"] == [], f"no pending periods: {results['pending_period_ids']}")
+    c.expect((rows["Ana"]["final_grade"], rows["Ana"]["result"]) == (8.5, "approved"), f"ana approved: {rows['Ana']}")
+    c.expect((rows["Bia"]["final_grade"], rows["Bia"]["result"], rows["Bia"]["attendance_rate"]) == (4.0, "recovery", 100.0), f"bia in recovery: {rows['Bia']}")
+    c.expect([p["average"] for p in rows["Bia"]["periods"]] == [5.0, 3.0], f"bia period results: {rows['Bia']['periods']}")
+
+    await c.call("POST", f"{base}/finalize", 403, "instructor cannot finalize", prof)
+    await c.call("POST", f"{base}/finalize", 409, "pending recovery blocks finalization", coord)
+    card = await c.call("GET", "/assessment/my/report-card", 200, "report card before finalization", h["ana"])
+    c.expect(len(card) == 1 and card[0]["result"] == "in_progress" and len(card[0]["periods"]) == 2, f"closed periods visible, result hidden: {card}")
+
+    recovery = f"{base}/recovery"
+    await c.call("PUT", recovery, 400, "approved student has no recovery", prof, json=[{"class_enrollment_id": grades["ana"], "score": 9}])
+    await c.call("PUT", recovery, 400, "recovery above scale", prof, json=[{"class_enrollment_id": grades["bia"], "score": 11}])
+    after = await c.call("PUT", recovery, 200, "bia recovery", prof, json=[{"class_enrollment_id": grades["bia"], "score": 7}])
+    bia = next(row for row in after["rows"] if row["student"]["name"] == "Bia")
+    c.expect((bia["final_grade"], bia["result"], bia["recovery_score"]) == (7.0, "approved", 7.0), f"recovery replaces lower grade: {bia}")
+
+    final = await c.call("POST", f"{base}/finalize", 200, "finalize", coord)
+    c.expect(final.get("finalized") is True, f"offering finalized: {final.get('finalized')}")
+    await c.call("PUT", recovery, 409, "no recovery after finalization", prof, json=[{"class_enrollment_id": grades["bia"], "score": 8}])
+    await c.call("POST", f"{base}/diary", 409, "diary locked after finalization", prof, json={"date": "2027-06-01", "content_taught": "x"})
+    await c.call("POST", f"{base}/results/compute", 409, "compute locked after finalization", prof)
+    await c.call("DELETE", f"{base}/periods/{ctx['p2']}/close", 409, "no reopen after finalization", coord)
+
+    card = await c.call("GET", "/assessment/my/report-card", 200, "report card after finalization", h["ana"])
+    c.expect((card[0]["finalized"], card[0]["final_grade"], card[0]["result"]) == (True, 8.5, "approved"), f"published result: {card}")
+    results = await c.call("GET", f"{base}/results", 200, "results after finalization", prof)
+    c.expect(len(results["rows"]) == 2, f"completed enrollments still listed: {len(results['rows'])}")
+    with SessionLocal() as db:
+        published = db.query(NotificationEvent).filter(NotificationEvent.event_type == NotificationEventType.grades_published).count()
+    c.expect(published == 2, f"one grades_published notification per student: {published}")
 
 
 async def run() -> int:
@@ -263,7 +340,9 @@ async def run() -> int:
         ctx = await setup_structure(c, h, ids)
         quiz_id, meeting_id = seed_quiz_and_meeting(institution_id, ctx["course"], ctx["offering"], ids)
         grades = await check_grades(c, h, ctx, quiz_id)
-        await check_diary(c, h, ctx, grades, meeting_id)
+        first_entry = await check_diary(c, h, ctx, grades, meeting_id)
+        check_result_rules(c)
+        await check_results(c, h, ctx, grades, first_entry)
 
     if c.failures:
         print("Assessment flow check failed:")

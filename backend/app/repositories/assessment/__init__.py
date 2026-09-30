@@ -4,6 +4,7 @@ from app.repositories.assessment.diary import ClassDiaryRepository, DiaryAttenda
 from app.repositories.assessment.grades import GradeEntryRepository
 from app.repositories.assessment.items import AssessmentItemRepository
 from app.repositories.assessment.offerings import TeachingOfferingRepository
+from app.repositories.assessment.results import PeriodClosureRepository, PeriodResultRepository, StudentEnrollmentRepository
 from app.repositories.assessment.schemes import GradingSchemeRepository
 
 __all__ = [
@@ -12,5 +13,8 @@ __all__ = [
     "DiaryAttendanceRepository",
     "GradeEntryRepository",
     "GradingSchemeRepository",
+    "PeriodClosureRepository",
+    "PeriodResultRepository",
+    "StudentEnrollmentRepository",
     "TeachingOfferingRepository",
 ]

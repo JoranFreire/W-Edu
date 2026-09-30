@@ -6,9 +6,9 @@ from app.models.academic_calendar import GradingPeriod
 from app.models.assessment import AssessmentItem
 from app.models.schedule import ClassOffering
 from app.models.student import Student
-from app.policies.assessment_locks import ensure_unlocked, is_period_locked
+from app.policies.assessment_locks import ensure_offering_open, ensure_unlocked, is_period_locked
 from app.repositories.academic import GradingPeriodRepository
-from app.repositories.assessment import AssessmentItemRepository
+from app.repositories.assessment import AssessmentItemRepository, PeriodClosureRepository
 from app.repositories.quiz import QuizRepository
 from app.schemas.assessment import AssessmentItemCreate, AssessmentItemUpdate
 from app.services.academic.patch import apply_patch
@@ -23,6 +23,7 @@ class AssessmentItemService:
         self.repo = AssessmentItemRepository(db)
         self.periods = GradingPeriodRepository(db)
         self.quizzes = QuizRepository(db)
+        self.closures = PeriodClosureRepository(db)
         self.offerings = TeachingOfferingService(db)
 
     def list(self, offering_id: int, user: Student) -> list[AssessmentItem]:
@@ -31,22 +32,26 @@ class AssessmentItemService:
 
     def create(self, offering_id: int, data: AssessmentItemCreate, user: Student) -> AssessmentItem:
         offering = self.offerings.get_for_teaching(offering_id, user)
+        ensure_offering_open(offering)
         period = self._period_for(offering, data.grading_period_id)
-        ensure_unlocked(is_period_locked(period))
+        ensure_unlocked(is_period_locked(period, self.closures.closed_period_ids(offering_id)))
         self._validate_quiz(data.quiz_id)
         return self.repo.save(AssessmentItem(class_offering_id=offering_id, **data.model_dump()))
 
     def get_editable(self, item_id: int, user: Student) -> AssessmentItem:
-        item = self.get_for_teaching(item_id, user)
-        ensure_unlocked(is_period_locked(item.grading_period))
+        item, offering = self._load(item_id, user)
+        ensure_offering_open(offering)
+        ensure_unlocked(is_period_locked(item.grading_period, self.closures.closed_period_ids(offering.id)))
         return item
 
     def get_for_teaching(self, item_id: int, user: Student) -> AssessmentItem:
+        return self._load(item_id, user)[0]
+
+    def _load(self, item_id: int, user: Student) -> tuple[AssessmentItem, ClassOffering]:
         item = self.repo.get_by_id(item_id)
         if not item:
             raise not_found("Avaliação não encontrada")
-        self.offerings.get_for_teaching(item.class_offering_id, user)
-        return item
+        return item, self.offerings.get_for_teaching(item.class_offering_id, user)
 
     def update(self, item_id: int, data: AssessmentItemUpdate, user: Student) -> AssessmentItem:
         item = self.get_editable(item_id, user)

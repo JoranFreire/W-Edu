@@ -3,7 +3,7 @@
 from datetime import date, datetime, timezone
 import enum
 
-from sqlalchemy import JSON, Boolean, Date, DateTime, Enum as SAEnum, Float, ForeignKey, String, Text, UniqueConstraint
+from sqlalchemy import JSON, Boolean, Date, DateTime, Enum as SAEnum, Float, ForeignKey, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
@@ -84,3 +84,33 @@ class GradeEntry(TenantMixin, Base):
     graded_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
     item: Mapped["AssessmentItem"] = relationship(back_populates="grades")
+
+
+class OfferingPeriodClosure(TenantMixin, Base):
+    """Etapa fechada numa turma: medias e faltas consolidadas e lancamentos bloqueados."""
+
+    __tablename__ = "offering_period_closures"
+    __table_args__ = (UniqueConstraint("class_offering_id", "grading_period_id"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    class_offering_id: Mapped[int] = mapped_column(ForeignKey("class_offerings.id", ondelete="CASCADE"), index=True)
+    grading_period_id: Mapped[int] = mapped_column(ForeignKey("grading_periods.id"), index=True)
+    closed_by_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"))
+    closed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
+class PeriodResult(TenantMixin, Base):
+    """Media e faltas do aluno numa etapa, gravadas no fechamento."""
+
+    __tablename__ = "period_results"
+    __table_args__ = (UniqueConstraint("class_enrollment_id", "grading_period_id"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    class_offering_id: Mapped[int] = mapped_column(ForeignKey("class_offerings.id", ondelete="CASCADE"), index=True)
+    class_enrollment_id: Mapped[int] = mapped_column(ForeignKey("class_enrollments.id"), index=True)
+    grading_period_id: Mapped[int] = mapped_column(ForeignKey("grading_periods.id"), index=True)
+    average: Mapped[float | None] = mapped_column(Float)
+    absences: Mapped[int] = mapped_column(Integer, default=0)
+    closed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+    grading_period: Mapped["GradingPeriod"] = relationship()

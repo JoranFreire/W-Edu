@@ -25,7 +25,7 @@ class DiaryAttendanceService:
         stored = self.repo.by_entry(entry_id)
         absent = self._absent_from_meeting(entry)
         rows = []
-        for enrollment in self.offerings.active_enrollments(entry.class_offering_id):
+        for enrollment in self.offerings.roster(entry.class_offering_id):
             row = stored.get(enrollment.id)
             default_absences = entry.lesson_count if enrollment.student_id in absent else 0
             rows.append(DiaryAttendanceRow(
@@ -39,7 +39,7 @@ class DiaryAttendanceService:
 
     def save(self, entry_id: int, values: list[DiaryAttendanceInput], user: Student) -> list[DiaryAttendanceRow]:
         entry, _ = self.diary.get_editable(entry_id, user)
-        valid_ids = {e.id for e in self.offerings.active_enrollments(entry.class_offering_id)}
+        valid_ids = {e.id for e in self.offerings.roster(entry.class_offering_id)}
         stored = self.repo.by_entry(entry_id)
         for value in values:
             if value.class_enrollment_id not in valid_ids:

@@ -305,6 +305,10 @@ async def run() -> int:
         c.expect(r.status_code == 404, f"B cannot write A diary: {r.status_code}")
         r = await client.get("/assessment/grading-schemes", headers=admin_b)
         c.expect(len(r.json()) == 1, f"B lists only own schemes: {r.json()}")
+        r = await client.get(f"/assessment/offerings/{offering_a}/results", headers=admin_b)
+        c.expect(r.status_code == 404, f"B cannot read A results: {r.status_code}")
+        r = await client.post(f"/assessment/offerings/{offering_a}/finalize", headers=admin_b)
+        c.expect(r.status_code == 404, f"B cannot finalize A offering: {r.status_code}")
 
         # Webhook sem usuario logado: registros herdam a instituicao da aula.
         with SessionLocal() as db:

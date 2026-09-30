@@ -7,7 +7,8 @@ export type NotificationEventType =
   | 'absence_registered'
   | 'attendance_recorded'
   | 'content_published'
-  | 'certificate_issued';
+  | 'certificate_issued'
+  | 'grades_published';
 
 export interface NotificationTemplate {
   id: number;

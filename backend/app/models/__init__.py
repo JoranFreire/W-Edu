@@ -21,7 +21,7 @@ from app.models.academic import (
 )
 from app.models.academic_calendar import AcademicTerm, CalendarEvent, GradingPeriod
 from app.models.academic_groups import ClassGroup, ClassGroupMember, ProgramEnrollment
-from app.models.assessment import AssessmentItem, GradeEntry, GradingScheme
+from app.models.assessment import AssessmentItem, GradeEntry, GradingScheme, OfferingPeriodClosure, PeriodResult
 from app.models.class_diary import ClassDiaryEntry, DiaryAttendance
 from app.models.course import Course, CourseModule, LearningPath, LearningPathCourse, CoursePrerequisite
 from app.models.course import CourseCompletionRule
@@ -66,4 +66,5 @@ __all__ = [
     "AcademicUnit", "Program", "Subject", "SubjectPrerequisite", "SubjectEquivalence", "Curriculum", "CurriculumComponent",
     "AcademicTerm", "GradingPeriod", "CalendarEvent", "ProgramEnrollment", "ClassGroup", "ClassGroupMember",
     "GradingScheme", "AssessmentItem", "GradeEntry", "ClassDiaryEntry", "DiaryAttendance",
+    "OfferingPeriodClosure", "PeriodResult",
 ]

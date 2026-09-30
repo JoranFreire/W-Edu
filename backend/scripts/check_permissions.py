@@ -129,6 +129,13 @@ EXPECTED: list[ExpectedRoute] = [
     ("DELETE", "/assessment/diary-entries/{entry_id}", "get_current_teaching_staff"),
     ("GET", "/assessment/diary-entries/{entry_id}/attendance", "get_current_teaching_staff"),
     ("PUT", "/assessment/diary-entries/{entry_id}/attendance", "get_current_teaching_staff"),
+    ("POST", "/assessment/offerings/{offering_id}/periods/{period_id}/close", "get_current_teaching_staff"),
+    ("DELETE", "/assessment/offerings/{offering_id}/periods/{period_id}/close", "get_current_admin_or_coordinator"),
+    ("GET", "/assessment/offerings/{offering_id}/results", "get_current_teaching_staff"),
+    ("POST", "/assessment/offerings/{offering_id}/results/compute", "get_current_teaching_staff"),
+    ("PUT", "/assessment/offerings/{offering_id}/recovery", "get_current_teaching_staff"),
+    ("POST", "/assessment/offerings/{offering_id}/finalize", "get_current_admin_or_coordinator"),
+    ("GET", "/assessment/my/report-card", "get_current_student"),
 ]
 
 

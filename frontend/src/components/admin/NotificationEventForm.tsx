@@ -7,7 +7,7 @@ import api from '@/lib/api/client';
 import { endpoints } from '@/lib/api/endpoints';
 import type { NotificationChannel, NotificationEventType } from '@/types/notification';
 
-const eventTypes: NotificationEventType[] = ['class_created', 'meeting_created', 'meeting_reminder', 'absence_registered', 'attendance_recorded', 'content_published', 'certificate_issued'];
+const eventTypes: NotificationEventType[] = ['class_created', 'meeting_created', 'meeting_reminder', 'absence_registered', 'attendance_recorded', 'content_published', 'certificate_issued', 'grades_published'];
 const channels: NotificationChannel[] = ['internal', 'whatsapp', 'email', 'push'];
 const inputCls = 'block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-sm text-gray-900 dark:text-white';
 

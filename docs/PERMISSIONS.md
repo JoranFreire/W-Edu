@@ -92,8 +92,11 @@ Calendario e turmas: periodo `planned -> open -> closed` (reabertura permitida);
 | Excluir esquema sem turmas | Nao | Nao | Nao | Nao | Sim |
 | Plano de avaliacoes, notas, boletim, diario e chamada | Nao | Turmas que ministra | Todas | Nao | Todas |
 | Inscrever alunos da turma-grupo na oferta | Nao | Nao | Sim | Nao | Sim |
+| Fechar etapa na turma, calcular resultado e lancar recuperacao | Nao | Turmas que ministra | Todas | Nao | Todas |
+| Reabrir etapa fechada na turma e publicar resultado (finalizar turma) | Nao | Nao | Sim | Nao | Sim |
+| Ver o proprio boletim (`/assessment/my/report-card`) | Sim | Sim | Sim | Sim | Sim |
 
-Etapa encerrada (ou periodo letivo encerrado) bloqueia notas e itens da etapa e o diario das datas dentro dela. Faltas justificadas nao contam na frequencia.
+Etapa encerrada na instituicao, etapa fechada na turma ou periodo letivo encerrado bloqueia notas e itens da etapa e o diario das datas dentro dela; turma finalizada bloqueia tudo. Faltas justificadas nao contam na frequencia. O boletim do aluno mostra so etapas fechadas e, apos a publicacao, o resultado final.
 
 ## Agenda e Presencial
 

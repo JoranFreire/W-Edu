@@ -3,6 +3,7 @@ from datetime import date, datetime
 from pydantic import BaseModel, Field, model_validator
 
 from app.models.assessment import AssessmentKind, AverageFormula, GradingScale
+from app.models.schedule import ClassEnrollmentResult
 from app.schemas.academic_groups import PersonSummary
 
 
@@ -195,3 +196,57 @@ class DiaryAttendanceRow(BaseModel):
 
 class SyncEnrollmentsResult(BaseModel):
     created: int
+
+
+class PeriodClosureOut(BaseModel):
+    grading_period_id: int
+    closed_students: int
+
+
+class PeriodResultOut(BaseModel):
+    grading_period_id: int
+    average: float | None
+    absences: int
+
+
+class FinalResultRow(BaseModel):
+    class_enrollment_id: int
+    student: PersonSummary
+    periods: list[PeriodResultOut]
+    average: float | None
+    recovery_score: float | None
+    final_grade: float | None
+    attendance_rate: float | None
+    result: ClassEnrollmentResult
+
+
+class OfferingResultsOut(BaseModel):
+    scheme: GradingSchemeOut
+    closed_period_ids: list[int]
+    pending_period_ids: list[int]
+    finalized: bool
+    rows: list[FinalResultRow]
+
+
+class RecoveryInput(BaseModel):
+    class_enrollment_id: int
+    score: float | None = Field(default=None, ge=0)
+
+
+class ReportCardPeriod(BaseModel):
+    name: str
+    average: float | None
+    absences: int
+
+
+class ReportCardEntry(BaseModel):
+    class_offering_id: int
+    offering_name: str
+    periods: list[ReportCardPeriod]
+    final_grade: float | None
+    recovery_score: float | None
+    attendance_rate: float | None
+    result: ClassEnrollmentResult
+    finalized: bool
+    passing_grade: float
+    min_attendance: float

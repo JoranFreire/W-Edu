@@ -1,4 +1,4 @@
-import type { AssessmentKind, AverageFormula, GradingScale } from '@/types/assessment';
+import type { AssessmentKind, AverageFormula, ClassEnrollmentResult, GradingScale } from '@/types/assessment';
 
 export const assessmentKindLabels: Record<AssessmentKind, string> = {
   test: 'Prova',
@@ -16,6 +16,14 @@ export const gradingScaleLabels: Record<GradingScale, string> = {
 export const averageFormulaLabels: Record<AverageFormula, string> = {
   arithmetic: 'Média aritmética',
   weighted: 'Média ponderada (pesos)',
+};
+
+export const resultLabels: Record<ClassEnrollmentResult, string> = {
+  in_progress: 'Em andamento',
+  recovery: 'Recuperação',
+  approved: 'Aprovado',
+  failed: 'Reprovado',
+  failed_attendance: 'Reprovado por falta',
 };
 
 /** Nota formatada no padrao brasileiro (virgula), vazia quando ainda nao lancada. */

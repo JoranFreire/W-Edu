@@ -22,3 +22,31 @@ export async function createStudent(request: APIRequestContext, name: string, in
   if (!response.ok()) throw new Error(`createStudent: ${response.status()} ${await response.text()}`);
   return { name, email };
 }
+
+async function tokenHeaders(request: APIRequestContext, email: string, institution: string) {
+  const response = await request.post(`${API_URL}/auth/login`, { data: { email, password: E2E_PASSWORD, institution } });
+  const { access_token: token } = await response.json();
+  return { Authorization: `Bearer ${token}`, 'X-Institution': institution };
+}
+
+/** Turma nova do curso Matemática, ministrada pelo Instrutor Alfa, com o aluno informado inscrito. */
+export async function createOfferingWithStudent(request: APIRequestContext, name: string, studentEmail: string, institution = 'escola-alfa') {
+  const admin = await adminHeaders(request, institution);
+  const courses: { id: number; name: string }[] = await (await request.get(`${API_URL}/courses`, { headers: admin })).json();
+  const people: { id: number; email: string }[] = await (await request.get(`${API_URL}/admin/users`, { headers: admin })).json();
+  const course = courses.find((item) => item.name === 'Matemática');
+  const instructor = people.find((person) => person.email === users.instrutor);
+  const now = Date.now();
+  const response = await request.post(`${API_URL}/schedule/classes`, {
+    headers: admin,
+    data: {
+      course_id: course?.id, name, capacity: 10, status: 'open', instructor_id: instructor?.id,
+      starts_at: new Date(now).toISOString(), ends_at: new Date(now + 30 * 86_400_000).toISOString(),
+    },
+  });
+  if (!response.ok()) throw new Error(`createOffering: ${response.status()} ${await response.text()}`);
+  const offering: { id: number } = await response.json();
+  const join = await request.post(`${API_URL}/schedule/classes/${offering.id}/join`, { headers: await tokenHeaders(request, studentEmail, institution) });
+  if (!join.ok()) throw new Error(`join: ${join.status()} ${await join.text()}`);
+  return offering;
+}

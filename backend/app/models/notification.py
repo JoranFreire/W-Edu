@@ -29,6 +29,7 @@ class NotificationEventType(str, enum.Enum):
     attendance_recorded = "attendance_recorded"
     content_published = "content_published"
     certificate_issued = "certificate_issued"
+    grades_published = "grades_published"
 
 
 class NotificationTemplate(TenantMixin, Base):

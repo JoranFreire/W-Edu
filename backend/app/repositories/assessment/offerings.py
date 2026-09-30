@@ -18,12 +18,13 @@ class TeachingOfferingRepository(Repository[ClassOffering]):
             query = query.filter(ClassOffering.instructor_id == instructor_id)
         return query.order_by(ClassOffering.starts_at.desc()).all()
 
-    def active_enrollments(self, offering_id: int) -> list[ClassEnrollment]:
+    def roster(self, offering_id: int) -> list[ClassEnrollment]:
+        """Alunos da turma: inscricoes ativas ou concluidas (canceladas ficam de fora)."""
         return (
             self.db.query(ClassEnrollment)
             .options(joinedload(ClassEnrollment.student))
             .join(Student, ClassEnrollment.student_id == Student.id)
-            .filter(ClassEnrollment.class_offering_id == offering_id, ClassEnrollment.status == ClassEnrollmentStatus.active)
+            .filter(ClassEnrollment.class_offering_id == offering_id, ClassEnrollment.status != ClassEnrollmentStatus.cancelled)
             .order_by(Student.name)
             .all()
         )
