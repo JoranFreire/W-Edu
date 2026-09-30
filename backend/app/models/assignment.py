@@ -5,6 +5,7 @@ from sqlalchemy import DateTime, Enum as SAEnum, ForeignKey, Integer, String, Te
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
+from app.core.tenancy import TenantMixin
 
 
 class AssignmentSubmissionStatus(str, enum.Enum):
@@ -13,7 +14,7 @@ class AssignmentSubmissionStatus(str, enum.Enum):
     returned = "returned"
 
 
-class AssignmentSubmission(Base):
+class AssignmentSubmission(TenantMixin, Base):
     __tablename__ = "assignment_submissions"
     __table_args__ = (UniqueConstraint("lesson_id", "student_id"),)
 

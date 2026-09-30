@@ -49,7 +49,7 @@ class NotificationTemplate(TenantMixin, Base):
     )
 
 
-class NotificationEvent(Base):
+class NotificationEvent(TenantMixin, Base):
     __tablename__ = "notification_events"
 
     id: Mapped[int] = mapped_column(primary_key=True)

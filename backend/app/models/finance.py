@@ -60,7 +60,7 @@ class BillingPlan(TenantMixin, Base):
     charges: Mapped[list["Charge"]] = relationship(back_populates="billing_plan")
 
 
-class Subscription(Base):
+class Subscription(TenantMixin, Base):
     __tablename__ = "subscriptions"
     __table_args__ = (
         UniqueConstraint("billing_plan_id", "student_id"),
@@ -87,7 +87,7 @@ class Subscription(Base):
     charges: Mapped[list["Charge"]] = relationship(back_populates="subscription")
 
 
-class Charge(Base):
+class Charge(TenantMixin, Base):
     __tablename__ = "charges"
 
     id: Mapped[int] = mapped_column(primary_key=True)

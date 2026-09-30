@@ -62,7 +62,7 @@ class Location(TenantMixin, Base):
     class_offerings: Mapped[list["ClassOffering"]] = relationship(back_populates="location")
 
 
-class Room(Base):
+class Room(TenantMixin, Base):
     __tablename__ = "rooms"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -103,7 +103,7 @@ class ClassOffering(TenantMixin, Base):
     charges: Mapped[list["Charge"]] = relationship(back_populates="class_offering")
 
 
-class ClassEnrollment(Base):
+class ClassEnrollment(TenantMixin, Base):
     __tablename__ = "class_enrollments"
     __table_args__ = (UniqueConstraint("class_offering_id", "student_id"),)
 
@@ -120,7 +120,7 @@ class ClassEnrollment(Base):
     student: Mapped["Student"] = relationship()
 
 
-class WaitlistEntry(Base):
+class WaitlistEntry(TenantMixin, Base):
     __tablename__ = "waitlist_entries"
     __table_args__ = (UniqueConstraint("class_offering_id", "student_id"),)
 
@@ -134,7 +134,7 @@ class WaitlistEntry(Base):
     student: Mapped["Student"] = relationship()
 
 
-class ScheduledMeeting(Base):
+class ScheduledMeeting(TenantMixin, Base):
     __tablename__ = "scheduled_meetings"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -158,7 +158,7 @@ class ScheduledMeeting(Base):
     practical_assessments: Mapped[list["PracticalAssessmentRecord"]] = relationship(back_populates="meeting", cascade="all, delete-orphan")
 
 
-class AttendanceRecord(Base):
+class AttendanceRecord(TenantMixin, Base):
     __tablename__ = "attendance_records"
     __table_args__ = (UniqueConstraint("scheduled_meeting_id", "student_id"),)
 
@@ -176,7 +176,7 @@ class AttendanceRecord(Base):
     student: Mapped["Student"] = relationship()
 
 
-class CheckinToken(Base):
+class CheckinToken(TenantMixin, Base):
     __tablename__ = "checkin_tokens"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -189,7 +189,7 @@ class CheckinToken(Base):
     meeting: Mapped["ScheduledMeeting"] = relationship(back_populates="checkin_tokens")
 
 
-class PracticalAssessmentRecord(Base):
+class PracticalAssessmentRecord(TenantMixin, Base):
     __tablename__ = "practical_assessment_records"
     __table_args__ = (UniqueConstraint("scheduled_meeting_id", "student_id"),)
 

@@ -51,7 +51,7 @@ class Course(TenantMixin, Base):
     charges: Mapped[list["Charge"]] = relationship(back_populates="course")
 
 
-class CourseModule(Base):
+class CourseModule(TenantMixin, Base):
     __tablename__ = "course_modules"
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -80,7 +80,7 @@ class LearningPath(TenantMixin, Base):
     )
 
 
-class LearningPathCourse(Base):
+class LearningPathCourse(TenantMixin, Base):
     __tablename__ = "learning_path_courses"
     __table_args__ = (UniqueConstraint("learning_path_id", "course_id"),)
 
@@ -93,7 +93,7 @@ class LearningPathCourse(Base):
     course: Mapped["Course"] = relationship(back_populates="path_links")
 
 
-class CoursePrerequisite(Base):
+class CoursePrerequisite(TenantMixin, Base):
     __tablename__ = "course_prerequisites"
     __table_args__ = (UniqueConstraint("course_id", "prerequisite_course_id"),)
 
@@ -111,7 +111,7 @@ class CoursePrerequisite(Base):
     )
 
 
-class CourseCompletionRule(Base):
+class CourseCompletionRule(TenantMixin, Base):
     __tablename__ = "course_completion_rules"
     __table_args__ = (UniqueConstraint("course_id"),)
 

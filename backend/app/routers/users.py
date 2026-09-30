@@ -124,6 +124,15 @@ def add_instructor_availability(
     return UserService(db).add_instructor_availability(user_id, data)
 
 
+def ensure_availability_owner_scope(current: User, service: UserService, owner_id: int) -> None:
+    if current.id == owner_id:
+        return
+    if current.role not in ADMIN_ROLES:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Usuário fora do seu escopo")
+    # Disponibilidade e do usuario, nao da instituicao: o dono precisa ser membro da instituicao ativa.
+    service.get_or_404(owner_id)
+
+
 @router.patch("/availability/{availability_id}", response_model=InstructorAvailabilityOut)
 def update_instructor_availability(
     availability_id: int,
@@ -134,8 +143,7 @@ def update_instructor_availability(
     availability = UserService(db).availability_repo.get_by_id(availability_id)
     if not availability:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Disponibilidade não encontrada")
-    if current.id != availability.instructor_profile.student_id and current.role not in ADMIN_ROLES:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Usuário fora do seu escopo")
+    ensure_availability_owner_scope(current, UserService(db), availability.instructor_profile.student_id)
     return UserService(db).update_instructor_availability(availability_id, data)
 
 
@@ -149,8 +157,7 @@ def delete_instructor_availability(
     availability = service.availability_repo.get_by_id(availability_id)
     if not availability:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Disponibilidade não encontrada")
-    if current.id != availability.instructor_profile.student_id and current.role not in ADMIN_ROLES:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Usuário fora do seu escopo")
+    ensure_availability_owner_scope(current, UserService(db), availability.instructor_profile.student_id)
     service.delete_instructor_availability(availability_id)
 
 

@@ -60,7 +60,7 @@ class Document(TenantMixin, Base):
     )
 
 
-class DocumentVersion(Base):
+class DocumentVersion(TenantMixin, Base):
     __tablename__ = "document_versions"
     __table_args__ = (UniqueConstraint("document_id", "version_number"),)
 

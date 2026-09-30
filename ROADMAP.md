@@ -244,7 +244,7 @@ Objetivo: uma instalacao atendendo varias instituicoes com dados isolados.
 - [x] Resolver tenant por header `X-Institution` validado contra membership e claim `inst` do JWT.
 - [ ] Resolver tenant por subdominio.
 - [x] Filtro obrigatorio por instituicao (eventos do ORM em `app/core/tenancy.py`, sem depender de cada repository).
-- [ ] Isolar acesso direto por id a tabelas filhas (aulas, modulos, inscricoes etc.) validando o pai.
+- [x] Isolar tabelas filhas (aulas, modulos, inscricoes, encontros, cobrancas etc.) com `institution_id` proprio e validacao de referencias cruzadas na gravacao.
 - [x] Novos papeis: `super_admin`, `institution_admin`, `secretary`, `guardian`.
 - [ ] Atualizar matriz e verificadores de permissao com escopo de instituicao.
 - [x] API da plataforma (super admin) para criar/gerir instituicoes (`/platform/institutions`).

@@ -3,9 +3,10 @@ from sqlalchemy import ForeignKey, DateTime, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
+from app.core.tenancy import TenantMixin
 
 
-class Enrollment(Base):
+class Enrollment(TenantMixin, Base):
     __tablename__ = "enrollments"
     __table_args__ = (UniqueConstraint("student_id", "course_id"),)
 

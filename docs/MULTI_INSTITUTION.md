@@ -43,12 +43,12 @@ campuses                 id, institution_id, name, address, is_active
 ### 2.2 Isolamento
 
 - Coluna `institution_id` em todas as tabelas raiz: `courses`, `learning_paths`, `locations`, `class_offerings`, `organizations`, `billing_plans`, `documents`, `notification_templates`, `certificates` e as novas tabelas academicas.
-- As tabelas filhas herdam o isolamento pelo pai. Exemplo: `lessons` via `courses`.
+- As tabelas filhas tambem tem `institution_id` (desnormalizado a partir do pai), para que acesso direto por id seja filtrado e o RLS futuro seja simples. Exemplo: `lessons` herda de `courses`. Perfis, disponibilidade e avaliacoes de instrutor pertencem ao usuario e sao protegidos pelo filtro de membros.
 - Resolucao do tenant: subdominio (`escola-x.wedu.com.br`) ou header `X-Institution`, validado contra o claim `inst` do JWT.
 - Uma dependencia `get_current_institution` injetada nos routers e um filtro obrigatorio aplicado pelo ORM.
 - Numa etapa posterior, Row Level Security no PostgreSQL como segunda barreira.
 
-**Implementado (Fase 11, backend):** `app/core/tenancy.py` guarda a instituicao ativa em `Session.info` na autenticacao. Com ela vinculada, toda consulta a models com `TenantMixin` recebe `institution_id = <ativa>` (inclusive relationships e `Session.get`), inserts recebem a instituicao automaticamente e usuarios ficam restritos aos membros da instituicao. Consultas globais deliberadas usam `execution_options(**UNSCOPED)`. Sessoes sem instituicao (worker de notificacoes, rotas publicas) nao sao filtradas. Nesta etapa `users.role` continua sendo o papel efetivo; `institution_memberships.role` e mantido sincronizado e passa a ser a fonte quando os papeis por instituicao forem ativados.
+**Implementado (Fase 11, backend):** `app/core/tenancy.py` guarda a instituicao ativa em `Session.info` na autenticacao. Com ela vinculada, toda consulta a models com `TenantMixin` recebe `institution_id = <ativa>` (inclusive relationships e `Session.get`), inserts recebem a instituicao automaticamente e usuarios ficam restritos aos membros da instituicao. Toda gravacao valida que registros e usuarios referenciados por FK sao da mesma instituicao (404 caso contrario); sem instituicao ativa, como em webhooks, o registro herda a instituicao do pai. Consultas globais deliberadas usam `execution_options(**UNSCOPED)`. Sessoes sem instituicao (worker de notificacoes, rotas publicas) nao sao filtradas. Nesta etapa `users.role` continua sendo o papel efetivo; `institution_memberships.role` e mantido sincronizado e passa a ser a fonte quando os papeis por instituicao forem ativados.
 
 ### 2.3 Papeis
 

@@ -30,7 +30,9 @@ import starlette.routing
 import app.models  # noqa: F401
 from app.core.database import Base, SessionLocal, engine
 from app.core.security import hash_password
+from app.models.attendance import Attendance
 from app.models.institution import Institution, InstitutionMembership
+from app.models.session import Session as VoiceSession
 from app.models.student import Student, UserRole
 from main import app
 
@@ -64,6 +66,7 @@ def seed() -> None:
             (Student(name="Aluno A", email="aluno-a@example.com", password_hash=hash_password(PASSWORD), role=UserRole.student), [inst_a]),
             (Student(name="Professor AB", email="prof@example.com", password_hash=hash_password(PASSWORD), role=UserRole.instructor), [inst_a, inst_b]),
             (Student(name="Root", email="root@example.com", password_hash=hash_password(PASSWORD), role=UserRole.super_admin), []),
+            (Student(name="Instrutor A", email="instr-a@example.com", password_hash=hash_password(PASSWORD), role=UserRole.instructor), [inst_a]),
         ]
         for user, institutions in users:
             db.add(user)
@@ -104,6 +107,7 @@ async def run() -> int:
         course_a = r.json().get("id")
         r = await client.post("/courses", json={"name": "Direito B"}, headers=admin_b)
         c.expect(r.status_code == 201, f"admin B create course: {r.status_code}")
+        course_b = r.json().get("id")
 
         r = await client.get("/courses", headers=admin_a)
         c.expect([x["name"] for x in r.json()] == ["Matematica A"], f"A lists only own courses: {r.json()}")
@@ -185,6 +189,66 @@ async def run() -> int:
         c.expect(r.status_code == 404, f"B cannot use A campus: {r.status_code}")
         r = await client.post("/schedule/locations", json={"name": "Predio 1", "campus_id": campus_a}, headers=admin_a)
         c.expect(r.status_code == 201, f"A location on A campus: {r.status_code} {r.text}")
+
+        # Tabelas filhas: acesso por id e referencias cruzadas.
+        r = await client.post("/lessons", json={"course_id": course_a, "title": "Aula A"}, headers=admin_a)
+        c.expect(r.status_code == 201, f"admin A create lesson: {r.status_code} {r.text}")
+        lesson_a = r.json().get("id")
+        r = await client.get(f"/lessons/{lesson_a}", headers=admin_b)
+        c.expect(r.status_code == 404, f"B cannot read A lesson by id: {r.status_code}")
+        r = await client.get(f"/lessons/course/{course_a}", headers=admin_b)
+        c.expect(r.status_code == 404 or r.json() == [], f"B cannot list A lessons: {r.status_code} {r.text}")
+        r = await client.patch(f"/lessons/{lesson_a}", json={"title": "Invadida"}, headers=admin_b)
+        c.expect(r.status_code == 404, f"B cannot edit A lesson: {r.status_code}")
+        r = await client.post("/lessons", json={"course_id": course_a, "title": "Intrusa"}, headers=admin_b)
+        c.expect(r.status_code == 404, f"B cannot attach lesson to A course: {r.status_code} {r.text}")
+        r = await client.post("/courses/{}/modules".format(course_a), json={"title": "Intruso"}, headers=admin_b)
+        c.expect(r.status_code == 404, f"B cannot add module to A course: {r.status_code} {r.text}")
+
+        with SessionLocal() as db:
+            instr_a = db.query(Student).filter(Student.email == "instr-a@example.com").one().id
+        class_payload = {
+            "name": "Turma",
+            "starts_at": "2027-02-01T08:00:00Z",
+            "ends_at": "2027-06-30T12:00:00Z",
+            "capacity": 30,
+        }
+        r = await client.post("/schedule/classes", json={**class_payload, "course_id": course_a}, headers=admin_b)
+        c.expect(r.status_code == 404, f"B cannot open class on A course: {r.status_code} {r.text}")
+        r = await client.post(
+            "/schedule/classes",
+            json={**class_payload, "course_id": course_b, "instructor_id": instr_a},
+            headers=admin_b,
+        )
+        c.expect(r.status_code == 404, f"B cannot assign A-only instructor: {r.status_code} {r.text}")
+        r = await client.post(
+            "/schedule/classes",
+            json={**class_payload, "course_id": course_a, "instructor_id": instr_a},
+            headers=admin_a,
+        )
+        c.expect(r.status_code == 201, f"A opens class with own instructor: {r.status_code} {r.text}")
+
+        r = await client.post(
+            f"/users/{instr_a}/availability",
+            json={"day_of_week": 1, "start_time": "08:00", "end_time": "12:00"},
+            headers=await c.login("instr-a@example.com"),
+        )
+        c.expect(r.status_code == 201, f"instructor adds availability: {r.status_code} {r.text}")
+        availability_id = r.json().get("id")
+        r = await client.patch(f"/users/availability/{availability_id}", json={"end_time": "13:00"}, headers=admin_b)
+        c.expect(r.status_code == 404, f"B cannot edit A instructor availability: {r.status_code}")
+
+        # Webhook sem usuario logado: registros herdam a instituicao da aula.
+        with SessionLocal() as db:
+            aluno_a = db.query(Student).filter(Student.email == "aluno-a@example.com").one().id
+            db.add(VoiceSession(student_id=aluno_a, lesson_id=lesson_a, bevox_session_id="bv-1"))
+            db.commit()
+        r = await client.post("/webhooks/bevox/session-ended", json={"bevox_session_id": "bv-1", "transcript": "ok"})
+        c.expect(r.status_code == 200, f"bevox webhook: {r.status_code} {r.text}")
+        with SessionLocal() as db:
+            institution_a = db.query(Institution).filter(Institution.slug == "escola-a").one().id
+            attendance = db.query(Attendance).filter(Attendance.lesson_id == lesson_a).one()
+            c.expect(attendance.institution_id == institution_a, f"webhook attendance tenant: {attendance.institution_id}")
 
     if c.failures:
         print("Tenant isolation check failed:")

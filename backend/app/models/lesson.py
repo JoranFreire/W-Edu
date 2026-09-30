@@ -4,6 +4,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 import enum
 
 from app.core.database import Base
+from app.core.tenancy import TenantMixin
 
 
 class LessonType(str, enum.Enum):
@@ -16,7 +17,7 @@ class LessonType(str, enum.Enum):
     assessment = "assessment"
 
 
-class Lesson(Base):
+class Lesson(TenantMixin, Base):
     __tablename__ = "lessons"
 
     id: Mapped[int] = mapped_column(primary_key=True)

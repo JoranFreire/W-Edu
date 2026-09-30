@@ -4,9 +4,10 @@ from sqlalchemy import DateTime, ForeignKey, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
+from app.core.tenancy import TenantMixin
 
 
-class ChatConversation(Base):
+class ChatConversation(TenantMixin, Base):
     __tablename__ = "chat_conversations"
     __table_args__ = (UniqueConstraint("course_id", "student_id", "instructor_id"),)
 
@@ -32,7 +33,7 @@ class ChatConversation(Base):
     )
 
 
-class ChatMessage(Base):
+class ChatMessage(TenantMixin, Base):
     __tablename__ = "chat_messages"
 
     id: Mapped[int] = mapped_column(primary_key=True)
