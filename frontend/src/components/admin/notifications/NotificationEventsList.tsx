@@ -1,3 +1,4 @@
+import { notificationChannelLabels, notificationEventLabel, notificationStatusLabels } from '@/lib/notifications/labels';
 import type { NotificationEvent } from '@/types/notification';
 
 export default function NotificationEventsList({ events, onMarkSent, onMarkFailed }: {
@@ -14,11 +15,11 @@ export default function NotificationEventsList({ events, onMarkSent, onMarkFaile
           {events.map((event) => (
             <div key={event.id} className="px-5 py-4 flex items-start justify-between gap-4">
               <div className="min-w-0">
-                <div className="flex items-center gap-2">
-                  <p className="text-sm font-medium text-gray-900 dark:text-white">{event.event_type}</p>
-                  <span className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300">{event.status}</span>
+                <div className="flex flex-wrap items-center gap-2">
+                  <p className="text-sm font-semibold text-gray-900 dark:text-white">{event.title}</p>
+                  <span className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300">{notificationStatusLabels[event.status]}</span>
                 </div>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 break-all">{event.title}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{notificationEventLabel(event.event_type)} · {notificationChannelLabels[event.channel]}</p>
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 break-all">{event.body}</p>
                 {event.scheduled_for && <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Agendado para {new Date(event.scheduled_for).toLocaleString('pt-BR')}</p>}
               </div>

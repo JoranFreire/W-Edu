@@ -1,5 +1,6 @@
 import CollectionView from '@/components/common/CollectionView';
 import type { ViewMode } from '@/lib/hooks/useViewMode';
+import { notificationChannelLabels, notificationEventLabel } from '@/lib/notifications/labels';
 import type { NotificationTemplate } from '@/types/notification';
 
 function ActiveBadge({ active }: { active: boolean }) {
@@ -8,6 +9,17 @@ function ActiveBadge({ active }: { active: boolean }) {
       {active ? 'Ativo' : 'Inativo'}
     </span>
   );
+}
+
+/** Titulo enviado ao destinatario, so quando difere do nome do evento. */
+function SentTitle({ template, className }: { template: NotificationTemplate; className: string }) {
+  if (template.title_template === notificationEventLabel(template.key)) return null;
+  return <p className={className}>Título: {template.title_template}</p>;
+}
+
+/** Codigo interno do template: discreto, para quem integra ou depura. */
+function TemplateKey({ value }: { value: string }) {
+  return <code className="text-[11px] text-gray-400 dark:text-gray-500">{value}</code>;
 }
 
 export default function NotificationTemplatesGrid({ templates, mode }: { templates: NotificationTemplate[]; mode: ViewMode }) {
@@ -22,22 +34,26 @@ export default function NotificationTemplatesGrid({ templates, mode }: { templat
       label="Templates"
       renderCard={(template) => (
         <div className="rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
-          <div className="flex items-center justify-between gap-2">
-            <p className="text-sm font-medium text-gray-900 dark:text-white">{template.key}</p>
-            <span className="text-xs text-gray-500 dark:text-gray-400">{template.channel}</span>
+          <div className="flex items-start justify-between gap-2">
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-white">{notificationEventLabel(template.key)}</h3>
+            <span className="shrink-0 text-xs text-gray-500 dark:text-gray-400">{notificationChannelLabels[template.channel]}</span>
           </div>
-          <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">{template.title_template}</p>
-          <div className="mt-3"><ActiveBadge active={template.is_active} /></div>
+          <SentTitle template={template} className="mt-2 text-xs text-gray-500 dark:text-gray-400" />
+          <div className="mt-3 flex items-center justify-between gap-2">
+            <ActiveBadge active={template.is_active} />
+            <TemplateKey value={template.key} />
+          </div>
         </div>
       )}
       renderRow={(template) => (
         <div className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
-            <p className="truncate text-sm font-medium text-gray-900 dark:text-white">{template.key}</p>
-            <p className="truncate text-xs text-gray-500 dark:text-gray-400">{template.title_template}</p>
+            <h3 className="truncate text-sm font-semibold text-gray-900 dark:text-white">{notificationEventLabel(template.key)}</h3>
+            <SentTitle template={template} className="truncate text-xs text-gray-500 dark:text-gray-400" />
           </div>
           <div className="flex shrink-0 items-center gap-3">
-            <span className="text-xs text-gray-500 dark:text-gray-400">{template.channel}</span>
+            <TemplateKey value={template.key} />
+            <span className="text-xs text-gray-500 dark:text-gray-400">{notificationChannelLabels[template.channel]}</span>
             <ActiveBadge active={template.is_active} />
           </div>
         </div>
