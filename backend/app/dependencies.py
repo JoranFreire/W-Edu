@@ -8,7 +8,7 @@ from app.core.tenancy import bind_institution
 from app.core.tenant_host import slug_from_host
 from app.models.institution import Institution
 from app.models.student import ADMIN_ROLES, Student, UserRole
-from app.policies.permissions import ensure_permission
+from app.policies.permissions import ensure_any_permission, ensure_permission
 from app.repositories.access import AccessRoleRepository
 from app.repositories.student import StudentRepository
 from app.services.institution import InstitutionService
@@ -125,6 +125,11 @@ def get_current_warehouse_manager(current: Student = Depends(get_current_student
 def get_current_warehouse_reader(current: Student = Depends(get_current_student)) -> Student:
     """Permissao `warehouse.reports`: relatorios do almoxarifado."""
     return ensure_permission(current, "warehouse.reports", "Sem permissão para relatórios do almoxarifado")
+
+
+def get_current_warehouse_user(current: Student = Depends(get_current_student)) -> Student:
+    """Qualquer permissao do almoxarifado: ver o catalogo de materiais e o saldo."""
+    return ensure_any_permission(current, ("warehouse.request", "warehouse.manage", "warehouse.reports"), "Acesso restrito ao almoxarifado")
 
 
 def get_current_guardian(current: Student = Depends(get_current_student)) -> Student:

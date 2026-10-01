@@ -221,3 +221,7 @@ Implementado na Fase 14 (entrega 1), em `/secretariat`: `program_enrollment_even
 - Toda query nova filtra por `institution_id`, e a verificacao entra nos checadores de permissao existentes.
 - Presets por `institutions.type` ajustam os rotulos e os campos exibidos no frontend, sem ramificar regras de negocio.
 - Nada do fluxo atual de curso livre e removido. As novas entidades sao opcionais para quem nao as usa.
+
+## 9. Almoxarifado
+
+Em `/warehouse`: `warehouse_items` (material de consumo ou permanente, unidade, estoque minimo, local, custo), `warehouse_entries` (compra ou doacao, custo e financiador), `material_requests` e `material_request_lines` (requisicao do professor, opcionalmente ligada a turma), com TenantMixin e RLS. Toda requisicao passa por aprovacao (por linha, total ou parcial; recusa exige motivo; aviso `material_request_decided`); a retirada confere o saldo e congela o custo; permanentes ficam emprestados ate a devolucao, que registra quantidade devolvida e perdida/avariada e fecha a requisicao. Saldo = entradas - retiradas + devolucoes. Relatorios de estoque abaixo do minimo, devolucoes atrasadas e consumo (por material, pessoa e turma); o consumo das turmas financiadas soma na prestacao de contas do financiador. Permissoes `warehouse.request`, `warehouse.manage` e `warehouse.reports` (RBAC).

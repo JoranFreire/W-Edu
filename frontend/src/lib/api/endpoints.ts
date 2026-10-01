@@ -218,6 +218,18 @@ export const endpoints = {
     roleMembers: (id: number) => `/access/roles/${id}/members`,
     roleMember: (id: number, userId: number) => `/access/roles/${id}/members/${userId}`,
   },
+  warehouse: {
+    items: '/warehouse/items',
+    item: (id: number) => `/warehouse/items/${id}`,
+    entries: (id: number) => `/warehouse/items/${id}/entries`,
+    requests: '/warehouse/requests',
+    myRequests: '/warehouse/my/requests',
+    cancel: (id: number) => `/warehouse/my/requests/${id}/cancel`,
+    action: (id: number, action: 'approve' | 'reject' | 'deliver' | 'returns') => `/warehouse/requests/${id}/${action}`,
+    lowStock: '/warehouse/reports/low-stock',
+    overdue: '/warehouse/reports/overdue',
+    consumption: '/warehouse/reports/consumption',
+  },
   courses: {
     list: '/courses',
     detail: (id: number) => `/courses/${id}`,

@@ -322,6 +322,11 @@ Objetivo: estrutura comum a escola, universidade e profissionalizante.
 - [x] Beneficios do programa (lanche, material, uniforme, transporte, auxilio): estoque, entregas por aluno (lanche so para presentes) e custo por financiador.
 - [ ] Futuro: exportacao SISTEC.
 
+### Transversal — Controle de acesso e almoxarifado
+
+- [x] RBAC: catalogo de permissoes, papeis como perfis padrao e perfis personalizados por instituicao (sem escalada de privilegio).
+- [x] Almoxarifado: materiais de consumo e permanentes, entradas (compra/doacao, financiador), requisicao do professor com aprovacao, retirada com saldo, devolucao com perda/avaria, estoque minimo, atrasos e consumo; custo nas turmas financiadas entra na prestacao de contas.
+
 ---
 
 ## Decisoes de Arquitetura

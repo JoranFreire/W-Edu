@@ -54,6 +54,10 @@ DEFAULT_TEMPLATES = {
         "Desligamento por faltas",
         "Sua inscrição em {class_name} foi encerrada: {absence_percent}% de faltas, acima do limite de {limit}%. Procure a secretaria.",
     ),
+    (NotificationEventType.material_request_decided, NotificationChannel.internal): (
+        "Requisição de material {status_label}",
+        "Sua requisição para {needed_on} ({purpose}) foi {status_label}.{note}",
+    ),
     (NotificationEventType.meeting_reminder, NotificationChannel.internal): (
         "Lembrete de encontro",
         "Você tem um encontro em {starts_at}: {meeting_title}.",

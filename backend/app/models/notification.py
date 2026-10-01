@@ -36,6 +36,7 @@ class NotificationEventType(str, enum.Enum):
     activity_reviewed = "activity_reviewed"
     admission_called = "admission_called"
     absence_dismissal = "absence_dismissal"
+    material_request_decided = "material_request_decided"
 
 
 class NotificationTemplate(TenantMixin, Base):

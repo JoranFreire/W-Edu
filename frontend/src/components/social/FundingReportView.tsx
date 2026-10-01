@@ -54,8 +54,16 @@ export default function FundingReportView({ report }: { report: FundingReport })
             {report.benefits.map((item) => <li key={item.item_name}>{item.item_name}: {item.quantity} {item.unit} · {formatMoney(item.cost_cents)}</li>)}
           </ul>
         )}
+        {report.materials.length > 0 && (
+          <>
+            <h3 className="mb-1 mt-3 text-sm font-semibold text-gray-900 dark:text-white">Materiais do almoxarifado usados nas turmas</h3>
+            <ul className="text-sm text-gray-700 dark:text-gray-300">
+              {report.materials.map((item) => <li key={item.item_name}>{item.item_name}: {item.quantity} · {formatMoney(item.cost_cents)}</li>)}
+            </ul>
+          </>
+        )}
         <p className="mt-2 text-sm text-gray-700 dark:text-gray-300">
-          Custo dos benefícios: {formatMoney(report.benefits_cost_cents)} · estoque recebido com este financiador: {formatMoney(report.stock_received_cents)}
+          Materiais: {formatMoney(report.materials_cost_cents)} · Custo dos benefícios: {formatMoney(report.benefits_cost_cents)} · estoque recebido com este financiador: {formatMoney(report.stock_received_cents)}
           {report.budget_balance_cents !== null ? ` · saldo do financiamento: ${formatMoney(report.budget_balance_cents)}` : ''}
         </p>
       </div>

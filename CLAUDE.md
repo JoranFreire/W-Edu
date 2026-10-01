@@ -12,7 +12,7 @@ Vale para todo código tocado, novo ou antigo. Ao alterar um arquivo que mistura
 - Repository: só acesso a dados.
 - Policy (`app/policies/`): regras de autorização que dependem dos dados (ex.: escopo de usuários).
 - Autorização por permissão (RBAC): guards em `app/dependencies.py` exigem uma chave do catálogo (`app/services/access/catalog.py`); o papel do usuário concede um conjunto padrão e perfis de acesso da instituição somam permissões. Recurso novo ganha permissão no catálogo, não um novo teste de papel.
-- Áreas grandes viram pacote com um módulo por responsabilidade (ex.: `app/services/certificates/`, `app/services/notifications/`, `app/services/academic/`, `app/services/assessment/`, `app/services/secretariat/`, `app/services/registration/`, `app/services/completion/`, `app/services/tuition/`, `app/services/contracts/`, `app/services/saas/`, `app/services/admissions/`, `app/services/retention/`, `app/services/social/`, `app/services/access/`, `app/routers/admin/`).
+- Áreas grandes viram pacote com um módulo por responsabilidade (ex.: `app/services/certificates/`, `app/services/notifications/`, `app/services/academic/`, `app/services/assessment/`, `app/services/secretariat/`, `app/services/registration/`, `app/services/completion/`, `app/services/tuition/`, `app/services/contracts/`, `app/services/saas/`, `app/services/admissions/`, `app/services/retention/`, `app/services/social/`, `app/services/access/`, `app/services/warehouse/`, `app/routers/admin/`).
 - Infraestrutura transversal em `app/core/` com um módulo por preocupação (ex.: `tenancy.py` filtra leitura; `tenant_integrity.py` valida gravação).
 
 **Frontend**
@@ -55,6 +55,7 @@ python scripts/check_saas_flow.py
 python scripts/check_admissions_flow.py
 python scripts/check_social_flow.py
 python scripts/check_access_flow.py
+python scripts/check_warehouse_flow.py
 python scripts/check_rls.py                     # Postgres com superusuario em DATABASE_URL; cria role/banco proprios
 alembic upgrade head && alembic check           # migration alinhada aos models
 ```
