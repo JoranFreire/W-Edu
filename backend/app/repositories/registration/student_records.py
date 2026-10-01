@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from sqlalchemy.orm import joinedload
 
@@ -12,7 +13,7 @@ class StudentRecordRepository:
     def __init__(self, db):
         self.db = db
 
-    def approved_subject_ids(self, student_id: int) -> set[int]:
+    def approved_subject_ids(self, student_id: UUID) -> set[UUID]:
         rows = (
             self.db.query(ClassOffering.subject_id)
             .join(ClassEnrollment, ClassEnrollment.class_offering_id == ClassOffering.id)
@@ -25,7 +26,7 @@ class StudentRecordRepository:
         )
         return {row[0] for row in rows}
 
-    def credited_subject_ids(self, program_enrollment_id: int) -> set[int]:
+    def credited_subject_ids(self, program_enrollment_id: UUID) -> set[UUID]:
         rows = (
             self.db.query(CreditTransfer.subject_id)
             .filter(CreditTransfer.program_enrollment_id == program_enrollment_id, CreditTransfer.status == CreditTransferStatus.approved)
@@ -33,7 +34,7 @@ class StudentRecordRepository:
         )
         return {row[0] for row in rows}
 
-    def term_enrollments(self, student_id: int, term_id: int) -> list[ClassEnrollment]:
+    def term_enrollments(self, student_id: UUID, term_id: UUID) -> list[ClassEnrollment]:
         """Inscricoes ativas do aluno em ofertas do periodo."""
         return (
             self.db.query(ClassEnrollment)
@@ -47,7 +48,7 @@ class StudentRecordRepository:
             .all()
         )
 
-    def term_waitlist(self, student_id: int, term_id: int) -> list[WaitlistEntry]:
+    def term_waitlist(self, student_id: UUID, term_id: UUID) -> list[WaitlistEntry]:
         return (
             self.db.query(WaitlistEntry)
             .join(ClassOffering, WaitlistEntry.class_offering_id == ClassOffering.id)
@@ -55,14 +56,14 @@ class StudentRecordRepository:
             .all()
         )
 
-    def enrollment(self, offering_id: int, student_id: int) -> ClassEnrollment | None:
+    def enrollment(self, offering_id: UUID, student_id: UUID) -> ClassEnrollment | None:
         return (
             self.db.query(ClassEnrollment)
             .filter(ClassEnrollment.class_offering_id == offering_id, ClassEnrollment.student_id == student_id)
             .first()
         )
 
-    def waitlist_entry(self, offering_id: int, student_id: int) -> WaitlistEntry | None:
+    def waitlist_entry(self, offering_id: UUID, student_id: UUID) -> WaitlistEntry | None:
         return (
             self.db.query(WaitlistEntry)
             .filter(WaitlistEntry.class_offering_id == offering_id, WaitlistEntry.student_id == student_id)

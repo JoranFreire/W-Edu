@@ -21,7 +21,7 @@ export default function AdminDocumentsPage() {
   const [classes, setClasses] = useState<ClassOffering[]>([]);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [students, setStudents] = useState<Student[]>([]);
-  const [drafts, setDrafts] = useState<Record<number, VersionDraft>>({});
+  const [drafts, setDrafts] = useState<Record<string, VersionDraft>>({});
   const [loading, setLoading] = useState(true);
   const [documentModalOpen, setDocumentModalOpen] = useState(false);
 
@@ -41,12 +41,12 @@ export default function AdminDocumentsPage() {
 
   useEffect(() => { load().catch(() => toast.error('Erro ao carregar documentos.')); }, []);
 
-  const updateDocument = async (documentId: number, status: DocumentStatus) => {
+  const updateDocument = async (documentId: string, status: DocumentStatus) => {
     try { await api.patch(endpoints.documents.detail(documentId), { status }); await load(); }
     catch { toast.error('Erro ao atualizar documento.'); }
   };
 
-  const addVersion = async (documentId: number) => {
+  const addVersion = async (documentId: string) => {
     const draft = drafts[documentId];
     try {
       const payload = new FormData();

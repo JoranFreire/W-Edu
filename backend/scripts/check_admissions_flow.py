@@ -29,6 +29,7 @@ import httpx
 import starlette.concurrency
 import starlette.routing
 
+from scripts.check_support import ApiClient  # noqa: E402
 import app.models  # noqa: F401
 from app.core.database import Base, SessionLocal, engine
 from app.core.security import hash_password
@@ -72,7 +73,7 @@ def seed() -> dict[str, int]:
             db.add(user)
             db.flush()
             db.add(InstitutionMembership(institution_id=institution.id, user_id=user.id, role=role))
-            ids[name] = user.id
+            ids[name] = str(user.id)
         db.commit()
     return ids
 
@@ -255,7 +256,7 @@ async def check_review(c: Checker, h: dict, offering_id: int) -> None:
 async def run() -> int:
     seed()
     transport = httpx.ASGITransport(app=app)
-    async with httpx.AsyncClient(transport=transport, base_url="http://testserver") as client:
+    async with ApiClient(transport=transport, base_url="http://testserver") as client:
         c = Checker(client)
         h = {"secretaria": await c.login("secretaria@example.com"), "coord": await c.login("coord@example.com")}
         h.update(await signup_applicants(c))

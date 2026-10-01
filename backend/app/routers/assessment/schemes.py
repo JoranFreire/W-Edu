@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -22,7 +24,7 @@ def create_scheme(data: GradingSchemeCreate, db: Session = Depends(get_db), _: S
 
 @router.patch("/{scheme_id}", response_model=GradingSchemeOut)
 def update_scheme(
-    scheme_id: int,
+    scheme_id: UUID,
     data: GradingSchemeUpdate,
     db: Session = Depends(get_db),
     _: Student = Depends(get_current_admin_or_coordinator),
@@ -31,5 +33,5 @@ def update_scheme(
 
 
 @router.delete("/{scheme_id}", status_code=204)
-def delete_scheme(scheme_id: int, db: Session = Depends(get_db), _: Student = Depends(get_current_admin)):
+def delete_scheme(scheme_id: UUID, db: Session = Depends(get_db), _: Student = Depends(get_current_admin)):
     GradingSchemeService(db).delete(scheme_id)

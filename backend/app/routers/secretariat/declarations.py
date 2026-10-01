@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends
 from fastapi.responses import Response
 from sqlalchemy.orm import Session
@@ -18,13 +20,13 @@ def _pdf_response(service: DeclarationService, declaration: AcademicDeclaration)
 
 
 @router.get("/enrollments/{enrollment_id}/declarations", response_model=list[DeclarationOut])
-def list_declarations(enrollment_id: int, db: Session = Depends(get_db), _: Student = Depends(get_current_secretariat)):
+def list_declarations(enrollment_id: UUID, db: Session = Depends(get_db), _: Student = Depends(get_current_secretariat)):
     return DeclarationService(db).list(enrollment_id)
 
 
 @router.post("/enrollments/{enrollment_id}/declarations", response_model=DeclarationOut, status_code=201)
 def issue_declaration(
-    enrollment_id: int,
+    enrollment_id: UUID,
     data: DeclarationCreate,
     db: Session = Depends(get_db),
     current: Student = Depends(get_current_secretariat),
@@ -33,14 +35,14 @@ def issue_declaration(
 
 
 @router.get("/declarations/{declaration_id}/pdf")
-def declaration_pdf(declaration_id: int, db: Session = Depends(get_db), _: Student = Depends(get_current_secretariat)):
+def declaration_pdf(declaration_id: UUID, db: Session = Depends(get_db), _: Student = Depends(get_current_secretariat)):
     service = DeclarationService(db)
     return _pdf_response(service, service.get_or_404(declaration_id))
 
 
 @router.post("/declarations/{declaration_id}/revoke", response_model=DeclarationOut)
 def revoke_declaration(
-    declaration_id: int,
+    declaration_id: UUID,
     data: DeclarationRevoke,
     db: Session = Depends(get_db),
     _: Student = Depends(get_current_admin_or_coordinator),
@@ -60,6 +62,6 @@ def my_declarations(db: Session = Depends(get_db), current: Student = Depends(ge
 
 
 @router.get("/my/declarations/{declaration_id}/pdf")
-def my_declaration_pdf(declaration_id: int, db: Session = Depends(get_db), current: Student = Depends(get_current_student)):
+def my_declaration_pdf(declaration_id: UUID, db: Session = Depends(get_db), current: Student = Depends(get_current_student)):
     service = DeclarationService(db)
     return _pdf_response(service, service.get_for_student(declaration_id, current))

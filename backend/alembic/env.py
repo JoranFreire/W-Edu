@@ -10,6 +10,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from app.core.config import settings
 from app.core.database import Base
 import app.models  # noqa: F401 — garante que todos os models sejam registrados
+from app.core.ids import IdType
 
 config = context.config
 config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
@@ -20,11 +21,19 @@ if config.config_file_name is not None:
 target_metadata = Base.metadata
 
 
+def render_item(type_, obj, autogen_context):
+    # Colunas de id: a migration usa o UUID padrao do SQLAlchemy, sem importar a aplicacao.
+    if type_ == "type" and isinstance(obj, IdType):
+        return "sa.Uuid()"
+    return False
+
+
 def run_migrations_offline() -> None:
     url = config.get_main_option("sqlalchemy.url")
     context.configure(
         url=url,
         target_metadata=target_metadata,
+        render_item=render_item,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
     )

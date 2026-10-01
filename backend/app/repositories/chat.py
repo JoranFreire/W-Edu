@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from sqlalchemy.orm import Session, selectinload
 
 from app.models.chat import ChatConversation, ChatMessage
@@ -7,7 +9,7 @@ class ChatRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def get_conversation(self, conversation_id: int) -> ChatConversation | None:
+    def get_conversation(self, conversation_id: UUID) -> ChatConversation | None:
         return (
             self.db.query(ChatConversation)
             .options(
@@ -20,7 +22,7 @@ class ChatRepository:
             .first()
         )
 
-    def get_existing(self, course_id: int, student_id: int, instructor_id: int | None) -> ChatConversation | None:
+    def get_existing(self, course_id: UUID, student_id: UUID, instructor_id: UUID | None) -> ChatConversation | None:
         return (
             self.db.query(ChatConversation)
             .filter(ChatConversation.course_id == course_id)
@@ -29,7 +31,7 @@ class ChatRepository:
             .first()
         )
 
-    def list_for_user(self, user_id: int) -> list[ChatConversation]:
+    def list_for_user(self, user_id: UUID) -> list[ChatConversation]:
         return (
             self.db.query(ChatConversation)
             .options(

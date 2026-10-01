@@ -13,7 +13,7 @@ import SettleButton from './SettleButton';
 import TuitionStatement from './TuitionStatement';
 
 /** Aba Financeiro da ficha: bolsas e descontos, extrato e (administracao) baixa das parcelas. */
-export default function EnrollmentFinanceTab({ enrollmentId, canSettle }: { enrollmentId: number; canSettle: boolean }) {
+export default function EnrollmentFinanceTab({ enrollmentId, canSettle }: { enrollmentId: string; canSettle: boolean }) {
   const { finance, error, addDiscount, deactivateDiscount, settle } = useEnrollmentFinance(enrollmentId);
   useErrorToast(error, 'Erro ao carregar o financeiro da matrícula.');
 

@@ -1,3 +1,4 @@
+from uuid import UUID
 from datetime import datetime, time, timedelta, timezone
 
 from fastapi import HTTPException, status
@@ -54,17 +55,17 @@ class ScheduledMeetingService:
             self._schedule_reminder(meeting, class_offering.name, course.name, class_offering.course_id)
         return meeting
 
-    def get_or_404(self, meeting_id: int) -> ScheduledMeeting:
+    def get_or_404(self, meeting_id: UUID) -> ScheduledMeeting:
         meeting = self.repo.get_by_id(meeting_id)
         if not meeting:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Encontro não encontrado")
         return meeting
 
-    def list_by_class(self, class_id: int) -> list[ScheduledMeeting]:
+    def list_by_class(self, class_id: UUID) -> list[ScheduledMeeting]:
         self.class_service.get_or_404(class_id)
         return self.repo.list_by_class(class_id)
 
-    def update(self, meeting_id: int, data: ScheduledMeetingUpdate) -> ScheduledMeeting:
+    def update(self, meeting_id: UUID, data: ScheduledMeetingUpdate) -> ScheduledMeeting:
         meeting = self.get_or_404(meeting_id)
         payload = data.model_dump(exclude_none=True)
         self._validate_refs(
@@ -87,7 +88,7 @@ class ScheduledMeetingService:
             setattr(meeting, field, value)
         return self.repo.update(meeting)
 
-    def close_meeting(self, meeting_id: int) -> ScheduledMeeting:
+    def close_meeting(self, meeting_id: UUID) -> ScheduledMeeting:
         meeting = self.get_or_404(meeting_id)
         if meeting.is_closed:
             return meeting
@@ -100,7 +101,7 @@ class ScheduledMeetingService:
         RetentionService(self.repo.db).dismiss_exceeded(meeting.class_offering)
         return meeting
 
-    def attendance_summary(self, meeting_id: int) -> MeetingAttendanceSummary:
+    def attendance_summary(self, meeting_id: UUID) -> MeetingAttendanceSummary:
         meeting = self.get_or_404(meeting_id)
         records = self.repo.db.query(AttendanceRecord).filter(AttendanceRecord.scheduled_meeting_id == meeting_id).all()
         enrolled = self.repo.list_active_enrollments(meeting.class_offering_id)
@@ -114,7 +115,7 @@ class ScheduledMeetingService:
 
     def instructor_agenda(
         self,
-        instructor_id: int,
+        instructor_id: UUID,
         range_start: datetime | None = None,
         range_end: datetime | None = None,
         duration_minutes: int = 60,
@@ -162,7 +163,7 @@ class ScheduledMeetingService:
             suggestions=suggestions,
         )
 
-    def _validate_refs(self, class_id: int, lesson_id: int | None, room_id: int | None) -> None:
+    def _validate_refs(self, class_id: UUID, lesson_id: UUID | None, room_id: UUID | None) -> None:
         class_offering = self.class_service.get_or_404(class_id)
         if lesson_id:
             lesson = self.lesson_repo.get_by_id(lesson_id)
@@ -177,10 +178,10 @@ class ScheduledMeetingService:
         self,
         *,
         class_offering: ClassOffering,
-        room_id: int | None,
+        room_id: UUID | None,
         starts_at: datetime,
         ends_at: datetime,
-        exclude_meeting_id: int | None = None,
+        exclude_meeting_id: UUID | None = None,
     ) -> None:
         if room_id:
             room_query = self.repo.db.query(ScheduledMeeting).filter(
@@ -214,7 +215,7 @@ class ScheduledMeetingService:
                     detail="Instrutor já possui encontro agendado neste horário",
                 )
 
-    def _list_instructor_meetings(self, instructor_id: int, range_start: datetime, range_end: datetime) -> list[ScheduledMeeting]:
+    def _list_instructor_meetings(self, instructor_id: UUID, range_start: datetime, range_end: datetime) -> list[ScheduledMeeting]:
         return (
             self.repo.db.query(ScheduledMeeting)
             .join(ClassOffering, ClassOffering.id == ScheduledMeeting.class_offering_id)
@@ -292,7 +293,7 @@ class ScheduledMeetingService:
             return value.replace(tzinfo=None)
         return value
 
-    def _schedule_reminder(self, meeting: ScheduledMeeting, class_name: str, course_name: str, course_id: int) -> None:
+    def _schedule_reminder(self, meeting: ScheduledMeeting, class_name: str, course_name: str, course_id: UUID) -> None:
         now = datetime.now(timezone.utc)
         reminder_at = self._align_timezone(meeting.starts_at, now) - timedelta(hours=24)
         if reminder_at <= now:

@@ -7,14 +7,14 @@ import { useApiQuery } from '@/lib/hooks/useApiQuery';
 import type { DiaryAttendanceRow } from '@/types/assessment';
 
 export interface DiaryAttendanceInput {
-  class_enrollment_id: number;
+  class_enrollment_id: string;
   absences: number;
   justified: boolean;
   note: string | null;
 }
 
 /** Chamada de um registro de aula. */
-export function useDiaryAttendance(entryId: number) {
+export function useDiaryAttendance(entryId: string) {
   const request = useCallback(
     () => api.get<DiaryAttendanceRow[]>(endpoints.assessment.diaryAttendance(entryId)).then((response) => response.data),
     [entryId],

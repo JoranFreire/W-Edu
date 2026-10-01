@@ -24,7 +24,7 @@ export default function ProgramsSection({ canDelete }: { canDelete: boolean }) {
   const [editing, setEditing] = useState<{ program?: Program } | null>(null);
   const [toDelete, setToDelete] = useState<Program | null>(null);
   useErrorToast(error, 'Erro ao carregar programas.');
-  const unitName = (id: number | null) => units.find((unit) => unit.id === id)?.name;
+  const unitName = (id: string | null) => units.find((unit) => unit.id === id)?.name;
 
   const handleSave = async (input: ProgramInput) => {
     await save(editing?.program?.id ?? null, input);

@@ -5,7 +5,7 @@ import { useAuthStore } from '@/store/authStore';
 import { endpoints } from '@/lib/api/endpoints';
 
 interface Props {
-  lessonId: number;
+  lessonId: string;
   onConsumed: () => void;
 }
 

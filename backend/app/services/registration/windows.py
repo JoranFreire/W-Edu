@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from datetime import datetime, timezone
 
@@ -33,10 +34,10 @@ class RegistrationWindowService:
         self.terms = AcademicTermRepository(db)
         self.programs = ProgramRepository(db)
 
-    def list(self, term_id: int | None = None) -> list[RegistrationWindowOut]:
+    def list(self, term_id: UUID | None = None) -> list[RegistrationWindowOut]:
         return [to_out(window) for window in self.repo.list(term_id)]
 
-    def get_or_404(self, window_id: int) -> RegistrationWindow:
+    def get_or_404(self, window_id: UUID) -> RegistrationWindow:
         window = self.repo.get_by_id(window_id)
         if not window:
             raise not_found("Janela de matrícula não encontrada")
@@ -52,7 +53,7 @@ class RegistrationWindowService:
         self._validate(window)
         return to_out(self.repo.save(window))
 
-    def update(self, window_id: int, data: RegistrationWindowUpdate) -> RegistrationWindowOut:
+    def update(self, window_id: UUID, data: RegistrationWindowUpdate) -> RegistrationWindowOut:
         window = self.get_or_404(window_id)
         for field, value in data.model_dump(exclude_unset=True).items():
             setattr(window, field, value)
@@ -60,7 +61,7 @@ class RegistrationWindowService:
         self._validate(window)
         return to_out(self.repo.save(window))
 
-    def delete(self, window_id: int) -> None:
+    def delete(self, window_id: UUID) -> None:
         self.repo.delete(self.get_or_404(window_id))
 
     @staticmethod

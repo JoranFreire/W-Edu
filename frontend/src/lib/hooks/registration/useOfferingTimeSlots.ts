@@ -7,7 +7,7 @@ import { useApiQuery } from '@/lib/hooks/useApiQuery';
 import type { TimeSlot, TimeSlotInput } from '@/types/registration';
 
 /** Horario semanal de uma oferta. */
-export function useOfferingTimeSlots(offeringId: number) {
+export function useOfferingTimeSlots(offeringId: string) {
   const request = useCallback(
     () => api.get<TimeSlot[]>(endpoints.registration.offeringSlots(offeringId)).then((response) => response.data),
     [offeringId],
@@ -18,7 +18,7 @@ export function useOfferingTimeSlots(offeringId: number) {
     await api.post(endpoints.registration.offeringSlots(offeringId), input);
     reload();
   };
-  const remove = async (slotId: number) => {
+  const remove = async (slotId: string) => {
     await api.delete(endpoints.registration.slot(slotId));
     reload();
   };

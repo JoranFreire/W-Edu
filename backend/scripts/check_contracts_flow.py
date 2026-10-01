@@ -28,6 +28,7 @@ import httpx
 import starlette.concurrency
 import starlette.routing
 
+from scripts.check_support import ApiClient  # noqa: E402
 import app.models  # noqa: F401
 from app.core.database import Base, SessionLocal, engine
 from app.core.security import hash_password
@@ -72,7 +73,7 @@ def seed() -> dict[str, int]:
             db.add(user)
             db.flush()
             db.add(InstitutionMembership(institution_id=institution.id, user_id=user.id, role=role))
-            ids[name] = user.id
+            ids[name] = str(user.id)
         db.commit()
     return ids
 
@@ -146,7 +147,7 @@ async def check_issue_and_accept(c: Checker, h: dict, ctx: dict, templates: dict
     with SessionLocal() as db:
         document = db.get(Document, contract["document_id"])
         c.expect(document.document_type == DocumentType.contract and document.latest_version_number == 1
-                 and document.student_id == ctx["ids"]["ana"], f"GED document: {document.__dict__}")
+                 and str(document.student_id) == ctx["ids"]["ana"], f"GED document: {document.__dict__}")
     response = await c.client.get(f"/contracts/{contract['id']}/pdf", headers=sec)
     c.expect(response.status_code == 200 and response.content.startswith(b"%PDF"), f"office pdf: {response.status_code}")
     listed = await c.call("GET", f"/contracts/enrollments/{ana}", 200, "office list", sec)
@@ -197,7 +198,7 @@ async def check_validation_and_cancel(c: Checker, h: dict, ctx: dict, templates:
 async def run() -> int:
     ids = seed()
     transport = httpx.ASGITransport(app=app)
-    async with httpx.AsyncClient(transport=transport, base_url="http://testserver") as client:
+    async with ApiClient(transport=transport, base_url="http://testserver") as client:
         c = Checker(client)
         h = {name: await c.login(f"{name}@example.com") for name, _ in USERS}
         ctx = await setup_structure(c, h, ids)

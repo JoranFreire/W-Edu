@@ -10,7 +10,7 @@ import type {
 } from '@/types/admissions';
 
 /** Um edital e suas inscricoes (secretaria): situacao, analise, comprovantes, selecao e prazos. */
-export function useAdmissionCall(callId: number) {
+export function useAdmissionCall(callId: string) {
   const request = useCallback(async () => {
     const [call, applications] = await Promise.all([
       api.get<AdmissionCall>(endpoints.admissions.call(callId)),
@@ -31,8 +31,8 @@ export function useAdmissionCall(callId: number) {
     applications: data?.applications ?? [],
     error,
     changeStatus: (status: AdmissionCallStatus) => run(() => api.post(endpoints.admissions.callStatus(callId), { status })),
-    review: (applicationId: number, input: ApplicationReviewInput) => run(() => api.post(endpoints.admissions.review(applicationId), input)),
-    reviewDocument: (documentId: number, review: DocumentReview) => run(() => api.post(endpoints.admissions.documentReview(documentId), { review })),
+    review: (applicationId: string, input: ApplicationReviewInput) => run(() => api.post(endpoints.admissions.review(applicationId), input)),
+    reviewDocument: (documentId: string, review: DocumentReview) => run(() => api.post(endpoints.admissions.documentReview(documentId), { review })),
     select: () => run(async () => (await api.post<SelectionSummary>(endpoints.admissions.select(callId))).data),
     processDeadlines: () => run(async () => (await api.post<DeadlinesSummary>(endpoints.admissions.deadlines(callId))).data),
     download: async (document: ApplicationDocument) => {

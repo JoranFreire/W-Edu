@@ -16,7 +16,7 @@ interface EnrollmentFile {
 export type MovementAction = 'lock' | 'reactivate' | 'cancel' | 'drop';
 
 /** Ficha da matricula (dados, linha do tempo e rematriculas) e suas movimentacoes. */
-export function useEnrollmentFile(enrollmentId: number) {
+export function useEnrollmentFile(enrollmentId: string) {
   const request = useCallback(async (): Promise<EnrollmentFile> => {
     const [enrollment, events, registrations] = await Promise.all([
       api.get<ProgramEnrollment>(endpoints.secretariat.enrollment(enrollmentId)),
@@ -40,14 +40,14 @@ export function useEnrollmentFile(enrollmentId: number) {
     reload,
     move: (action: MovementAction, reason: string | null) =>
       run(() => api.post(endpoints.secretariat.action(enrollmentId, action), { reason })),
-    reenroll: (termId: number, termNumber: number | null) =>
+    reenroll: (termId: string, termNumber: number | null) =>
       run(() => api.post(endpoints.secretariat.registrations(enrollmentId), { term_id: termId, curriculum_term_number: termNumber })),
     transferOut: (destination: string, reason: string | null) =>
       run(() => api.post(endpoints.secretariat.action(enrollmentId, 'transfer-out'), { destination, reason })),
-    transferInternal: (programId: number, reason: string | null) =>
+    transferInternal: (programId: string, reason: string | null) =>
       run(() => api.post<ProgramEnrollment>(endpoints.secretariat.action(enrollmentId, 'transfer-internal'), { program_id: programId, reason })
         .then((response) => response.data)),
-    changeCurriculum: (curriculumId: number, reason: string | null) =>
+    changeCurriculum: (curriculumId: string, reason: string | null) =>
       run(() => api.post(endpoints.secretariat.action(enrollmentId, 'change-curriculum'), { curriculum_id: curriculumId, reason })),
   };
 }

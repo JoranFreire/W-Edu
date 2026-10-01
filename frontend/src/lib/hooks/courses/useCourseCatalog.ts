@@ -9,7 +9,7 @@ import type { Course, Enrollment, LearningPath, LearningPathCourse } from '@/typ
 interface CatalogData {
   courses: Course[];
   learningPaths: LearningPath[];
-  pathCourses: Record<number, LearningPathCourse[]>;
+  pathCourses: Record<string, LearningPathCourse[]>;
   enrollments: Enrollment[];
 }
 
@@ -26,7 +26,7 @@ async function loadPathCourses(path: LearningPath) {
 }
 
 /** Catalogo de cursos e trilhas do aluno, com as matriculas dele e a acao de matricular. */
-export function useCourseCatalog(studentId: number | undefined) {
+export function useCourseCatalog(studentId: string | undefined) {
   const request = useCallback(async (): Promise<CatalogData> => {
     if (!studentId) return EMPTY;
     const [courses, learningPaths, enrollments] = await Promise.all([
@@ -40,10 +40,10 @@ export function useCourseCatalog(studentId: number | undefined) {
   const { data = EMPTY, loading, error, reload } = useApiQuery(request);
 
   const enrolledIds = useMemo(() => new Set(data.enrollments.map((enrollment) => enrollment.course_id)), [data.enrollments]);
-  const isEnrolled = (courseId: number) => enrolledIds.has(courseId);
-  const courseName = (courseId: number) => data.courses.find((course) => course.id === courseId)?.name ?? `Curso #${courseId}`;
+  const isEnrolled = (courseId: string) => enrolledIds.has(courseId);
+  const courseName = (courseId: string) => data.courses.find((course) => course.id === courseId)?.name ?? `Curso #${courseId}`;
 
-  const enroll = async (courseId: number) => {
+  const enroll = async (courseId: string) => {
     if (!studentId) return;
     await api.post<Enrollment>(endpoints.enrollments.create, { student_id: studentId, course_id: courseId });
     reload();

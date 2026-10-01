@@ -4,7 +4,7 @@ import { useState } from 'react';
 import type { CourseModule, Lesson } from '@/types/course';
 
 interface Props {
-  courseId: number;
+  courseId: string;
   modules: CourseModule[];
   lesson?: Lesson;
   onClose: () => void;
@@ -15,7 +15,7 @@ export default function LessonModal({ courseId, modules, lesson, onClose, onSave
   const [title, setTitle] = useState(lesson?.title ?? '');
   const [content, setContent] = useState(lesson?.content ?? '');
   const [order, setOrder] = useState(lesson?.order ?? 1);
-  const [moduleId, setModuleId] = useState<number | ''>(lesson?.module_id ?? '');
+  const [moduleId, setModuleId] = useState<string | ''>(lesson?.module_id ?? '');
   const [type, setType] = useState<Lesson['type']>(lesson?.type ?? 'text');
   const [videoUrl, setVideoUrl] = useState(lesson?.video_url ?? '');
   const [saving, setSaving] = useState(false);
@@ -69,7 +69,7 @@ export default function LessonModal({ courseId, modules, lesson, onClose, onSave
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Módulo</label>
-            <select value={moduleId} onChange={(e) => setModuleId(e.target.value ? Number(e.target.value) : '')}
+            <select value={moduleId} onChange={(e) => setModuleId(e.target.value)}
               className="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
               <option value="">Sem módulo</option>
               {modules.map((module) => (

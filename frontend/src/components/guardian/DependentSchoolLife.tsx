@@ -12,7 +12,7 @@ import { useErrorToast } from '@/lib/hooks/useErrorToast';
 import type { Occurrence } from '@/types/schoolLife';
 
 /** Ocorrencias (com "Ciente") ou proximos itens da agenda da turma do dependente. */
-export default function DependentSchoolLife({ studentId, view }: { studentId: number; view: 'occurrences' | 'agenda' }) {
+export default function DependentSchoolLife({ studentId, view }: { studentId: string; view: 'occurrences' | 'agenda' }) {
   const { schoolLife, error, acknowledge } = useDependentSchoolLife(studentId, todayIso());
   useErrorToast(error, 'Erro ao carregar a vida escolar.');
 

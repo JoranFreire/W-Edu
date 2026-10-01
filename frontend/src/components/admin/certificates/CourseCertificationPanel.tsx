@@ -22,7 +22,7 @@ type CertificateTab = 'rules' | 'issue' | 'validation' | 'issued';
 
 /** Abas de certificacao de um curso: regra, emissao, validacao e emitidos. */
 export default function CourseCertificationPanel({ courseId, students, canRevoke }: {
-  courseId: number;
+  courseId: string;
   students: Student[];
   canRevoke: boolean;
 }) {

@@ -3,7 +3,7 @@ import type { PersonSummary } from '@/types/academicGroups';
 export type GuardianRelationship = 'mother' | 'father' | 'legal_guardian' | 'grandparent' | 'other';
 
 export interface GuardianLink {
-  id: number;
+  id: string;
   student: PersonSummary;
   guardian: PersonSummary;
   relationship_kind: GuardianRelationship;
@@ -13,7 +13,7 @@ export interface GuardianLink {
 }
 
 export interface Dependent {
-  link_id: number;
+  link_id: string;
   student: PersonSummary;
   relationship_kind: GuardianRelationship;
   is_financial: boolean;
@@ -21,14 +21,14 @@ export interface Dependent {
 }
 
 export interface DependentNotice {
-  id: number;
+  id: string;
   title: string;
   body: string;
   created_at: string;
 }
 
 export interface DependentCharge {
-  id: number;
+  id: string;
   amount_cents: number;
   currency: string;
   status: string;

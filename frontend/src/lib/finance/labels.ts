@@ -5,6 +5,6 @@ export const chargeStatusLabels: Record<string, string> = { pending: 'Pendente',
 export const formatCents = (cents: number) => `R$ ${(cents / 100).toFixed(2)}`;
 
 /** Resolve nomes de titulares/planos por id, com fallback "Tipo #id". */
-export function makeNameLookup<T extends { id: number; name: string }>(items: T[], fallbackLabel: string) {
-  return (id: number | null) => (id ? items.find((item) => item.id === id)?.name ?? `${fallbackLabel} #${id}` : null);
+export function makeNameLookup<T extends { id: string; name: string }>(items: T[], fallbackLabel: string) {
+  return (id: string | null) => (id ? items.find((item) => item.id === id)?.name ?? `${fallbackLabel} #${id}` : null);
 }

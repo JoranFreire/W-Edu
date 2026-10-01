@@ -1,3 +1,4 @@
+from uuid import UUID
 from datetime import datetime
 from typing import Optional
 from pydantic import BaseModel, Field
@@ -18,8 +19,8 @@ class QuizQuestionUpdate(BaseModel):
 
 
 class QuizQuestionOut(BaseModel):
-    id: int
-    quiz_id: int
+    id: UUID
+    quiz_id: UUID
     question: str
     options: list[str]
     order: int
@@ -31,7 +32,7 @@ class QuizQuestionWithAnswer(QuizQuestionOut):
 
 
 class QuizCreate(BaseModel):
-    lesson_id: int
+    lesson_id: UUID
     passing_score: int = Field(default=70, ge=1, le=100)
     max_attempts: int = Field(default=0, ge=0)
 
@@ -42,8 +43,8 @@ class QuizUpdate(BaseModel):
 
 
 class QuizOut(BaseModel):
-    id: int
-    lesson_id: int
+    id: UUID
+    lesson_id: UUID
     passing_score: int
     max_attempts: int
     created_at: datetime
@@ -63,9 +64,9 @@ class QuizAnswerSubmit(BaseModel):
 
 
 class QuizAttemptOut(BaseModel):
-    id: int
-    quiz_id: int
-    student_id: int
+    id: UUID
+    quiz_id: UUID
+    student_id: UUID
     score: int
     passed: bool
     answers: dict

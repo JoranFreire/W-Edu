@@ -14,7 +14,7 @@ interface DashboardData {
 }
 
 /** Resumo do aluno: matriculas, progresso, sessoes de voz e cursos matriculados. */
-export function useStudentDashboard(studentId: number | undefined) {
+export function useStudentDashboard(studentId: string | undefined) {
   const request = useCallback(async (): Promise<DashboardData | undefined> => {
     if (!studentId) return undefined;
     const [enrollments, progress, sessions, courses] = await Promise.all([

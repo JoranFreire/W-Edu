@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from sqlalchemy import func
 
@@ -10,7 +11,7 @@ from app.repositories.academic._base import Repository
 class InternshipRepository(Repository[Internship]):
     model = Internship
 
-    def list_by_enrollment(self, enrollment_id: int) -> list[Internship]:
+    def list_by_enrollment(self, enrollment_id: UUID) -> list[Internship]:
         return (
             self.db.query(Internship)
             .filter(Internship.program_enrollment_id == enrollment_id)
@@ -18,7 +19,7 @@ class InternshipRepository(Repository[Internship]):
             .all()
         )
 
-    def list_by_student(self, student_id: int) -> list[Internship]:
+    def list_by_student(self, student_id: UUID) -> list[Internship]:
         return (
             self.db.query(Internship)
             .join(ProgramEnrollment, ProgramEnrollment.id == Internship.program_enrollment_id)
@@ -27,14 +28,14 @@ class InternshipRepository(Repository[Internship]):
             .all()
         )
 
-    def list_supervised(self, advisor_id: int | None) -> list[Internship]:
+    def list_supervised(self, advisor_id: UUID | None) -> list[Internship]:
         """Estagios em andamento do orientador (sem orientador informado: todos, para a coordenacao)."""
         query = self.db.query(Internship).filter(Internship.status == InternshipStatus.in_progress)
         if advisor_id is not None:
             query = query.filter(Internship.advisor_id == advisor_id)
         return query.order_by(Internship.starts_on, Internship.id).all()
 
-    def hours(self, internship_ids: list[int]) -> dict[int, dict[ReviewStatus, int]]:
+    def hours(self, internship_ids: list[UUID]) -> dict[UUID, dict[ReviewStatus, int]]:
         """Horas lancadas por estagio e situacao do registro."""
         if not internship_ids:
             return {}
@@ -44,12 +45,12 @@ class InternshipRepository(Repository[Internship]):
             .group_by(InternshipLog.internship_id, InternshipLog.status)
             .all()
         )
-        totals: dict[int, dict[ReviewStatus, int]] = {}
+        totals: dict[UUID, dict[ReviewStatus, int]] = {}
         for internship_id, status, hours in rows:
             totals.setdefault(internship_id, {})[status] = int(hours or 0)
         return totals
 
-    def approved_mandatory_hours(self, enrollment_id: int) -> int:
+    def approved_mandatory_hours(self, enrollment_id: UUID) -> int:
         total = (
             self.db.query(func.sum(InternshipLog.hours))
             .join(Internship, Internship.id == InternshipLog.internship_id)
@@ -67,7 +68,7 @@ class InternshipRepository(Repository[Internship]):
 class InternshipLogRepository(Repository[InternshipLog]):
     model = InternshipLog
 
-    def list_by_internship(self, internship_id: int) -> list[InternshipLog]:
+    def list_by_internship(self, internship_id: UUID) -> list[InternshipLog]:
         return (
             self.db.query(InternshipLog)
             .filter(InternshipLog.internship_id == internship_id)

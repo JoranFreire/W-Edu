@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from datetime import datetime, timezone
 
@@ -28,11 +29,11 @@ class ContractPartyService:
     def list_mine(self, user: Student) -> list[ContractOut]:
         return [to_out(contract) for contract in self.repo.list_for_user(user.id)]
 
-    def pdf_for(self, user: Student, contract_id: int) -> tuple[EnrollmentContract, bytes]:
+    def pdf_for(self, user: Student, contract_id: UUID) -> tuple[EnrollmentContract, bytes]:
         contract = self._as_party(user, contract_id)
         return contract, contract_pdf(contract)
 
-    def accept(self, user: Student, contract_id: int) -> ContractOut:
+    def accept(self, user: Student, contract_id: UUID) -> ContractOut:
         contract = self._as_party(user, contract_id)
         if contract.status != ContractStatus.pending:
             raise conflict("Contrato não está aguardando aceite")
@@ -44,7 +45,7 @@ class ContractPartyService:
         self.archive.archive(contract, user.id, "Aceite eletrônico")
         return to_out(self.repo.save(contract))
 
-    def _as_party(self, user: Student, contract_id: int) -> EnrollmentContract:
+    def _as_party(self, user: Student, contract_id: UUID) -> EnrollmentContract:
         contract = self.issuing.get_or_404(contract_id)
         student_id = contract.program_enrollment.student_id
         ensure_party(user, contract, {link.guardian_id for link in self.links.list_by_student(student_id) if link.is_financial})

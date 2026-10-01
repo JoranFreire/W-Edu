@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from sqlalchemy.orm import Session
 
@@ -23,12 +24,12 @@ class ClassDiaryService:
         self.closures = PeriodClosureRepository(db)
         self.offerings = TeachingOfferingService(db)
 
-    def list(self, offering_id: int, user: Student) -> list[DiaryEntryOut]:
+    def list(self, offering_id: UUID, user: Student) -> list[DiaryEntryOut]:
         offering = self.offerings.get_for_teaching(offering_id, user)
         closed = self.closures.closed_period_ids(offering_id)
         return [self.to_out(entry, offering, closed) for entry in self.repo.list_by_offering(offering_id)]
 
-    def create(self, offering_id: int, data: DiaryEntryCreate, user: Student) -> DiaryEntryOut:
+    def create(self, offering_id: UUID, data: DiaryEntryCreate, user: Student) -> DiaryEntryOut:
         offering = self.offerings.get_for_teaching(offering_id, user)
         ensure_offering_open(offering)
         self._validate_date(offering, data)
@@ -38,31 +39,31 @@ class ClassDiaryService:
         entry = ClassDiaryEntry(class_offering_id=offering_id, instructor_id=user.id, **data.model_dump())
         return self.to_out(self.repo.save(entry), offering, set())
 
-    def get_for_teaching(self, entry_id: int, user: Student) -> tuple[ClassDiaryEntry, ClassOffering]:
+    def get_for_teaching(self, entry_id: UUID, user: Student) -> tuple[ClassDiaryEntry, ClassOffering]:
         entry = self.repo.get_by_id(entry_id)
         if not entry:
             raise not_found("Registro de aula não encontrado")
         return entry, self.offerings.get_for_teaching(entry.class_offering_id, user)
 
-    def get_editable(self, entry_id: int, user: Student) -> tuple[ClassDiaryEntry, ClassOffering]:
+    def get_editable(self, entry_id: UUID, user: Student) -> tuple[ClassDiaryEntry, ClassOffering]:
         entry, offering = self.get_for_teaching(entry_id, user)
         ensure_offering_open(offering)
         ensure_unlocked(is_date_locked(offering.term, entry.date, self.closures.closed_period_ids(offering.id)))
         return entry, offering
 
-    def update(self, entry_id: int, data: DiaryEntryUpdate, user: Student) -> DiaryEntryOut:
+    def update(self, entry_id: UUID, data: DiaryEntryUpdate, user: Student) -> DiaryEntryOut:
         entry, offering = self.get_editable(entry_id, user)
         if data.lesson_count is not None and any(a.absences > data.lesson_count for a in entry.attendance):
             raise bad_request("Há faltas acima da nova quantidade de aulas")
         apply_patch(entry, data)
         return self.to_out(self.repo.save(entry), offering, set())
 
-    def delete(self, entry_id: int, user: Student) -> None:
+    def delete(self, entry_id: UUID, user: Student) -> None:
         entry, _ = self.get_editable(entry_id, user)
         self.repo.delete(entry)
 
     @staticmethod
-    def to_out(entry: ClassDiaryEntry, offering: ClassOffering, closed_in_offering: set[int]) -> DiaryEntryOut:
+    def to_out(entry: ClassDiaryEntry, offering: ClassOffering, closed_in_offering: set[UUID]) -> DiaryEntryOut:
         return DiaryEntryOut(
             id=entry.id,
             class_offering_id=entry.class_offering_id,

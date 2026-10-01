@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
@@ -37,36 +39,36 @@ class AnalyticsOverviewService(AnalyticsBase):
             engagement_rate=self._global_engagement_rate(org_id),
         )
 
-    def _count_students(self, organization_id: int | None) -> int:
+    def _count_students(self, organization_id: UUID | None) -> int:
         q = self.db.query(Student)
         if organization_id is not None:
             q = q.filter(Student.organization_id == organization_id)
         return q.count()
 
-    def _count_role(self, role: UserRole, organization_id: int | None) -> int:
+    def _count_role(self, role: UserRole, organization_id: UUID | None) -> int:
         q = self.db.query(Student).filter(Student.role == role)
         if organization_id is not None:
             q = q.filter(Student.organization_id == organization_id)
         return q.count()
 
-    def _count_organizations(self, organization_id: int | None) -> int:
+    def _count_organizations(self, organization_id: UUID | None) -> int:
         if organization_id is None:
             return self.db.query(Organization).count()
         return 1
 
-    def _count_courses(self, organization_id: int | None) -> int:
+    def _count_courses(self, organization_id: UUID | None) -> int:
         q = self.db.query(Course)
         if organization_id is not None:
             q = q.join(Enrollment, Enrollment.course_id == Course.id).join(Student, Student.id == Enrollment.student_id).filter(Student.organization_id == organization_id).distinct()
         return q.count()
 
-    def _count_classes(self, organization_id: int | None) -> int:
+    def _count_classes(self, organization_id: UUID | None) -> int:
         q = self.db.query(ClassOffering)
         if organization_id is not None:
             q = q.join(ClassEnrollment, ClassEnrollment.class_offering_id == ClassOffering.id).join(Student, Student.id == ClassEnrollment.student_id).filter(Student.organization_id == organization_id).distinct()
         return q.count()
 
-    def _count_meetings(self, organization_id: int | None, closed: bool | None = None) -> int:
+    def _count_meetings(self, organization_id: UUID | None, closed: bool | None = None) -> int:
         q = self.db.query(ScheduledMeeting)
         if organization_id is not None:
             q = q.join(ClassOffering, ClassOffering.id == ScheduledMeeting.class_offering_id).join(ClassEnrollment, ClassEnrollment.class_offering_id == ClassOffering.id).join(Student, Student.id == ClassEnrollment.student_id).filter(Student.organization_id == organization_id).distinct()
@@ -74,35 +76,35 @@ class AnalyticsOverviewService(AnalyticsBase):
             q = q.filter(ScheduledMeeting.is_closed.is_(closed))
         return q.count()
 
-    def _count_certificates(self, organization_id: int | None) -> int:
+    def _count_certificates(self, organization_id: UUID | None) -> int:
         q = self.db.query(Certificate).filter(Certificate.revoked_at.is_(None))
         if organization_id is not None:
             q = q.join(Student, Student.id == Certificate.student_id).filter(Student.organization_id == organization_id)
         return q.count()
 
-    def _count_active_subscriptions(self, organization_id: int | None) -> int:
+    def _count_active_subscriptions(self, organization_id: UUID | None) -> int:
         q = self.db.query(Subscription).filter(Subscription.status == SubscriptionStatus.active)
         if organization_id is not None:
             q = q.filter(Subscription.organization_id == organization_id)
         return q.count()
 
-    def _count_documents(self, organization_id: int | None) -> int:
+    def _count_documents(self, organization_id: UUID | None) -> int:
         q = self.db.query(Document)
         if organization_id is not None:
             q = q.filter(Document.organization_id == organization_id)
         return q.count()
 
-    def _sum_charges(self, organization_id: int | None, status_value: ChargeStatus) -> int:
+    def _sum_charges(self, organization_id: UUID | None, status_value: ChargeStatus) -> int:
         q = self.db.query(func.coalesce(func.sum(Charge.amount_cents), 0)).filter(Charge.status == status_value)
         if organization_id is not None:
             q = q.filter(Charge.organization_id == organization_id)
         return q.scalar() or 0
 
-    def _global_attendance_rate(self, organization_id: int | None) -> int:
+    def _global_attendance_rate(self, organization_id: UUID | None) -> int:
         meeting_ids = [row[0] for row in self.db.query(ScheduledMeeting.id).filter(ScheduledMeeting.is_closed.is_(True)).all()]
         return self._attendance_rate_for_meetings(meeting_ids, organization_id)
 
-    def _global_completion_rate(self, organization_id: int | None) -> int:
+    def _global_completion_rate(self, organization_id: UUID | None) -> int:
         tq = self.db.query(Enrollment)
         cq = self.db.query(Certificate).filter(Certificate.revoked_at.is_(None))
         if organization_id is not None:
@@ -110,7 +112,7 @@ class AnalyticsOverviewService(AnalyticsBase):
             cq = cq.join(Student, Student.id == Certificate.student_id).filter(Student.organization_id == organization_id)
         return self._rate(cq.count(), tq.count())
 
-    def _global_engagement_rate(self, organization_id: int | None) -> int:
+    def _global_engagement_rate(self, organization_id: UUID | None) -> int:
         tq = self.db.query(Progress)
         cq = self.db.query(Progress).filter(Progress.status == ProgressStatus.done)
         if organization_id is not None:

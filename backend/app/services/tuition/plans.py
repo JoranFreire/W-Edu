@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from sqlalchemy.orm import Session
 
@@ -28,10 +29,10 @@ class TuitionPlanService:
         self.programs = ProgramRepository(db)
         self.groups = ClassGroupRepository(db)
 
-    def list(self, term_id: int | None = None) -> list[TuitionPlanOut]:
+    def list(self, term_id: UUID | None = None) -> list[TuitionPlanOut]:
         return [to_out(plan) for plan in self.repo.list(term_id)]
 
-    def get_or_404(self, plan_id: int) -> TuitionPlan:
+    def get_or_404(self, plan_id: UUID) -> TuitionPlan:
         plan = self.repo.get_by_id(plan_id)
         if not plan:
             raise not_found("Plano de mensalidade não encontrado")
@@ -44,7 +45,7 @@ class TuitionPlanService:
         self._validate_target(plan)
         return to_out(self.repo.save(plan))
 
-    def update(self, plan_id: int, data: TuitionPlanUpdate) -> TuitionPlanOut:
+    def update(self, plan_id: UUID, data: TuitionPlanUpdate) -> TuitionPlanOut:
         plan = self.get_or_404(plan_id)
         apply_patch(plan, data)
         return to_out(self.repo.save(plan))

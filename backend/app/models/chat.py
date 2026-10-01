@@ -1,3 +1,6 @@
+from uuid import UUID
+
+from app.core.ids import new_id
 from datetime import datetime, timezone
 
 from sqlalchemy import DateTime, ForeignKey, String, Text, UniqueConstraint
@@ -11,10 +14,10 @@ class ChatConversation(TenantMixin, Base):
     __tablename__ = "chat_conversations"
     __table_args__ = (UniqueConstraint("course_id", "student_id", "instructor_id"),)
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    course_id: Mapped[int] = mapped_column(ForeignKey("courses.id"), index=True)
-    student_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
-    instructor_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True, index=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
+    course_id: Mapped[UUID] = mapped_column(ForeignKey("courses.id"), index=True)
+    student_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"), index=True)
+    instructor_id: Mapped[UUID | None] = mapped_column(ForeignKey("users.id"), nullable=True, index=True)
     subject: Mapped[str | None] = mapped_column(String(200))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     updated_at: Mapped[datetime] = mapped_column(
@@ -36,9 +39,9 @@ class ChatConversation(TenantMixin, Base):
 class ChatMessage(TenantMixin, Base):
     __tablename__ = "chat_messages"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    conversation_id: Mapped[int] = mapped_column(ForeignKey("chat_conversations.id"), index=True)
-    sender_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
+    conversation_id: Mapped[UUID] = mapped_column(ForeignKey("chat_conversations.id"), index=True)
+    sender_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"), index=True)
     body: Mapped[str] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 

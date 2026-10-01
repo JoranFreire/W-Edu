@@ -17,7 +17,7 @@ const flagLabels: { key: keyof GuardianFlags; label: string }[] = [
 ];
 
 /** Responsaveis do aluno: parentesco, financeiro, autorizacao de retirada e contato principal. */
-export default function GuardiansPanel({ studentId }: { studentId: number }) {
+export default function GuardiansPanel({ studentId }: { studentId: string }) {
   const { links, error, add, update, remove } = useGuardianLinks(studentId);
   useErrorToast(error, 'Erro ao carregar responsáveis.');
 

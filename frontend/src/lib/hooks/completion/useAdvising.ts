@@ -11,7 +11,7 @@ export function useAdvising() {
   const request = useCallback(() => api.get<Advising>(endpoints.completion.advising).then((response) => response.data), []);
   const { data, loading, error, reload } = useApiQuery(request);
 
-  const recordResult = async (projectId: number, input: FinalProjectResultInput) => {
+  const recordResult = async (projectId: string, input: FinalProjectResultInput) => {
     await api.post(endpoints.completion.finalProjectResult(projectId), input);
     reload();
   };

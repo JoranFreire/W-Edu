@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from sqlalchemy import or_
 
 from app.models.academic import Subject, SubjectEquivalence, SubjectPrerequisite
@@ -7,7 +9,7 @@ from app.repositories.academic._base import Repository
 class SubjectPrerequisiteRepository(Repository[SubjectPrerequisite]):
     model = SubjectPrerequisite
 
-    def get_link(self, subject_id: int, required_subject_id: int) -> SubjectPrerequisite | None:
+    def get_link(self, subject_id: UUID, required_subject_id: UUID) -> SubjectPrerequisite | None:
         return (
             self.db.query(SubjectPrerequisite)
             .filter(
@@ -17,7 +19,7 @@ class SubjectPrerequisiteRepository(Repository[SubjectPrerequisite]):
             .first()
         )
 
-    def list_required(self, subject_id: int) -> list[Subject]:
+    def list_required(self, subject_id: UUID) -> list[Subject]:
         return (
             self.db.query(Subject)
             .join(SubjectPrerequisite, SubjectPrerequisite.required_subject_id == Subject.id)
@@ -30,7 +32,7 @@ class SubjectPrerequisiteRepository(Repository[SubjectPrerequisite]):
         """Pares (disciplina, pre-requisito) da instituicao, para checar ciclos."""
         return self.db.query(SubjectPrerequisite.subject_id, SubjectPrerequisite.required_subject_id).all()
 
-    def required_names(self, subject_ids: set[int]) -> dict[int, dict[int, str]]:
+    def required_names(self, subject_ids: set[UUID]) -> dict[UUID, dict[UUID, str]]:
         """Pre-requisitos de cada disciplina, com o nome de cada exigida."""
         if not subject_ids:
             return {}
@@ -40,12 +42,12 @@ class SubjectPrerequisiteRepository(Repository[SubjectPrerequisite]):
             .filter(SubjectPrerequisite.subject_id.in_(subject_ids))
             .all()
         )
-        required: dict[int, dict[int, str]] = {}
+        required: dict[UUID, dict[UUID, str]] = {}
         for subject_id, required_id, name in rows:
             required.setdefault(subject_id, {})[required_id] = name
         return required
 
-    def edges_for(self, subject_ids: list[int]) -> list[tuple[int, int]]:
+    def edges_for(self, subject_ids: list[UUID]) -> list[tuple[int, int]]:
         return (
             self.db.query(SubjectPrerequisite.subject_id, SubjectPrerequisite.required_subject_id)
             .filter(SubjectPrerequisite.subject_id.in_(subject_ids))
@@ -56,7 +58,7 @@ class SubjectPrerequisiteRepository(Repository[SubjectPrerequisite]):
 class SubjectEquivalenceRepository(Repository[SubjectEquivalence]):
     model = SubjectEquivalence
 
-    def get_link(self, first_id: int, second_id: int) -> SubjectEquivalence | None:
+    def get_link(self, first_id: UUID, second_id: UUID) -> SubjectEquivalence | None:
         low, high = sorted((first_id, second_id))
         return (
             self.db.query(SubjectEquivalence)
@@ -64,7 +66,7 @@ class SubjectEquivalenceRepository(Repository[SubjectEquivalence]):
             .first()
         )
 
-    def list_equivalents(self, subject_id: int) -> list[Subject]:
+    def list_equivalents(self, subject_id: UUID) -> list[Subject]:
         links = (
             self.db.query(SubjectEquivalence)
             .filter(or_(SubjectEquivalence.subject_id == subject_id, SubjectEquivalence.equivalent_subject_id == subject_id))

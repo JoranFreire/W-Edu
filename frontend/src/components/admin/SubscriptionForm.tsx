@@ -27,9 +27,9 @@ export default function SubscriptionForm({ plans, students, organizations, onCre
     const toast = (await import('react-hot-toast')).default;
     try {
       await api.post(endpoints.finance.subscriptions, {
-        billing_plan_id: Number(form.billing_plan_id),
-        student_id: form.student_id ? Number(form.student_id) : null,
-        organization_id: form.organization_id ? Number(form.organization_id) : null,
+        billing_plan_id: form.billing_plan_id,
+        student_id: form.student_id ? form.student_id : null,
+        organization_id: form.organization_id ? form.organization_id : null,
         gateway_name: form.gateway_name || null,
         gateway_customer_id: form.gateway_customer_id || null,
       });

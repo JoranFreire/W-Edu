@@ -5,9 +5,9 @@ export type OccurrenceSeverity = 'low' | 'medium' | 'high';
 export type AgendaItemKind = 'homework' | 'test' | 'event' | 'notice';
 
 export interface Occurrence {
-  id: number;
+  id: string;
   student: PersonSummary;
-  class_group_id: number | null;
+  class_group_id: string | null;
   kind: OccurrenceKind;
   severity: OccurrenceSeverity;
   description: string;
@@ -18,8 +18,8 @@ export interface Occurrence {
 }
 
 export interface OccurrenceInput {
-  student_id: number;
-  class_group_id: number | null;
+  student_id: string;
+  class_group_id: string | null;
   kind: OccurrenceKind;
   severity: OccurrenceSeverity;
   description: string;
@@ -27,10 +27,10 @@ export interface OccurrenceInput {
 }
 
 export interface AgendaItem {
-  id: number;
-  class_group_id: number;
+  id: string;
+  class_group_id: string;
   class_group_name: string;
-  class_offering_id: number | null;
+  class_offering_id: string | null;
   class_offering_name: string | null;
   kind: AgendaItemKind;
   title: string;
@@ -44,5 +44,5 @@ export interface AgendaItemInput {
   title: string;
   description: string | null;
   due_on: string;
-  class_offering_id: number | null;
+  class_offering_id: string | null;
 }

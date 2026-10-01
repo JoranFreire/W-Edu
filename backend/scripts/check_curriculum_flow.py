@@ -28,6 +28,7 @@ import httpx
 import starlette.concurrency
 import starlette.routing
 
+from scripts.check_support import ApiClient  # noqa: E402
 import app.models  # noqa: F401
 from app.core.database import Base, SessionLocal, engine
 from app.core.security import hash_password
@@ -211,7 +212,7 @@ async def check_curricula(c: Checker, coord: dict, admin: dict, aluno: dict, pro
 async def run() -> int:
     seed()
     transport = httpx.ASGITransport(app=app)
-    async with httpx.AsyncClient(transport=transport, base_url="http://testserver") as client:
+    async with ApiClient(transport=transport, base_url="http://testserver") as client:
         c = Checker(client)
         coord, admin, aluno = await c.login("coord"), await c.login("admin"), await c.login("aluno")
         r = await client.post("/academic/units", json={"name": "X"}, headers=aluno)

@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from sqlalchemy import func
 
@@ -12,12 +13,12 @@ class WarehouseItemRepository(Repository[WarehouseItem]):
     def list(self) -> list[WarehouseItem]:
         return self.db.query(WarehouseItem).order_by(WarehouseItem.is_active.desc(), WarehouseItem.category, WarehouseItem.name).all()
 
-    def lock_many(self, item_ids: list[int]) -> dict[int, WarehouseItem]:
+    def lock_many(self, item_ids: list[UUID]) -> dict[UUID, WarehouseItem]:
         """Trava os itens durante a retirada (duas retiradas disputando o mesmo saldo)."""
         rows = self.db.query(WarehouseItem).filter(WarehouseItem.id.in_(item_ids)).with_for_update().all()
         return {item.id: item for item in rows}
 
-    def movements(self, item_ids: list[int]) -> dict[int, tuple[int, int, int, int]]:
+    def movements(self, item_ids: list[UUID]) -> dict[UUID, tuple[int, int, int, int]]:
         """(recebido, entregue, devolvido, perdido) por item."""
         if not item_ids:
             return {}
@@ -38,7 +39,7 @@ class WarehouseItemRepository(Repository[WarehouseItem]):
 class WarehouseEntryRepository(Repository[WarehouseEntry]):
     model = WarehouseEntry
 
-    def list_by_item(self, item_id: int) -> list[WarehouseEntry]:
+    def list_by_item(self, item_id: UUID) -> list[WarehouseEntry]:
         return (
             self.db.query(WarehouseEntry)
             .filter(WarehouseEntry.item_id == item_id)

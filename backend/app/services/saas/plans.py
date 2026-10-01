@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from sqlalchemy.orm import Session
 
@@ -18,7 +19,7 @@ class SaasPlanService:
     def list(self) -> list[SaasPlan]:
         return self.repo.list()
 
-    def get_or_404(self, plan_id: int) -> SaasPlan:
+    def get_or_404(self, plan_id: UUID) -> SaasPlan:
         plan = self.repo.get_by_id(plan_id)
         if not plan:
             raise not_found("Plano não encontrado")
@@ -29,7 +30,7 @@ class SaasPlanService:
             raise conflict("Já existe plano com este nome")
         return self.repo.save(SaasPlan(**data.model_dump()))
 
-    def update(self, plan_id: int, data: SaasPlanUpdate) -> SaasPlan:
+    def update(self, plan_id: UUID, data: SaasPlanUpdate) -> SaasPlan:
         plan = self.get_or_404(plan_id)
         if data.name and data.name != plan.name and self.repo.get_by_name(data.name):
             raise conflict("Já existe plano com este nome")

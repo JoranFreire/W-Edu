@@ -14,7 +14,7 @@ import { useErrorToast } from '@/lib/hooks/useErrorToast';
 /** Prestacao de contas de um financiador. */
 export default function FundingReportPage() {
   const router = useRouter();
-  const fundingId = Number(useParams<{ fundingId: string }>().fundingId);
+  const fundingId = useParams<{ fundingId: string }>().fundingId;
   const { report, error, downloadCsv } = useFundingReport(fundingId);
   useErrorToast(error, 'Erro ao carregar a prestação de contas.');
 

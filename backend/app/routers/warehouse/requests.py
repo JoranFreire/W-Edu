@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -21,5 +23,5 @@ def my_requests(db: Session = Depends(get_db), current: Student = Depends(get_cu
 
 
 @router.post("/my/requests/{request_id}/cancel", response_model=RequestOut)
-def cancel_request(request_id: int, db: Session = Depends(get_db), current: Student = Depends(get_current_warehouse_requester)):
+def cancel_request(request_id: UUID, db: Session = Depends(get_db), current: Student = Depends(get_current_warehouse_requester)):
     return MaterialRequestService(db).cancel(current, request_id)

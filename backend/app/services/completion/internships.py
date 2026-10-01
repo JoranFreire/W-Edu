@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from sqlalchemy.orm import Session
 
@@ -24,27 +25,27 @@ class InternshipService:
         self.users = StudentRepository(db)
         self.lifecycle = EnrollmentLifecycleService(db)
 
-    def list_for_enrollment(self, enrollment_id: int) -> list[InternshipOut]:
+    def list_for_enrollment(self, enrollment_id: UUID) -> list[InternshipOut]:
         self.lifecycle.get_or_404(enrollment_id)
         return self.to_out(self.repo.list_by_enrollment(enrollment_id))
 
     def list_mine(self, student: Student) -> list[InternshipOut]:
         return self.to_out(self.repo.list_by_student(student.id))
 
-    def create(self, enrollment_id: int, data: InternshipCreate) -> InternshipOut:
+    def create(self, enrollment_id: UUID, data: InternshipCreate) -> InternshipOut:
         enrollment = self.lifecycle.get_or_404(enrollment_id)
         ensure_active(enrollment)
         internship = Internship(program_enrollment_id=enrollment.id, **data.model_dump())
         self._validate(internship)
         return self.to_out([self.repo.save(internship)])[0]
 
-    def update(self, internship_id: int, data: InternshipUpdate) -> InternshipOut:
+    def update(self, internship_id: UUID, data: InternshipUpdate) -> InternshipOut:
         internship = self.get_or_404(internship_id)
         apply_patch(internship, data, clearable=CLEARABLE)
         self._validate(internship)
         return self.to_out([self.repo.save(internship)])[0]
 
-    def get_or_404(self, internship_id: int) -> Internship:
+    def get_or_404(self, internship_id: UUID) -> Internship:
         internship = self.repo.get_by_id(internship_id)
         if not internship:
             raise not_found("Estágio não encontrado")

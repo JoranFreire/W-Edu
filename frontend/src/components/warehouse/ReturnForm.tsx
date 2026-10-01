@@ -9,7 +9,7 @@ import type { MaterialRequest } from '@/types/warehouse';
 /** Devolucao dos permanentes: quantidade devolvida e perdida/avariada por linha. */
 export default function ReturnForm({ request, onReturn }: { request: MaterialRequest; onReturn: (body: unknown) => Promise<void> }) {
   const loaned = request.lines.filter((line) => line.outstanding > 0);
-  const [values, setValues] = useState<Record<number, { returned: string; lost: string }>>(
+  const [values, setValues] = useState<Record<string, { returned: string; lost: string }>>(
     Object.fromEntries(loaned.map((line) => [line.id, { returned: String(line.outstanding), lost: '0' }])),
   );
   const submit = async () => {

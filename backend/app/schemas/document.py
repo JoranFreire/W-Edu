@@ -1,3 +1,4 @@
+from uuid import UUID
 from datetime import datetime
 from pydantic import BaseModel, Field
 
@@ -9,10 +10,10 @@ class DocumentCreate(BaseModel):
     document_type: DocumentType = DocumentType.other
     description: str | None = None
     status: DocumentStatus = DocumentStatus.draft
-    course_id: int | None = None
-    class_offering_id: int | None = None
-    organization_id: int | None = None
-    student_id: int | None = None
+    course_id: UUID | None = None
+    class_offering_id: UUID | None = None
+    organization_id: UUID | None = None
+    student_id: UUID | None = None
     external_reference: str | None = None
 
 
@@ -21,10 +22,10 @@ class DocumentUpdate(BaseModel):
     document_type: DocumentType | None = None
     description: str | None = None
     status: DocumentStatus | None = None
-    course_id: int | None = None
-    class_offering_id: int | None = None
-    organization_id: int | None = None
-    student_id: int | None = None
+    course_id: UUID | None = None
+    class_offering_id: UUID | None = None
+    organization_id: UUID | None = None
+    student_id: UUID | None = None
     external_reference: str | None = None
     is_signed: bool | None = None
     signed_at: datetime | None = None
@@ -37,31 +38,31 @@ class DocumentVersionCreate(BaseModel):
 
 
 class DocumentVersionOut(BaseModel):
-    id: int
-    document_id: int
+    id: UUID
+    document_id: UUID
     version_number: int
     file_name: str | None
     mime_type: str | None
     file_size: int | None
     external_url: str | None
     notes: str | None
-    created_by_id: int | None
+    created_by_id: UUID | None
     created_at: datetime
 
     model_config = {"from_attributes": True}
 
 
 class DocumentOut(BaseModel):
-    id: int
+    id: UUID
     title: str
     document_type: DocumentType
     description: str | None
     status: DocumentStatus
-    course_id: int | None
-    class_offering_id: int | None
-    organization_id: int | None
-    student_id: int | None
-    uploaded_by_id: int | None
+    course_id: UUID | None
+    class_offering_id: UUID | None
+    organization_id: UUID | None
+    student_id: UUID | None
+    uploaded_by_id: UUID | None
     latest_version_number: int
     is_signed: bool
     signed_at: datetime | None

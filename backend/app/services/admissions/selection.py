@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from datetime import datetime, timezone
 import secrets
@@ -24,7 +25,7 @@ class SelectionService:
         self.calls = AdmissionCallService(db)
         self.convocation = ConvocationService(db)
 
-    def run(self, call_id: int) -> SelectionOut:
+    def run(self, call_id: UUID) -> SelectionOut:
         call = self.calls.get_or_404(call_id)
         if call.status == AdmissionCallStatus.selected:
             raise conflict("Seleção já realizada")

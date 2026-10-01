@@ -2,13 +2,14 @@
 # Dados de demonstracao: docker compose --profile demo run --rm seed
 services:
   db:
-    image: postgres:16-alpine
+    build:
+      context: ./deploy/docker
+      dockerfile: Dockerfile.db
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     volumes:
       - pgdata:/var/lib/postgresql/data
-      - ./deploy/docker/init-db.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
     ports:
       - "5433:5432"
     healthcheck:

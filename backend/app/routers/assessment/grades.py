@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -11,15 +13,15 @@ router = APIRouter(prefix="/items/{item_id}")
 
 
 @router.get("/grades", response_model=list[GradeRow])
-def list_grades(item_id: int, db: Session = Depends(get_db), current: Student = Depends(get_current_teaching_staff)):
+def list_grades(item_id: UUID, db: Session = Depends(get_db), current: Student = Depends(get_current_teaching_staff)):
     return GradeService(db).list(item_id, current)
 
 
 @router.put("/grades", response_model=list[GradeRow])
-def save_grades(item_id: int, data: list[GradeInput], db: Session = Depends(get_db), current: Student = Depends(get_current_teaching_staff)):
+def save_grades(item_id: UUID, data: list[GradeInput], db: Session = Depends(get_db), current: Student = Depends(get_current_teaching_staff)):
     return GradeService(db).save(item_id, data, current)
 
 
 @router.post("/import-quiz", response_model=QuizImportResult)
-def import_quiz_scores(item_id: int, db: Session = Depends(get_db), current: Student = Depends(get_current_teaching_staff)):
+def import_quiz_scores(item_id: UUID, db: Session = Depends(get_db), current: Student = Depends(get_current_teaching_staff)):
     return GradeService(db).import_quiz(item_id, current)

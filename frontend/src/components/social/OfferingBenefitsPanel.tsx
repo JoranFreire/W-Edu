@@ -10,7 +10,7 @@ import { useOfferingBenefits } from '@/lib/hooks/social/useOfferingBenefits';
 import { useErrorToast } from '@/lib/hooks/useErrorToast';
 
 /** Entrega de beneficios no encontro (lanche so para quem esteve presente) e historico de entregas da turma. */
-export default function OfferingBenefitsPanel({ offeringId }: { offeringId: number }) {
+export default function OfferingBenefitsPanel({ offeringId }: { offeringId: string }) {
   const { benefits, error, deliver } = useOfferingBenefits(offeringId);
   const [draft, setDraft] = useState({ meetingId: '', itemId: '', quantity: '1' });
   useErrorToast(error, 'Erro ao carregar os benefícios.');
@@ -19,7 +19,7 @@ export default function OfferingBenefitsPanel({ offeringId }: { offeringId: numb
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
     try {
-      const result = await deliver(Number(draft.meetingId), Number(draft.itemId), Number(draft.quantity));
+      const result = await deliver(draft.meetingId, draft.itemId, Number(draft.quantity));
       toast.success(`${result.delivered} entrega(s) registrada(s); estoque restante: ${result.remaining_stock}.`);
     } catch (err) {
       toast.error(apiErrorMessage(err, 'Não foi possível registrar a entrega.'));

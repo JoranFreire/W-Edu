@@ -9,18 +9,18 @@ import { useApiQuery } from '@/lib/hooks/useApiQuery';
 import type { Contract } from '@/types/contracts';
 
 /** Contratos da matricula (secretaria): emissao, download e cancelamento. */
-export function useEnrollmentContracts(enrollmentId: number) {
+export function useEnrollmentContracts(enrollmentId: string) {
   const request = useCallback(
     () => api.get<Contract[]>(endpoints.contracts.enrollment(enrollmentId)).then((response) => response.data),
     [enrollmentId],
   );
   const { data = [], error, reload } = useApiQuery(request);
 
-  const issue = async (templateId: number, termId: number | null) => {
+  const issue = async (templateId: string, termId: string | null) => {
     await api.post(endpoints.contracts.enrollment(enrollmentId), { template_id: templateId, term_id: termId });
     reload();
   };
-  const cancel = async (contractId: number) => {
+  const cancel = async (contractId: string) => {
     await api.post(endpoints.contracts.cancel(contractId));
     reload();
   };

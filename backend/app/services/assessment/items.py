@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from sqlalchemy.orm import Session
 
@@ -26,11 +27,11 @@ class AssessmentItemService:
         self.closures = PeriodClosureRepository(db)
         self.offerings = TeachingOfferingService(db)
 
-    def list(self, offering_id: int, user: Student) -> list[AssessmentItem]:
+    def list(self, offering_id: UUID, user: Student) -> list[AssessmentItem]:
         self.offerings.get_for_teaching(offering_id, user)
         return self.repo.list_by_offering(offering_id)
 
-    def create(self, offering_id: int, data: AssessmentItemCreate, user: Student) -> AssessmentItem:
+    def create(self, offering_id: UUID, data: AssessmentItemCreate, user: Student) -> AssessmentItem:
         offering = self.offerings.get_for_teaching(offering_id, user)
         ensure_offering_open(offering)
         period = self._period_for(offering, data.grading_period_id)
@@ -38,22 +39,22 @@ class AssessmentItemService:
         self._validate_quiz(data.quiz_id)
         return self.repo.save(AssessmentItem(class_offering_id=offering_id, **data.model_dump()))
 
-    def get_editable(self, item_id: int, user: Student) -> AssessmentItem:
+    def get_editable(self, item_id: UUID, user: Student) -> AssessmentItem:
         item, offering = self._load(item_id, user)
         ensure_offering_open(offering)
         ensure_unlocked(is_period_locked(item.grading_period, self.closures.closed_period_ids(offering.id)))
         return item
 
-    def get_for_teaching(self, item_id: int, user: Student) -> AssessmentItem:
+    def get_for_teaching(self, item_id: UUID, user: Student) -> AssessmentItem:
         return self._load(item_id, user)[0]
 
-    def _load(self, item_id: int, user: Student) -> tuple[AssessmentItem, ClassOffering]:
+    def _load(self, item_id: UUID, user: Student) -> tuple[AssessmentItem, ClassOffering]:
         item = self.repo.get_by_id(item_id)
         if not item:
             raise not_found("Avaliação não encontrada")
         return item, self.offerings.get_for_teaching(item.class_offering_id, user)
 
-    def update(self, item_id: int, data: AssessmentItemUpdate, user: Student) -> AssessmentItem:
+    def update(self, item_id: UUID, data: AssessmentItemUpdate, user: Student) -> AssessmentItem:
         item = self.get_editable(item_id, user)
         if data.quiz_id is not None:
             self._validate_quiz(data.quiz_id)
@@ -62,10 +63,10 @@ class AssessmentItemService:
         apply_patch(item, data, clearable=frozenset({"quiz_id", "due_on"}))
         return self.repo.save(item)
 
-    def delete(self, item_id: int, user: Student) -> None:
+    def delete(self, item_id: UUID, user: Student) -> None:
         self.repo.delete(self.get_editable(item_id, user))
 
-    def _period_for(self, offering: ClassOffering, period_id: int | None) -> GradingPeriod | None:
+    def _period_for(self, offering: ClassOffering, period_id: UUID | None) -> GradingPeriod | None:
         if period_id is None:
             return None
         period = self.periods.get_by_id(period_id)
@@ -75,6 +76,6 @@ class AssessmentItemService:
             raise bad_request("A etapa não pertence ao período letivo da turma")
         return period
 
-    def _validate_quiz(self, quiz_id: int | None) -> None:
+    def _validate_quiz(self, quiz_id: UUID | None) -> None:
         if quiz_id is not None and not self.quizzes.get_by_id(quiz_id):
             raise not_found("Quiz não encontrado")

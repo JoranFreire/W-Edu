@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from datetime import datetime
 
@@ -11,13 +12,13 @@ from app.repositories.academic._base import Repository
 class RegistrationWindowRepository(Repository[RegistrationWindow]):
     model = RegistrationWindow
 
-    def list(self, term_id: int | None = None) -> list[RegistrationWindow]:
+    def list(self, term_id: UUID | None = None) -> list[RegistrationWindow]:
         query = self.db.query(RegistrationWindow)
         if term_id is not None:
             query = query.filter(RegistrationWindow.term_id == term_id)
         return query.order_by(RegistrationWindow.opens_at.desc(), RegistrationWindow.id.desc()).all()
 
-    def open_at(self, moment: datetime, program_ids: list[int]) -> list[RegistrationWindow]:
+    def open_at(self, moment: datetime, program_ids: list[UUID]) -> list[RegistrationWindow]:
         """Janelas abertas no instante para algum dos programas (ou para todos)."""
         if not program_ids:
             return []

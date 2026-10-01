@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from datetime import date
 
@@ -11,7 +12,7 @@ from app.repositories.academic._base import Repository
 class StudentDiscountRepository(Repository[StudentDiscount]):
     model = StudentDiscount
 
-    def list_by_enrollment(self, enrollment_id: int) -> list[StudentDiscount]:
+    def list_by_enrollment(self, enrollment_id: UUID) -> list[StudentDiscount]:
         return (
             self.db.query(StudentDiscount)
             .filter(StudentDiscount.program_enrollment_id == enrollment_id)
@@ -19,7 +20,7 @@ class StudentDiscountRepository(Repository[StudentDiscount]):
             .all()
         )
 
-    def active_on(self, enrollment_id: int, day: date) -> list[StudentDiscount]:
+    def active_on(self, enrollment_id: UUID, day: date) -> list[StudentDiscount]:
         return (
             self.db.query(StudentDiscount)
             .filter(

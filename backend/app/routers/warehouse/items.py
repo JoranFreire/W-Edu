@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -21,15 +23,15 @@ def create_item(data: ItemCreate, db: Session = Depends(get_db), _: Student = De
 
 
 @router.patch("/{item_id}", response_model=ItemOut)
-def update_item(item_id: int, data: ItemUpdate, db: Session = Depends(get_db), _: Student = Depends(get_current_warehouse_manager)):
+def update_item(item_id: UUID, data: ItemUpdate, db: Session = Depends(get_db), _: Student = Depends(get_current_warehouse_manager)):
     return WarehouseCatalogService(db).update(item_id, data)
 
 
 @router.get("/{item_id}/entries", response_model=list[EntryOut])
-def item_entries(item_id: int, db: Session = Depends(get_db), _: Student = Depends(get_current_warehouse_manager)):
+def item_entries(item_id: UUID, db: Session = Depends(get_db), _: Student = Depends(get_current_warehouse_manager)):
     return WarehouseCatalogService(db).entries_of(item_id)
 
 
 @router.post("/{item_id}/entries", response_model=ItemOut, status_code=201)
-def receive(item_id: int, data: EntryCreate, db: Session = Depends(get_db), current: Student = Depends(get_current_warehouse_manager)):
+def receive(item_id: UUID, data: EntryCreate, db: Session = Depends(get_db), current: Student = Depends(get_current_warehouse_manager)):
     return WarehouseCatalogService(db).receive(item_id, data, current)

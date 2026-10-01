@@ -9,7 +9,7 @@ export default function CurriculumVersionBar({ curricula, selected, canDelete, o
   curricula: Curriculum[];
   selected: Curriculum;
   canDelete: boolean;
-  onSelect: (id: number) => void;
+  onSelect: (id: string) => void;
   onActivate: () => void;
   onArchive: () => void;
   onNewVersion: () => void;
@@ -17,7 +17,7 @@ export default function CurriculumVersionBar({ curricula, selected, canDelete, o
 }) {
   return (
     <div className="flex flex-wrap items-center gap-3">
-      <select aria-label="Versão da matriz" value={selected.id} onChange={(e) => onSelect(Number(e.target.value))} className={`${inputCls} w-auto`}>
+      <select aria-label="Versão da matriz" value={selected.id} onChange={(e) => onSelect(e.target.value)} className={`${inputCls} w-auto`}>
         {curricula.map((curriculum) => (
           <option key={curriculum.id} value={curriculum.id}>
             Versão {curriculum.version} ({curriculumStatusLabels[curriculum.status]})

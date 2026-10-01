@@ -62,7 +62,7 @@ export default function SubjectFormModal({ subject, courses, onSave, onClose }: 
           <textarea rows={4} value={form.syllabus} onChange={(e) => set({ syllabus: e.target.value })} className={`mt-1 ${inputCls}`} />
         </label>
         <label className={labelCls}>Conteúdo EAD (curso)
-          <select value={form.course_id ?? ''} onChange={(e) => set({ course_id: e.target.value ? Number(e.target.value) : null })} className={`mt-1 ${inputCls}`}>
+          <select value={form.course_id ?? ''} onChange={(e) => set({ course_id: e.target.value || null })} className={`mt-1 ${inputCls}`}>
             <option value="">Nenhum</option>
             {courses.map((course) => <option key={course.id} value={course.id}>{course.name}</option>)}
           </select>

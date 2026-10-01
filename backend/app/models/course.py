@@ -1,3 +1,6 @@
+from uuid import UUID
+
+from app.core.ids import new_id
 from datetime import datetime, timezone
 import enum
 from sqlalchemy import ForeignKey, Integer, String, Text, DateTime, Enum as SAEnum, UniqueConstraint
@@ -16,7 +19,7 @@ class CourseModality(str, enum.Enum):
 class Course(TenantMixin, Base):
     __tablename__ = "courses"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
     name: Mapped[str] = mapped_column(String(200))
     description: Mapped[str | None] = mapped_column(Text)
     modality: Mapped[CourseModality] = mapped_column(SAEnum(CourseModality), default=CourseModality.online)
@@ -54,8 +57,8 @@ class Course(TenantMixin, Base):
 class CourseModule(TenantMixin, Base):
     __tablename__ = "course_modules"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    course_id: Mapped[int] = mapped_column(ForeignKey("courses.id"), index=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
+    course_id: Mapped[UUID] = mapped_column(ForeignKey("courses.id"), index=True)
     title: Mapped[str] = mapped_column(String(200))
     description: Mapped[str | None] = mapped_column(Text)
     order: Mapped[int] = mapped_column(Integer, default=0)
@@ -68,7 +71,7 @@ class CourseModule(TenantMixin, Base):
 class LearningPath(TenantMixin, Base):
     __tablename__ = "learning_paths"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
     name: Mapped[str] = mapped_column(String(200))
     description: Mapped[str | None] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
@@ -84,9 +87,9 @@ class LearningPathCourse(TenantMixin, Base):
     __tablename__ = "learning_path_courses"
     __table_args__ = (UniqueConstraint("learning_path_id", "course_id"),)
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    learning_path_id: Mapped[int] = mapped_column(ForeignKey("learning_paths.id"), index=True)
-    course_id: Mapped[int] = mapped_column(ForeignKey("courses.id"), index=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
+    learning_path_id: Mapped[UUID] = mapped_column(ForeignKey("learning_paths.id"), index=True)
+    course_id: Mapped[UUID] = mapped_column(ForeignKey("courses.id"), index=True)
     order: Mapped[int] = mapped_column(Integer, default=0)
 
     learning_path: Mapped["LearningPath"] = relationship(back_populates="courses")
@@ -97,9 +100,9 @@ class CoursePrerequisite(TenantMixin, Base):
     __tablename__ = "course_prerequisites"
     __table_args__ = (UniqueConstraint("course_id", "prerequisite_course_id"),)
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    course_id: Mapped[int] = mapped_column(ForeignKey("courses.id"), index=True)
-    prerequisite_course_id: Mapped[int] = mapped_column(ForeignKey("courses.id"), index=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
+    course_id: Mapped[UUID] = mapped_column(ForeignKey("courses.id"), index=True)
+    prerequisite_course_id: Mapped[UUID] = mapped_column(ForeignKey("courses.id"), index=True)
 
     course: Mapped["Course"] = relationship(
         back_populates="prerequisites",
@@ -115,8 +118,8 @@ class CourseCompletionRule(TenantMixin, Base):
     __tablename__ = "course_completion_rules"
     __table_args__ = (UniqueConstraint("course_id"),)
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    course_id: Mapped[int] = mapped_column(ForeignKey("courses.id"), index=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
+    course_id: Mapped[UUID] = mapped_column(ForeignKey("courses.id"), index=True)
     require_lessons_complete: Mapped[bool] = mapped_column(default=True)
     minimum_progress_percent: Mapped[int] = mapped_column(Integer, default=100)
     require_quiz: Mapped[bool] = mapped_column(default=True)

@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from datetime import date, datetime, timezone
 
@@ -22,11 +23,11 @@ class GuardianSchoolLifeService:
         self.occurrences = OccurrenceRepository(db)
         self.agenda = AgendaService(db)
 
-    def occurrences_of(self, guardian: Student, student_id: int) -> list[StudentOccurrence]:
+    def occurrences_of(self, guardian: Student, student_id: UUID) -> list[StudentOccurrence]:
         self._ensure_dependent(guardian, student_id)
         return self.occurrences.list_by_student(student_id)
 
-    def acknowledge(self, guardian: Student, student_id: int, occurrence_id: int) -> StudentOccurrence:
+    def acknowledge(self, guardian: Student, student_id: UUID, occurrence_id: UUID) -> StudentOccurrence:
         self._ensure_dependent(guardian, student_id)
         occurrence = self.occurrences.get_by_id(occurrence_id)
         if not occurrence or occurrence.student_id != student_id:
@@ -36,9 +37,9 @@ class GuardianSchoolLifeService:
             occurrence.acknowledged_at = datetime.now(timezone.utc)
         return self.occurrences.save(occurrence)
 
-    def agenda_of(self, guardian: Student, student_id: int, from_date: date | None = None) -> list[AgendaItemOut]:
+    def agenda_of(self, guardian: Student, student_id: UUID, from_date: date | None = None) -> list[AgendaItemOut]:
         self._ensure_dependent(guardian, student_id)
         return self.agenda.for_student(student_id, from_date)
 
-    def _ensure_dependent(self, guardian: Student, student_id: int) -> None:
+    def _ensure_dependent(self, guardian: Student, student_id: UUID) -> None:
         ensure_linked(self.links.get(student_id, guardian.id))

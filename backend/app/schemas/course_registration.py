@@ -1,3 +1,4 @@
+from uuid import UUID
 from datetime import datetime, time
 from typing import Literal
 
@@ -8,8 +9,8 @@ from app.schemas.academic import SubjectSummary
 
 
 class RegistrationWindowCreate(BaseModel):
-    term_id: int
-    program_id: int | None = None
+    term_id: UUID
+    program_id: UUID | None = None
     name: str = Field(min_length=1, max_length=120)
     opens_at: datetime
     closes_at: datetime
@@ -28,10 +29,10 @@ class RegistrationWindowUpdate(BaseModel):
 
 
 class RegistrationWindowOut(BaseModel):
-    id: int
-    term_id: int
+    id: UUID
+    term_id: UUID
     term_name: str
-    program_id: int | None
+    program_id: UUID | None
     program_name: str | None
     name: str
     opens_at: datetime
@@ -55,8 +56,8 @@ class TimeSlotCreate(BaseModel):
 
 
 class TimeSlotOut(BaseModel):
-    id: int
-    class_offering_id: int
+    id: UUID
+    class_offering_id: UUID
     weekday: int
     starts_at: time
     ends_at: time
@@ -68,7 +69,7 @@ OfferingSituation = Literal["enrolled", "waitlisted", "available", "full", "bloc
 
 
 class CatalogOffering(BaseModel):
-    offering_id: int
+    offering_id: UUID
     offering_name: str
     subject: SubjectSummary
     term_number: int | None
@@ -85,8 +86,8 @@ class CatalogOffering(BaseModel):
 
 class RegistrationCatalogOut(BaseModel):
     window: RegistrationWindowOut | None
-    term_id: int
-    program_enrollment_id: int
+    term_id: UUID
+    program_enrollment_id: UUID
     registration_number: str
     program_name: str
     credits_registered: int
@@ -97,12 +98,12 @@ class RegistrationCatalogOut(BaseModel):
 
 class MyRegistrationWindowOut(BaseModel):
     window: RegistrationWindowOut
-    program_enrollment_id: int
+    program_enrollment_id: UUID
     program_name: str
 
 
 class RegistrationResultOut(BaseModel):
-    offering_id: int
+    offering_id: UUID
     result: Literal["enrolled", "waitlisted"]
     waitlist_position: int | None = None
 

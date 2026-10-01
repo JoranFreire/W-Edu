@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from sqlalchemy.orm import Session, selectinload
 
 from app.models.assignment import AssignmentSubmission, AssignmentSubmissionStatus
@@ -28,7 +30,7 @@ class CertificateEligibilityService:
         self.db = db
         self.rules = CertificateRuleService(db)
 
-    def evaluate(self, course_id: int, student_id: int) -> CertificateEligibilityOut:
+    def evaluate(self, course_id: UUID, student_id: UUID) -> CertificateEligibilityOut:
         get_course_or_404(self.db, course_id)
         get_student_or_404(self.db, student_id)
         rule = self.rules.get_rule(course_id)
@@ -60,14 +62,14 @@ class CertificateEligibilityService:
             reasons=reasons,
         )
 
-    def meets_progress(self, rule: CourseCompletionRule, student_id: int) -> bool:
+    def meets_progress(self, rule: CourseCompletionRule, student_id: UUID) -> bool:
         """Verificacao barata usada antes da avaliacao completa na emissao automatica."""
         if not rule.require_lessons_complete:
             return True
         lessons = self.db.query(Lesson).filter(Lesson.course_id == rule.course_id).all()
         return self.progress_percent(student_id, lessons) >= rule.minimum_progress_percent
 
-    def progress_percent(self, student_id: int, lessons: list[Lesson]) -> int:
+    def progress_percent(self, student_id: UUID, lessons: list[Lesson]) -> int:
         if not lessons:
             return 100
         lesson_ids = {lesson.id for lesson in lessons}
@@ -78,13 +80,13 @@ class CertificateEligibilityService:
         done = sum(1 for record in records if record.status == ProgressStatus.done)
         return round(done / len(lessons) * 100)
 
-    def _is_enrolled(self, course_id: int, student_id: int) -> bool:
+    def _is_enrolled(self, course_id: UUID, student_id: UUID) -> bool:
         return self.db.query(Enrollment).filter(
             Enrollment.course_id == course_id,
             Enrollment.student_id == student_id,
         ).first() is not None
 
-    def _lessons_with_quiz(self, course_id: int) -> list[Lesson]:
+    def _lessons_with_quiz(self, course_id: UUID) -> list[Lesson]:
         return (
             self.db.query(Lesson)
             .options(selectinload(Lesson.quiz))
@@ -93,14 +95,14 @@ class CertificateEligibilityService:
             .all()
         )
 
-    def _quiz_percent(self, student_id: int, lessons: list[Lesson], minimum_score: int) -> int:
+    def _quiz_percent(self, student_id: UUID, lessons: list[Lesson], minimum_score: int) -> int:
         assessment_lessons = [lesson for lesson in lessons if lesson.quiz is not None or lesson.type == LessonType.assessment]
         if not assessment_lessons:
             return 100
         passed = sum(1 for lesson in assessment_lessons if self._passed_assessment(student_id, lesson, minimum_score))
         return round(passed / len(assessment_lessons) * 100)
 
-    def _passed_assessment(self, student_id: int, lesson: Lesson, minimum_score: int) -> bool:
+    def _passed_assessment(self, student_id: UUID, lesson: Lesson, minimum_score: int) -> bool:
         """Aprovado se passou no quiz, na entrega corrigida ou na avaliacao pratica da aula."""
         if lesson.quiz and self._passed_quiz(student_id, lesson.quiz.id):
             return True
@@ -108,7 +110,7 @@ class CertificateEligibilityService:
             return False
         return self._passed_submission(student_id, lesson.id, minimum_score) or self._passed_practical(student_id, lesson.id, minimum_score)
 
-    def _passed_quiz(self, student_id: int, quiz_id: int) -> bool:
+    def _passed_quiz(self, student_id: UUID, quiz_id: UUID) -> bool:
         best_attempt = (
             self.db.query(QuizAttempt)
             .filter(QuizAttempt.student_id == student_id, QuizAttempt.quiz_id == quiz_id)
@@ -117,7 +119,7 @@ class CertificateEligibilityService:
         )
         return bool(best_attempt and best_attempt.passed)
 
-    def _passed_submission(self, student_id: int, lesson_id: int, minimum_score: int) -> bool:
+    def _passed_submission(self, student_id: UUID, lesson_id: UUID, minimum_score: int) -> bool:
         submission = (
             self.db.query(AssignmentSubmission)
             .filter(
@@ -130,7 +132,7 @@ class CertificateEligibilityService:
         )
         return bool(submission and submission.score is not None and submission.score >= minimum_score)
 
-    def _passed_practical(self, student_id: int, lesson_id: int, minimum_score: int) -> bool:
+    def _passed_practical(self, student_id: UUID, lesson_id: UUID, minimum_score: int) -> bool:
         practical = (
             self.db.query(PracticalAssessmentRecord)
             .join(ScheduledMeeting, ScheduledMeeting.id == PracticalAssessmentRecord.scheduled_meeting_id)
@@ -144,7 +146,7 @@ class CertificateEligibilityService:
         )
         return bool(practical and practical.score >= minimum_score)
 
-    def _attendance_percent(self, student_id: int, course_id: int) -> int:
+    def _attendance_percent(self, student_id: UUID, course_id: UUID) -> int:
         class_offering_ids = [
             row[0]
             for row in self.db.query(ClassOffering.id)

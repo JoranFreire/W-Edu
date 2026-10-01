@@ -43,11 +43,11 @@ export default function MovementActions({ enrollment, actions, onChanged }: { en
 
   const submit = async (movement: Movement, values: Record<string, string>) => {
     const reason = values.reason?.trim() || null;
-    if (movement === 'reenroll') await actions.reenroll(Number(values.term_id), values.term_number ? Number(values.term_number) : null);
+    if (movement === 'reenroll') await actions.reenroll(values.term_id, values.term_number ? Number(values.term_number) : null);
     else if (movement === 'transfer-out') await actions.transferOut(values.destination, reason);
-    else if (movement === 'change-curriculum') await actions.changeCurriculum(Number(values.curriculum_id), reason);
+    else if (movement === 'change-curriculum') await actions.changeCurriculum(values.curriculum_id, reason);
     else if (movement === 'transfer-internal') {
-      const created = await actions.transferInternal(Number(values.program_id), reason);
+      const created = await actions.transferInternal(values.program_id, reason);
       toast.success(`Nova matrícula ${created.registration_number}.`);
       router.push(`/admin/secretariat/enrollments/${created.id}`);
       return;

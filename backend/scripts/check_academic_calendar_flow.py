@@ -27,6 +27,7 @@ import httpx
 import starlette.concurrency
 import starlette.routing
 
+from scripts.check_support import ApiClient  # noqa: E402
 import app.models  # noqa: F401
 from app.core.database import Base, SessionLocal, engine
 from app.core.security import hash_password
@@ -71,7 +72,7 @@ def seed() -> dict[str, int]:
             db.add(user)
             db.flush()
             db.add(InstitutionMembership(institution_id=institution.id, user_id=user.id, role=role))
-            ids[name] = user.id
+            ids[name] = str(user.id)
         db.commit()
     return ids
 
@@ -224,7 +225,7 @@ async def check_groups(c: Checker, coord: dict, admin: dict, ids: dict[str, int]
 async def run() -> int:
     ids = seed()
     transport = httpx.ASGITransport(app=app)
-    async with httpx.AsyncClient(transport=transport, base_url="http://testserver") as client:
+    async with ApiClient(transport=transport, base_url="http://testserver") as client:
         c = Checker(client)
         coord, admin = await c.login("coord"), await c.login("admin")
         term_id = await check_terms(c, coord, admin)

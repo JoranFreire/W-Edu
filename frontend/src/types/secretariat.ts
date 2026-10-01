@@ -8,26 +8,26 @@ export type CreditTransferStatus = 'requested' | 'approved' | 'rejected';
 export type TranscriptStatus = 'completed' | 'credited' | 'in_progress' | 'failed' | 'pending';
 
 export interface EnrollmentEvent {
-  id: number;
+  id: string;
   kind: EnrollmentEventKind;
-  term_id: number | null;
+  term_id: string | null;
   reason: string | null;
   details: Record<string, unknown>;
-  created_by_id: number | null;
+  created_by_id: string | null;
   created_at: string;
 }
 
 export interface TermRegistration {
-  id: number;
-  term_id: number;
+  id: string;
+  term_id: string;
   term_name: string;
   curriculum_term_number: number | null;
   registered_at: string;
 }
 
 export interface CreditTransfer {
-  id: number;
-  subject_id: number;
+  id: string;
+  subject_id: string;
   subject_code: string;
   subject_name: string;
   origin: CreditTransferOrigin;
@@ -42,7 +42,7 @@ export interface CreditTransfer {
 }
 
 export interface TranscriptRow {
-  subject_id: number;
+  subject_id: string;
   code: string;
   name: string;
   term_number: number;
@@ -56,7 +56,7 @@ export interface TranscriptRow {
 }
 
 export interface Transcript {
-  program_enrollment_id: number;
+  program_enrollment_id: string;
   registration_number: string;
   student_name: string;
   program_code: string;
@@ -79,10 +79,10 @@ export interface Transcript {
 export type DeclarationKind = 'enrollment' | 'attendance' | 'completion';
 
 export interface Declaration {
-  id: number;
-  program_enrollment_id: number;
+  id: string;
+  program_enrollment_id: string;
   kind: DeclarationKind;
-  term_id: number | null;
+  term_id: string | null;
   title: string;
   lines: string[];
   validation_code: string;

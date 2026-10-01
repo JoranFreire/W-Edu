@@ -1,12 +1,12 @@
 import { subscriptionStatusLabels } from '@/lib/finance/labels';
 import type { Subscription } from '@/types/finance';
 
-type NameLookup = (id: number | null) => string | null;
+type NameLookup = (id: string | null) => string | null;
 
 export default function SubscriptionsList({ subscriptions, planName, holderName }: {
   subscriptions: Subscription[];
   planName: NameLookup;
-  holderName: (studentId: number | null, organizationId: number | null) => string | null;
+  holderName: (studentId: string | null, organizationId: string | null) => string | null;
 }) {
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">

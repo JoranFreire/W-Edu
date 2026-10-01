@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
@@ -23,40 +25,40 @@ class QuizService:
             raise HTTPException(status_code=400, detail="Esta aula já possui um quiz.")
         return self.repo.create(data.lesson_id, data.passing_score, data.max_attempts)
 
-    def update_quiz(self, lesson_id: int, data: QuizUpdate) -> Quiz:
+    def update_quiz(self, lesson_id: UUID, data: QuizUpdate) -> Quiz:
         quiz = self._get_quiz_or_404(lesson_id)
         return self.repo.update(quiz, **data.model_dump(exclude_none=True))
 
-    def delete_quiz(self, lesson_id: int) -> None:
+    def delete_quiz(self, lesson_id: UUID) -> None:
         quiz = self._get_quiz_or_404(lesson_id)
         self.repo.delete(quiz)
 
-    def add_question(self, lesson_id: int, data: QuizQuestionCreate) -> QuizQuestion:
+    def add_question(self, lesson_id: UUID, data: QuizQuestionCreate) -> QuizQuestion:
         quiz = self._get_quiz_or_404(lesson_id)
         if data.correct_index >= len(data.options):
             raise HTTPException(status_code=400, detail="correct_index fora do range de opções.")
         return self.question_repo.create(quiz.id, data.question, data.options, data.correct_index, data.order)
 
-    def update_question(self, question_id: int, data: QuizQuestionUpdate) -> QuizQuestion:
+    def update_question(self, question_id: UUID, data: QuizQuestionUpdate) -> QuizQuestion:
         question = self._get_question_or_404(question_id)
         return self.question_repo.update(question, **data.model_dump(exclude_none=True))
 
-    def delete_question(self, question_id: int) -> None:
+    def delete_question(self, question_id: UUID) -> None:
         question = self._get_question_or_404(question_id)
         self.question_repo.delete(question)
 
-    def get_quiz_with_answers(self, lesson_id: int) -> Quiz:
+    def get_quiz_with_answers(self, lesson_id: UUID) -> Quiz:
         return self._get_quiz_or_404(lesson_id)
 
     # --- Student ---
 
-    def get_quiz_for_student(self, lesson_id: int) -> Quiz:
+    def get_quiz_for_student(self, lesson_id: UUID) -> Quiz:
         return self._get_quiz_or_404(lesson_id)
 
-    def get_optional_quiz_for_student(self, lesson_id: int) -> Quiz | None:
+    def get_optional_quiz_for_student(self, lesson_id: UUID) -> Quiz | None:
         return self.repo.get_by_lesson(lesson_id)
 
-    def submit_attempt(self, lesson_id: int, student_id: int, data: QuizAnswerSubmit) -> QuizAttempt:
+    def submit_attempt(self, lesson_id: UUID, student_id: UUID, data: QuizAnswerSubmit) -> QuizAttempt:
         quiz = self._get_quiz_or_404(lesson_id)
 
         if quiz.max_attempts > 0:
@@ -80,11 +82,11 @@ class QuizService:
             self.certificate_service.auto_issue(lesson.course_id, student_id)
         return attempt
 
-    def get_attempts(self, lesson_id: int, student_id: int) -> list[QuizAttempt]:
+    def get_attempts(self, lesson_id: UUID, student_id: UUID) -> list[QuizAttempt]:
         quiz = self._get_quiz_or_404(lesson_id)
         return self.attempt_repo.list_by_student_and_quiz(student_id, quiz.id)
 
-    def get_optional_attempts(self, lesson_id: int, student_id: int) -> list[QuizAttempt]:
+    def get_optional_attempts(self, lesson_id: UUID, student_id: UUID) -> list[QuizAttempt]:
         quiz = self.repo.get_by_lesson(lesson_id)
         if not quiz:
             return []
@@ -92,13 +94,13 @@ class QuizService:
 
     # --- Internal ---
 
-    def _get_quiz_or_404(self, lesson_id: int) -> Quiz:
+    def _get_quiz_or_404(self, lesson_id: UUID) -> Quiz:
         quiz = self.repo.get_by_lesson(lesson_id)
         if not quiz:
             raise HTTPException(status_code=404, detail="Quiz não encontrado para esta aula.")
         return quiz
 
-    def _get_question_or_404(self, question_id: int) -> QuizQuestion:
+    def _get_question_or_404(self, question_id: UUID) -> QuizQuestion:
         question = self.question_repo.get_by_id(question_id)
         if not question:
             raise HTTPException(status_code=404, detail="Questão não encontrada.")

@@ -12,7 +12,7 @@ export interface SubjectInput {
   syllabus: string | null;
   hours: number;
   credits: number | null;
-  course_id: number | null;
+  course_id: string | null;
   is_active: boolean;
 }
 
@@ -21,7 +21,7 @@ export function useSubjects() {
   const request = useCallback(() => api.get<Subject[]>(endpoints.academic.subjects).then((response) => response.data), []);
   const { data = [], loading, error, reload } = useApiQuery(request);
 
-  const save = async (id: number | null, input: SubjectInput) => {
+  const save = async (id: string | null, input: SubjectInput) => {
     if (id) await api.patch(endpoints.academic.subject(id), input);
     else await api.post(endpoints.academic.subjects, input);
     reload();

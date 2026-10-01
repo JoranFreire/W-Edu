@@ -6,7 +6,7 @@ import { endpoints } from '@/lib/api/endpoints';
 import { useApiQuery } from '@/lib/hooks/useApiQuery';
 import type { TeachingOffering } from '@/types/assessment';
 
-export function useTeachingOffering(offeringId: number) {
+export function useTeachingOffering(offeringId: string) {
   const request = useCallback(
     () => api.get<TeachingOffering>(endpoints.assessment.offering(offeringId)).then((response) => response.data),
     [offeringId],

@@ -10,7 +10,7 @@ export interface InstitutionBranding {
 }
 
 export interface InstitutionSummary {
-  id: number;
+  id: string;
   slug: string;
   name: string;
   type: InstitutionType;
@@ -32,8 +32,8 @@ export interface Membership {
 }
 
 export interface Campus {
-  id: number;
-  institution_id: number;
+  id: string;
+  institution_id: string;
   name: string;
   address: string | null;
   is_active: boolean;

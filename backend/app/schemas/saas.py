@@ -1,3 +1,4 @@
+from uuid import UUID
 from datetime import date, datetime
 
 from pydantic import BaseModel, Field
@@ -21,7 +22,7 @@ class SaasPlanUpdate(BaseModel):
 
 
 class SaasPlanOut(BaseModel):
-    id: int
+    id: UUID
     name: str
     description: str | None
     monthly_price_cents: int
@@ -32,14 +33,14 @@ class SaasPlanOut(BaseModel):
 
 
 class SubscriptionInput(BaseModel):
-    plan_id: int
+    plan_id: UUID
     status: SaasSubscriptionStatus = SaasSubscriptionStatus.active
     started_on: date | None = None
     trial_ends_on: date | None = None
 
 
 class SubscriptionOut(BaseModel):
-    institution_id: int
+    institution_id: UUID
     plan: SaasPlanOut
     status: SaasSubscriptionStatus
     started_on: date
@@ -53,8 +54,8 @@ class InvoiceGenerate(BaseModel):
 
 
 class PlatformInvoiceOut(BaseModel):
-    id: int
-    institution_id: int
+    id: UUID
+    institution_id: UUID
     plan_name: str
     period_start: date
     period_end: date

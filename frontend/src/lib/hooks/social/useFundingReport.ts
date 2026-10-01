@@ -8,7 +8,7 @@ import { useApiQuery } from '@/lib/hooks/useApiQuery';
 import type { FundingReport } from '@/types/socialPrograms';
 
 /** Prestacao de contas do financiador e download da planilha. */
-export function useFundingReport(fundingId: number) {
+export function useFundingReport(fundingId: string) {
   const request = useCallback(
     () => api.get<FundingReport>(endpoints.social.fundingReport(fundingId)).then((response) => response.data),
     [fundingId],

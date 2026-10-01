@@ -22,7 +22,7 @@ const tabs: TabItem<GroupTab>[] = [
 
 export default function AdminClassGroupPage() {
   const router = useRouter();
-  const groupId = Number(useParams<{ groupId: string }>().groupId);
+  const groupId = useParams<{ groupId: string }>().groupId;
   const { group, members, error, addMember, removeMember } = useClassGroup(groupId);
   const { enrollments } = useProgramEnrollments({ program_id: group?.program_id, status: 'active' });
   const [tab, setTab] = useState<GroupTab>('roster');

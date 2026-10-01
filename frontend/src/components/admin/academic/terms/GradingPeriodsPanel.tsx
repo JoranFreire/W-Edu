@@ -16,7 +16,7 @@ import type { GradingPeriod } from '@/types/academicCalendar';
 const emptyDraft: GradingPeriodInput = { name: '', starts_on: '', ends_on: '', weight: 1 };
 
 /** Etapas de avaliacao do periodo: inclusao, encerramento/reabertura e exclusao. */
-export default function GradingPeriodsPanel({ termId, editable, canDelete }: { termId: number; editable: boolean; canDelete: boolean }) {
+export default function GradingPeriodsPanel({ termId, editable, canDelete }: { termId: string; editable: boolean; canDelete: boolean }) {
   const terms = useTerminology();
   const { periods, error, save, changeStatus, remove } = useGradingPeriods(termId);
   const [draft, setDraft] = useState(emptyDraft);

@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -24,7 +26,7 @@ router = APIRouter()
 @router.get("/students/{student_id}/student-profile", response_model=StudentProfileOut)
 @router.get("/users/{student_id}/student-profile", response_model=StudentProfileOut)
 def get_student_profile(
-    student_id: int,
+    student_id: UUID,
     db: Session = Depends(get_db),
     current: Student = Depends(get_current_academic_staff),
 ):
@@ -36,7 +38,7 @@ def get_student_profile(
 @router.patch("/students/{student_id}/student-profile", response_model=StudentProfileOut)
 @router.patch("/users/{student_id}/student-profile", response_model=StudentProfileOut)
 def update_student_profile(
-    student_id: int,
+    student_id: UUID,
     data: StudentProfileUpdate,
     db: Session = Depends(get_db),
     current: Student = Depends(get_current_academic_staff),
@@ -49,7 +51,7 @@ def update_student_profile(
 @router.get("/students/{student_id}/instructor-profile", response_model=InstructorProfileOut)
 @router.get("/users/{student_id}/instructor-profile", response_model=InstructorProfileOut)
 def get_instructor_profile(
-    student_id: int,
+    student_id: UUID,
     db: Session = Depends(get_db),
     current: Student = Depends(get_current_academic_staff),
 ):
@@ -61,7 +63,7 @@ def get_instructor_profile(
 @router.patch("/students/{student_id}/instructor-profile", response_model=InstructorProfileOut)
 @router.patch("/users/{student_id}/instructor-profile", response_model=InstructorProfileOut)
 def update_instructor_profile(
-    student_id: int,
+    student_id: UUID,
     data: InstructorProfileUpdate,
     db: Session = Depends(get_db),
     current: Student = Depends(get_current_academic_staff),
@@ -74,7 +76,7 @@ def update_instructor_profile(
 @router.get("/students/{student_id}/availability", response_model=list[InstructorAvailabilityOut])
 @router.get("/users/{student_id}/availability", response_model=list[InstructorAvailabilityOut])
 def list_instructor_availability(
-    student_id: int,
+    student_id: UUID,
     db: Session = Depends(get_db),
     current: Student = Depends(get_current_academic_staff),
 ):
@@ -86,7 +88,7 @@ def list_instructor_availability(
 @router.post("/students/{student_id}/availability", response_model=InstructorAvailabilityOut, status_code=201)
 @router.post("/users/{student_id}/availability", response_model=InstructorAvailabilityOut, status_code=201)
 def add_instructor_availability(
-    student_id: int,
+    student_id: UUID,
     data: InstructorAvailabilityCreate,
     db: Session = Depends(get_db),
     current: Student = Depends(get_current_academic_staff),
@@ -99,7 +101,7 @@ def add_instructor_availability(
 @router.patch("/students/availability/{availability_id}", response_model=InstructorAvailabilityOut)
 @router.patch("/users/availability/{availability_id}", response_model=InstructorAvailabilityOut)
 def update_instructor_availability(
-    availability_id: int,
+    availability_id: UUID,
     data: InstructorAvailabilityUpdate,
     db: Session = Depends(get_db),
     current: Student = Depends(get_current_academic_staff),
@@ -112,7 +114,7 @@ def update_instructor_availability(
 @router.delete("/students/availability/{availability_id}", status_code=204)
 @router.delete("/users/availability/{availability_id}", status_code=204)
 def delete_instructor_availability(
-    availability_id: int,
+    availability_id: UUID,
     db: Session = Depends(get_db),
     current: Student = Depends(get_current_academic_staff),
 ):
@@ -124,7 +126,7 @@ def delete_instructor_availability(
 @router.get("/students/{student_id}/ratings", response_model=list[InstructorRatingOut])
 @router.get("/users/{student_id}/ratings", response_model=list[InstructorRatingOut])
 def list_instructor_ratings(
-    student_id: int,
+    student_id: UUID,
     db: Session = Depends(get_db),
     current: Student = Depends(get_current_academic_staff),
 ):
@@ -136,7 +138,7 @@ def list_instructor_ratings(
 @router.post("/students/{student_id}/ratings", response_model=InstructorRatingOut, status_code=201)
 @router.post("/users/{student_id}/ratings", response_model=InstructorRatingOut, status_code=201)
 def add_instructor_rating(
-    student_id: int,
+    student_id: UUID,
     data: InstructorRatingCreate,
     db: Session = Depends(get_db),
     current: Student = Depends(get_current_academic_staff),

@@ -11,13 +11,13 @@ import type { FundingSource } from '@/types/socialPrograms';
 export default function OfferingFundingRow({ offering, fundingSources, onSave }: {
   offering: ClassOffering;
   fundingSources: FundingSource[];
-  onSave: (fundingId: number | null, limit: number | null) => Promise<void>;
+  onSave: (fundingId: string | null, limit: number | null) => Promise<void>;
 }) {
   const [fundingId, setFundingId] = useState(String(offering.funding_source_id ?? ''));
   const [limit, setLimit] = useState(String(offering.max_absence_percent ?? ''));
   const save = async () => {
     try {
-      await onSave(fundingId ? Number(fundingId) : null, limit ? Number(limit) : null);
+      await onSave(fundingId ? fundingId : null, limit ? Number(limit) : null);
       toast.success('Turma atualizada.');
     } catch (error) {
       toast.error(apiErrorMessage(error, 'Erro ao atualizar a turma.'));

@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from datetime import date
 
@@ -20,16 +21,16 @@ class InstitutionSubscriptionService:
         self.plans = SaasPlanService(db)
         self.institutions = InstitutionService(db)
 
-    def get(self, institution_id: int) -> InstitutionSubscription | None:
+    def get(self, institution_id: UUID) -> InstitutionSubscription | None:
         return self.repo.get_for(institution_id)
 
-    def get_or_404(self, institution_id: int) -> InstitutionSubscription:
+    def get_or_404(self, institution_id: UUID) -> InstitutionSubscription:
         subscription = self.repo.get_for(institution_id)
         if not subscription:
             raise not_found("Instituição sem plano contratado")
         return subscription
 
-    def set(self, institution_id: int, data: SubscriptionInput) -> InstitutionSubscription:
+    def set(self, institution_id: UUID, data: SubscriptionInput) -> InstitutionSubscription:
         self.institutions.get_or_404(institution_id)
         plan = self.plans.get_or_404(data.plan_id)
         if not plan.is_active:

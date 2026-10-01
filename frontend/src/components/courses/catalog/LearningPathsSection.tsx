@@ -4,10 +4,10 @@ import type { LearningPath, LearningPathCourse } from '@/types/course';
 /** Trilhas de aprendizagem com a sequencia de cursos e a situacao do aluno em cada um. */
 export default function LearningPathsSection({ paths, pathCourses, isEnrolled, courseName, onEnroll }: {
   paths: LearningPath[];
-  pathCourses: Record<number, LearningPathCourse[]>;
-  isEnrolled: (courseId: number) => boolean;
-  courseName: (courseId: number) => string;
-  onEnroll: (courseId: number) => void;
+  pathCourses: Record<string, LearningPathCourse[]>;
+  isEnrolled: (courseId: string) => boolean;
+  courseName: (courseId: string) => string;
+  onEnroll: (courseId: string) => void;
 }) {
   return (
     <section className="space-y-3">

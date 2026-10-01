@@ -18,7 +18,7 @@ async function downloadSubmission(submission: AssignmentSubmission) {
   }
 }
 
-export default function AssignmentSubmissionsPanel({ lessonId }: { lessonId: number }) {
+export default function AssignmentSubmissionsPanel({ lessonId }: { lessonId: string }) {
   const { submissions, loading, error, review } = useAssignmentSubmissions(lessonId);
 
   if (loading) return <p className="p-3 text-xs text-gray-500 dark:text-gray-400">Carregando entregas...</p>;

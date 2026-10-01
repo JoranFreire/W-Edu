@@ -1,3 +1,6 @@
+from uuid import UUID
+
+from app.core.ids import new_id
 from datetime import datetime, timezone
 
 from sqlalchemy import DateTime, ForeignKey, String, Text
@@ -10,9 +13,9 @@ from app.core.tenancy import TenantMixin
 class ForumThread(TenantMixin, Base):
     __tablename__ = "forum_threads"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    course_id: Mapped[int] = mapped_column(ForeignKey("courses.id"), index=True)
-    author_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
+    course_id: Mapped[UUID] = mapped_column(ForeignKey("courses.id"), index=True)
+    author_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"), index=True)
     title: Mapped[str] = mapped_column(String(200))
     body: Mapped[str] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
@@ -34,9 +37,9 @@ class ForumThread(TenantMixin, Base):
 class ForumPost(TenantMixin, Base):
     __tablename__ = "forum_posts"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    thread_id: Mapped[int] = mapped_column(ForeignKey("forum_threads.id"), index=True)
-    author_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
+    thread_id: Mapped[UUID] = mapped_column(ForeignKey("forum_threads.id"), index=True)
+    author_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"), index=True)
     body: Mapped[str] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     updated_at: Mapped[datetime] = mapped_column(

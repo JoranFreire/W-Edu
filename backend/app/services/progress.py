@@ -1,3 +1,4 @@
+from uuid import UUID
 from datetime import datetime, timezone
 from sqlalchemy.orm import Session
 
@@ -17,14 +18,14 @@ class ProgressService:
         self.lesson_repo = LessonRepository(db)
         self.certificate_service = CertificateIssuanceService(db)
 
-    def mark(self, student_id: int, lesson_id: int, status: ProgressStatus) -> Progress:
+    def mark(self, student_id: UUID, lesson_id: UUID, status: ProgressStatus) -> Progress:
         progress = self.repo.upsert(student_id, lesson_id, status)
         lesson = self.lesson_repo.get_by_id(lesson_id)
         if lesson:
             self.certificate_service.auto_issue(lesson.course_id, student_id)
         return progress
 
-    def mark_consumed(self, student_id: int, lesson_id: int) -> Progress:
+    def mark_consumed(self, student_id: UUID, lesson_id: UUID) -> Progress:
         # Consumir o conteudo de novo nao pode rebaixar uma aula ja concluida.
         existing = self.repo.get_by_student_and_lesson(student_id, lesson_id)
         status = ProgressStatus.done if existing and existing.status == ProgressStatus.done else ProgressStatus.in_progress
@@ -38,10 +39,10 @@ class ProgressService:
             self.certificate_service.auto_issue(lesson.course_id, student_id)
         return progress
 
-    def list_by_student(self, student_id: int) -> list[Progress]:
+    def list_by_student(self, student_id: UUID) -> list[Progress]:
         return self.repo.list_by_student(student_id)
 
-    def course_summary(self, student_id: int) -> list[CourseProgressOut]:
+    def course_summary(self, student_id: UUID) -> list[CourseProgressOut]:
         enrollments = (
             self.repo.db.query(Enrollment)
             .filter(Enrollment.student_id == student_id)
@@ -62,7 +63,7 @@ class ProgressService:
             .order_by(Lesson.course_id, Lesson.order)
             .all()
         )
-        lessons_by_course: dict[int, list[Lesson]] = {}
+        lessons_by_course: dict[UUID, list[Lesson]] = {}
         for lesson in lessons:
             lessons_by_course.setdefault(lesson.course_id, []).append(lesson)
 
@@ -70,7 +71,7 @@ class ProgressService:
         progress_by_lesson = {
             progress.lesson_id: progress
             for progress in self.repo.db.query(Progress)
-            .filter(Progress.student_id == student_id, Progress.lesson_id.in_(lesson_ids or [-1]))
+            .filter(Progress.student_id == student_id, Progress.lesson_id.in_(lesson_ids))
             .all()
         }
 

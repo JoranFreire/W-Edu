@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from pathlib import Path
 
@@ -26,7 +27,7 @@ class ApplicationDocumentService:
         self.applications = AdmissionApplicationRepository(db)
         self.applicant_side = ApplicationService(db)
 
-    def upload(self, applicant: Student, application_id: int, kind: str, file: UploadFile) -> ApplicationOut:
+    def upload(self, applicant: Student, application_id: UUID, kind: str, file: UploadFile) -> ApplicationOut:
         application = self.applicant_side.own(applicant, application_id)
         if application.status not in OPEN_FOR_DOCUMENTS:
             raise conflict("Inscrição encerrada para envio de comprovantes")
@@ -41,20 +42,20 @@ class ApplicationDocumentService:
         self.applications.db.refresh(application)
         return application_out(application)
 
-    def review(self, document_id: int, data: DocumentReviewInput, reviewer: Student) -> ApplicationOut:
+    def review(self, document_id: UUID, data: DocumentReviewInput, reviewer: Student) -> ApplicationOut:
         document = self._get_or_404(document_id)
         document.review, document.review_note, document.reviewed_by_id = data.review, data.note, reviewer.id
         self.repo.save(document)
         return application_out(document.application)
 
-    def download(self, document_id: int) -> FileResponse:
+    def download(self, document_id: UUID) -> FileResponse:
         document = self._get_or_404(document_id)
         path = Path(document.storage_path)
         if not path.exists():
             raise not_found("Arquivo não encontrado")
         return FileResponse(path, filename=document.file_name, media_type=document.mime_type or "application/octet-stream")
 
-    def _get_or_404(self, document_id: int) -> ApplicationDocument:
+    def _get_or_404(self, document_id: UUID) -> ApplicationDocument:
         document = self.repo.get_by_id(document_id)
         if not document:
             raise not_found("Comprovante não encontrado")

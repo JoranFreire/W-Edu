@@ -17,7 +17,7 @@ export function useWarehouseItems(onlyActive = false) {
     await api.post(endpoints.warehouse.items, input);
     reload();
   };
-  const receive = async (itemId: number, input: EntryInput) => {
+  const receive = async (itemId: string, input: EntryInput) => {
     await api.post(endpoints.warehouse.entries(itemId), input);
     reload();
   };

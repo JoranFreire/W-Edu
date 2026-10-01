@@ -1,3 +1,4 @@
+from uuid import UUID
 from datetime import datetime
 from pydantic import BaseModel, Field
 
@@ -22,7 +23,7 @@ class BillingPlanUpdate(BaseModel):
 
 
 class BillingPlanOut(BaseModel):
-    id: int
+    id: UUID
     name: str
     description: str | None
     price_cents: int
@@ -36,9 +37,9 @@ class BillingPlanOut(BaseModel):
 
 
 class SubscriptionCreate(BaseModel):
-    billing_plan_id: int
-    student_id: int | None = None
-    organization_id: int | None = None
+    billing_plan_id: UUID
+    student_id: UUID | None = None
+    organization_id: UUID | None = None
     gateway_name: str | None = None
     gateway_customer_id: str | None = None
 
@@ -51,10 +52,10 @@ class SubscriptionUpdate(BaseModel):
 
 
 class SubscriptionOut(BaseModel):
-    id: int
-    billing_plan_id: int
-    student_id: int | None
-    organization_id: int | None
+    id: UUID
+    billing_plan_id: UUID
+    student_id: UUID | None
+    organization_id: UUID | None
     status: SubscriptionStatus
     start_date: datetime
     current_period_start: datetime
@@ -68,12 +69,12 @@ class SubscriptionOut(BaseModel):
 
 
 class ChargeCreate(BaseModel):
-    billing_plan_id: int | None = None
-    subscription_id: int | None = None
-    student_id: int | None = None
-    organization_id: int | None = None
-    course_id: int | None = None
-    class_offering_id: int | None = None
+    billing_plan_id: UUID | None = None
+    subscription_id: UUID | None = None
+    student_id: UUID | None = None
+    organization_id: UUID | None = None
+    course_id: UUID | None = None
+    class_offering_id: UUID | None = None
     amount_cents: int = Field(ge=0)
     currency: str = "BRL"
     payment_method: PaymentMethod = PaymentMethod.manual
@@ -100,13 +101,13 @@ class ChargeUpdate(BaseModel):
 
 
 class ChargeOut(BaseModel):
-    id: int
-    billing_plan_id: int | None
-    subscription_id: int | None
-    student_id: int | None
-    organization_id: int | None
-    course_id: int | None
-    class_offering_id: int | None
+    id: UUID
+    billing_plan_id: UUID | None
+    subscription_id: UUID | None
+    student_id: UUID | None
+    organization_id: UUID | None
+    course_id: UUID | None
+    class_offering_id: UUID | None
     amount_cents: int
     currency: str
     payment_method: PaymentMethod
@@ -123,10 +124,10 @@ class ChargeOut(BaseModel):
     paid_at: datetime | None
     description: str | None
     created_at: datetime
-    program_enrollment_id: int | None = None
-    tuition_plan_id: int | None = None
+    program_enrollment_id: UUID | None = None
+    tuition_plan_id: UUID | None = None
     installment_number: int | None = None
-    payer_id: int | None = None
+    payer_id: UUID | None = None
     gross_amount_cents: int | None = None
     discount_cents: int = 0
     punctuality_discount_cents: int = 0

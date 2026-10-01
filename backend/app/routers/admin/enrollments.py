@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -11,5 +13,5 @@ router = APIRouter()
 
 
 @router.get("/enrollments/course/{course_id}", response_model=list[EnrollmentOut])
-def enrollments_by_course(course_id: int, db: Session = Depends(get_db), _: Student = Depends(get_current_admin_or_coordinator)):
+def enrollments_by_course(course_id: UUID, db: Session = Depends(get_db), _: Student = Depends(get_current_admin_or_coordinator)):
     return EnrollmentService(db).list_by_course(course_id)

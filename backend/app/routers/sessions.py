@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session as DBSession
 
@@ -40,7 +42,7 @@ def my_session_history(db: DBSession = Depends(get_db), current: Student = Depen
 
 @router.patch("/{session_id}/voice", response_model=SessionOut)
 def update_voice_session(
-    session_id: int,
+    session_id: UUID,
     data: SessionVoiceUpdate,
     db: DBSession = Depends(get_db),
     current: Student = Depends(get_current_student),

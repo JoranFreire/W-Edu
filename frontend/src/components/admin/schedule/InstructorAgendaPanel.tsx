@@ -36,7 +36,7 @@ export default function InstructorAgendaPanel({ instructors, onPickSuggestion }:
     }
     setLoading(true);
     try {
-      const { data } = await api.get<InstructorAgenda>(endpoints.schedule.instructorAgenda(Number(form.instructor_id)), {
+      const { data } = await api.get<InstructorAgenda>(endpoints.schedule.instructorAgenda(form.instructor_id), {
         params: {
           range_start: toApiDateTime(form.range_start),
           range_end: toApiDateTime(form.range_end),

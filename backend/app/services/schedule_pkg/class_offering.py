@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -44,7 +46,7 @@ class ClassOfferingService:
             )
         return class_offering
 
-    def get_or_404(self, class_id: int) -> ClassOffering:
+    def get_or_404(self, class_id: UUID) -> ClassOffering:
         class_offering = self.repo.get_by_id(class_id)
         if not class_offering:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Turma não encontrada")
@@ -53,12 +55,12 @@ class ClassOfferingService:
     def list_all(self) -> list[ClassOffering]:
         return self.repo.list_all()
 
-    def list_by_course(self, course_id: int) -> list[ClassOffering]:
+    def list_by_course(self, course_id: UUID) -> list[ClassOffering]:
         if not self.course_repo.get_by_id(course_id):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Curso não encontrado")
         return self.repo.list_by_course(course_id)
 
-    def update(self, class_id: int, data: ClassOfferingUpdate) -> ClassOffering:
+    def update(self, class_id: UUID, data: ClassOfferingUpdate) -> ClassOffering:
         class_offering = self.get_or_404(class_id)
         payload = data.model_dump(exclude_none=True)
         # Financiador e limite de faltas podem ser removidos enviando null.
@@ -85,7 +87,7 @@ class ClassOfferingService:
             setattr(class_offering, field, value)
         return self.repo.update(class_offering)
 
-    def join(self, class_id: int, student_id: int) -> ClassJoinOut:
+    def join(self, class_id: UUID, student_id: UUID) -> ClassJoinOut:
         class_offering = self.get_or_404(class_id)
         if class_offering.subject_id is not None and class_offering.class_group_id is None:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Disciplina: a inscrição é feita pela matrícula por disciplina")
@@ -101,15 +103,15 @@ class ClassOfferingService:
         )
         return ClassJoinOut(result="waitlisted", waitlist_entry=entry)
 
-    def list_enrollments(self, class_id: int) -> list[ClassEnrollment]:
+    def list_enrollments(self, class_id: UUID) -> list[ClassEnrollment]:
         self.get_or_404(class_id)
         return self.repo.list_enrollments(class_id)
 
-    def list_waitlist(self, class_id: int) -> list[WaitlistEntry]:
+    def list_waitlist(self, class_id: UUID) -> list[WaitlistEntry]:
         self.get_or_404(class_id)
         return self.repo.list_waitlist(class_id)
 
-    def _validate_refs(self, course_id: int, location_id: int | None, room_id: int | None, instructor_id: int | None) -> None:
+    def _validate_refs(self, course_id: UUID, location_id: UUID | None, room_id: UUID | None, instructor_id: UUID | None) -> None:
         if not self.course_repo.get_by_id(course_id):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Curso não encontrado")
         if location_id and not self.location_repo.get_by_id(location_id):
@@ -125,7 +127,7 @@ class ClassOfferingService:
         if instructor and instructor.role != UserRole.instructor:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Usuário selecionado não é instrutor")
 
-    def _validate_funding(self, funding_source_id: int | None) -> None:
+    def _validate_funding(self, funding_source_id: UUID | None) -> None:
         if funding_source_id is not None and not self.repo.db.get(FundingSource, funding_source_id):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Financiador não encontrado")
 

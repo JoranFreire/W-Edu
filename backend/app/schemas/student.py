@@ -1,3 +1,4 @@
+from uuid import UUID
 from datetime import datetime
 from pydantic import BaseModel, EmailStr, Field
 from app.models.student import UserRole
@@ -8,14 +9,14 @@ class StudentCreate(BaseModel):
     email: EmailStr
     password: str
     role: UserRole = UserRole.student
-    organization_id: int | None = None
+    organization_id: UUID | None = None
 
 
 class StudentUpdate(BaseModel):
     name: str | None = None
     email: EmailStr | None = None
     role: UserRole | None = None
-    organization_id: int | None = None
+    organization_id: UUID | None = None
     is_active: bool | None = None
 
 
@@ -35,7 +36,7 @@ class OrganizationUpdate(BaseModel):
 
 
 class OrganizationOut(BaseModel):
-    id: int
+    id: UUID
     name: str
     legal_name: str | None
     document: str | None
@@ -55,8 +56,8 @@ class StudentProfileUpdate(BaseModel):
 
 
 class StudentProfileOut(BaseModel):
-    id: int
-    student_id: int
+    id: UUID
+    student_id: UUID
     phone: str | None
     document: str | None
     position: str | None
@@ -74,8 +75,8 @@ class InstructorProfileUpdate(BaseModel):
 
 
 class InstructorProfileOut(BaseModel):
-    id: int
-    student_id: int
+    id: UUID
+    student_id: UUID
     specialties: str | None
     bio: str | None
     rating: str | None
@@ -98,8 +99,8 @@ class InstructorAvailabilityUpdate(BaseModel):
 
 
 class InstructorAvailabilityOut(BaseModel):
-    id: int
-    instructor_profile_id: int
+    id: UUID
+    instructor_profile_id: UUID
     day_of_week: int
     start_time: str
     end_time: str
@@ -115,9 +116,9 @@ class InstructorRatingCreate(BaseModel):
 
 
 class InstructorRatingOut(BaseModel):
-    id: int
-    instructor_profile_id: int
-    student_id: int
+    id: UUID
+    instructor_profile_id: UUID
+    student_id: UUID
     score: int
     comment: str | None
     created_at: datetime
@@ -126,11 +127,11 @@ class InstructorRatingOut(BaseModel):
 
 
 class StudentOut(BaseModel):
-    id: int
+    id: UUID
     name: str
     email: str
     role: UserRole
-    organization_id: int | None
+    organization_id: UUID | None
     is_active: bool
     created_at: datetime
 

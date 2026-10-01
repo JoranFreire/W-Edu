@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from app.core.tenancy import UNSCOPED
 from app.models.academic_groups import ProgramEnrollment
@@ -10,7 +11,7 @@ from app.repositories.academic._base import Repository
 class DeclarationRepository(Repository[AcademicDeclaration]):
     model = AcademicDeclaration
 
-    def list_by_enrollment(self, enrollment_id: int) -> list[AcademicDeclaration]:
+    def list_by_enrollment(self, enrollment_id: UUID) -> list[AcademicDeclaration]:
         return (
             self.db.query(AcademicDeclaration)
             .filter(AcademicDeclaration.program_enrollment_id == enrollment_id)
@@ -18,7 +19,7 @@ class DeclarationRepository(Repository[AcademicDeclaration]):
             .all()
         )
 
-    def list_for_student(self, student_id: int) -> list[AcademicDeclaration]:
+    def list_for_student(self, student_id: UUID) -> list[AcademicDeclaration]:
         return (
             self.db.query(AcademicDeclaration)
             .join(ProgramEnrollment, AcademicDeclaration.program_enrollment_id == ProgramEnrollment.id)
@@ -36,7 +37,7 @@ class DeclarationRepository(Repository[AcademicDeclaration]):
             .first()
         )
 
-    def term_class_enrollments(self, student_id: int, term_id: int) -> list[ClassEnrollment]:
+    def term_class_enrollments(self, student_id: UUID, term_id: UUID) -> list[ClassEnrollment]:
         return (
             self.db.query(ClassEnrollment)
             .join(ClassOffering, ClassEnrollment.class_offering_id == ClassOffering.id)

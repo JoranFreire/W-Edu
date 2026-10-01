@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from sqlalchemy.orm import Session
 
@@ -14,7 +15,7 @@ class AttendanceLedgerBuilder:
     def __init__(self, db: Session):
         self.repo = RetentionAttendanceRepository(db)
 
-    def for_enrollments(self, offering_id: int, enrollments: list[ClassEnrollment]) -> dict[int, Ledger]:
+    def for_enrollments(self, offering_id: UUID, enrollments: list[ClassEnrollment]) -> dict[UUID, Ledger]:
         diary = self.repo.diary_sessions(offering_id)
         if diary:
             return {e.id: self._from_diary(diary, e.id) for e in enrollments}
@@ -23,7 +24,7 @@ class AttendanceLedgerBuilder:
         return {e.id: self._from_meetings(meetings, e.student_id, planned) for e in enrollments}
 
     @staticmethod
-    def _from_diary(sessions, enrollment_id: int) -> Ledger:
+    def _from_diary(sessions, enrollment_id: UUID) -> Ledger:
         total = sum(lessons for lessons, _ in sessions)
         flags, absences = [], 0
         for _, rows in sessions:
@@ -34,6 +35,6 @@ class AttendanceLedgerBuilder:
         return Ledger(total=total, absences=absences, trailing_absences=trailing(flags))
 
     @staticmethod
-    def _from_meetings(meetings: list[set[int]], student_id: int, planned: int) -> Ledger:
+    def _from_meetings(meetings: list[set[UUID]], student_id: UUID, planned: int) -> Ledger:
         flags = [student_id in absent for absent in meetings]
         return Ledger(total=len(meetings), absences=sum(flags), trailing_absences=trailing(flags), planned=planned)

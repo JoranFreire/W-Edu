@@ -10,7 +10,7 @@ import FinalProjectForm from './FinalProjectForm';
 
 /** TCC da matricula: situacao atual e formulario de tema/orientacao. */
 export default function OfficeFinalProjectSection({ enrollmentId, advisors, editable }: {
-  enrollmentId: number;
+  enrollmentId: string;
   advisors: PersonSummary[];
   editable: boolean;
 }) {

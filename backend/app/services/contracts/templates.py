@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from sqlalchemy.orm import Session
 
@@ -20,7 +21,7 @@ class ContractTemplateService:
     def list(self) -> list[ContractTemplate]:
         return self.repo.list()
 
-    def get_or_404(self, template_id: int) -> ContractTemplate:
+    def get_or_404(self, template_id: UUID) -> ContractTemplate:
         template = self.repo.get_by_id(template_id)
         if not template:
             raise not_found("Modelo de contrato não encontrado")
@@ -30,7 +31,7 @@ class ContractTemplateService:
         self._validate_body(data.body)
         return self.repo.save(ContractTemplate(**data.model_dump()))
 
-    def update(self, template_id: int, data: ContractTemplateUpdate) -> ContractTemplate:
+    def update(self, template_id: UUID, data: ContractTemplateUpdate) -> ContractTemplate:
         template = self.get_or_404(template_id)
         if data.body is not None:
             self._validate_body(data.body)

@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -56,7 +58,7 @@ def list_courses(db: Session = Depends(get_db), current: Student = Depends(get_c
 
 
 @router.get("/courses/{course_id}", response_model=CourseAnalyticsOut)
-def get_course(course_id: int, db: Session = Depends(get_db), current: Student = Depends(get_current_admin_or_company_manager)):
+def get_course(course_id: UUID, db: Session = Depends(get_db), current: Student = Depends(get_current_admin_or_company_manager)):
     return AnalyticsService(db).course(course_id, current)
 
 
@@ -66,10 +68,10 @@ def me(db: Session = Depends(get_db), current: Student = Depends(get_current_stu
 
 
 @router.get("/students/{student_id}", response_model=StudentAnalyticsOut)
-def get_student(student_id: int, db: Session = Depends(get_db), current: Student = Depends(get_current_admin_or_company_manager)):
+def get_student(student_id: UUID, db: Session = Depends(get_db), current: Student = Depends(get_current_admin_or_company_manager)):
     return AnalyticsService(db).student(student_id, current)
 
 
 @router.get("/classes/{class_id}", response_model=ClassAnalyticsOut)
-def get_class(class_id: int, db: Session = Depends(get_db), current: Student = Depends(get_current_admin_or_company_manager)):
+def get_class(class_id: UUID, db: Session = Depends(get_db), current: Student = Depends(get_current_admin_or_company_manager)):
     return AnalyticsService(db).class_(class_id, current)

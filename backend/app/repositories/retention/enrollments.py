@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from sqlalchemy.orm import joinedload
 
@@ -11,7 +12,7 @@ class RetentionEnrollmentRepository:
     def __init__(self, db):
         self.db = db
 
-    def tracked(self, offering_id: int) -> list[ClassEnrollment]:
+    def tracked(self, offering_id: UUID) -> list[ClassEnrollment]:
         return (
             self.db.query(ClassEnrollment)
             .options(joinedload(ClassEnrollment.student))
@@ -23,5 +24,5 @@ class RetentionEnrollmentRepository:
             .all()
         )
 
-    def get(self, enrollment_id: int) -> ClassEnrollment | None:
+    def get(self, enrollment_id: UUID) -> ClassEnrollment | None:
         return self.db.get(ClassEnrollment, enrollment_id)

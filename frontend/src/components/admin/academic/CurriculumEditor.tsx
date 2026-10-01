@@ -16,7 +16,7 @@ import CurriculumBoard from './CurriculumBoard';
 import CurriculumSummary from './CurriculumSummary';
 
 /** Conteudo de uma versao da matriz: totais, pendencias e componentes por periodo. */
-export default function CurriculumEditor({ curriculumId }: { curriculumId: number }) {
+export default function CurriculumEditor({ curriculumId }: { curriculumId: string }) {
   const terms = useTerminology();
   const { detail, error, addComponent, updateComponent, removeComponent } = useCurriculumDetail(curriculumId);
   const { subjects } = useSubjects();

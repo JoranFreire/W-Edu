@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 import calendar
 from datetime import date, datetime, timedelta, timezone
@@ -26,10 +27,10 @@ class PlatformInvoiceService:
         self.repo = PlatformInvoiceRepository(db)
         self.subscriptions = InstitutionSubscriptionService(db)
 
-    def list(self, institution_id: int) -> list[PlatformInvoice]:
+    def list(self, institution_id: UUID) -> list[PlatformInvoice]:
         return self.repo.list_for(institution_id)
 
-    def generate(self, institution_id: int, period_start: date) -> PlatformInvoice:
+    def generate(self, institution_id: UUID, period_start: date) -> PlatformInvoice:
         subscription = self.subscriptions.get_or_404(institution_id)
         if subscription.status == SaasSubscriptionStatus.cancelled:
             raise conflict("Assinatura cancelada")
@@ -44,7 +45,7 @@ class PlatformInvoiceService:
             due_on=period_start + timedelta(days=DAYS_TO_PAY),
         ))
 
-    def mark_paid(self, invoice_id: int) -> PlatformInvoice:
+    def mark_paid(self, invoice_id: UUID) -> PlatformInvoice:
         invoice = self.repo.get_by_id(invoice_id)
         if not invoice:
             raise not_found("Fatura não encontrada")

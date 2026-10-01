@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from sqlalchemy.orm import Session
 
@@ -14,11 +15,11 @@ class SubjectPrerequisiteService:
         self.repo = SubjectPrerequisiteRepository(db)
         self.subjects = SubjectService(db)
 
-    def list(self, subject_id: int) -> list[Subject]:
+    def list(self, subject_id: UUID) -> list[Subject]:
         self.subjects.get_or_404(subject_id)
         return self.repo.list_required(subject_id)
 
-    def add(self, subject_id: int, required_subject_id: int) -> Subject:
+    def add(self, subject_id: UUID, required_subject_id: UUID) -> Subject:
         if subject_id == required_subject_id:
             raise bad_request("Disciplina não pode ser pré-requisito dela mesma")
         self.subjects.get_or_404(subject_id)
@@ -30,7 +31,7 @@ class SubjectPrerequisiteService:
         self.repo.save(SubjectPrerequisite(subject_id=subject_id, required_subject_id=required_subject_id))
         return required
 
-    def remove(self, subject_id: int, required_subject_id: int) -> None:
+    def remove(self, subject_id: UUID, required_subject_id: UUID) -> None:
         link = self.repo.get_link(subject_id, required_subject_id)
         if not link:
             raise not_found("Pré-requisito não encontrado")

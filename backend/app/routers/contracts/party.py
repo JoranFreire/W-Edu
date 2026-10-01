@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -17,11 +19,11 @@ def my_contracts(db: Session = Depends(get_db), current: Student = Depends(get_c
 
 
 @router.get("/{contract_id}/pdf")
-def my_contract_pdf(contract_id: int, db: Session = Depends(get_db), current: Student = Depends(get_current_student)):
+def my_contract_pdf(contract_id: UUID, db: Session = Depends(get_db), current: Student = Depends(get_current_student)):
     contract, content = ContractPartyService(db).pdf_for(current, contract_id)
     return pdf_response(contract, content)
 
 
 @router.post("/{contract_id}/accept", response_model=ContractOut)
-def accept_contract(contract_id: int, db: Session = Depends(get_db), current: Student = Depends(get_current_student)):
+def accept_contract(contract_id: UUID, db: Session = Depends(get_db), current: Student = Depends(get_current_student)):
     return ContractPartyService(db).accept(current, contract_id)

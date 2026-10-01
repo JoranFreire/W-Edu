@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 import hashlib
 
@@ -45,17 +46,17 @@ class ContractIssueService:
         self.fields = ContractFields(db)
         self.archive = ContractArchive(db)
 
-    def list(self, enrollment_id: int) -> list[ContractOut]:
+    def list(self, enrollment_id: UUID) -> list[ContractOut]:
         self.lifecycle.get_or_404(enrollment_id)
         return [to_out(contract) for contract in self.repo.list_by_enrollment(enrollment_id)]
 
-    def get_or_404(self, contract_id: int) -> EnrollmentContract:
+    def get_or_404(self, contract_id: UUID) -> EnrollmentContract:
         contract = self.repo.get_by_id(contract_id)
         if not contract:
             raise not_found("Contrato não encontrado")
         return contract
 
-    def issue(self, enrollment_id: int, data: ContractIssue, author_id: int) -> ContractOut:
+    def issue(self, enrollment_id: UUID, data: ContractIssue, author_id: UUID) -> ContractOut:
         enrollment = self.lifecycle.get_or_404(enrollment_id)
         template = self.templates.get_or_404(data.template_id)
         if not template.is_active:
@@ -71,7 +72,7 @@ class ContractIssueService:
         contract.document_id = self.archive.archive(contract, author_id, "Emissão").id
         return to_out(self.repo.save(contract))
 
-    def cancel(self, contract_id: int, author_id: int) -> ContractOut:
+    def cancel(self, contract_id: UUID, author_id: UUID) -> ContractOut:
         contract = self.get_or_404(contract_id)
         if contract.status != ContractStatus.pending:
             raise conflict("Só contratos aguardando aceite podem ser cancelados")

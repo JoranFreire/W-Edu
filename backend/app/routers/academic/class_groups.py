@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -18,8 +20,8 @@ router = APIRouter(prefix="/class-groups")
 
 @router.get("", response_model=list[ClassGroupOut])
 def list_class_groups(
-    term_id: int | None = None,
-    program_id: int | None = None,
+    term_id: UUID | None = None,
+    program_id: UUID | None = None,
     db: Session = Depends(get_db),
     _: Student = Depends(get_current_student),
 ):
@@ -32,13 +34,13 @@ def create_class_group(data: ClassGroupCreate, db: Session = Depends(get_db), _:
 
 
 @router.get("/{group_id}", response_model=ClassGroupOut)
-def get_class_group(group_id: int, db: Session = Depends(get_db), _: Student = Depends(get_current_student)):
+def get_class_group(group_id: UUID, db: Session = Depends(get_db), _: Student = Depends(get_current_student)):
     return ClassGroupService(db).detail(group_id)
 
 
 @router.patch("/{group_id}", response_model=ClassGroupOut)
 def update_class_group(
-    group_id: int,
+    group_id: UUID,
     data: ClassGroupUpdate,
     db: Session = Depends(get_db),
     _: Student = Depends(get_current_admin_or_coordinator),
@@ -47,18 +49,18 @@ def update_class_group(
 
 
 @router.delete("/{group_id}", status_code=204)
-def delete_class_group(group_id: int, db: Session = Depends(get_db), _: Student = Depends(get_current_admin)):
+def delete_class_group(group_id: UUID, db: Session = Depends(get_db), _: Student = Depends(get_current_admin)):
     ClassGroupService(db).delete(group_id)
 
 
 @router.get("/{group_id}/members", response_model=list[ClassGroupMemberOut])
-def list_class_group_members(group_id: int, db: Session = Depends(get_db), _: Student = Depends(get_current_admin_or_coordinator)):
+def list_class_group_members(group_id: UUID, db: Session = Depends(get_db), _: Student = Depends(get_current_admin_or_coordinator)):
     return ClassGroupMemberService(db).list(group_id)
 
 
 @router.post("/{group_id}/members", response_model=ClassGroupMemberOut, status_code=201)
 def add_class_group_member(
-    group_id: int,
+    group_id: UUID,
     data: ClassGroupMemberCreate,
     db: Session = Depends(get_db),
     _: Student = Depends(get_current_admin_or_coordinator),
@@ -68,8 +70,8 @@ def add_class_group_member(
 
 @router.delete("/{group_id}/members/{enrollment_id}", status_code=204)
 def remove_class_group_member(
-    group_id: int,
-    enrollment_id: int,
+    group_id: UUID,
+    enrollment_id: UUID,
     db: Session = Depends(get_db),
     _: Student = Depends(get_current_admin_or_coordinator),
 ):

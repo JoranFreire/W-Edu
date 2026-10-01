@@ -10,7 +10,7 @@ import type { CatalogOffering } from '@/types/registration';
 import RegistrationCatalogView from './RegistrationCatalogView';
 
 /** Disciplinas do aluno no periodo pela secretaria: inscreve fora da janela e, com excecao, dispensa as regras. */
-export default function OfficeRegistrationPanel({ enrollmentId, termId, editable }: { enrollmentId: number; termId: number; editable: boolean }) {
+export default function OfficeRegistrationPanel({ enrollmentId, termId, editable }: { enrollmentId: string; termId: string; editable: boolean }) {
   const { catalog, error, register, drop } = useOfficeRegistration(enrollmentId, termId);
   useErrorToast(error, 'Erro ao carregar as disciplinas do período.');
 

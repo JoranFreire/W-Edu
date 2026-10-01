@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -46,10 +48,10 @@ def create_campus(data: CampusCreate, db: Session = Depends(get_db), _: Student 
 
 
 @router.patch("/campuses/{campus_id}", response_model=CampusOut)
-def update_campus(campus_id: int, data: CampusUpdate, db: Session = Depends(get_db), _: Student = Depends(get_current_admin)):
+def update_campus(campus_id: UUID, data: CampusUpdate, db: Session = Depends(get_db), _: Student = Depends(get_current_admin)):
     return CampusService(db).update(campus_id, data)
 
 
 @router.delete("/campuses/{campus_id}", status_code=204)
-def delete_campus(campus_id: int, db: Session = Depends(get_db), _: Student = Depends(get_current_admin)):
+def delete_campus(campus_id: UUID, db: Session = Depends(get_db), _: Student = Depends(get_current_admin)):
     CampusService(db).delete(campus_id)

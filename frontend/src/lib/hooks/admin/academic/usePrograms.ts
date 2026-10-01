@@ -10,7 +10,7 @@ export interface ProgramInput {
   code: string;
   name: string;
   level: ProgramLevel;
-  unit_id: number | null;
+  unit_id: string | null;
   degree: string | null;
   duration_terms: number | null;
   total_hours: number | null;
@@ -26,7 +26,7 @@ export function usePrograms() {
   const request = useCallback(() => api.get<Program[]>(endpoints.academic.programs).then((response) => response.data), []);
   const { data = [], loading, error, reload } = useApiQuery(request);
 
-  const save = async (id: number | null, input: ProgramInput) => {
+  const save = async (id: string | null, input: ProgramInput) => {
     if (id) await api.patch(endpoints.academic.program(id), input);
     else await api.post(endpoints.academic.programs, input);
     reload();

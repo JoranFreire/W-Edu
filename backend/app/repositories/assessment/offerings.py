@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from sqlalchemy.orm import joinedload
 
@@ -12,13 +13,13 @@ class TeachingOfferingRepository(Repository[ClassOffering]):
 
     model = ClassOffering
 
-    def list(self, instructor_id: int | None = None) -> list[ClassOffering]:
+    def list(self, instructor_id: UUID | None = None) -> list[ClassOffering]:
         query = self.db.query(ClassOffering)
         if instructor_id is not None:
             query = query.filter(ClassOffering.instructor_id == instructor_id)
         return query.order_by(ClassOffering.starts_at.desc()).all()
 
-    def roster(self, offering_id: int) -> list[ClassEnrollment]:
+    def roster(self, offering_id: UUID) -> list[ClassEnrollment]:
         """Alunos da turma: inscricoes ativas ou concluidas (canceladas ficam de fora)."""
         return (
             self.db.query(ClassEnrollment)
@@ -29,6 +30,6 @@ class TeachingOfferingRepository(Repository[ClassOffering]):
             .all()
         )
 
-    def enrolled_student_ids(self, offering_id: int) -> set[int]:
+    def enrolled_student_ids(self, offering_id: UUID) -> set[UUID]:
         rows = self.db.query(ClassEnrollment.student_id).filter(ClassEnrollment.class_offering_id == offering_id).all()
         return {row[0] for row in rows}

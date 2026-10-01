@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from sqlalchemy.orm import Session
 
 from app.models.certificate import Certificate
@@ -50,10 +52,10 @@ class AnalyticsReportService(AnalyticsBase):
         rows: list[EngagementReportRowOut] = []
         for course in self._courses_for_scope(org_id):
             lesson_ids = [row[0] for row in self.db.query(Lesson.id).filter(Lesson.course_id == course.id).all()]
-            pq = self.db.query(Progress).filter(Progress.lesson_id.in_(lesson_ids or [-1]))
+            pq = self.db.query(Progress).filter(Progress.lesson_id.in_(lesson_ids))
             cq = pq.filter(Progress.status == ProgressStatus.done)
             quiz_ids = [row[0] for row in self.db.query(Quiz.id).join(Lesson, Quiz.lesson_id == Lesson.id).filter(Lesson.course_id == course.id).all()]
-            aq = self.db.query(QuizAttempt).filter(QuizAttempt.quiz_id.in_(quiz_ids or [-1]))
+            aq = self.db.query(QuizAttempt).filter(QuizAttempt.quiz_id.in_(quiz_ids))
             passed_q = aq.filter(QuizAttempt.passed.is_(True))
             if org_id is not None:
                 pq = pq.join(Student, Student.id == Progress.student_id).filter(Student.organization_id == org_id)
@@ -84,75 +86,75 @@ class AnalyticsReportService(AnalyticsBase):
             rows.append(RoiReportRowOut(organization_id=scoped_id, organization_name=org.name if org else "Sem empresa", students=self._count_students_for_org(scoped_id), paid_charges_cents=paid, pending_charges_cents=self._sum_charges_for_org(scoped_id, ChargeStatus.pending), certificates_issued=certs, completion_rate=self._global_completion_rate_for_org(scoped_id), revenue_per_certificate_cents=round(paid / certs) if certs else 0))
         return rows
 
-    def _courses_for_scope(self, organization_id: int | None) -> list[Course]:
+    def _courses_for_scope(self, organization_id: UUID | None) -> list[Course]:
         q = self.db.query(Course).order_by(Course.name)
         if organization_id is not None:
             q = q.join(Enrollment, Enrollment.course_id == Course.id).join(Student, Student.id == Enrollment.student_id).filter(Student.organization_id == organization_id).distinct()
         return q.all()
 
-    def _classes_for_scope(self, organization_id: int | None) -> list[ClassOffering]:
+    def _classes_for_scope(self, organization_id: UUID | None) -> list[ClassOffering]:
         q = self.db.query(ClassOffering).order_by(ClassOffering.starts_at.desc())
         if organization_id is not None:
             q = q.join(ClassEnrollment, ClassEnrollment.class_offering_id == ClassOffering.id).join(Student, Student.id == ClassEnrollment.student_id).filter(Student.organization_id == organization_id).distinct()
         return q.all()
 
-    def _organizations_for_scope(self, organization_id: int | None) -> list[Organization]:
+    def _organizations_for_scope(self, organization_id: UUID | None) -> list[Organization]:
         q = self.db.query(Organization).order_by(Organization.name)
         if organization_id is not None:
             q = q.filter(Organization.id == organization_id)
         return q.all()
 
-    def _enrollment_count_for_course(self, course_id: int, organization_id: int | None) -> int:
+    def _enrollment_count_for_course(self, course_id: UUID, organization_id: UUID | None) -> int:
         q = self.db.query(Enrollment).filter(Enrollment.course_id == course_id)
         if organization_id is not None:
             q = q.join(Student, Student.id == Enrollment.student_id).filter(Student.organization_id == organization_id)
         return q.count()
 
-    def _certificate_count_for_course(self, course_id: int, organization_id: int | None) -> int:
+    def _certificate_count_for_course(self, course_id: UUID, organization_id: UUID | None) -> int:
         q = self.db.query(Certificate).filter(Certificate.course_id == course_id, Certificate.revoked_at.is_(None))
         if organization_id is not None:
             q = q.join(Student, Student.id == Certificate.student_id).filter(Student.organization_id == organization_id)
         return q.count()
 
-    def _certificate_count_for_students(self, course_id: int, student_ids: list[int]) -> int:
+    def _certificate_count_for_students(self, course_id: UUID, student_ids: list[UUID]) -> int:
         if not student_ids:
             return 0
         return self.db.query(Certificate).filter(Certificate.course_id == course_id, Certificate.student_id.in_(student_ids), Certificate.revoked_at.is_(None)).count()
 
-    def _student_ids_for_class(self, class_id: int, organization_id: int | None) -> list[int]:
+    def _student_ids_for_class(self, class_id: UUID, organization_id: UUID | None) -> list[UUID]:
         q = self.db.query(ClassEnrollment.student_id).filter(ClassEnrollment.class_offering_id == class_id, ClassEnrollment.status == ClassEnrollmentStatus.active)
         if organization_id is not None:
             q = q.join(Student, Student.id == ClassEnrollment.student_id).filter(Student.organization_id == organization_id)
         return [row[0] for row in q.all()]
 
-    def _meeting_ids_for_class(self, class_id: int) -> list[int]:
+    def _meeting_ids_for_class(self, class_id: UUID) -> list[UUID]:
         return [row[0] for row in self.db.query(ScheduledMeeting.id).filter(ScheduledMeeting.class_offering_id == class_id).all()]
 
-    def _attendance_records_for_class(self, class_id: int, organization_id: int | None) -> list[AttendanceRecord]:
+    def _attendance_records_for_class(self, class_id: UUID, organization_id: UUID | None) -> list[AttendanceRecord]:
         q = self.db.query(AttendanceRecord).filter(AttendanceRecord.class_offering_id == class_id)
         if organization_id is not None:
             q = q.join(Student, Student.id == AttendanceRecord.student_id).filter(Student.organization_id == organization_id)
         return q.all()
 
-    def _count_students_for_org(self, organization_id: int | None) -> int:
+    def _count_students_for_org(self, organization_id: UUID | None) -> int:
         q = self.db.query(Student)
         if organization_id is not None:
             q = q.filter(Student.organization_id == organization_id)
         return q.count()
 
-    def _count_certificates_for_org(self, organization_id: int | None) -> int:
+    def _count_certificates_for_org(self, organization_id: UUID | None) -> int:
         q = self.db.query(Certificate).filter(Certificate.revoked_at.is_(None))
         if organization_id is not None:
             q = q.join(Student, Student.id == Certificate.student_id).filter(Student.organization_id == organization_id)
         return q.count()
 
-    def _sum_charges_for_org(self, organization_id: int | None, status_value: ChargeStatus) -> int:
+    def _sum_charges_for_org(self, organization_id: UUID | None, status_value: ChargeStatus) -> int:
         q = self.db.query(func.coalesce(func.sum(Charge.amount_cents), 0)).filter(Charge.status == status_value)
         if organization_id is not None:
             q = q.filter(Charge.organization_id == organization_id)
         return q.scalar() or 0
 
-    def _global_completion_rate_for_org(self, organization_id: int | None) -> int:
+    def _global_completion_rate_for_org(self, organization_id: UUID | None) -> int:
         tq = self.db.query(Enrollment)
         cq = self.db.query(Certificate).filter(Certificate.revoked_at.is_(None))
         if organization_id is not None:

@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from sqlalchemy.orm import Session
 from app.models.lesson import Lesson
 
@@ -6,10 +8,10 @@ class LessonRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def get_by_id(self, lesson_id: int) -> Lesson | None:
+    def get_by_id(self, lesson_id: UUID) -> Lesson | None:
         return self.db.get(Lesson, lesson_id)
 
-    def list_by_course(self, course_id: int) -> list[Lesson]:
+    def list_by_course(self, course_id: UUID) -> list[Lesson]:
         return (
             self.db.query(Lesson)
             .filter(Lesson.course_id == course_id)

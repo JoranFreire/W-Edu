@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -33,16 +35,16 @@ class LessonService:
             )
         return lesson
 
-    def get_or_404(self, lesson_id: int) -> Lesson:
+    def get_or_404(self, lesson_id: UUID) -> Lesson:
         lesson = self.repo.get_by_id(lesson_id)
         if not lesson:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Aula não encontrada")
         return lesson
 
-    def list_by_course(self, course_id: int) -> list[Lesson]:
+    def list_by_course(self, course_id: UUID) -> list[Lesson]:
         return self.repo.list_by_course(course_id)
 
-    def update(self, lesson_id: int, data: LessonUpdate) -> Lesson:
+    def update(self, lesson_id: UUID, data: LessonUpdate) -> Lesson:
         lesson = self.get_or_404(lesson_id)
         payload = data.model_dump(exclude_none=True)
         if "module_id" in payload:
@@ -51,11 +53,11 @@ class LessonService:
             setattr(lesson, field, value)
         return self.repo.update(lesson)
 
-    def delete(self, lesson_id: int) -> None:
+    def delete(self, lesson_id: UUID) -> None:
         lesson = self.get_or_404(lesson_id)
         self.repo.delete(lesson)
 
-    def _validate_module(self, course_id: int, module_id: int | None) -> None:
+    def _validate_module(self, course_id: UUID, module_id: UUID | None) -> None:
         if module_id is None:
             return
         module = self.module_repo.get_by_id(module_id)

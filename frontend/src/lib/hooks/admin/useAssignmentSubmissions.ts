@@ -13,15 +13,15 @@ export interface SubmissionReview {
 }
 
 /** Entregas de uma aula e a correcao de cada uma. */
-export function useAssignmentSubmissions(lessonId: number) {
+export function useAssignmentSubmissions(lessonId: string) {
   const request = useCallback(
     () => api.get<AssignmentSubmission[]>(endpoints.assignments.submissions(lessonId)).then((response) => response.data),
     [lessonId],
   );
   const query = useApiQuery(request);
-  const [reviewed, setReviewed] = useState<Record<number, AssignmentSubmission>>({});
+  const [reviewed, setReviewed] = useState<Record<string, AssignmentSubmission>>({});
 
-  const review = async (submissionId: number, data: SubmissionReview) => {
+  const review = async (submissionId: string, data: SubmissionReview) => {
     const { data: updated } = await api.patch<AssignmentSubmission>(endpoints.assignments.review(submissionId), data);
     setReviewed((current) => ({ ...current, [submissionId]: updated }));
   };

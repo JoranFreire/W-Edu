@@ -7,7 +7,7 @@ import { useApiQuery } from '@/lib/hooks/useApiQuery';
 import type { Occurrence, OccurrenceInput } from '@/types/schoolLife';
 
 /** Ocorrencias de um aluno (equipe escolar). */
-export function useStudentOccurrences(studentId: number) {
+export function useStudentOccurrences(studentId: string) {
   const request = useCallback(
     () => api.get<Occurrence[]>(endpoints.school.studentOccurrences(studentId)).then((response) => response.data),
     [studentId],
@@ -18,7 +18,7 @@ export function useStudentOccurrences(studentId: number) {
     await api.post(endpoints.school.occurrences, input);
     reload();
   };
-  const remove = async (occurrenceId: number) => {
+  const remove = async (occurrenceId: string) => {
     await api.delete(endpoints.school.occurrence(occurrenceId));
     reload();
   };

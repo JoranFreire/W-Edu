@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from sqlalchemy.orm import Session
 
@@ -21,11 +22,11 @@ class ReenrollmentService:
         self.terms = AcademicTermService(db)
         self.events = EnrollmentEventRecorder(db)
 
-    def list(self, enrollment_id: int) -> list[TermRegistrationOut]:
+    def list(self, enrollment_id: UUID) -> list[TermRegistrationOut]:
         self.lifecycle.get_or_404(enrollment_id)
         return [self._to_out(registration) for registration in self.repo.list_by_enrollment(enrollment_id)]
 
-    def reenroll(self, enrollment_id: int, data: ReenrollInput, user_id: int) -> TermRegistrationOut:
+    def reenroll(self, enrollment_id: UUID, data: ReenrollInput, user_id: UUID) -> TermRegistrationOut:
         enrollment = self.lifecycle.get_or_404(enrollment_id)
         if enrollment.status != ProgramEnrollmentStatus.active:
             raise conflict("Só matrículas ativas podem ser rematriculadas; reative a matrícula antes")

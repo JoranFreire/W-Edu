@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -11,7 +13,7 @@ router = APIRouter()
 
 
 @router.get("/students/{student_id}/occurrences", response_model=list[OccurrenceOut])
-def list_occurrences(student_id: int, db: Session = Depends(get_db), current: Student = Depends(get_current_school_staff)):
+def list_occurrences(student_id: UUID, db: Session = Depends(get_db), current: Student = Depends(get_current_school_staff)):
     return OccurrenceService(db).list_for_student(student_id, current)
 
 
@@ -21,5 +23,5 @@ def register_occurrence(data: OccurrenceCreate, db: Session = Depends(get_db), c
 
 
 @router.delete("/occurrences/{occurrence_id}", status_code=204)
-def remove_occurrence(occurrence_id: int, db: Session = Depends(get_db), current: Student = Depends(get_current_school_staff)):
+def remove_occurrence(occurrence_id: UUID, db: Session = Depends(get_db), current: Student = Depends(get_current_school_staff)):
     OccurrenceService(db).remove(occurrence_id, current)

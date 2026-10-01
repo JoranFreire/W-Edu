@@ -5,7 +5,7 @@ export type BenefitKind = 'snack' | 'material' | 'uniform' | 'transport' | 'stip
 export type StockOrigin = 'purchase' | 'donation';
 
 export interface FundingSource {
-  id: number;
+  id: string;
   name: string;
   kind: FundingKind;
   agreement_number: string | null;
@@ -19,7 +19,7 @@ export interface FundingSource {
 export type FundingSourceInput = Omit<FundingSource, 'id' | 'is_active'>;
 
 export interface BenefitItem {
-  id: number;
+  id: string;
   name: string;
   kind: BenefitKind;
   unit: string;
@@ -35,24 +35,24 @@ export interface StockEntryInput {
   quantity: number;
   unit_cost_cents: number | null;
   origin: StockOrigin;
-  funding_source_id: number | null;
+  funding_source_id: string | null;
   received_on: string;
 }
 
 export interface Delivery {
-  id: number;
-  item_id: number;
+  id: string;
+  item_id: string;
   item_name: string;
   student: PersonSummary;
-  class_offering_id: number;
-  scheduled_meeting_id: number | null;
+  class_offering_id: string;
+  scheduled_meeting_id: string | null;
   quantity: number;
   unit_cost_cents: number;
   delivered_on: string;
 }
 
 export interface OfferingIndicators {
-  class_offering_id: number | null;
+  class_offering_id: string | null;
   name: string;
   applications: number;
   enrolled: number;

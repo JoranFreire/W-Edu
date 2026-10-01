@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from sqlalchemy.orm import Session
 
@@ -26,7 +27,7 @@ class PeriodClosureService:
         self.attendance = DiaryAttendanceRepository(db)
         self.offerings = TeachingOfferingService(db)
 
-    def close(self, offering_id: int, period_id: int, user: Student) -> PeriodClosureOut:
+    def close(self, offering_id: UUID, period_id: UUID, user: Student) -> PeriodClosureOut:
         offering = self.offerings.get_for_teaching(offering_id, user)
         ensure_offering_open(offering)
         period = self._period_of(offering, period_id)
@@ -36,7 +37,7 @@ class PeriodClosureService:
         self.repo.commit()
         return PeriodClosureOut(grading_period_id=period_id, closed_students=closed)
 
-    def consolidate(self, offering: ClassOffering, period: GradingPeriod, closed_by_id: int | None) -> int:
+    def consolidate(self, offering: ClassOffering, period: GradingPeriod, closed_by_id: UUID | None) -> int:
         """Grava os resultados da etapa (sem commit); usado tambem no calculo final."""
         snapshot = OfferingScores(self.db, offering)
         absences = self.attendance.unjustified_absences(offering.id, period.starts_on, period.ends_on)
@@ -51,7 +52,7 @@ class PeriodClosureService:
         self.repo.add(OfferingPeriodClosure(class_offering_id=offering.id, grading_period_id=period.id, closed_by_id=closed_by_id))
         return len(enrollments)
 
-    def reopen(self, offering_id: int, period_id: int, user: Student) -> None:
+    def reopen(self, offering_id: UUID, period_id: UUID, user: Student) -> None:
         offering = self.offerings.get_for_teaching(offering_id, user)
         ensure_offering_open(offering)
         closure = self.repo.get(offering_id, period_id)
@@ -65,7 +66,7 @@ class PeriodClosureService:
             enrollment.result = ClassEnrollmentResult.in_progress
         self.repo.delete(closure)
 
-    def _period_of(self, offering: ClassOffering, period_id: int) -> GradingPeriod:
+    def _period_of(self, offering: ClassOffering, period_id: UUID) -> GradingPeriod:
         period = self.periods.get_by_id(period_id)
         if not period:
             raise not_found("Etapa de avaliação não encontrada")

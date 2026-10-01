@@ -1,3 +1,4 @@
+from uuid import UUID
 from datetime import datetime, timezone
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session as DBSession
@@ -20,11 +21,11 @@ class SessionService:
         self.attendance_repo = AttendanceRepository(db)
         self.progress_repo = ProgressRepository(db)
 
-    def start(self, student_id: int, lesson_id: int) -> Session:
+    def start(self, student_id: UUID, lesson_id: UUID) -> Session:
         session = Session(student_id=student_id, lesson_id=lesson_id)
         return self.session_repo.create(session)
 
-    def start_voice(self, student_id: int, lesson_id: int) -> VoiceSessionStartOut:
+    def start_voice(self, student_id: UUID, lesson_id: UUID) -> VoiceSessionStartOut:
         lesson = self.session_repo.db.get(Lesson, lesson_id)
         if not lesson:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Aula não encontrada")
@@ -61,8 +62,8 @@ class SessionService:
 
     def update_voice_state(
         self,
-        session_id: int,
-        student_id: int,
+        session_id: UUID,
+        student_id: UUID,
         bevox_session_id: str | None = None,
         transcript: str | None = None,
         ended: bool = False,
@@ -116,10 +117,10 @@ class SessionService:
 
         return session
 
-    def list_by_student(self, student_id: int) -> list[Session]:
+    def list_by_student(self, student_id: UUID) -> list[Session]:
         return self.session_repo.list_by_student(student_id)
 
-    def history_by_student(self, student_id: int) -> list[SessionHistoryOut]:
+    def history_by_student(self, student_id: UUID) -> list[SessionHistoryOut]:
         sessions = self.session_repo.list_by_student(student_id)
         if not sessions:
             return []
@@ -132,7 +133,7 @@ class SessionService:
         course_ids = list({lesson.course_id for lesson in lessons.values()})
         courses = {
             course.id: course
-            for course in self.session_repo.db.query(Course).filter(Course.id.in_(course_ids or [-1])).all()
+            for course in self.session_repo.db.query(Course).filter(Course.id.in_(course_ids)).all()
         }
 
         history: list[SessionHistoryOut] = []

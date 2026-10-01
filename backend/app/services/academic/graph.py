@@ -1,12 +1,13 @@
 """Funcoes puras sobre grafos dirigidos (pre-requisitos, hierarquia de unidades)."""
 
+from uuid import UUID
 from collections import defaultdict
 from collections.abc import Iterable
 
 
 def reaches(edges: Iterable[tuple[int, int]], start: int, target: int) -> bool:
     """Existe caminho ``start -> ... -> target`` seguindo as arestas ``(origem, destino)``?"""
-    adjacency: dict[int, list[int]] = defaultdict(list)
+    adjacency: dict[UUID, list[UUID]] = defaultdict(list)
     for origin, destination in edges:
         adjacency[origin].append(destination)
     pending, seen = [start], {start}

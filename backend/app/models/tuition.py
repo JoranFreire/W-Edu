@@ -1,5 +1,8 @@
 """Financeiro educacional: planos de mensalidade e descontos/bolsas do aluno."""
 
+from uuid import UUID
+
+from app.core.ids import new_id
 from datetime import date, datetime, timezone
 import enum
 
@@ -33,12 +36,12 @@ class TuitionPlan(TenantMixin, Base):
 
     __tablename__ = "tuition_plans"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
     name: Mapped[str] = mapped_column(String(200))
     basis: Mapped[TuitionBasis] = mapped_column(SAEnum(TuitionBasis), default=TuitionBasis.program)
-    term_id: Mapped[int] = mapped_column(ForeignKey("academic_terms.id"), index=True)
-    program_id: Mapped[int | None] = mapped_column(ForeignKey("programs.id"), index=True)
-    class_group_id: Mapped[int | None] = mapped_column(ForeignKey("class_groups.id"), index=True)
+    term_id: Mapped[UUID] = mapped_column(ForeignKey("academic_terms.id"), index=True)
+    program_id: Mapped[UUID | None] = mapped_column(ForeignKey("programs.id"), index=True)
+    class_group_id: Mapped[UUID | None] = mapped_column(ForeignKey("class_groups.id"), index=True)
     # Por parcela (programa/turma-grupo) ou por credito no periodo (credito).
     amount_cents: Mapped[int] = mapped_column(Integer)
     installments: Mapped[int] = mapped_column(Integer, default=1)
@@ -56,8 +59,8 @@ class StudentDiscount(TenantMixin, Base):
 
     __tablename__ = "student_discounts"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    program_enrollment_id: Mapped[int] = mapped_column(ForeignKey("program_enrollments.id"), index=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
+    program_enrollment_id: Mapped[UUID] = mapped_column(ForeignKey("program_enrollments.id"), index=True)
     kind: Mapped[DiscountKind] = mapped_column(SAEnum(DiscountKind), default=DiscountKind.other)
     percent: Mapped[float | None] = mapped_column(Float)
     amount_cents: Mapped[int | None] = mapped_column(Integer)

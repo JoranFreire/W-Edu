@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from sqlalchemy.orm import Session
 from sqlalchemy.orm import selectinload
 
@@ -9,7 +11,7 @@ class CertificateRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def get_by_id(self, certificate_id: int) -> Certificate | None:
+    def get_by_id(self, certificate_id: UUID) -> Certificate | None:
         return self.db.get(Certificate, certificate_id)
 
     def get_by_code(self, code: str) -> Certificate | None:
@@ -20,14 +22,14 @@ class CertificateRepository:
             .first()
         )
 
-    def get_by_student_and_course(self, student_id: int, course_id: int) -> Certificate | None:
+    def get_by_student_and_course(self, student_id: UUID, course_id: UUID) -> Certificate | None:
         return (
             self.db.query(Certificate)
             .filter(Certificate.student_id == student_id, Certificate.course_id == course_id)
             .first()
         )
 
-    def list_by_student(self, student_id: int) -> list[Certificate]:
+    def list_by_student(self, student_id: UUID) -> list[Certificate]:
         return (
             self.db.query(Certificate)
             .filter(Certificate.student_id == student_id)
@@ -35,7 +37,7 @@ class CertificateRepository:
             .all()
         )
 
-    def list_by_course(self, course_id: int) -> list[Certificate]:
+    def list_by_course(self, course_id: UUID) -> list[Certificate]:
         return (
             self.db.query(Certificate)
             .filter(Certificate.course_id == course_id)
@@ -59,7 +61,7 @@ class CourseCompletionRuleRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def get_by_course(self, course_id: int) -> CourseCompletionRule | None:
+    def get_by_course(self, course_id: UUID) -> CourseCompletionRule | None:
         return self.db.query(CourseCompletionRule).filter(CourseCompletionRule.course_id == course_id).first()
 
     def create(self, rule: CourseCompletionRule) -> CourseCompletionRule:

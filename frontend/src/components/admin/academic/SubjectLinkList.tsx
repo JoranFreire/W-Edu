@@ -29,14 +29,14 @@ export default function SubjectLinkList({ kind, subject, subjects, canRemove }: 
   const handleAdd = async () => {
     if (!selected) return;
     try {
-      await add(Number(selected));
+      await add(selected);
       setSelected('');
     } catch (error) {
       toast.error(apiErrorMessage(error, `Erro: ${text.add.toLowerCase()}.`));
     }
   };
 
-  const handleRemove = async (otherId: number) => {
+  const handleRemove = async (otherId: string) => {
     try { await remove(otherId); } catch (error) { toast.error(apiErrorMessage(error, 'Erro ao remover vínculo.')); }
   };
 

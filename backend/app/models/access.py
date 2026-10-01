@@ -1,5 +1,8 @@
 """Perfis de acesso da instituicao (RBAC) e quem os recebe."""
 
+from uuid import UUID
+
+from app.core.ids import new_id
 from datetime import datetime, timezone
 
 from sqlalchemy import JSON, DateTime, ForeignKey, String, Text, UniqueConstraint
@@ -19,7 +22,7 @@ class AccessRole(TenantMixin, Base):
     __tablename__ = "access_roles"
     __table_args__ = (UniqueConstraint("institution_id", "name"),)
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
     name: Mapped[str] = mapped_column(String(120))
     description: Mapped[str | None] = mapped_column(Text)
     permissions: Mapped[list] = mapped_column(JSON, default=list)
@@ -32,9 +35,9 @@ class AccessRoleAssignment(TenantMixin, Base):
     __tablename__ = "access_role_assignments"
     __table_args__ = (UniqueConstraint("role_id", "user_id"),)
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    role_id: Mapped[int] = mapped_column(ForeignKey("access_roles.id", ondelete="CASCADE"), index=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
+    role_id: Mapped[UUID] = mapped_column(ForeignKey("access_roles.id", ondelete="CASCADE"), index=True)
+    user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"), index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
     role: Mapped["AccessRole"] = relationship(back_populates="assignments")

@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -21,5 +23,5 @@ def create_plan(data: SaasPlanCreate, db: Session = Depends(get_db), _: Student 
 
 
 @router.patch("/{plan_id}", response_model=SaasPlanOut)
-def update_plan(plan_id: int, data: SaasPlanUpdate, db: Session = Depends(get_db), _: Student = Depends(get_current_super_admin)):
+def update_plan(plan_id: UUID, data: SaasPlanUpdate, db: Session = Depends(get_db), _: Student = Depends(get_current_super_admin)):
     return SaasPlanService(db).update(plan_id, data)

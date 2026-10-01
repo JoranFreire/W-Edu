@@ -1,3 +1,6 @@
+from uuid import UUID
+
+from app.core.ids import new_id
 from datetime import datetime, timezone
 import enum
 
@@ -26,16 +29,16 @@ class DocumentStatus(str, enum.Enum):
 class Document(TenantMixin, Base):
     __tablename__ = "documents"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
     title: Mapped[str] = mapped_column(String(200), index=True)
     document_type: Mapped[DocumentType] = mapped_column(SAEnum(DocumentType), default=DocumentType.other)
     description: Mapped[str | None] = mapped_column(Text)
     status: Mapped[DocumentStatus] = mapped_column(SAEnum(DocumentStatus), default=DocumentStatus.draft)
-    course_id: Mapped[int | None] = mapped_column(ForeignKey("courses.id"), nullable=True, index=True)
-    class_offering_id: Mapped[int | None] = mapped_column(ForeignKey("class_offerings.id"), nullable=True, index=True)
-    organization_id: Mapped[int | None] = mapped_column(ForeignKey("organizations.id"), nullable=True, index=True)
-    student_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True, index=True)
-    uploaded_by_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True, index=True)
+    course_id: Mapped[UUID | None] = mapped_column(ForeignKey("courses.id"), nullable=True, index=True)
+    class_offering_id: Mapped[UUID | None] = mapped_column(ForeignKey("class_offerings.id"), nullable=True, index=True)
+    organization_id: Mapped[UUID | None] = mapped_column(ForeignKey("organizations.id"), nullable=True, index=True)
+    student_id: Mapped[UUID | None] = mapped_column(ForeignKey("users.id"), nullable=True, index=True)
+    uploaded_by_id: Mapped[UUID | None] = mapped_column(ForeignKey("users.id"), nullable=True, index=True)
     latest_version_number: Mapped[int] = mapped_column(Integer, default=0)
     is_signed: Mapped[bool] = mapped_column(Boolean, default=False)
     signed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
@@ -64,8 +67,8 @@ class DocumentVersion(TenantMixin, Base):
     __tablename__ = "document_versions"
     __table_args__ = (UniqueConstraint("document_id", "version_number"),)
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    document_id: Mapped[int] = mapped_column(ForeignKey("documents.id"), index=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
+    document_id: Mapped[UUID] = mapped_column(ForeignKey("documents.id"), index=True)
     version_number: Mapped[int] = mapped_column(Integer)
     file_name: Mapped[str | None] = mapped_column(String(255))
     mime_type: Mapped[str | None] = mapped_column(String(120))
@@ -73,7 +76,7 @@ class DocumentVersion(TenantMixin, Base):
     storage_path: Mapped[str | None] = mapped_column(String(500))
     external_url: Mapped[str | None] = mapped_column(String(500))
     notes: Mapped[str | None] = mapped_column(Text)
-    created_by_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True, index=True)
+    created_by_id: Mapped[UUID | None] = mapped_column(ForeignKey("users.id"), nullable=True, index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     document: Mapped["Document"] = relationship(back_populates="versions")

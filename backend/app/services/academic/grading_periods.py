@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from sqlalchemy.orm import Session
 
@@ -17,11 +18,11 @@ class GradingPeriodService:
         self.repo = GradingPeriodRepository(db)
         self.terms = AcademicTermService(db)
 
-    def list(self, term_id: int) -> list[GradingPeriod]:
+    def list(self, term_id: UUID) -> list[GradingPeriod]:
         self.terms.get_or_404(term_id)
         return self.repo.list_by_term(term_id)
 
-    def create(self, term_id: int, data: GradingPeriodCreate) -> GradingPeriod:
+    def create(self, term_id: UUID, data: GradingPeriodCreate) -> GradingPeriod:
         term = self.terms.get_not_closed(term_id)
         existing = self.repo.list_by_term(term_id)
         order = data.order or max((p.order for p in existing), default=0) + 1
@@ -31,7 +32,7 @@ class GradingPeriodService:
         self._validate_dates(term, period, existing)
         return self.repo.save(period)
 
-    def update(self, period_id: int, data: GradingPeriodUpdate) -> GradingPeriod:
+    def update(self, period_id: UUID, data: GradingPeriodUpdate) -> GradingPeriod:
         period = self._get_editable(period_id)
         apply_patch(period, data)
         if period.ends_on < period.starts_on:
@@ -40,23 +41,23 @@ class GradingPeriodService:
         self._validate_dates(period.term, period, others)
         return self.repo.save(period)
 
-    def change_status(self, period_id: int, target: GradingPeriodStatus) -> GradingPeriod:
+    def change_status(self, period_id: UUID, target: GradingPeriodStatus) -> GradingPeriod:
         period = self.get_or_404(period_id)
         if target == GradingPeriodStatus.open and period.term.status == TermStatus.closed:
             raise conflict("Período letivo encerrado; reabra-o antes da etapa")
         period.status = target
         return self.repo.save(period)
 
-    def delete(self, period_id: int) -> None:
+    def delete(self, period_id: UUID) -> None:
         self.repo.delete(self._get_editable(period_id))
 
-    def get_or_404(self, period_id: int) -> GradingPeriod:
+    def get_or_404(self, period_id: UUID) -> GradingPeriod:
         period = self.repo.get_by_id(period_id)
         if not period:
             raise not_found("Etapa de avaliação não encontrada")
         return period
 
-    def _get_editable(self, period_id: int) -> GradingPeriod:
+    def _get_editable(self, period_id: UUID) -> GradingPeriod:
         period = self.get_or_404(period_id)
         if period.status == GradingPeriodStatus.closed:
             raise conflict("Etapa encerrada")

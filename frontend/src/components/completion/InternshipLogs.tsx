@@ -13,7 +13,7 @@ import InternshipLogForm from './InternshipLogForm';
 
 /** Diario de horas: o aluno (`mode="student"`) lanca e remove pendentes; o orientador (`mode="advisor"`) valida. */
 export default function InternshipLogs({ internshipId, mode, canLog = false, onChange }: {
-  internshipId: number;
+  internshipId: string;
   mode: 'student' | 'advisor' | 'view';
   canLog?: boolean;
   onChange?: () => void;

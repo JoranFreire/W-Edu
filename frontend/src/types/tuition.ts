@@ -5,14 +5,14 @@ export type TuitionBasis = 'program' | 'class_group' | 'credit';
 export type DiscountKind = 'scholarship' | 'sibling' | 'punctuality' | 'agreement' | 'other';
 
 export interface TuitionPlan {
-  id: number;
+  id: string;
   name: string;
   basis: TuitionBasis;
-  term_id: number;
+  term_id: string;
   term_name: string;
-  program_id: number | null;
+  program_id: string | null;
   program_name: string | null;
-  class_group_id: number | null;
+  class_group_id: string | null;
   class_group_name: string | null;
   amount_cents: number;
   installments: number;
@@ -23,9 +23,9 @@ export interface TuitionPlan {
 export interface TuitionPlanInput {
   name: string;
   basis: TuitionBasis;
-  term_id: number;
-  program_id: number | null;
-  class_group_id: number | null;
+  term_id: string;
+  program_id: string | null;
+  class_group_id: string | null;
   amount_cents: number;
   installments: number;
   first_due_on: string;
@@ -38,8 +38,8 @@ export interface GenerationResult {
 }
 
 export interface Discount {
-  id: number;
-  program_enrollment_id: number;
+  id: string;
+  program_enrollment_id: string;
   kind: DiscountKind;
   percent: number | null;
   amount_cents: number | null;
@@ -73,11 +73,11 @@ export interface Settlement {
 }
 
 export interface TuitionCharge {
-  id: number;
+  id: string;
   student: PersonSummary | null;
   payer: PersonSummary | null;
-  program_enrollment_id: number | null;
-  tuition_plan_id: number | null;
+  program_enrollment_id: string | null;
+  tuition_plan_id: string | null;
   installment_number: number | null;
   description: string | null;
   due_on: string | null;

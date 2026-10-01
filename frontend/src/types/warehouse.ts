@@ -4,7 +4,7 @@ export type MaterialKind = 'consumable' | 'durable';
 export type RequestStatus = 'pending' | 'approved' | 'rejected' | 'delivered' | 'closed' | 'cancelled';
 
 export interface WarehouseItem {
-  id: number;
+  id: string;
   name: string;
   category: string | null;
   kind: MaterialKind;
@@ -32,13 +32,13 @@ export interface EntryInput {
   quantity: number;
   unit_cost_cents: number | null;
   origin: 'purchase' | 'donation';
-  funding_source_id: number | null;
+  funding_source_id: string | null;
   received_on: string;
 }
 
 export interface RequestLine {
-  id: number;
-  item_id: number;
+  id: string;
+  item_id: string;
   item_name: string;
   kind: MaterialKind;
   unit: string;
@@ -51,9 +51,9 @@ export interface RequestLine {
 }
 
 export interface MaterialRequest {
-  id: number;
+  id: string;
   requester: PersonSummary;
-  class_offering_id: number | null;
+  class_offering_id: string | null;
   class_offering_name: string | null;
   purpose: string;
   needed_on: string;
@@ -70,8 +70,8 @@ export interface MaterialRequest {
 export interface MaterialRequestInput {
   purpose: string;
   needed_on: string;
-  class_offering_id: number | null;
-  lines: { item_id: number; quantity: number }[];
+  class_offering_id: string | null;
+  lines: { item_id: string; quantity: number }[];
 }
 
 export interface ConsumptionRow {

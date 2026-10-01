@@ -11,7 +11,7 @@ import type { PersonSummary } from '@/types/academicGroups';
 import type { OccurrenceInput, OccurrenceKind, OccurrenceSeverity } from '@/types/schoolLife';
 
 interface Draft {
-  studentId: number | null;
+  studentId: string | null;
   kind: OccurrenceKind;
   severity: OccurrenceSeverity;
   description: string;
@@ -22,7 +22,7 @@ interface Draft {
 export default function OccurrenceForm({ students, selectable = false, classGroupId, onSubmit }: {
   students: PersonSummary[];
   selectable?: boolean;
-  classGroupId: number | null;
+  classGroupId: string | null;
   onSubmit: (input: OccurrenceInput) => Promise<void>;
 }) {
   const empty: Draft = {
@@ -50,7 +50,7 @@ export default function OccurrenceForm({ students, selectable = false, classGrou
     <form onSubmit={submit} className="space-y-3">
       <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
         {selectable && (
-          <select required aria-label="Aluno da ocorrência" value={draft.studentId ?? ''} onChange={(e) => set({ studentId: Number(e.target.value) || null })} className={inputCls}>
+          <select required aria-label="Aluno da ocorrência" value={draft.studentId ?? ''} onChange={(e) => set({ studentId: e.target.value || null })} className={inputCls}>
             <option value="">Aluno…</option>
             {students.map((student) => <option key={student.id} value={student.id}>{student.name}</option>)}
           </select>

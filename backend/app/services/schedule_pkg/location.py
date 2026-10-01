@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -16,12 +18,12 @@ class LocationService:
         self._ensure_campus(data.campus_id)
         return self.repo.create(Location(**data.model_dump()))
 
-    def _ensure_campus(self, campus_id: int | None) -> None:
+    def _ensure_campus(self, campus_id: UUID | None) -> None:
         # Campus e filtrado pela instituicao ativa: de outra instituicao resulta em 404.
         if campus_id is not None and not self.db.get(Campus, campus_id):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Campus não encontrado")
 
-    def get_or_404(self, location_id: int) -> Location:
+    def get_or_404(self, location_id: UUID) -> Location:
         location = self.repo.get_by_id(location_id)
         if not location:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Unidade não encontrada")
@@ -30,7 +32,7 @@ class LocationService:
     def list_all(self) -> list[Location]:
         return self.repo.list_all()
 
-    def update(self, location_id: int, data: LocationUpdate) -> Location:
+    def update(self, location_id: UUID, data: LocationUpdate) -> Location:
         location = self.get_or_404(location_id)
         self._ensure_campus(data.campus_id)
         for field, value in data.model_dump(exclude_none=True).items():

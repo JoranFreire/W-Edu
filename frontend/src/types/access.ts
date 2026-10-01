@@ -14,7 +14,7 @@ export interface BuiltInProfile {
 }
 
 export interface AccessRole {
-  id: number;
+  id: string;
   name: string;
   description: string | null;
   permissions: string[];
@@ -28,7 +28,7 @@ export interface AccessRoleInput {
 }
 
 export interface AccessMember {
-  id: number;
+  id: string;
   name: string;
   email: string;
   role: UserRole;

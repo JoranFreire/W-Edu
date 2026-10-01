@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from datetime import datetime, timedelta, timezone
 
@@ -56,7 +57,7 @@ class ConvocationService:
             )
         return len(summoned)
 
-    def confirm(self, applicant: Student, application_id: int) -> ApplicationOut:
+    def confirm(self, applicant: Student, application_id: UUID) -> ApplicationOut:
         application = self.applicant_side.own(applicant, application_id)
         if application.status != ApplicationStatus.selected:
             raise conflict("Inscrição não está convocada")
@@ -67,7 +68,7 @@ class ConvocationService:
         application.status, application.confirmed_at = ApplicationStatus.confirmed, datetime.now(timezone.utc)
         return application_out(self.repo.save(application))
 
-    def decline(self, applicant: Student, application_id: int) -> ApplicationOut:
+    def decline(self, applicant: Student, application_id: UUID) -> ApplicationOut:
         application = self.applicant_side.own(applicant, application_id)
         if application.status not in (ApplicationStatus.selected, ApplicationStatus.waitlisted):
             raise conflict("Só se desiste de vaga convocada ou em espera")
@@ -78,7 +79,7 @@ class ConvocationService:
             self.call_next(application.call)
         return application_out(application)
 
-    def process_deadlines(self, call_id: int) -> DeadlinesOut:
+    def process_deadlines(self, call_id: UUID) -> DeadlinesOut:
         """Expira quem nao confirmou no prazo e chama os proximos da lista."""
         call = self.calls.get_or_404(call_id)
         now = datetime.now(timezone.utc)

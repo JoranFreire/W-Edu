@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from sqlalchemy.orm import Session
 
@@ -19,13 +20,13 @@ class ProgramService:
 
     def list(
         self,
-        unit_id: int | None = None,
+        unit_id: UUID | None = None,
         level: ProgramLevel | None = None,
         status: ProgramStatus | None = None,
     ) -> list[Program]:
         return self.repo.list(unit_id=unit_id, level=level, status=status)
 
-    def get_or_404(self, program_id: int) -> Program:
+    def get_or_404(self, program_id: UUID) -> Program:
         program = self.repo.get_by_id(program_id)
         if not program:
             raise not_found("Programa não encontrado")
@@ -37,7 +38,7 @@ class ProgramService:
         self._ensure_unique_code(data.code)
         return self.repo.save(Program(**data.model_dump()))
 
-    def update(self, program_id: int, data: ProgramUpdate) -> Program:
+    def update(self, program_id: UUID, data: ProgramUpdate) -> Program:
         program = self.get_or_404(program_id)
         if data.unit_id is not None:
             self.units.get_or_404(data.unit_id)
@@ -46,7 +47,7 @@ class ProgramService:
         apply_patch(program, data, clearable=CLEARABLE)
         return self.repo.save(program)
 
-    def delete(self, program_id: int) -> None:
+    def delete(self, program_id: UUID) -> None:
         program = self.get_or_404(program_id)
         if self.repo.has_curricula(program_id):
             raise conflict("Programa possui matrizes curriculares")

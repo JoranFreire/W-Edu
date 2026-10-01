@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from sqlalchemy.orm import Session
 
@@ -11,10 +12,10 @@ class FamilyRecipients:
     def __init__(self, db: Session):
         self.links = GuardianLinkRepository(db)
 
-    def of(self, student_id: int) -> list[int]:
+    def of(self, student_id: UUID) -> list[UUID]:
         return self.of_many([student_id])
 
-    def of_many(self, student_ids: list[int]) -> list[int]:
+    def of_many(self, student_ids: list[UUID]) -> list[UUID]:
         """Sem repeticao: o responsavel de dois irmaos da mesma turma recebe um aviso so."""
         guardians = self.links.guardian_ids_of(student_ids)
         return list(dict.fromkeys([*student_ids, *guardians]))

@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -16,10 +18,10 @@ def list_teaching_offerings(db: Session = Depends(get_db), current: Student = De
 
 
 @router.get("/offerings/{offering_id}", response_model=TeachingOfferingOut)
-def get_teaching_offering(offering_id: int, db: Session = Depends(get_db), current: Student = Depends(get_current_teaching_staff)):
+def get_teaching_offering(offering_id: UUID, db: Session = Depends(get_db), current: Student = Depends(get_current_teaching_staff)):
     return TeachingOfferingService(db).get_for_teaching(offering_id, current)
 
 
 @router.post("/offerings/{offering_id}/sync-group-enrollments", response_model=SyncEnrollmentsResult)
-def sync_group_enrollments(offering_id: int, db: Session = Depends(get_db), current: Student = Depends(get_current_admin_or_coordinator)):
+def sync_group_enrollments(offering_id: UUID, db: Session = Depends(get_db), current: Student = Depends(get_current_admin_or_coordinator)):
     return TeachingOfferingService(db).sync_group_enrollments(offering_id, current)

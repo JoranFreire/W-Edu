@@ -1,5 +1,6 @@
 """Situacao do aluno num periodo letivo: o que ja cursou, o que tem inscrito e o que cada oferta exige."""
 from __future__ import annotations
+from uuid import UUID
 
 from dataclasses import dataclass
 
@@ -18,13 +19,13 @@ from app.services.registration.rules import Evaluation, WeeklySlot, clashing, ev
 @dataclass
 class TermPlan:
     enrollment: ProgramEnrollment
-    term_id: int
-    done: set[int]
-    components: dict[int, CurriculumComponent]
-    enrolled: dict[int, ClassOffering]
-    waitlisted: dict[int, WaitlistEntry]
-    slots: dict[int, list[WeeklySlot]]
-    prerequisites: dict[int, dict[int, str]]
+    term_id: UUID
+    done: set[UUID]
+    components: dict[UUID, CurriculumComponent]
+    enrolled: dict[UUID, ClassOffering]
+    waitlisted: dict[UUID, WaitlistEntry]
+    slots: dict[UUID, list[WeeklySlot]]
+    prerequisites: dict[UUID, dict[UUID, str]]
 
     def credit_of(self, offering: ClassOffering) -> int:
         component = self.components.get(offering.subject_id)
@@ -57,7 +58,7 @@ class TermPlanBuilder:
         self.prerequisites = SubjectPrerequisiteRepository(db)
         self.transcripts = TranscriptRepository(db)
 
-    def build(self, enrollment: ProgramEnrollment, term_id: int, candidates: list[ClassOffering]) -> TermPlan:
+    def build(self, enrollment: ProgramEnrollment, term_id: UUID, candidates: list[ClassOffering]) -> TermPlan:
         student_id = enrollment.student_id
         enrolled = {e.class_offering_id: e.class_offering for e in self.records.term_enrollments(student_id, term_id)}
         offering_ids = list({*enrolled, *(offering.id for offering in candidates)})
@@ -76,7 +77,7 @@ class TermPlanBuilder:
             prerequisites=self.prerequisites.required_names(subject_ids),
         )
 
-    def _done(self, enrollment: ProgramEnrollment) -> set[int]:
+    def _done(self, enrollment: ProgramEnrollment) -> set[UUID]:
         """Aprovadas e aproveitadas; a equivalente de uma cumprida tambem conta."""
         done = self.records.approved_subject_ids(enrollment.student_id) | self.records.credited_subject_ids(enrollment.id)
         for first, second in self.transcripts.equivalences(done):

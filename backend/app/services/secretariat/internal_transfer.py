@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from sqlalchemy.orm import Session
 
@@ -20,7 +21,7 @@ class InternalTransferService:
         self.enrollments = ProgramEnrollmentService(db)
         self.events = EnrollmentEventRecorder(db)
 
-    def transfer(self, enrollment_id: int, program_id: int, curriculum_id: int | None, reason: str | None, user_id: int) -> ProgramEnrollment:
+    def transfer(self, enrollment_id: UUID, program_id: UUID, curriculum_id: UUID | None, reason: str | None, user_id: UUID) -> ProgramEnrollment:
         current = self.lifecycle.get_or_404(enrollment_id)
         if current.program_id == program_id:
             raise bad_request("Escolha um programa diferente do atual")

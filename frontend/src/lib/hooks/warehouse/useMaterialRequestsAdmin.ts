@@ -13,7 +13,7 @@ export function useMaterialRequestsAdmin(status: RequestStatus | '') {
     [status],
   );
   const { data = [], error, reload } = useApiQuery(request);
-  const act = async (id: number, action: 'approve' | 'reject' | 'deliver' | 'returns', body?: unknown) => {
+  const act = async (id: string, action: 'approve' | 'reject' | 'deliver' | 'returns', body?: unknown) => {
     await api.post(endpoints.warehouse.action(id, action), body);
     reload();
   };

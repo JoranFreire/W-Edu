@@ -19,7 +19,7 @@ export default function UserDossierPage() {
   const { userId } = useParams<{ userId: string }>();
   const router = useRouter();
   const { student, permissions } = useAuthStore();
-  const { dossier, loading, error, reload } = useUserDossier(Number(userId));
+  const { dossier, loading, error, reload } = useUserDossier(userId);
   const [editingContact, setEditingContact] = useState(false);
   useErrorToast(error, 'Erro ao carregar o dossiê.');
 

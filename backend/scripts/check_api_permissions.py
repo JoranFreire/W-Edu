@@ -28,6 +28,7 @@ import fastapi.routing
 import starlette.concurrency
 import starlette.routing
 
+from scripts.check_support import ApiClient  # noqa: E402
 import app.models  # noqa: F401
 from app.core.database import Base, SessionLocal, engine, get_db
 from app.dependencies import get_current_student
@@ -180,7 +181,7 @@ class PermissionCheck:
         try:
             log("create client")
             transport = httpx.ASGITransport(app=app)
-            async with httpx.AsyncClient(transport=transport, base_url="http://testserver") as client:
+            async with ApiClient(transport=transport, base_url="http://testserver") as client:
                 log("coordinator create student")
                 self.as_role(ids["coordinator"], UserRole.coordinator)
                 response = await client.post(

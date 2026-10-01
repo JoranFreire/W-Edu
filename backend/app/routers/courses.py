@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -30,25 +32,25 @@ def list_courses(db: Session = Depends(get_db), _: Student = Depends(get_current
 
 
 @router.get("/{course_id}", response_model=CourseOut)
-def get_course(course_id: int, db: Session = Depends(get_db), _: Student = Depends(get_current_student)):
+def get_course(course_id: UUID, db: Session = Depends(get_db), _: Student = Depends(get_current_student)):
     return CourseService(db).get_or_404(course_id)
 
 
 @router.patch("/{course_id}", response_model=CourseOut)
 def update_course(
-    course_id: int, data: CourseUpdate, db: Session = Depends(get_db), _: Student = Depends(get_current_admin_or_coordinator)
+    course_id: UUID, data: CourseUpdate, db: Session = Depends(get_db), _: Student = Depends(get_current_admin_or_coordinator)
 ):
     return CourseService(db).update(course_id, data)
 
 
 @router.delete("/{course_id}", status_code=204)
-def delete_course(course_id: int, db: Session = Depends(get_db), _: Student = Depends(get_current_admin)):
+def delete_course(course_id: UUID, db: Session = Depends(get_db), _: Student = Depends(get_current_admin)):
     CourseService(db).delete(course_id)
 
 
 @router.post("/{course_id}/modules", response_model=CourseModuleOut, status_code=201)
 def create_module(
-    course_id: int,
+    course_id: UUID,
     data: CourseModuleCreate,
     db: Session = Depends(get_db),
     _: Student = Depends(get_current_admin_or_coordinator),
@@ -59,7 +61,7 @@ def create_module(
 
 @router.get("/{course_id}/modules", response_model=list[CourseModuleOut])
 def list_modules(
-    course_id: int,
+    course_id: UUID,
     db: Session = Depends(get_db),
     _: Student = Depends(get_current_student),
 ):
@@ -68,7 +70,7 @@ def list_modules(
 
 @router.patch("/modules/{module_id}", response_model=CourseModuleOut)
 def update_module(
-    module_id: int,
+    module_id: UUID,
     data: CourseModuleUpdate,
     db: Session = Depends(get_db),
     _: Student = Depends(get_current_admin_or_coordinator),
@@ -77,13 +79,13 @@ def update_module(
 
 
 @router.delete("/modules/{module_id}", status_code=204)
-def delete_module(module_id: int, db: Session = Depends(get_db), _: Student = Depends(get_current_admin)):
+def delete_module(module_id: UUID, db: Session = Depends(get_db), _: Student = Depends(get_current_admin)):
     CourseModuleService(db).delete(module_id)
 
 
 @router.post("/{course_id}/prerequisites", response_model=CoursePrerequisiteOut, status_code=201)
 def create_prerequisite(
-    course_id: int,
+    course_id: UUID,
     data: CoursePrerequisiteCreate,
     db: Session = Depends(get_db),
     _: Student = Depends(get_current_admin_or_coordinator),
@@ -93,7 +95,7 @@ def create_prerequisite(
 
 @router.get("/{course_id}/prerequisites", response_model=list[CoursePrerequisiteOut])
 def list_prerequisites(
-    course_id: int,
+    course_id: UUID,
     db: Session = Depends(get_db),
     _: Student = Depends(get_current_student),
 ):
@@ -102,8 +104,8 @@ def list_prerequisites(
 
 @router.delete("/{course_id}/prerequisites/{prerequisite_course_id}", status_code=204)
 def delete_prerequisite(
-    course_id: int,
-    prerequisite_course_id: int,
+    course_id: UUID,
+    prerequisite_course_id: UUID,
     db: Session = Depends(get_db),
     _: Student = Depends(get_current_admin),
 ):

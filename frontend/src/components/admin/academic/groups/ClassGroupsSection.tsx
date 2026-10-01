@@ -21,7 +21,7 @@ import ClassGroupFormModal from './ClassGroupFormModal';
 
 export default function ClassGroupsSection({ canDelete }: { canDelete: boolean }) {
   const labels = useTerminology();
-  const [termId, setTermId] = useState<number | undefined>();
+  const [termId, setTermId] = useState<string | undefined>();
   const { groups, error, save, remove } = useClassGroups(termId);
   const { terms } = useAcademicTerms();
   const { programs } = usePrograms();
@@ -31,8 +31,8 @@ export default function ClassGroupsSection({ canDelete }: { canDelete: boolean }
   useErrorToast(error, 'Erro ao carregar turmas.');
 
   const teachers = users.filter((user) => user.role === 'instructor' || user.role === 'coordinator' || isAdminRole(user.role));
-  const termName = (id: number) => terms.find((term) => term.id === id)?.name;
-  const programCode = (id: number) => programs.find((program) => program.id === id)?.code;
+  const termName = (id: string) => terms.find((term) => term.id === id)?.name;
+  const programCode = (id: string) => programs.find((program) => program.id === id)?.code;
 
   const handleSave = async (input: ClassGroupInput) => {
     await save(editing?.group?.id ?? null, input);
@@ -54,7 +54,7 @@ export default function ClassGroupsSection({ canDelete }: { canDelete: boolean }
   return (
     <section className={`${sectionCls} space-y-4`}>
       <SectionHeader title="Turmas" description={`Turmas-grupo por ${labels.academicTerm.toLowerCase()}, com turno e professor responsável.`} actionLabel="Nova turma" onAction={() => setEditing({})} />
-      <select aria-label={`Filtrar por ${labels.academicTerm.toLowerCase()}`} value={termId ?? ''} onChange={(e) => setTermId(e.target.value ? Number(e.target.value) : undefined)} className={`${inputCls} sm:w-64`}>
+      <select aria-label={`Filtrar por ${labels.academicTerm.toLowerCase()}`} value={termId ?? ''} onChange={(e) => setTermId(e.target.value || undefined)} className={`${inputCls} sm:w-64`}>
         <option value="">Todos os períodos</option>
         {terms.map((term) => <option key={term.id} value={term.id}>{term.name}</option>)}
       </select>

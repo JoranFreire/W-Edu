@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -11,17 +13,17 @@ router = APIRouter()
 
 
 @router.get("/enrollments/{enrollment_id}/final-project", response_model=FinalProjectOut | None)
-def enrollment_final_project(enrollment_id: int, db: Session = Depends(get_db), _: Student = Depends(get_current_secretariat)):
+def enrollment_final_project(enrollment_id: UUID, db: Session = Depends(get_db), _: Student = Depends(get_current_secretariat)):
     return FinalProjectService(db).get_for_enrollment(enrollment_id)
 
 
 @router.put("/enrollments/{enrollment_id}/final-project", response_model=FinalProjectOut)
-def save_final_project(enrollment_id: int, data: FinalProjectInput, db: Session = Depends(get_db), _: Student = Depends(get_current_secretariat)):
+def save_final_project(enrollment_id: UUID, data: FinalProjectInput, db: Session = Depends(get_db), _: Student = Depends(get_current_secretariat)):
     return FinalProjectService(db).save(enrollment_id, data)
 
 
 @router.post("/final-projects/{project_id}/result", response_model=FinalProjectOut)
-def record_final_project(project_id: int, data: FinalProjectResult, db: Session = Depends(get_db), current: Student = Depends(get_current_teaching_staff)):
+def record_final_project(project_id: UUID, data: FinalProjectResult, db: Session = Depends(get_db), current: Student = Depends(get_current_teaching_staff)):
     return FinalProjectService(db).record(project_id, data, current)
 
 

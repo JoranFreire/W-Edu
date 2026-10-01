@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from sqlalchemy.orm import Session
 
@@ -30,7 +31,7 @@ class FinalProjectService:
         self.users = StudentRepository(db)
         self.lifecycle = EnrollmentLifecycleService(db)
 
-    def get_for_enrollment(self, enrollment_id: int) -> FinalProjectOut | None:
+    def get_for_enrollment(self, enrollment_id: UUID) -> FinalProjectOut | None:
         self.lifecycle.get_or_404(enrollment_id)
         project = self.repo.get_by_enrollment(enrollment_id)
         return to_out(project) if project else None
@@ -38,7 +39,7 @@ class FinalProjectService:
     def list_mine(self, student: Student) -> list[FinalProjectOut]:
         return [to_out(project) for project in self.repo.list_by_student(student.id)]
 
-    def save(self, enrollment_id: int, data: FinalProjectInput) -> FinalProjectOut:
+    def save(self, enrollment_id: UUID, data: FinalProjectInput) -> FinalProjectOut:
         """Cria ou atualiza; depois de reprovado, salvar de novo abre nova tentativa."""
         enrollment = self.lifecycle.get_or_404(enrollment_id)
         ensure_active(enrollment)
@@ -56,7 +57,7 @@ class FinalProjectService:
             setattr(project, field, value)
         return to_out(self.repo.save(project))
 
-    def record(self, project_id: int, data: FinalProjectResult, user: Student) -> FinalProjectOut:
+    def record(self, project_id: UUID, data: FinalProjectResult, user: Student) -> FinalProjectOut:
         project = self.repo.get_by_id(project_id)
         if not project:
             raise not_found("TCC não encontrado")

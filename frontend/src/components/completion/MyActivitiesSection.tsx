@@ -11,8 +11,8 @@ import ActivityList from './ActivityList';
 export default function MyActivitiesSection({ activities, enrollments, onSubmit, onWithdraw }: {
   activities: Activity[];
   enrollments: Integralization[];
-  onSubmit: (enrollmentId: number, input: ActivityInput) => Promise<void>;
-  onWithdraw: (activityId: number) => Promise<void>;
+  onSubmit: (enrollmentId: string, input: ActivityInput) => Promise<void>;
+  onWithdraw: (activityId: string) => Promise<void>;
 }) {
   const target = enrollments.find((item) => item.requirements.some((requirement) => requirement.key === 'complementary_hours')) ?? enrollments[0];
   const withdraw = async (activity: Activity) => {

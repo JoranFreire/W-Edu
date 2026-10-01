@@ -30,7 +30,7 @@ export default function LocationForm({ onCreated, onCancel, variant = 'card' }: 
     const { endpoints } = await import('@/lib/api/endpoints');
     const toast = (await import('react-hot-toast')).default;
     try {
-      await api.post(endpoints.schedule.locations, { name, campus_id: campusId ? Number(campusId) : null });
+      await api.post(endpoints.schedule.locations, { name, campus_id: campusId ? campusId : null });
       setName('');
       setCampusId('');
       toast.success('Unidade criada.');

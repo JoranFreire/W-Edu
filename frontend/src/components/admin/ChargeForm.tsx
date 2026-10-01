@@ -34,11 +34,11 @@ export default function ChargeForm({ subscriptions, students, organizations, cou
     const toast = (await import('react-hot-toast')).default;
     try {
       await api.post(endpoints.finance.charges, {
-        subscription_id: form.subscription_id ? Number(form.subscription_id) : null,
-        student_id: form.student_id ? Number(form.student_id) : null,
-        organization_id: form.organization_id ? Number(form.organization_id) : null,
-        course_id: form.course_id ? Number(form.course_id) : null,
-        class_offering_id: form.class_offering_id ? Number(form.class_offering_id) : null,
+        subscription_id: form.subscription_id ? form.subscription_id : null,
+        student_id: form.student_id ? form.student_id : null,
+        organization_id: form.organization_id ? form.organization_id : null,
+        course_id: form.course_id ? form.course_id : null,
+        class_offering_id: form.class_offering_id ? form.class_offering_id : null,
         amount_cents: Number(form.amount_cents), currency: form.currency,
         payment_method: form.payment_method,
         gateway_name: form.gateway_name || null,

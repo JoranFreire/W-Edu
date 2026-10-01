@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from datetime import date
 
@@ -21,7 +22,7 @@ class ConclusionService:
         self.transcripts = TranscriptService(db)
         self.integralization = IntegralizationService(db)
 
-    def check(self, enrollment_id: int) -> ConclusionCheckOut:
+    def check(self, enrollment_id: UUID) -> ConclusionCheckOut:
         enrollment = self.lifecycle.get_or_404(enrollment_id)
         summary = self.transcripts.build(enrollment).summary
         requirements = self.integralization.build(enrollment).requirements
@@ -32,7 +33,7 @@ class ConclusionService:
             hours_done=summary.hours_done, required_hours=enrollment.program.total_hours, missing=missing,
         )
 
-    def conclude(self, enrollment_id: int, concluded_on: date, ceremony_on: date | None, user_id: int) -> ProgramEnrollment:
+    def conclude(self, enrollment_id: UUID, concluded_on: date, ceremony_on: date | None, user_id: UUID) -> ProgramEnrollment:
         check = self.check(enrollment_id)
         if not check.eligible:
             raise conflict("Requisitos pendentes: " + "; ".join(check.missing))
@@ -45,7 +46,7 @@ class ConclusionService:
         enrollment.concluded_on, enrollment.ceremony_on = concluded_on, ceremony_on
         return self.lifecycle.repo.save(enrollment)
 
-    def set_ceremony(self, enrollment_id: int, ceremony_on: date) -> ProgramEnrollment:
+    def set_ceremony(self, enrollment_id: UUID, ceremony_on: date) -> ProgramEnrollment:
         """Colacao de grau registrada depois da conclusao."""
         enrollment = self.lifecycle.get_or_404(enrollment_id)
         if enrollment.status != ProgramEnrollmentStatus.graduated:

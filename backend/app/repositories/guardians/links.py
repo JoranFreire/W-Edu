@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from app.models.finance import Charge
 from app.models.guardians import StudentGuardian
@@ -9,7 +10,7 @@ from app.repositories.academic._base import Repository
 class GuardianLinkRepository(Repository[StudentGuardian]):
     model = StudentGuardian
 
-    def list_by_student(self, student_id: int) -> list[StudentGuardian]:
+    def list_by_student(self, student_id: UUID) -> list[StudentGuardian]:
         return (
             self.db.query(StudentGuardian)
             .filter(StudentGuardian.student_id == student_id)
@@ -17,10 +18,10 @@ class GuardianLinkRepository(Repository[StudentGuardian]):
             .all()
         )
 
-    def list_by_guardian(self, guardian_id: int) -> list[StudentGuardian]:
+    def list_by_guardian(self, guardian_id: UUID) -> list[StudentGuardian]:
         return self.db.query(StudentGuardian).filter(StudentGuardian.guardian_id == guardian_id).order_by(StudentGuardian.id).all()
 
-    def guardian_ids_of(self, student_ids: list[int]) -> list[int]:
+    def guardian_ids_of(self, student_ids: list[UUID]) -> list[UUID]:
         if not student_ids:
             return []
         rows = (
@@ -31,22 +32,22 @@ class GuardianLinkRepository(Repository[StudentGuardian]):
         )
         return [row.guardian_id for row in rows]
 
-    def get(self, student_id: int, guardian_id: int) -> StudentGuardian | None:
+    def get(self, student_id: UUID, guardian_id: UUID) -> StudentGuardian | None:
         return (
             self.db.query(StudentGuardian)
             .filter(StudentGuardian.student_id == student_id, StudentGuardian.guardian_id == guardian_id)
             .first()
         )
 
-    def clear_primary(self, student_id: int, except_id: int | None = None) -> None:
+    def clear_primary(self, student_id: UUID, except_id: UUID | None = None) -> None:
         for link in self.list_by_student(student_id):
             if link.id != except_id:
                 link.is_primary = False
 
-    def charges_for(self, student_id: int) -> list[Charge]:
+    def charges_for(self, student_id: UUID) -> list[Charge]:
         return self.db.query(Charge).filter(Charge.student_id == student_id).order_by(Charge.id.desc()).all()
 
-    def notices_for(self, student_id: int, limit: int = 50) -> list[NotificationEvent]:
+    def notices_for(self, student_id: UUID, limit: int = 50) -> list[NotificationEvent]:
         return (
             self.db.query(NotificationEvent)
             .filter(NotificationEvent.recipient_student_id == student_id)

@@ -7,7 +7,7 @@ import { useApiQuery } from '@/lib/hooks/useApiQuery';
 import type { ConclusionCheck } from '@/types/secretariat';
 
 /** Requisitos de conclusao do programa, conclusao e data de colacao. */
-export function useConclusion(enrollmentId: number) {
+export function useConclusion(enrollmentId: string) {
   const request = useCallback(
     () => api.get<ConclusionCheck>(endpoints.secretariat.conclusion(enrollmentId)).then((response) => response.data),
     [enrollmentId],

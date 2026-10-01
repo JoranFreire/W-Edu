@@ -18,7 +18,7 @@ export type NotificationEventType =
   | 'material_request_decided';
 
 export interface NotificationTemplate {
-  id: number;
+  id: string;
   key: string;
   channel: NotificationChannel;
   title_template: string;
@@ -37,14 +37,14 @@ export interface NotificationTemplateInput {
 }
 
 export interface NotificationEvent {
-  id: number;
+  id: string;
   event_type: NotificationEventType;
   channel: NotificationChannel;
   template_key: string | null;
-  recipient_student_id: number | null;
-  course_id: number | null;
-  class_offering_id: number | null;
-  scheduled_meeting_id: number | null;
+  recipient_student_id: string | null;
+  course_id: string | null;
+  class_offering_id: string | null;
+  scheduled_meeting_id: string | null;
   payload: Record<string, string>;
   title: string;
   body: string;
@@ -57,7 +57,7 @@ export interface NotificationEvent {
 
 /** Aviso na caixa do usuario (comunicados internos enderecados a ele). */
 export interface InboxNotice {
-  id: number;
+  id: string;
   event_type: NotificationEventType;
   title: string;
   body: string;

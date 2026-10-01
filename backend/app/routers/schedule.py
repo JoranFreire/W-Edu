@@ -1,3 +1,4 @@
+from uuid import UUID
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, Query
@@ -49,7 +50,7 @@ def list_locations(db: Session = Depends(get_db), _: Student = Depends(get_curre
 
 @router.patch("/locations/{location_id}", response_model=LocationOut)
 def update_location(
-    location_id: int,
+    location_id: UUID,
     data: LocationUpdate,
     db: Session = Depends(get_db),
     _: Student = Depends(get_current_admin_or_coordinator),
@@ -63,7 +64,7 @@ def create_room(data: RoomCreate, db: Session = Depends(get_db), _: Student = De
 
 
 @router.get("/rooms", response_model=list[RoomOut])
-def list_rooms(location_id: int | None = None, db: Session = Depends(get_db), _: Student = Depends(get_current_student)):
+def list_rooms(location_id: UUID | None = None, db: Session = Depends(get_db), _: Student = Depends(get_current_student)):
     service = RoomService(db)
     if location_id:
         return service.list_by_location(location_id)
@@ -72,7 +73,7 @@ def list_rooms(location_id: int | None = None, db: Session = Depends(get_db), _:
 
 @router.patch("/rooms/{room_id}", response_model=RoomOut)
 def update_room(
-    room_id: int,
+    room_id: UUID,
     data: RoomUpdate,
     db: Session = Depends(get_db),
     _: Student = Depends(get_current_admin_or_coordinator),
@@ -91,7 +92,7 @@ def create_class(
 
 @router.get("/classes", response_model=list[ClassOfferingOut])
 def list_classes(
-    course_id: int | None = None,
+    course_id: UUID | None = None,
     db: Session = Depends(get_db),
     _: Student = Depends(get_current_student),
 ):
@@ -102,13 +103,13 @@ def list_classes(
 
 
 @router.get("/classes/{class_id}", response_model=ClassOfferingOut)
-def get_class(class_id: int, db: Session = Depends(get_db), _: Student = Depends(get_current_student)):
+def get_class(class_id: UUID, db: Session = Depends(get_db), _: Student = Depends(get_current_student)):
     return ClassOfferingService(db).get_or_404(class_id)
 
 
 @router.patch("/classes/{class_id}", response_model=ClassOfferingOut)
 def update_class(
-    class_id: int,
+    class_id: UUID,
     data: ClassOfferingUpdate,
     db: Session = Depends(get_db),
     _: Student = Depends(get_current_admin_or_coordinator),
@@ -117,13 +118,13 @@ def update_class(
 
 
 @router.post("/classes/{class_id}/join", response_model=ClassJoinOut)
-def join_class(class_id: int, db: Session = Depends(get_db), current: Student = Depends(get_current_student)):
+def join_class(class_id: UUID, db: Session = Depends(get_db), current: Student = Depends(get_current_student)):
     return ClassOfferingService(db).join(class_id, current.id)
 
 
 @router.get("/classes/{class_id}/enrollments", response_model=list[ClassEnrollmentOut])
 def list_class_enrollments(
-    class_id: int,
+    class_id: UUID,
     db: Session = Depends(get_db),
     _: Student = Depends(get_current_admin_or_coordinator),
 ):
@@ -132,7 +133,7 @@ def list_class_enrollments(
 
 @router.get("/classes/{class_id}/waitlist", response_model=list[WaitlistEntryOut])
 def list_class_waitlist(
-    class_id: int,
+    class_id: UUID,
     db: Session = Depends(get_db),
     _: Student = Depends(get_current_admin_or_coordinator),
 ):
@@ -150,7 +151,7 @@ def create_meeting(
 
 @router.get("/classes/{class_id}/meetings", response_model=list[ScheduledMeetingOut])
 def list_class_meetings(
-    class_id: int,
+    class_id: UUID,
     db: Session = Depends(get_db),
     _: Student = Depends(get_current_student),
 ):
@@ -159,7 +160,7 @@ def list_class_meetings(
 
 @router.get("/instructors/{instructor_id}/agenda", response_model=InstructorAgendaOut)
 def instructor_agenda(
-    instructor_id: int,
+    instructor_id: UUID,
     range_start: datetime | None = None,
     range_end: datetime | None = None,
     duration_minutes: int = Query(default=60, ge=15, le=480),
@@ -171,7 +172,7 @@ def instructor_agenda(
 
 @router.patch("/meetings/{meeting_id}", response_model=ScheduledMeetingOut)
 def update_meeting(
-    meeting_id: int,
+    meeting_id: UUID,
     data: ScheduledMeetingUpdate,
     db: Session = Depends(get_db),
     _: Student = Depends(get_current_admin_or_coordinator),
@@ -181,7 +182,7 @@ def update_meeting(
 
 @router.post("/meetings/{meeting_id}/close", response_model=ScheduledMeetingOut)
 def close_meeting(
-    meeting_id: int,
+    meeting_id: UUID,
     db: Session = Depends(get_db),
     _: Student = Depends(get_current_admin_or_coordinator),
 ):
@@ -190,7 +191,7 @@ def close_meeting(
 
 @router.get("/meetings/{meeting_id}/summary", response_model=MeetingAttendanceSummary)
 def meeting_summary(
-    meeting_id: int,
+    meeting_id: UUID,
     db: Session = Depends(get_db),
     _: Student = Depends(get_current_admin_or_coordinator),
 ):
@@ -199,7 +200,7 @@ def meeting_summary(
 
 @router.post("/meetings/{meeting_id}/checkin-tokens", response_model=CheckinTokenOut, status_code=201)
 def create_checkin_token(
-    meeting_id: int,
+    meeting_id: UUID,
     data: CheckinTokenCreate,
     db: Session = Depends(get_db),
     _: Student = Depends(get_current_admin_or_coordinator),
@@ -209,7 +210,7 @@ def create_checkin_token(
 
 @router.get("/meetings/{meeting_id}/checkin-tokens", response_model=list[CheckinTokenOut])
 def list_checkin_tokens(
-    meeting_id: int,
+    meeting_id: UUID,
     db: Session = Depends(get_db),
     _: Student = Depends(get_current_admin_or_coordinator),
 ):
@@ -223,7 +224,7 @@ def check_in(token: str, db: Session = Depends(get_db), current: Student = Depen
 
 @router.post("/meetings/{meeting_id}/attendance", response_model=AttendanceRecordOut, status_code=201)
 def create_attendance_record(
-    meeting_id: int,
+    meeting_id: UUID,
     data: AttendanceRecordCreate,
     db: Session = Depends(get_db),
     _: Student = Depends(get_current_admin_or_coordinator),
@@ -239,7 +240,7 @@ def create_attendance_record(
 
 @router.get("/meetings/{meeting_id}/attendance", response_model=list[AttendanceRecordOut])
 def list_attendance_records(
-    meeting_id: int,
+    meeting_id: UUID,
     db: Session = Depends(get_db),
     _: Student = Depends(get_current_admin_or_coordinator),
 ):
@@ -248,7 +249,7 @@ def list_attendance_records(
 
 @router.get("/meetings/{meeting_id}/attendance-report", response_model=list[MeetingAttendanceReportRow])
 def meeting_attendance_report(
-    meeting_id: int,
+    meeting_id: UUID,
     db: Session = Depends(get_db),
     _: Student = Depends(get_current_admin_or_coordinator),
 ):
@@ -257,7 +258,7 @@ def meeting_attendance_report(
 
 @router.post("/meetings/{meeting_id}/practical-assessments", response_model=PracticalAssessmentRecordOut, status_code=201)
 def upsert_practical_assessment(
-    meeting_id: int,
+    meeting_id: UUID,
     data: PracticalAssessmentRecordCreate,
     db: Session = Depends(get_db),
     current: Student = Depends(get_current_admin_or_coordinator),

@@ -1,3 +1,6 @@
+from uuid import UUID
+
+from app.core.ids import new_id
 from datetime import datetime, timezone
 import enum
 
@@ -42,7 +45,7 @@ class BillingPlan(TenantMixin, Base):
     __tablename__ = "billing_plans"
     __table_args__ = (UniqueConstraint("institution_id", "name"),)
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
     name: Mapped[str] = mapped_column(String(200), index=True)
     description: Mapped[str | None] = mapped_column(Text)
     price_cents: Mapped[int] = mapped_column(Integer)
@@ -68,10 +71,10 @@ class Subscription(TenantMixin, Base):
         CheckConstraint("student_id IS NOT NULL OR organization_id IS NOT NULL", name="subscription_customer_check"),
     )
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    billing_plan_id: Mapped[int] = mapped_column(ForeignKey("billing_plans.id"), index=True)
-    student_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True, index=True)
-    organization_id: Mapped[int | None] = mapped_column(ForeignKey("organizations.id"), nullable=True, index=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
+    billing_plan_id: Mapped[UUID] = mapped_column(ForeignKey("billing_plans.id"), index=True)
+    student_id: Mapped[UUID | None] = mapped_column(ForeignKey("users.id"), nullable=True, index=True)
+    organization_id: Mapped[UUID | None] = mapped_column(ForeignKey("organizations.id"), nullable=True, index=True)
     status: Mapped[SubscriptionStatus] = mapped_column(SAEnum(SubscriptionStatus), default=SubscriptionStatus.active)
     start_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     current_period_start: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
@@ -91,13 +94,13 @@ class Charge(TenantMixin, Base):
     __tablename__ = "charges"
     __table_args__ = (UniqueConstraint("program_enrollment_id", "tuition_plan_id", "installment_number", name="uq_charges_tuition_installment"),)
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    billing_plan_id: Mapped[int | None] = mapped_column(ForeignKey("billing_plans.id"), nullable=True, index=True)
-    subscription_id: Mapped[int | None] = mapped_column(ForeignKey("subscriptions.id"), nullable=True, index=True)
-    student_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True, index=True)
-    organization_id: Mapped[int | None] = mapped_column(ForeignKey("organizations.id"), nullable=True, index=True)
-    course_id: Mapped[int | None] = mapped_column(ForeignKey("courses.id"), nullable=True, index=True)
-    class_offering_id: Mapped[int | None] = mapped_column(ForeignKey("class_offerings.id"), nullable=True, index=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
+    billing_plan_id: Mapped[UUID | None] = mapped_column(ForeignKey("billing_plans.id"), nullable=True, index=True)
+    subscription_id: Mapped[UUID | None] = mapped_column(ForeignKey("subscriptions.id"), nullable=True, index=True)
+    student_id: Mapped[UUID | None] = mapped_column(ForeignKey("users.id"), nullable=True, index=True)
+    organization_id: Mapped[UUID | None] = mapped_column(ForeignKey("organizations.id"), nullable=True, index=True)
+    course_id: Mapped[UUID | None] = mapped_column(ForeignKey("courses.id"), nullable=True, index=True)
+    class_offering_id: Mapped[UUID | None] = mapped_column(ForeignKey("class_offerings.id"), nullable=True, index=True)
     amount_cents: Mapped[int] = mapped_column(Integer)
     currency: Mapped[str] = mapped_column(String(10), default="BRL")
     payment_method: Mapped[PaymentMethod] = mapped_column(SAEnum(PaymentMethod), default=PaymentMethod.manual)
@@ -115,11 +118,11 @@ class Charge(TenantMixin, Base):
     description: Mapped[str | None] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     # Mensalidade (Fase 17): parcela de um plano para a matricula, pagador e composicao do valor.
-    program_enrollment_id: Mapped[int | None] = mapped_column(ForeignKey("program_enrollments.id"), nullable=True, index=True)
-    tuition_plan_id: Mapped[int | None] = mapped_column(ForeignKey("tuition_plans.id"), nullable=True, index=True)
+    program_enrollment_id: Mapped[UUID | None] = mapped_column(ForeignKey("program_enrollments.id"), nullable=True, index=True)
+    tuition_plan_id: Mapped[UUID | None] = mapped_column(ForeignKey("tuition_plans.id"), nullable=True, index=True)
     installment_number: Mapped[int | None] = mapped_column(Integer)
     # Responsavel financeiro que paga (vazio: o proprio aluno).
-    payer_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True, index=True)
+    payer_id: Mapped[UUID | None] = mapped_column(ForeignKey("users.id"), nullable=True, index=True)
     gross_amount_cents: Mapped[int | None] = mapped_column(Integer)
     discount_cents: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
     punctuality_discount_cents: Mapped[int] = mapped_column(Integer, default=0, server_default="0")

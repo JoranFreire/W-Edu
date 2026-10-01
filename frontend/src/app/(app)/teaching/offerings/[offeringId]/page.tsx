@@ -41,7 +41,7 @@ const socialTabs: TabItem<TeachingTab>[] = [
 
 export default function TeachingOfferingPage() {
   const router = useRouter();
-  const offeringId = Number(useParams<{ offeringId: string }>().offeringId);
+  const offeringId = useParams<{ offeringId: string }>().offeringId;
   const role = useAuthStore((state) => state.student?.role);
   const isCoordination = isAdminRole(role) || role === 'coordinator';
   const { offering, error, syncGroup } = useTeachingOffering(offeringId);

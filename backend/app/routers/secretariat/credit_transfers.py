@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -11,13 +13,13 @@ router = APIRouter()
 
 
 @router.get("/enrollments/{enrollment_id}/credit-transfers", response_model=list[CreditTransferOut])
-def list_credit_transfers(enrollment_id: int, db: Session = Depends(get_db), _: Student = Depends(get_current_secretariat)):
+def list_credit_transfers(enrollment_id: UUID, db: Session = Depends(get_db), _: Student = Depends(get_current_secretariat)):
     return CreditTransferService(db).list(enrollment_id)
 
 
 @router.post("/enrollments/{enrollment_id}/credit-transfers", response_model=CreditTransferOut, status_code=201)
 def request_credit_transfer(
-    enrollment_id: int,
+    enrollment_id: UUID,
     data: CreditTransferCreate,
     db: Session = Depends(get_db),
     _: Student = Depends(get_current_secretariat),
@@ -27,7 +29,7 @@ def request_credit_transfer(
 
 @router.post("/credit-transfers/{transfer_id}/decision", response_model=CreditTransferOut)
 def decide_credit_transfer(
-    transfer_id: int,
+    transfer_id: UUID,
     data: CreditTransferDecision,
     db: Session = Depends(get_db),
     current: Student = Depends(get_current_admin_or_coordinator),

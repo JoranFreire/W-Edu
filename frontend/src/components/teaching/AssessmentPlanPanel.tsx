@@ -15,14 +15,14 @@ import GradeEntryModal from './GradeEntryModal';
 
 /** Avaliacoes da turma por etapa, com lancamento de notas. */
 export default function AssessmentPlanPanel({ offeringId, periods, onGradesChanged }: {
-  offeringId: number;
+  offeringId: string;
   periods: GradingPeriod[];
   onGradesChanged: () => void;
 }) {
   const { items, error, create, remove } = useAssessmentItems(offeringId);
   const [grading, setGrading] = useState<AssessmentItem | null>(null);
   useErrorToast(error, 'Erro ao carregar avaliações.');
-  const period = (id: number | null) => periods.find((candidate) => candidate.id === id);
+  const period = (id: string | null) => periods.find((candidate) => candidate.id === id);
   const locked = (item: AssessmentItem) => period(item.grading_period_id)?.status === 'closed';
 
   const handleCreate = async (input: AssessmentItemInput) => {

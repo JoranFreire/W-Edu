@@ -19,7 +19,7 @@ type DependentTab = 'report' | 'notices' | 'occurrences' | 'agenda' | 'finance';
 
 export default function DependentPage() {
   const router = useRouter();
-  const studentId = Number(useParams<{ studentId: string }>().studentId);
+  const studentId = useParams<{ studentId: string }>().studentId;
   const { dependents } = useDependents();
   const dependent = dependents.find((item) => item.student.id === studentId);
   const isFinancial = dependent?.is_financial ?? false;

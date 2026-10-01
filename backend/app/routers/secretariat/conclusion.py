@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -12,13 +14,13 @@ router = APIRouter(prefix="/enrollments/{enrollment_id}")
 
 
 @router.get("/conclusion", response_model=ConclusionCheckOut)
-def check_conclusion(enrollment_id: int, db: Session = Depends(get_db), _: Student = Depends(get_current_secretariat)):
+def check_conclusion(enrollment_id: UUID, db: Session = Depends(get_db), _: Student = Depends(get_current_secretariat)):
     return ConclusionService(db).check(enrollment_id)
 
 
 @router.post("/conclusion", response_model=ProgramEnrollmentOut)
 def conclude_program(
-    enrollment_id: int,
+    enrollment_id: UUID,
     data: ConclusionInput,
     db: Session = Depends(get_db),
     current: Student = Depends(get_current_secretariat),
@@ -27,5 +29,5 @@ def conclude_program(
 
 
 @router.put("/ceremony", response_model=ProgramEnrollmentOut)
-def set_ceremony(enrollment_id: int, data: CeremonyInput, db: Session = Depends(get_db), _: Student = Depends(get_current_secretariat)):
+def set_ceremony(enrollment_id: UUID, data: CeremonyInput, db: Session = Depends(get_db), _: Student = Depends(get_current_secretariat)):
     return ConclusionService(db).set_ceremony(enrollment_id, data.ceremony_on)

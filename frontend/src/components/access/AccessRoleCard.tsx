@@ -12,8 +12,8 @@ export default function AccessRoleCard({ role, catalog, members, onEdit, onRemov
   members: AccessMember[];
   onEdit: () => void;
   onRemove: () => void;
-  onAssign: (userId: number) => void;
-  onUnassign: (userId: number) => void;
+  onAssign: (userId: string) => void;
+  onUnassign: (userId: string) => void;
 }) {
   const [candidate, setCandidate] = useState('');
   const label = (key: string) => catalog.find((permission) => permission.key === key)?.label ?? key;
@@ -49,7 +49,7 @@ export default function AccessRoleCard({ role, catalog, members, onEdit, onRemov
           <option value="">Adicionar pessoa…</option>
           {members.filter((member) => !assigned.has(member.id)).map((member) => <option key={member.id} value={member.id}>{member.name} ({member.email})</option>)}
         </select>
-        <button disabled={!candidate} onClick={() => { onAssign(Number(candidate)); setCandidate(''); }} aria-label={`Atribuir ${role.name}`} className={secondaryButtonCls}>Atribuir</button>
+        <button disabled={!candidate} onClick={() => { onAssign(candidate); setCandidate(''); }} aria-label={`Atribuir ${role.name}`} className={secondaryButtonCls}>Atribuir</button>
       </div>
     </li>
   );

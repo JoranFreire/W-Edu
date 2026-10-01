@@ -22,7 +22,7 @@ export default function ComponentFormModal({ component, subjects, termLabel, def
   onClose: () => void;
 }) {
   const [form, setForm] = useState({
-    subject_id: component?.subject.id ?? 0,
+    subject_id: component?.subject.id ?? '',
     term_number: String(component?.term_number ?? defaultTerm),
     kind: component?.kind ?? ('mandatory' as ComponentKind),
     hours: fromOptionalInt(component?.hours_override),
@@ -48,7 +48,7 @@ export default function ComponentFormModal({ component, subjects, termLabel, def
       <form onSubmit={submit} className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {!component && (
           <label className={`${labelCls} sm:col-span-2`}>Disciplina
-            <select required value={form.subject_id || ''} onChange={(e) => set({ subject_id: Number(e.target.value) })} className={`mt-1 ${inputCls}`}>
+            <select required value={form.subject_id || ''} onChange={(e) => set({ subject_id: e.target.value })} className={`mt-1 ${inputCls}`}>
               <option value="">Selecione...</option>
               {subjects.map((subject) => <option key={subject.id} value={subject.id}>{subject.code} · {subject.name}</option>)}
             </select>

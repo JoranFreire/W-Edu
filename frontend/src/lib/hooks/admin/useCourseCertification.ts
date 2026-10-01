@@ -14,7 +14,7 @@ interface CourseCertificationData {
 }
 
 /** Regra, certificados emitidos e matriculas de um curso, com emissao e revogacao. */
-export function useCourseCertification(courseId: number) {
+export function useCourseCertification(courseId: string) {
   const request = useCallback(async (): Promise<CourseCertificationData> => {
     const [rule, certificates, enrollments] = await Promise.all([
       api.get<CertificateRule>(endpoints.certificates.rule(courseId)),
@@ -29,16 +29,16 @@ export function useCourseCertification(courseId: number) {
     const { data: saved } = await api.patch<CertificateRule>(endpoints.certificates.rule(courseId), rule);
     return saved;
   };
-  const checkEligibility = async (studentId: number) => {
+  const checkEligibility = async (studentId: string) => {
     const { data: eligibility } = await api.get<CertificateEligibility>(endpoints.certificates.eligibility(courseId, studentId));
     return eligibility;
   };
-  const issue = async (studentId: number) => {
+  const issue = async (studentId: string) => {
     const { data: result } = await api.post<CertificateIssueResult>(endpoints.certificates.issue(courseId, studentId));
     reload();
     return result;
   };
-  const revoke = async (certificateId: number, reason: string | null) => {
+  const revoke = async (certificateId: string, reason: string | null) => {
     await api.post<Certificate>(endpoints.certificates.revoke(certificateId), { reason });
     reload();
   };

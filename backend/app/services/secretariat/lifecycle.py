@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from datetime import datetime, timezone
 
@@ -30,7 +31,7 @@ class EnrollmentLifecycleService:
         self.curricula = CurriculumRepository(db)
         self.events = EnrollmentEventRecorder(db)
 
-    def get_or_404(self, enrollment_id: int) -> ProgramEnrollment:
+    def get_or_404(self, enrollment_id: UUID) -> ProgramEnrollment:
         enrollment = self.repo.get_by_id(enrollment_id)
         if not enrollment:
             raise not_found("Matrícula não encontrada")
@@ -38,9 +39,9 @@ class EnrollmentLifecycleService:
 
     def transition(
         self,
-        enrollment_id: int,
+        enrollment_id: UUID,
         target: Status,
-        user_id: int | None,
+        user_id: UUID | None,
         *,
         reason: str | None = None,
         details: dict | None = None,
@@ -56,10 +57,10 @@ class EnrollmentLifecycleService:
         self.events.record(enrollment, EVENT_FOR_STATUS[target], user_id, reason=reason, details=details)
         return self.repo.save(enrollment) if commit else enrollment
 
-    def transfer_out(self, enrollment_id: int, destination: str, reason: str | None, user_id: int) -> ProgramEnrollment:
+    def transfer_out(self, enrollment_id: UUID, destination: str, reason: str | None, user_id: UUID) -> ProgramEnrollment:
         return self.transition(enrollment_id, Status.transferred, user_id, reason=reason, details={"destination": destination})
 
-    def change_curriculum(self, enrollment_id: int, curriculum_id: int, reason: str | None, user_id: int) -> ProgramEnrollment:
+    def change_curriculum(self, enrollment_id: UUID, curriculum_id: UUID, reason: str | None, user_id: UUID) -> ProgramEnrollment:
         """Migracao de matriz: o aluno passa a seguir outra versao do mesmo programa."""
         enrollment = self.get_or_404(enrollment_id)
         if enrollment.status not in (Status.active, Status.locked):

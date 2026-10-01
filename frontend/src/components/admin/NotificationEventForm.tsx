@@ -34,10 +34,10 @@ export default function NotificationEventForm({ onCreated, onCancel, variant = '
       await api.post(endpoints.notifications.events, {
         event_type: form.event_type, channel: form.channel, template_key: form.template_key || null,
         payload: JSON.parse(form.payload),
-        recipient_student_id: form.recipient_student_id ? Number(form.recipient_student_id) : null,
-        course_id: form.course_id ? Number(form.course_id) : null,
-        class_offering_id: form.class_offering_id ? Number(form.class_offering_id) : null,
-        scheduled_meeting_id: form.scheduled_meeting_id ? Number(form.scheduled_meeting_id) : null,
+        recipient_student_id: form.recipient_student_id ? form.recipient_student_id : null,
+        course_id: form.course_id ? form.course_id : null,
+        class_offering_id: form.class_offering_id ? form.class_offering_id : null,
+        scheduled_meeting_id: form.scheduled_meeting_id ? form.scheduled_meeting_id : null,
         scheduled_for: form.scheduled_for ? new Date(form.scheduled_for).toISOString() : null,
       });
       toast.success('Evento criado.');

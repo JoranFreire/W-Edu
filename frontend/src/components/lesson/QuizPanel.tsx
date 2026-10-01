@@ -9,7 +9,7 @@ import type { Quiz, QuizAttempt } from '@/types/quiz';
 
 interface Props {
   quiz: Quiz;
-  lessonId: number;
+  lessonId: string;
   onClose: () => void;
   onPass: () => void;
   onAttempt: (attempt: QuizAttempt) => void;

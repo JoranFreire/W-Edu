@@ -7,7 +7,7 @@ import { useApiQuery } from '@/lib/hooks/useApiQuery';
 import type { InstitutionPlan, SubscriptionInput } from '@/types/saas';
 
 /** Plano, uso e faturas de uma instituicao (super admin): assinatura, geracao e baixa de faturas. */
-export function useInstitutionPlan(institutionId: number) {
+export function useInstitutionPlan(institutionId: string) {
   const request = useCallback(
     () => api.get<InstitutionPlan>(endpoints.saas.institution(institutionId)).then((response) => response.data),
     [institutionId],
@@ -22,7 +22,7 @@ export function useInstitutionPlan(institutionId: number) {
     await api.post(endpoints.saas.invoices(institutionId), { period_start: periodStart });
     reload();
   };
-  const markPaid = async (invoiceId: number) => {
+  const markPaid = async (invoiceId: string) => {
     await api.post(endpoints.saas.invoicePaid(invoiceId));
     reload();
   };

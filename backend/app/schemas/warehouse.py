@@ -1,3 +1,4 @@
+from uuid import UUID
 from datetime import date, datetime
 
 from pydantic import BaseModel, Field
@@ -26,7 +27,7 @@ class ItemUpdate(BaseModel):
 
 
 class ItemOut(BaseModel):
-    id: int
+    id: UUID
     name: str
     category: str | None
     kind: MaterialKind
@@ -44,37 +45,37 @@ class EntryCreate(BaseModel):
     quantity: int = Field(ge=1)
     unit_cost_cents: int | None = Field(default=None, ge=0)
     origin: EntryOrigin = EntryOrigin.purchase
-    funding_source_id: int | None = None
+    funding_source_id: UUID | None = None
     received_on: date
     notes: str | None = Field(default=None, max_length=2000)
 
 
 class EntryOut(BaseModel):
-    id: int
-    item_id: int
+    id: UUID
+    item_id: UUID
     quantity: int
     unit_cost_cents: int
     origin: EntryOrigin
-    funding_source_id: int | None
+    funding_source_id: UUID | None
     received_on: date
 
     model_config = {"from_attributes": True}
 
 
 class RequestLineInput(BaseModel):
-    item_id: int
+    item_id: UUID
     quantity: int = Field(ge=1, le=10000)
 
 
 class RequestCreate(BaseModel):
     purpose: str = Field(min_length=1, max_length=2000)
     needed_on: date
-    class_offering_id: int | None = None
+    class_offering_id: UUID | None = None
     lines: list[RequestLineInput] = Field(min_length=1)
 
 
 class LineApproval(BaseModel):
-    line_id: int
+    line_id: UUID
     quantity: int = Field(ge=0)
 
 
@@ -91,7 +92,7 @@ class RejectInput(BaseModel):
 
 
 class LineReturn(BaseModel):
-    line_id: int
+    line_id: UUID
     returned: int = Field(default=0, ge=0)
     lost: int = Field(default=0, ge=0)
 
@@ -101,8 +102,8 @@ class ReturnInput(BaseModel):
 
 
 class RequestLineOut(BaseModel):
-    id: int
-    item_id: int
+    id: UUID
+    item_id: UUID
     item_name: str
     kind: MaterialKind
     unit: str
@@ -115,9 +116,9 @@ class RequestLineOut(BaseModel):
 
 
 class RequestOut(BaseModel):
-    id: int
+    id: UUID
     requester: PersonSummary
-    class_offering_id: int | None
+    class_offering_id: UUID | None
     class_offering_name: str | None
     purpose: str
     needed_on: date

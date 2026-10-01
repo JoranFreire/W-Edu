@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from sqlalchemy.orm import Session
 
@@ -23,7 +24,7 @@ class GradingSchemeService:
     def list(self) -> list[GradingScheme]:
         return self.repo.list_all()
 
-    def get_or_404(self, scheme_id: int) -> GradingScheme:
+    def get_or_404(self, scheme_id: UUID) -> GradingScheme:
         scheme = self.repo.get_by_id(scheme_id)
         if not scheme:
             raise not_found("Esquema de avaliação não encontrado")
@@ -41,7 +42,7 @@ class GradingSchemeService:
             self.repo.clear_default()
         return self.repo.save(GradingScheme(**data.model_dump()))
 
-    def update(self, scheme_id: int, data: GradingSchemeUpdate) -> GradingScheme:
+    def update(self, scheme_id: UUID, data: GradingSchemeUpdate) -> GradingScheme:
         scheme = self.get_or_404(scheme_id)
         if data.name is not None and data.name != scheme.name and self.repo.get_by_name(data.name):
             raise conflict("Já existe esquema com este nome")
@@ -54,7 +55,7 @@ class GradingSchemeService:
             self.repo.clear_default(except_id=scheme.id)
         return self.repo.save(scheme)
 
-    def delete(self, scheme_id: int) -> None:
+    def delete(self, scheme_id: UUID) -> None:
         scheme = self.get_or_404(scheme_id)
         if self.repo.is_used(scheme_id):
             raise conflict("Esquema em uso por turmas")

@@ -1,5 +1,8 @@
 """Calendario academico: periodos letivos, etapas de avaliacao e eventos."""
 
+from uuid import UUID
+
+from app.core.ids import new_id
 from datetime import date, datetime, timezone
 import enum
 
@@ -44,7 +47,7 @@ class AcademicTerm(TenantMixin, Base):
     __tablename__ = "academic_terms"
     __table_args__ = (UniqueConstraint("institution_id", "name"),)
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
     name: Mapped[str] = mapped_column(String(80))
     kind: Mapped[TermKind] = mapped_column(SAEnum(TermKind), default=TermKind.semester)
     starts_on: Mapped[date] = mapped_column(Date)
@@ -61,8 +64,8 @@ class GradingPeriod(TenantMixin, Base):
     __tablename__ = "grading_periods"
     __table_args__ = (UniqueConstraint("term_id", "order"),)
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    term_id: Mapped[int] = mapped_column(ForeignKey("academic_terms.id", ondelete="CASCADE"), index=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
+    term_id: Mapped[UUID] = mapped_column(ForeignKey("academic_terms.id", ondelete="CASCADE"), index=True)
     name: Mapped[str] = mapped_column(String(80))
     order: Mapped[int] = mapped_column(Integer)
     starts_on: Mapped[date] = mapped_column(Date)
@@ -76,8 +79,8 @@ class GradingPeriod(TenantMixin, Base):
 class CalendarEvent(TenantMixin, Base):
     __tablename__ = "calendar_events"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    term_id: Mapped[int | None] = mapped_column(ForeignKey("academic_terms.id", ondelete="CASCADE"), index=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
+    term_id: Mapped[UUID | None] = mapped_column(ForeignKey("academic_terms.id", ondelete="CASCADE"), index=True)
     kind: Mapped[CalendarEventKind] = mapped_column(SAEnum(CalendarEventKind))
     title: Mapped[str] = mapped_column(String(200))
     starts_on: Mapped[date] = mapped_column(Date, index=True)

@@ -20,7 +20,7 @@ export default function OfferingAcademicFields({ value, onChange }: {
   const labels = useTerminology();
   const { terms } = useAcademicTerms();
   const { subjects } = useSubjects();
-  const { groups } = useClassGroups(value.term_id ? Number(value.term_id) : undefined);
+  const { groups } = useClassGroups(value.term_id ? value.term_id : undefined);
 
   return (
     <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">

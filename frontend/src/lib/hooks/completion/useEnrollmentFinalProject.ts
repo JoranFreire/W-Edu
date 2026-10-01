@@ -7,7 +7,7 @@ import { useApiQuery } from '@/lib/hooks/useApiQuery';
 import type { FinalProject, FinalProjectInput } from '@/types/completion';
 
 /** TCC da matricula (secretaria): tema, orientador e nova tentativa. */
-export function useEnrollmentFinalProject(enrollmentId: number) {
+export function useEnrollmentFinalProject(enrollmentId: string) {
   const request = useCallback(
     () => api.get<FinalProject | null>(endpoints.completion.finalProject(enrollmentId)).then((response) => response.data),
     [enrollmentId],

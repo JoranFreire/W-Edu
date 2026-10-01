@@ -34,7 +34,7 @@ export function useNotifications() {
     reload();
     return processed.length;
   };
-  const retryEvent = async (id: number) => {
+  const retryEvent = async (id: string) => {
     await api.post(endpoints.notifications.eventRetry(id));
     reload();
   };

@@ -27,7 +27,7 @@ export default function CertificatesPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  const courseName = (courseId: number) => courses.find((course) => course.id === courseId)?.name ?? `Curso #${courseId}`;
+  const courseName = (courseId: string) => courses.find((course) => course.id === courseId)?.name ?? `Curso #${courseId}`;
   const validationUrl = (code: string) => typeof window === 'undefined' ? '' : `${window.location.origin}/validate-certificate?code=${encodeURIComponent(code)}`;
 
 

@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from pydantic import BaseModel, Field
 
 from app.models.student import UserRole
@@ -25,7 +27,7 @@ class AccessRoleInput(BaseModel):
 
 
 class AccessRoleOut(BaseModel):
-    id: int
+    id: UUID
     name: str
     description: str | None
     permissions: list[str]
@@ -33,11 +35,11 @@ class AccessRoleOut(BaseModel):
 
 
 class AssignmentInput(BaseModel):
-    user_id: int
+    user_id: UUID
 
 
 class MemberOut(BaseModel):
-    id: int
+    id: UUID
     name: str
     email: str
     role: UserRole

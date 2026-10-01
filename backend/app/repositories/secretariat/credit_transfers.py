@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from app.models.secretariat import CreditTransfer, CreditTransferStatus
 from app.repositories.academic._base import Repository
@@ -7,7 +8,7 @@ from app.repositories.academic._base import Repository
 class CreditTransferRepository(Repository[CreditTransfer]):
     model = CreditTransfer
 
-    def list_by_enrollment(self, enrollment_id: int) -> list[CreditTransfer]:
+    def list_by_enrollment(self, enrollment_id: UUID) -> list[CreditTransfer]:
         return (
             self.db.query(CreditTransfer)
             .filter(CreditTransfer.program_enrollment_id == enrollment_id)
@@ -15,7 +16,7 @@ class CreditTransferRepository(Repository[CreditTransfer]):
             .all()
         )
 
-    def active_for_subject(self, enrollment_id: int, subject_id: int) -> CreditTransfer | None:
+    def active_for_subject(self, enrollment_id: UUID, subject_id: UUID) -> CreditTransfer | None:
         """Pedido pendente ou aprovado para a disciplina (rejeitados podem ser refeitos)."""
         return (
             self.db.query(CreditTransfer)
@@ -27,7 +28,7 @@ class CreditTransferRepository(Repository[CreditTransfer]):
             .first()
         )
 
-    def approved(self, enrollment_id: int) -> list[CreditTransfer]:
+    def approved(self, enrollment_id: UUID) -> list[CreditTransfer]:
         return (
             self.db.query(CreditTransfer)
             .filter(CreditTransfer.program_enrollment_id == enrollment_id, CreditTransfer.status == CreditTransferStatus.approved)

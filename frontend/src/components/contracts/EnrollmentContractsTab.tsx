@@ -12,7 +12,7 @@ import type { Contract } from '@/types/contracts';
 import ContractCard from './ContractCard';
 
 /** Aba Contratos da ficha: emissao a partir de um modelo, download e cancelamento. */
-export default function EnrollmentContractsTab({ enrollmentId }: { enrollmentId: number }) {
+export default function EnrollmentContractsTab({ enrollmentId }: { enrollmentId: string }) {
   const { contracts, error, issue, cancel, download } = useEnrollmentContracts(enrollmentId);
   const { templates } = useContractTemplates();
   const { terms } = useAcademicTerms();
@@ -29,7 +29,7 @@ export default function EnrollmentContractsTab({ enrollmentId }: { enrollmentId:
   };
   const submit = (event: React.FormEvent) => {
     event.preventDefault();
-    run(() => issue(Number(draft.templateId), draft.termId ? Number(draft.termId) : null), 'Contrato emitido.', 'Erro ao emitir o contrato.');
+    run(() => issue(draft.templateId, draft.termId ? draft.termId : null), 'Contrato emitido.', 'Erro ao emitir o contrato.');
   };
   const handleCancel = (contract: Contract) => {
     if (!globalThis.confirm(`Cancelar ${contract.title}?`)) return;

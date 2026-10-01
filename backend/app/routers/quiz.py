@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -11,18 +13,18 @@ router = APIRouter()
 
 
 @router.get("/lesson/{lesson_id}", response_model=QuizWithQuestions)
-def get_quiz(lesson_id: int, db: Session = Depends(get_db), _: Student = Depends(get_current_student)):
+def get_quiz(lesson_id: UUID, db: Session = Depends(get_db), _: Student = Depends(get_current_student)):
     return QuizService(db).get_quiz_for_student(lesson_id)
 
 
 @router.get("/lesson/{lesson_id}/optional", response_model=QuizWithQuestions | None)
-def get_optional_quiz(lesson_id: int, db: Session = Depends(get_db), _: Student = Depends(get_current_student)):
+def get_optional_quiz(lesson_id: UUID, db: Session = Depends(get_db), _: Student = Depends(get_current_student)):
     return QuizService(db).get_optional_quiz_for_student(lesson_id)
 
 
 @router.post("/lesson/{lesson_id}/attempt", response_model=QuizAttemptOut, status_code=201)
 def submit_attempt(
-    lesson_id: int,
+    lesson_id: UUID,
     data: QuizAnswerSubmit,
     db: Session = Depends(get_db),
     student: Student = Depends(get_current_student),
@@ -32,7 +34,7 @@ def submit_attempt(
 
 @router.get("/lesson/{lesson_id}/attempts", response_model=list[QuizAttemptOut])
 def my_attempts(
-    lesson_id: int,
+    lesson_id: UUID,
     db: Session = Depends(get_db),
     student: Student = Depends(get_current_student),
 ):
@@ -41,7 +43,7 @@ def my_attempts(
 
 @router.get("/lesson/{lesson_id}/attempts/optional", response_model=list[QuizAttemptOut])
 def my_optional_attempts(
-    lesson_id: int,
+    lesson_id: UUID,
     db: Session = Depends(get_db),
     student: Student = Depends(get_current_student),
 ):

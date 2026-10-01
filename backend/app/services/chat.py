@@ -1,3 +1,4 @@
+from uuid import UUID
 from datetime import datetime, timezone
 
 from fastapi import HTTPException, status
@@ -44,23 +45,23 @@ class ChatService:
         self._add_message(conversation, current.id, data.message)
         return self.get_conversation(conversation.id, current)
 
-    def get_conversation(self, conversation_id: int, current: Student) -> ChatConversationOut:
+    def get_conversation(self, conversation_id: UUID, current: Student) -> ChatConversationOut:
         conversation = self._get_conversation_or_404(conversation_id)
         self._ensure_conversation_access(conversation, current)
         return self._conversation_out(conversation)
 
-    def create_message(self, conversation_id: int, current: Student, data: ChatMessageCreate) -> ChatConversationOut:
+    def create_message(self, conversation_id: UUID, current: Student, data: ChatMessageCreate) -> ChatConversationOut:
         conversation = self._get_conversation_or_404(conversation_id)
         self._ensure_conversation_access(conversation, current)
         self._add_message(conversation, current.id, data.body)
         return self.get_conversation(conversation_id, current)
 
-    def _add_message(self, conversation: ChatConversation, sender_id: int, body: str) -> None:
+    def _add_message(self, conversation: ChatConversation, sender_id: UUID, body: str) -> None:
         self.repo.create_message(ChatMessage(conversation_id=conversation.id, sender_id=sender_id, body=body))
         conversation.updated_at = datetime.now(timezone.utc)
         self.repo.update_conversation(conversation)
 
-    def _resolve_instructor(self, instructor_id: int | None) -> int | None:
+    def _resolve_instructor(self, instructor_id: UUID | None) -> int | None:
         if instructor_id is None:
             return None
         instructor = self.student_repo.get_by_id(instructor_id)
@@ -68,7 +69,7 @@ class ChatService:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Instrutor inválido")
         return instructor.id
 
-    def _ensure_course_access(self, course_id: int, current: Student) -> None:
+    def _ensure_course_access(self, course_id: UUID, current: Student) -> None:
         if current.role in ADMIN_ROLES | {UserRole.coordinator, UserRole.instructor}:
             return
         if self.enrollment_repo.get_by_student_and_course(current.id, course_id):
@@ -92,13 +93,13 @@ class ChatService:
             return
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Acesso restrito à conversa")
 
-    def _get_course_or_404(self, course_id: int):
+    def _get_course_or_404(self, course_id: UUID):
         course = self.course_repo.get_by_id(course_id)
         if not course:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Curso não encontrado")
         return course
 
-    def _get_conversation_or_404(self, conversation_id: int) -> ChatConversation:
+    def _get_conversation_or_404(self, conversation_id: UUID) -> ChatConversation:
         conversation = self.repo.get_conversation(conversation_id)
         if not conversation:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Conversa não encontrada")

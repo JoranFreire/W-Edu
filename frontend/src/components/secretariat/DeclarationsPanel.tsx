@@ -14,7 +14,7 @@ import { declarationValidationUrl } from '@/lib/secretariat/declarationLinks';
 import type { Declaration, DeclarationKind } from '@/types/secretariat';
 
 /** Emissao de declaracoes (matricula, frequencia, conclusao), download, link publico e revogacao. */
-export default function DeclarationsPanel({ enrollmentId, canRevoke }: { enrollmentId: number; canRevoke: boolean }) {
+export default function DeclarationsPanel({ enrollmentId, canRevoke }: { enrollmentId: string; canRevoke: boolean }) {
   const { declarations, error, issue, download, revoke } = useDeclarations(enrollmentId);
   const { terms } = useAcademicTerms();
   const [kind, setKind] = useState<DeclarationKind>('enrollment');
@@ -32,7 +32,7 @@ export default function DeclarationsPanel({ enrollmentId, canRevoke }: { enrollm
 
   const handleIssue = (event: React.FormEvent) => {
     event.preventDefault();
-    attempt(() => issue(kind, termId ? Number(termId) : null), 'Declaração emitida.');
+    attempt(() => issue(kind, termId ? termId : null), 'Declaração emitida.');
   };
 
   const handleRevoke = (declaration: Declaration) => {

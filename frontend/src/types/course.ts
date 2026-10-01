@@ -2,7 +2,7 @@ export type CourseModality = 'online' | 'in_person' | 'hybrid';
 export type LessonType = 'text' | 'video' | 'pdf' | 'live' | 'in_person' | 'voice' | 'assessment';
 
 export interface Course {
-  id: number;
+  id: string;
   name: string;
   description: string | null;
   modality: CourseModality;
@@ -11,8 +11,8 @@ export interface Course {
 }
 
 export interface CourseModule {
-  id: number;
-  course_id: number;
+  id: string;
+  course_id: string;
   title: string;
   description: string | null;
   order: number;
@@ -20,29 +20,29 @@ export interface CourseModule {
 }
 
 export interface CoursePrerequisite {
-  id: number;
-  course_id: number;
-  prerequisite_course_id: number;
+  id: string;
+  course_id: string;
+  prerequisite_course_id: string;
 }
 
 export interface LearningPath {
-  id: number;
+  id: string;
   name: string;
   description: string | null;
   created_at: string;
 }
 
 export interface LearningPathCourse {
-  id: number;
-  learning_path_id: number;
-  course_id: number;
+  id: string;
+  learning_path_id: string;
+  course_id: string;
   order: number;
 }
 
 export interface Lesson {
-  id: number;
-  course_id: number;
-  module_id: number | null;
+  id: string;
+  course_id: string;
+  module_id: string | null;
   title: string;
   content: string | null;
   order: number;
@@ -53,25 +53,25 @@ export interface Lesson {
 }
 
 export interface Enrollment {
-  id: number;
-  student_id: number;
-  course_id: number;
+  id: string;
+  student_id: string;
+  course_id: string;
   enrolled_at: string;
 }
 
 export type ProgressStatus = 'pending' | 'in_progress' | 'done';
 
 export interface Progress {
-  id: number;
-  student_id: number;
-  lesson_id: number;
+  id: string;
+  student_id: string;
+  lesson_id: string;
   status: ProgressStatus;
   content_consumed_at: string | null;
   updated_at: string;
 }
 
 export interface CourseProgress {
-  course_id: number;
+  course_id: string;
   course_name: string;
   total_lessons: number;
   done_lessons: number;
@@ -82,9 +82,9 @@ export interface CourseProgress {
 }
 
 export interface Session {
-  id: number;
-  student_id: number;
-  lesson_id: number;
+  id: string;
+  student_id: string;
+  lesson_id: string;
   bevox_session_id: string | null;
   transcript: string | null;
   started_at: string;
@@ -92,11 +92,11 @@ export interface Session {
 }
 
 export interface SessionHistory {
-  id: number;
-  student_id: number;
-  lesson_id: number;
+  id: string;
+  student_id: string;
+  lesson_id: string;
   lesson_title: string;
-  course_id: number;
+  course_id: string;
   course_name: string;
   bevox_session_id: string | null;
   transcript: string | null;
@@ -111,12 +111,12 @@ export interface VoiceSessionStart {
   agent_id: string;
   caller_id: string;
   context: {
-    course_id: number;
+    course_id: string;
     course_name: string;
-    lesson_id: number;
+    lesson_id: string;
     lesson_title: string;
     lesson_content: string | null;
-    module_id: number | null;
+    module_id: string | null;
     module_title: string | null;
   };
   bevox_ws_url: string | null;

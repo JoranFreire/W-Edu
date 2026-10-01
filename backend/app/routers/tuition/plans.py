@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -12,7 +14,7 @@ router = APIRouter(prefix="/plans")
 
 
 @router.get("", response_model=list[TuitionPlanOut])
-def list_plans(term_id: int | None = None, db: Session = Depends(get_db), _: Student = Depends(get_current_admin)):
+def list_plans(term_id: UUID | None = None, db: Session = Depends(get_db), _: Student = Depends(get_current_admin)):
     return TuitionPlanService(db).list(term_id)
 
 
@@ -22,10 +24,10 @@ def create_plan(data: TuitionPlanCreate, db: Session = Depends(get_db), _: Stude
 
 
 @router.patch("/{plan_id}", response_model=TuitionPlanOut)
-def update_plan(plan_id: int, data: TuitionPlanUpdate, db: Session = Depends(get_db), _: Student = Depends(get_current_admin)):
+def update_plan(plan_id: UUID, data: TuitionPlanUpdate, db: Session = Depends(get_db), _: Student = Depends(get_current_admin)):
     return TuitionPlanService(db).update(plan_id, data)
 
 
 @router.post("/{plan_id}/generate", response_model=GenerationOut)
-def generate_charges(plan_id: int, db: Session = Depends(get_db), _: Student = Depends(get_current_admin)):
+def generate_charges(plan_id: UUID, db: Session = Depends(get_db), _: Student = Depends(get_current_admin)):
     return TuitionBillingService(db).generate(plan_id)

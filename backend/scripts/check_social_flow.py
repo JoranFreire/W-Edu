@@ -30,6 +30,7 @@ import httpx
 import starlette.concurrency
 import starlette.routing
 
+from scripts.check_support import MISSING_ID, ApiClient  # noqa: E402
 import app.models  # noqa: F401
 from app.core.database import Base, SessionLocal, engine
 from app.core.security import hash_password
@@ -71,7 +72,7 @@ def seed() -> dict[str, int]:
             db.add(user)
             db.flush()
             db.add(InstitutionMembership(institution_id=institution.id, user_id=user.id, role=role))
-            ids[name] = user.id
+            ids[name] = str(user.id)
         db.commit()
     return ids
 
@@ -109,7 +110,7 @@ async def setup(c: Checker, h: dict, ids: dict) -> dict:
     course = await c.call("POST", "/courses", 201, "course", coord, json={"name": "Auxiliar de cozinha"})
     await c.call("POST", "/schedule/classes", 404, "unknown funding", coord, json={
         "course_id": course["id"], "name": "X", "capacity": 10, "starts_at": "2027-03-01T08:00:00Z", "ends_at": "2027-06-30T12:00:00Z",
-        "funding_source_id": 9999})
+        "funding_source_id": MISSING_ID})
     offering = await c.call("POST", "/schedule/classes", 201, "funded offering", coord, json={
         "course_id": course["id"], "name": "Cozinha 2027", "capacity": 10, "status": "open", "instructor_id": ids["prof"],
         "starts_at": "2027-03-01T08:00:00Z", "ends_at": "2027-06-30T12:00:00Z", "funding_source_id": funding["id"], "max_absence_percent": 40,
@@ -140,7 +141,7 @@ async def check_benefits(c: Checker, h: dict, ids: dict, ctx: dict) -> dict:
                            json={"quantity": 10, "funding_source_id": ctx["funding"], "received_on": "2027-02-20"})
     c.expect(stocked["stock"] == 10, f"stock: {stocked}")
     await c.call("POST", f"/social/benefit-items/{kit['id']}/stock", 201, "kit donation", sec, json={"quantity": 3, "origin": "donation", "received_on": "2027-02-20"})
-    await c.call("POST", f"/social/benefit-items/{kit['id']}/stock", 404, "unknown funding", sec, json={"quantity": 1, "funding_source_id": 9999, "received_on": "2027-02-20"})
+    await c.call("POST", f"/social/benefit-items/{kit['id']}/stock", 404, "unknown funding", sec, json={"quantity": 1, "funding_source_id": MISSING_ID, "received_on": "2027-02-20"})
     entries = await c.call("GET", f"/social/benefit-items/{kit['id']}/stock", 200, "kit entries", sec)
     c.expect(len(entries) == 1 and entries[0]["unit_cost_cents"] == 3000, f"entries: {entries}")
     items = await c.call("GET", "/social/benefit-items", 200, "instructor lists items", prof)
@@ -253,7 +254,7 @@ def check_minimum_wage(c: Checker) -> None:
 async def run() -> int:
     ids = seed()
     transport = httpx.ASGITransport(app=app)
-    async with httpx.AsyncClient(transport=transport, base_url="http://testserver") as client:
+    async with ApiClient(transport=transport, base_url="http://testserver") as client:
         c = Checker(client)
         h = {name: await c.login(f"{name}@example.com") for name, _ in USERS}
         ctx = await setup(c, h, ids)

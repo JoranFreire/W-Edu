@@ -11,7 +11,7 @@ export default function CertificatesList({ certificates, students, canRevoke, on
   onDownload: (certificate: Certificate) => void;
   onShowQr: (certificate: Certificate) => void;
 }) {
-  const studentName = (id: number) => students.find((s) => s.id === id)?.name ?? `Aluno #${id}`;
+  const studentName = (id: string) => students.find((s) => s.id === id)?.name ?? `Aluno #${id}`;
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">

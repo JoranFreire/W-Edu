@@ -7,7 +7,7 @@ import { useApiQuery } from '@/lib/hooks/useApiQuery';
 import type { CreditTransfer, CreditTransferOrigin } from '@/types/secretariat';
 
 export interface CreditTransferInput {
-  subject_id: number;
+  subject_id: string;
   origin: CreditTransferOrigin;
   source_institution: string | null;
   source_subject: string;
@@ -16,7 +16,7 @@ export interface CreditTransferInput {
 }
 
 /** Pedidos de aproveitamento de estudos da matricula. */
-export function useCreditTransfers(enrollmentId: number) {
+export function useCreditTransfers(enrollmentId: string) {
   const request = useCallback(
     () => api.get<CreditTransfer[]>(endpoints.secretariat.creditTransfers(enrollmentId)).then((response) => response.data),
     [enrollmentId],
@@ -27,7 +27,7 @@ export function useCreditTransfers(enrollmentId: number) {
     await api.post(endpoints.secretariat.creditTransfers(enrollmentId), input);
     reload();
   };
-  const decide = async (transferId: number, approved: boolean, note: string | null) => {
+  const decide = async (transferId: string, approved: boolean, note: string | null) => {
     await api.post(endpoints.secretariat.creditDecision(transferId), { approved, note });
     reload();
   };

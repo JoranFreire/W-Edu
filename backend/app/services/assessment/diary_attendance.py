@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from sqlalchemy.orm import Session
 
@@ -20,7 +21,7 @@ class DiaryAttendanceService:
         self.diary = ClassDiaryService(db)
         self.offerings = TeachingOfferingService(db)
 
-    def list(self, entry_id: int, user: Student) -> list[DiaryAttendanceRow]:
+    def list(self, entry_id: UUID, user: Student) -> list[DiaryAttendanceRow]:
         entry, _ = self.diary.get_for_teaching(entry_id, user)
         stored = self.repo.by_entry(entry_id)
         absent = self._absent_from_meeting(entry)
@@ -37,7 +38,7 @@ class DiaryAttendanceService:
             ))
         return rows
 
-    def save(self, entry_id: int, values: list[DiaryAttendanceInput], user: Student) -> list[DiaryAttendanceRow]:
+    def save(self, entry_id: UUID, values: list[DiaryAttendanceInput], user: Student) -> list[DiaryAttendanceRow]:
         entry, _ = self.diary.get_editable(entry_id, user)
         valid_ids = {e.id for e in self.offerings.roster(entry.class_offering_id)}
         stored = self.repo.by_entry(entry_id)
@@ -53,7 +54,7 @@ class DiaryAttendanceService:
         self.repo.commit()
         return self.list(entry_id, user)
 
-    def _absent_from_meeting(self, entry: ClassDiaryEntry) -> set[int]:
+    def _absent_from_meeting(self, entry: ClassDiaryEntry) -> set[UUID]:
         if entry.scheduled_meeting_id is None:
             return set()
         return self.repo.absent_students_in_meeting(entry.scheduled_meeting_id)

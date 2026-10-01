@@ -13,8 +13,8 @@ export interface DossierContact {
 }
 
 export interface DossierGuardianLink {
-  link_id: number;
-  person: { id: number; name: string; email: string; phone: string | null };
+  link_id: string;
+  person: { id: string; name: string; email: string; phone: string | null };
   relationship_kind: GuardianRelationship;
   is_financial: boolean;
   is_primary: boolean;
@@ -22,7 +22,7 @@ export interface DossierGuardianLink {
 }
 
 export interface DossierProgramEnrollment {
-  id: number;
+  id: string;
   program_code: string;
   program_name: string;
   registration_number: string;
@@ -40,19 +40,19 @@ export interface UserDossier {
   dependents: DossierGuardianLink[] | null;
   program_enrollments: DossierProgramEnrollment[] | null;
   courses: DossierCourse[];
-  certificates: { id: number; course_name: string; validation_code: string; issued_at: string; revoked: boolean }[];
+  certificates: { id: string; course_name: string; validation_code: string; issued_at: string; revoked: boolean }[];
   finance: DossierFinance | null;
   occurrences: {
     total: number;
-    recent: { id: number; kind: OccurrenceKind; severity: OccurrenceSeverity; description: string; occurred_on: string }[];
+    recent: { id: string; kind: OccurrenceKind; severity: OccurrenceSeverity; description: string; occurred_on: string }[];
   } | null;
   benefits: DossierBenefit[] | null;
   materials: DossierMaterialRequest[] | null;
-  teaching: { id: number; name: string; course_name: string; term_name: string | null }[] | null;
+  teaching: { id: string; name: string; course_name: string; term_name: string | null }[] | null;
 }
 
 export interface DossierCourse {
-  course_id: number;
+  course_id: string;
   course_name: string;
   total_lessons: number;
   done_lessons: number;
@@ -62,7 +62,7 @@ export interface DossierCourse {
 }
 
 export interface DossierCharge {
-  id: number;
+  id: string;
   description: string | null;
   amount_cents: number;
   status: 'pending' | 'paid' | 'failed' | 'cancelled' | 'refunded';
@@ -82,7 +82,7 @@ export interface DossierFinance {
 }
 
 export interface DossierBenefit {
-  id: number;
+  id: string;
   item_name: string;
   unit: string;
   quantity: number;
@@ -91,7 +91,7 @@ export interface DossierBenefit {
 }
 
 export interface DossierMaterialRequest {
-  id: number;
+  id: string;
   purpose: string;
   needed_on: string;
   status: RequestStatus;

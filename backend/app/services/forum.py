@@ -1,3 +1,4 @@
+from uuid import UUID
 from datetime import datetime, timezone
 
 from fastapi import HTTPException, status
@@ -19,12 +20,12 @@ class ForumService:
         self.course_repo = CourseRepository(db)
         self.enrollment_repo = EnrollmentRepository(db)
 
-    def list_threads(self, course_id: int, current: Student) -> list[ForumThreadOut]:
+    def list_threads(self, course_id: UUID, current: Student) -> list[ForumThreadOut]:
         self._get_course_or_404(course_id)
         self._ensure_course_access(course_id, current)
         return [self._thread_out(thread, include_posts=False) for thread in self.repo.list_threads_by_course(course_id)]
 
-    def create_thread(self, course_id: int, author: Student, data: ForumThreadCreate) -> ForumThreadOut:
+    def create_thread(self, course_id: UUID, author: Student, data: ForumThreadCreate) -> ForumThreadOut:
         self._get_course_or_404(course_id)
         self._ensure_course_access(course_id, author)
         thread = self.repo.create_thread(
@@ -34,12 +35,12 @@ class ForumService:
         thread.posts = []
         return self._thread_out(thread)
 
-    def get_thread(self, thread_id: int, current: Student) -> ForumThreadOut:
+    def get_thread(self, thread_id: UUID, current: Student) -> ForumThreadOut:
         thread = self._get_thread_or_404(thread_id)
         self._ensure_course_access(thread.course_id, current)
         return self._thread_out(thread)
 
-    def create_post(self, thread_id: int, author: Student, data: ForumPostCreate) -> ForumThreadOut:
+    def create_post(self, thread_id: UUID, author: Student, data: ForumPostCreate) -> ForumThreadOut:
         thread = self._get_thread_or_404(thread_id)
         self._ensure_course_access(thread.course_id, author)
         self.repo.create_post(ForumPost(thread_id=thread.id, author_id=author.id, body=data.body))
@@ -48,13 +49,13 @@ class ForumService:
         self.repo.update_thread(thread)
         return self._thread_out(thread)
 
-    def _get_course_or_404(self, course_id: int):
+    def _get_course_or_404(self, course_id: UUID):
         course = self.course_repo.get_by_id(course_id)
         if not course:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Curso não encontrado")
         return course
 
-    def _ensure_course_access(self, course_id: int, current: Student) -> None:
+    def _ensure_course_access(self, course_id: UUID, current: Student) -> None:
         if current.role in ADMIN_ROLES | {UserRole.coordinator, UserRole.instructor}:
             return
         if self.enrollment_repo.get_by_student_and_course(current.id, course_id):
@@ -71,7 +72,7 @@ class ForumService:
                 return
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Acesso ao fórum restrito ao curso")
 
-    def _get_thread_or_404(self, thread_id: int) -> ForumThread:
+    def _get_thread_or_404(self, thread_id: UUID) -> ForumThread:
         thread = self.repo.get_thread(thread_id)
         if not thread:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Tópico não encontrado")

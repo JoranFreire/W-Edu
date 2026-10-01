@@ -12,7 +12,7 @@ interface EnrollmentFinance {
 }
 
 /** Bolsas, descontos e extrato da matricula; baixa da parcela (administracao). */
-export function useEnrollmentFinance(enrollmentId: number) {
+export function useEnrollmentFinance(enrollmentId: string) {
   const request = useCallback(async (): Promise<EnrollmentFinance> => {
     const [discounts, charges] = await Promise.all([
       api.get<Discount[]>(endpoints.tuition.discounts(enrollmentId)),
@@ -26,11 +26,11 @@ export function useEnrollmentFinance(enrollmentId: number) {
     await api.post(endpoints.tuition.discounts(enrollmentId), input);
     reload();
   };
-  const deactivateDiscount = async (discountId: number) => {
+  const deactivateDiscount = async (discountId: string) => {
     await api.post(endpoints.tuition.deactivateDiscount(discountId));
     reload();
   };
-  const settle = async (chargeId: number, input: SettleInput) => {
+  const settle = async (chargeId: string, input: SettleInput) => {
     await api.post(endpoints.tuition.settle(chargeId), input);
     reload();
   };

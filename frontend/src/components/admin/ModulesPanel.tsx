@@ -9,7 +9,7 @@ import type { CourseModule } from '@/types/course';
 import ConfirmDialog from './ConfirmDialog';
 
 interface Props {
-  courseId: number;
+  courseId: string;
   modules: CourseModule[];
   canDelete: boolean;
   onChanged: () => void;

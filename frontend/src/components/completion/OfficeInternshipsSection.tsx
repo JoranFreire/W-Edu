@@ -15,7 +15,7 @@ import InternshipLogs from './InternshipLogs';
 
 /** Estagios da matricula: cadastro, encerramento e consulta do diario de horas. */
 export default function OfficeInternshipsSection({ enrollmentId, advisors, editable }: {
-  enrollmentId: number;
+  enrollmentId: string;
   advisors: PersonSummary[];
   editable: boolean;
 }) {

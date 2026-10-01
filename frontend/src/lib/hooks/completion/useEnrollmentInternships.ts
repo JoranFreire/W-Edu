@@ -7,7 +7,7 @@ import { useApiQuery } from '@/lib/hooks/useApiQuery';
 import type { Internship, InternshipInput, InternshipStatus } from '@/types/completion';
 
 /** Estagios da matricula (secretaria): cadastro e mudanca de situacao. */
-export function useEnrollmentInternships(enrollmentId: number) {
+export function useEnrollmentInternships(enrollmentId: string) {
   const request = useCallback(
     () => api.get<Internship[]>(endpoints.completion.internships(enrollmentId)).then((response) => response.data),
     [enrollmentId],
@@ -18,7 +18,7 @@ export function useEnrollmentInternships(enrollmentId: number) {
     await api.post(endpoints.completion.internships(enrollmentId), input);
     reload();
   };
-  const changeStatus = async (internshipId: number, status: InternshipStatus) => {
+  const changeStatus = async (internshipId: string, status: InternshipStatus) => {
     await api.patch(endpoints.completion.internship(internshipId), { status });
     reload();
   };

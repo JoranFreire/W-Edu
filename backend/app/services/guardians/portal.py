@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from sqlalchemy.orm import Session
 
@@ -32,19 +33,19 @@ class GuardianPortalService:
             for link in self.repo.list_by_guardian(guardian.id)
         ]
 
-    def report_card(self, guardian: Student, student_id: int) -> list[ReportCardEntry]:
+    def report_card(self, guardian: Student, student_id: UUID) -> list[ReportCardEntry]:
         return self.report_cards.for_student(self._dependent(guardian, student_id))
 
-    def transcripts_of(self, guardian: Student, student_id: int) -> list[TranscriptOut]:
+    def transcripts_of(self, guardian: Student, student_id: UUID) -> list[TranscriptOut]:
         return self.transcripts.for_student(self._dependent(guardian, student_id))
 
-    def notices(self, guardian: Student, student_id: int) -> list[NotificationEvent]:
+    def notices(self, guardian: Student, student_id: UUID) -> list[NotificationEvent]:
         return self.repo.notices_for(self._dependent(guardian, student_id).id)
 
-    def charges(self, guardian: Student, student_id: int) -> list[Charge]:
+    def charges(self, guardian: Student, student_id: UUID) -> list[Charge]:
         link = ensure_linked(self.repo.get(student_id, guardian.id))
         ensure_financial(link)
         return self.repo.charges_for(student_id)
 
-    def _dependent(self, guardian: Student, student_id: int) -> Student:
+    def _dependent(self, guardian: Student, student_id: UUID) -> Student:
         return ensure_linked(self.repo.get(student_id, guardian.id)).student

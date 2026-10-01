@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from datetime import date
 
@@ -24,14 +25,14 @@ class TuitionStatementService:
         self.late_fees = LateFeeSettingsService(db)
         self.settlement = TuitionSettlementService(db)
 
-    def for_enrollment(self, enrollment_id: int) -> list[TuitionChargeOut]:
+    def for_enrollment(self, enrollment_id: UUID) -> list[TuitionChargeOut]:
         self.lifecycle.get_or_404(enrollment_id)
         return self._out(self.repo.list_by_enrollment(enrollment_id))
 
     def for_user(self, user: Student) -> list[TuitionChargeOut]:
         return self._out(self.repo.list_for_user(user.id))
 
-    def quote_for(self, user: Student, charge_id: int, on: date | None) -> SettlementOut:
+    def quote_for(self, user: Student, charge_id: UUID, on: date | None) -> SettlementOut:
         charge = self.settlement.get_or_404(charge_id)
         ensure_can_view_charge(user, charge)
         return quote(charge, on or date.today(), self.late_fees.policy())

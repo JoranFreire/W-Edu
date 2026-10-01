@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from sqlalchemy import func
 from sqlalchemy.orm import joinedload
@@ -12,7 +13,7 @@ class TermOfferingRepository(Repository[ClassOffering]):
 
     model = ClassOffering
 
-    def open_for_subjects(self, term_id: int, subject_ids: set[int]) -> list[ClassOffering]:
+    def open_for_subjects(self, term_id: UUID, subject_ids: set[UUID]) -> list[ClassOffering]:
         if not subject_ids:
             return []
         return (
@@ -27,11 +28,11 @@ class TermOfferingRepository(Repository[ClassOffering]):
             .all()
         )
 
-    def lock(self, offering_id: int) -> ClassOffering | None:
+    def lock(self, offering_id: UUID) -> ClassOffering | None:
         """Trava a oferta durante a inscricao (duas pessoas disputando a ultima vaga)."""
         return self.db.query(ClassOffering).filter(ClassOffering.id == offering_id).with_for_update().first()
 
-    def seats_taken(self, offering_ids: list[int]) -> dict[int, int]:
+    def seats_taken(self, offering_ids: list[UUID]) -> dict[UUID, int]:
         if not offering_ids:
             return {}
         rows = (
@@ -42,7 +43,7 @@ class TermOfferingRepository(Repository[ClassOffering]):
         )
         return dict(rows)
 
-    def waitlist(self, offering_id: int) -> list[WaitlistEntry]:
+    def waitlist(self, offering_id: UUID) -> list[WaitlistEntry]:
         return (
             self.db.query(WaitlistEntry)
             .filter(WaitlistEntry.class_offering_id == offering_id)
@@ -50,6 +51,6 @@ class TermOfferingRepository(Repository[ClassOffering]):
             .all()
         )
 
-    def next_waitlist_position(self, offering_id: int) -> int:
+    def next_waitlist_position(self, offering_id: UUID) -> int:
         current = self.db.query(func.max(WaitlistEntry.position)).filter(WaitlistEntry.class_offering_id == offering_id).scalar()
         return (current or 0) + 1

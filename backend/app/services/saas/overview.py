@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from sqlalchemy.orm import Session
 
@@ -16,7 +17,7 @@ class InstitutionPlanOverview:
         self.invoices = PlatformInvoiceService(db)
         self.seats = StudentSeatPolicy(db)
 
-    def for_institution(self, institution_id: int) -> InstitutionPlanOut:
+    def for_institution(self, institution_id: UUID) -> InstitutionPlanOut:
         subscription = self.subscriptions.get(institution_id)
         return InstitutionPlanOut(
             subscription=SubscriptionOut.model_validate(subscription) if subscription else None,

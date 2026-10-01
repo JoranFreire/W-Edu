@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -31,7 +33,7 @@ def create_plan(data: BillingPlanCreate, db: Session = Depends(get_db), _: Stude
 
 
 @router.patch("/plans/{plan_id}", response_model=BillingPlanOut)
-def update_plan(plan_id: int, data: BillingPlanUpdate, db: Session = Depends(get_db), _: Student = Depends(get_current_admin)):
+def update_plan(plan_id: UUID, data: BillingPlanUpdate, db: Session = Depends(get_db), _: Student = Depends(get_current_admin)):
     return FinanceService(db).update_plan(plan_id, data)
 
 
@@ -49,7 +51,7 @@ def create_subscription(data: SubscriptionCreate, db: Session = Depends(get_db),
 
 
 @router.patch("/subscriptions/{subscription_id}", response_model=SubscriptionOut)
-def update_subscription(subscription_id: int, data: SubscriptionUpdate, db: Session = Depends(get_db), _: Student = Depends(get_current_admin)):
+def update_subscription(subscription_id: UUID, data: SubscriptionUpdate, db: Session = Depends(get_db), _: Student = Depends(get_current_admin)):
     return FinanceService(db).update_subscription(subscription_id, data)
 
 
@@ -67,20 +69,20 @@ def create_charge(data: ChargeCreate, db: Session = Depends(get_db), _: Student 
 
 
 @router.patch("/charges/{charge_id}", response_model=ChargeOut)
-def update_charge(charge_id: int, data: ChargeUpdate, db: Session = Depends(get_db), _: Student = Depends(get_current_admin)):
+def update_charge(charge_id: UUID, data: ChargeUpdate, db: Session = Depends(get_db), _: Student = Depends(get_current_admin)):
     return FinanceService(db).update_charge(charge_id, data)
 
 
 @router.post("/charges/{charge_id}/gateway/asaas", response_model=ChargeOut)
-def create_asaas_charge(charge_id: int, db: Session = Depends(get_db), _: Student = Depends(get_current_admin)):
+def create_asaas_charge(charge_id: UUID, db: Session = Depends(get_db), _: Student = Depends(get_current_admin)):
     return FinanceService(db).sync_charge_gateway(charge_id)
 
 
 @router.post("/charges/{charge_id}/paid", response_model=ChargeOut)
-def mark_paid(charge_id: int, db: Session = Depends(get_db), _: Student = Depends(get_current_admin)):
+def mark_paid(charge_id: UUID, db: Session = Depends(get_db), _: Student = Depends(get_current_admin)):
     return FinanceService(db).mark_paid(charge_id)
 
 
 @router.post("/charges/{charge_id}/failed", response_model=ChargeOut)
-def mark_failed(charge_id: int, db: Session = Depends(get_db), _: Student = Depends(get_current_admin)):
+def mark_failed(charge_id: UUID, db: Session = Depends(get_db), _: Student = Depends(get_current_admin)):
     return FinanceService(db).mark_failed(charge_id)

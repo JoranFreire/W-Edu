@@ -1,7 +1,7 @@
 export interface ForumPost {
-  id: number;
-  thread_id: number;
-  author_id: number;
+  id: string;
+  thread_id: string;
+  author_id: string;
   author_name: string;
   body: string;
   created_at: string;
@@ -9,9 +9,9 @@ export interface ForumPost {
 }
 
 export interface ForumThread {
-  id: number;
-  course_id: number;
-  author_id: number;
+  id: string;
+  course_id: string;
+  author_id: string;
   author_name: string;
   title: string;
   body: string;

@@ -13,7 +13,7 @@ import DiaryAttendanceModal from './DiaryAttendanceModal';
 import DiaryEntryForm from './DiaryEntryForm';
 
 /** Diario de classe: aulas registradas e chamada de cada uma. */
-export default function DiaryPanel({ offeringId, onAttendanceChanged }: { offeringId: number; onAttendanceChanged: () => void }) {
+export default function DiaryPanel({ offeringId, onAttendanceChanged }: { offeringId: string; onAttendanceChanged: () => void }) {
   const { entries, error, create, remove } = useClassDiary(offeringId);
   const [calling, setCalling] = useState<DiaryEntry | null>(null);
   useErrorToast(error, 'Erro ao carregar diário.');

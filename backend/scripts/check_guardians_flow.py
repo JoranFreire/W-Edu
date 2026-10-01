@@ -26,6 +26,7 @@ import httpx
 import starlette.concurrency
 import starlette.routing
 
+from scripts.check_support import ApiClient  # noqa: E402
 import app.models  # noqa: F401
 from app.core.database import Base, SessionLocal, engine
 from app.core.security import hash_password
@@ -73,7 +74,7 @@ def seed() -> tuple[int, dict[str, int]]:
             db.add(user)
             db.flush()
             db.add(InstitutionMembership(institution_id=institution.id, user_id=user.id, role=role))
-            ids[name] = user.id
+            ids[name] = str(user.id)
         institution_id = institution.id
         db.commit()
     return institution_id, ids
@@ -161,7 +162,7 @@ async def check_portal(c: Checker, h: dict, ids: dict, institution_id: int, joao
 async def run() -> int:
     institution_id, ids = seed()
     transport = httpx.ASGITransport(app=app)
-    async with httpx.AsyncClient(transport=transport, base_url="http://testserver") as client:
+    async with ApiClient(transport=transport, base_url="http://testserver") as client:
         c = Checker(client)
         h = {name: await c.login(f"{name}@example.com") for name, _ in USERS}
         links = await check_links(c, h["secretaria"], ids)

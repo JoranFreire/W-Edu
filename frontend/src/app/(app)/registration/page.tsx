@@ -11,7 +11,7 @@ import { useTerminology } from '@/lib/hooks/useTerminology';
 export default function RegistrationPage() {
   const terms = useTerminology();
   const { windows, loading, error } = useMyRegistrationWindows();
-  const [chosen, setChosen] = useState<number | null>(null);
+  const [chosen, setChosen] = useState<string | null>(null);
   useErrorToast(error, 'Erro ao carregar as janelas de matrícula.');
   const current = windows.find((item) => item.window.id === chosen) ?? windows[0];
 
@@ -23,7 +23,7 @@ export default function RegistrationPage() {
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Escolha as turmas do período respeitando pré-requisitos, horários e vagas.</p>
         </div>
         {windows.length > 1 && (
-          <select aria-label="Janela de matrícula" value={current?.window.id ?? ''} onChange={(e) => setChosen(Number(e.target.value))} className={`${inputCls} md:w-80`}>
+          <select aria-label="Janela de matrícula" value={current?.window.id ?? ''} onChange={(e) => setChosen(e.target.value)} className={`${inputCls} md:w-80`}>
             {windows.map((item) => <option key={item.window.id} value={item.window.id}>{item.window.name} · {item.program_name}</option>)}
           </select>
         )}

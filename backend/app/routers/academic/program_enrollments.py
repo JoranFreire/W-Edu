@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -13,9 +15,9 @@ router = APIRouter(prefix="/program-enrollments")
 
 @router.get("", response_model=list[ProgramEnrollmentOut])
 def list_program_enrollments(
-    program_id: int | None = None,
+    program_id: UUID | None = None,
     status: ProgramEnrollmentStatus | None = None,
-    student_id: int | None = None,
+    student_id: UUID | None = None,
     db: Session = Depends(get_db),
     _: Student = Depends(get_current_secretariat),
 ):
@@ -38,7 +40,7 @@ def create_program_enrollment(
 
 @router.post("/{enrollment_id}/status", response_model=ProgramEnrollmentOut)
 def change_program_enrollment_status(
-    enrollment_id: int,
+    enrollment_id: UUID,
     data: ProgramEnrollmentStatusChange,
     db: Session = Depends(get_db),
     current: Student = Depends(get_current_admin_or_coordinator),

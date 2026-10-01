@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from datetime import date
 
@@ -34,15 +35,15 @@ class AgendaService:
         self.offerings = ClassOfferingRepository(db)
         self.notices = FamilyNoticeService(db)
 
-    def list_for_group(self, group_id: int, from_date: date | None = None) -> list[AgendaItemOut]:
+    def list_for_group(self, group_id: UUID, from_date: date | None = None) -> list[AgendaItemOut]:
         self._group_or_404(group_id)
         return [to_out(item) for item in self.repo.list_by_groups([group_id], from_date)]
 
-    def for_student(self, student_id: int, from_date: date | None = None) -> list[AgendaItemOut]:
+    def for_student(self, student_id: UUID, from_date: date | None = None) -> list[AgendaItemOut]:
         group_ids = [group.id for group in self.members.groups_of_student(student_id)]
         return [to_out(item) for item in self.repo.list_by_groups(group_ids, from_date)]
 
-    def publish(self, group_id: int, data: AgendaItemCreate, author: Student) -> AgendaItemOut:
+    def publish(self, group_id: UUID, data: AgendaItemCreate, author: Student) -> AgendaItemOut:
         group = self._group_or_404(group_id)
         ensure_can_publish_agenda(author, group, self.groups.taught_by(group.id, author.id))
         if data.class_offering_id is not None:
@@ -57,14 +58,14 @@ class AgendaService:
         self.notices.agenda_published(item, self.members.student_ids(group.id))
         return to_out(self.repo.save(item))
 
-    def remove(self, item_id: int, user: Student) -> None:
+    def remove(self, item_id: UUID, user: Student) -> None:
         item = self.repo.get_by_id(item_id)
         if not item:
             raise not_found("Item da agenda não encontrado")
         ensure_can_remove(user, item.created_by_id)
         self.repo.delete(item)
 
-    def _group_or_404(self, group_id: int) -> ClassGroup:
+    def _group_or_404(self, group_id: UUID) -> ClassGroup:
         group = self.groups.get_by_id(group_id)
         if not group:
             raise not_found("Turma não encontrada")

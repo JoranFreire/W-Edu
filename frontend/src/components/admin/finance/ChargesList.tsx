@@ -10,9 +10,9 @@ const statusCls = (status: Charge['status']) =>
       : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300';
 
 export interface ChargeActions {
-  sendToAsaas: (id: number) => void;
-  markPaid: (id: number) => void;
-  markFailed: (id: number) => void;
+  sendToAsaas: (id: string) => void;
+  markPaid: (id: string) => void;
+  markFailed: (id: string) => void;
 }
 
 export default function ChargesList({ charges, describe, actions }: {

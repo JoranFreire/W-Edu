@@ -17,7 +17,7 @@ import { useErrorToast } from '@/lib/hooks/useErrorToast';
 /** Plano SaaS de uma instituicao: assinatura, uso e faturas mensais. */
 export default function InstitutionPlanPage() {
   const router = useRouter();
-  const institutionId = Number(useParams<{ institutionId: string }>().institutionId);
+  const institutionId = useParams<{ institutionId: string }>().institutionId;
   const { overview, error, subscribe, generateInvoice, markPaid } = useInstitutionPlan(institutionId);
   const { plans } = useSaasPlans();
   const [periodStart, setPeriodStart] = useState('');

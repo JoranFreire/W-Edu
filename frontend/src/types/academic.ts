@@ -5,19 +5,19 @@ export type CurriculumStatus = 'draft' | 'active' | 'archived';
 export type ComponentKind = 'mandatory' | 'elective' | 'optional';
 
 export interface AcademicUnit {
-  id: number;
+  id: string;
   name: string;
   kind: AcademicUnitKind;
-  parent_id: number | null;
+  parent_id: string | null;
   is_active: boolean;
 }
 
 export interface Program {
-  id: number;
+  id: string;
   code: string;
   name: string;
   level: ProgramLevel;
-  unit_id: number | null;
+  unit_id: string | null;
   degree: string | null;
   duration_terms: number | null;
   total_hours: number | null;
@@ -29,25 +29,25 @@ export interface Program {
 }
 
 export interface Subject {
-  id: number;
+  id: string;
   code: string;
   name: string;
   syllabus: string | null;
   hours: number;
   credits: number | null;
-  course_id: number | null;
+  course_id: string | null;
   is_active: boolean;
 }
 
 export interface SubjectSummary {
-  id: number;
+  id: string;
   code: string;
   name: string;
 }
 
 export interface Curriculum {
-  id: number;
-  program_id: number;
+  id: string;
+  program_id: string;
   version: string;
   valid_from: string | null;
   status: CurriculumStatus;
@@ -55,7 +55,7 @@ export interface Curriculum {
 }
 
 export interface CurriculumComponent {
-  id: number;
+  id: string;
   subject: SubjectSummary;
   term_number: number;
   kind: ComponentKind;

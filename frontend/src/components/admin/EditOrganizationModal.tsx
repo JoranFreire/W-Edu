@@ -6,7 +6,7 @@ import type { Organization } from '@/types/auth';
 export default function EditOrganizationModal({ organization, onClose, onSave }: {
   organization: Organization;
   onClose: () => void;
-  onSave: (id: number, data: { name: string; legal_name: string | null; document: string | null; contact_email: string | null; is_active: boolean }) => Promise<void>;
+  onSave: (id: string, data: { name: string; legal_name: string | null; document: string | null; contact_email: string | null; is_active: boolean }) => Promise<void>;
 }) {
   const [name, setName] = useState(organization.name);
   const [legalName, setLegalName] = useState(organization.legal_name ?? '');

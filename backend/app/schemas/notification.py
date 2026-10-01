@@ -1,3 +1,4 @@
+from uuid import UUID
 from datetime import datetime
 from pydantic import BaseModel, Field
 
@@ -18,7 +19,7 @@ class NotificationTemplateUpdate(BaseModel):
 
 
 class NotificationTemplateOut(BaseModel):
-    id: int
+    id: UUID
     key: str
     channel: NotificationChannel
     title_template: str
@@ -34,23 +35,23 @@ class NotificationEventCreate(BaseModel):
     event_type: NotificationEventType
     channel: NotificationChannel = NotificationChannel.internal
     template_key: str | None = None
-    recipient_student_id: int | None = None
-    course_id: int | None = None
-    class_offering_id: int | None = None
-    scheduled_meeting_id: int | None = None
+    recipient_student_id: UUID | None = None
+    course_id: UUID | None = None
+    class_offering_id: UUID | None = None
+    scheduled_meeting_id: UUID | None = None
     payload: dict = Field(default_factory=dict)
     scheduled_for: datetime | None = None
 
 
 class NotificationEventOut(BaseModel):
-    id: int
+    id: UUID
     event_type: NotificationEventType
     channel: NotificationChannel
     template_key: str | None
-    recipient_student_id: int | None
-    course_id: int | None
-    class_offering_id: int | None
-    scheduled_meeting_id: int | None
+    recipient_student_id: UUID | None
+    course_id: UUID | None
+    class_offering_id: UUID | None
+    scheduled_meeting_id: UUID | None
     payload: dict
     title: str
     body: str
@@ -64,7 +65,7 @@ class NotificationEventOut(BaseModel):
 
 
 class InboxNoticeOut(BaseModel):
-    id: int
+    id: UUID
     event_type: NotificationEventType
     title: str
     body: str

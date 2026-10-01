@@ -27,6 +27,7 @@ import httpx
 import starlette.concurrency
 import starlette.routing
 
+from scripts.check_support import ApiClient  # noqa: E402
 import app.models  # noqa: F401
 from app.core.database import Base, SessionLocal, engine
 from app.core.security import hash_password
@@ -80,13 +81,13 @@ def seed() -> dict[str, int]:
             institution = Institution(slug=slug, name=slug.title(), type=InstitutionType.school)
             db.add(institution)
             db.flush()
-            ids[slug] = institution.id
+            ids[slug] = str(institution.id)
             for name, role in users:
                 user = Student(name=name.title(), email=f"{name}@example.com", password_hash=hash_password(PASSWORD), role=role)
                 db.add(user)
                 db.flush()
                 db.add(InstitutionMembership(institution_id=institution.id, user_id=user.id, role=role))
-                ids[name] = user.id
+                ids[name] = str(user.id)
         db.commit()
 
     with SessionLocal() as db:
@@ -210,7 +211,7 @@ async def check_permissions(c: Checker, h: dict, ids: dict) -> None:
 async def run() -> int:
     ids = seed()
     transport = httpx.ASGITransport(app=app)
-    async with httpx.AsyncClient(transport=transport, base_url="http://testserver") as client:
+    async with ApiClient(transport=transport, base_url="http://testserver") as client:
         c = Checker(client)
         h = {name: await c.login(f"{name}@example.com") for users in USERS.values() for name, _ in users}
         await check_admin_view(c, h, ids)

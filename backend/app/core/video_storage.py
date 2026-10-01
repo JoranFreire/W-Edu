@@ -1,6 +1,7 @@
 from pathlib import Path
 import re
 import uuid
+from uuid import UUID
 
 from fastapi import UploadFile
 
@@ -31,7 +32,7 @@ def _sanitize_filename(filename: str) -> str:
     return f"{safe_stem}{suffix}"
 
 
-def store_uploaded_video(lesson_id: int, upload: UploadFile) -> str:
+def store_uploaded_video(lesson_id: UUID, upload: UploadFile) -> str:
     base_dir = videos_storage_dir() / str(lesson_id)
     base_dir.mkdir(parents=True, exist_ok=True)
     safe_name = _sanitize_filename(upload.filename or "video.mp4")

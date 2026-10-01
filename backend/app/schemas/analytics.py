@@ -1,3 +1,4 @@
+from uuid import UUID
 from datetime import datetime
 from pydantic import BaseModel
 
@@ -21,7 +22,7 @@ class AnalyticsOverviewOut(BaseModel):
 
 
 class CourseAnalyticsOut(BaseModel):
-    course_id: int
+    course_id: UUID
     course_name: str
     modality: str
     enrollments: int
@@ -37,7 +38,7 @@ class CourseAnalyticsOut(BaseModel):
 
 
 class StudentAnalyticsOut(BaseModel):
-    student_id: int
+    student_id: UUID
     student_name: str
     enrollments: int
     completed_courses: int
@@ -50,9 +51,9 @@ class StudentAnalyticsOut(BaseModel):
 
 
 class ClassAnalyticsOut(BaseModel):
-    class_offering_id: int
+    class_offering_id: UUID
     class_name: str
-    course_id: int
+    course_id: UUID
     course_name: str
     total_enrolled: int
     meetings: int
@@ -67,8 +68,8 @@ class ClassAnalyticsOut(BaseModel):
 
 class CompletionReportRowOut(BaseModel):
     scope_type: str
-    scope_id: int
-    course_id: int
+    scope_id: UUID
+    course_id: UUID
     course_name: str
     class_name: str | None = None
     enrolled: int
@@ -77,9 +78,9 @@ class CompletionReportRowOut(BaseModel):
 
 
 class AttendanceReportRowOut(BaseModel):
-    class_offering_id: int
+    class_offering_id: UUID
     class_name: str
-    course_id: int
+    course_id: UUID
     course_name: str
     meetings: int
     closed_meetings: int
@@ -90,7 +91,7 @@ class AttendanceReportRowOut(BaseModel):
 
 
 class EngagementReportRowOut(BaseModel):
-    course_id: int
+    course_id: UUID
     course_name: str
     progress_records: int
     completed_progress_records: int
@@ -101,9 +102,9 @@ class EngagementReportRowOut(BaseModel):
 
 
 class ClassPerformanceReportRowOut(BaseModel):
-    class_offering_id: int
+    class_offering_id: UUID
     class_name: str
-    course_id: int
+    course_id: UUID
     course_name: str
     enrolled: int
     completion_rate: int
@@ -112,7 +113,7 @@ class ClassPerformanceReportRowOut(BaseModel):
 
 
 class RoiReportRowOut(BaseModel):
-    organization_id: int | None
+    organization_id: UUID | None
     organization_name: str
     students: int
     paid_charges_cents: int

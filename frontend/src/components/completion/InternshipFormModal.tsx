@@ -27,7 +27,7 @@ export default function InternshipFormModal({ advisors, onSave, onClose }: {
   const submit = (event: React.FormEvent) => {
     event.preventDefault();
     const input: InternshipInput = {
-      company_name: form.company_name, supervisor_name: form.supervisor_name || null, advisor_id: form.advisor_id ? Number(form.advisor_id) : null,
+      company_name: form.company_name, supervisor_name: form.supervisor_name || null, advisor_id: form.advisor_id ? form.advisor_id : null,
       is_mandatory: form.is_mandatory, agreement_number: form.agreement_number || null, starts_on: form.starts_on,
       ends_on: form.ends_on || null, planned_hours: toOptionalInt(form.planned_hours),
     };

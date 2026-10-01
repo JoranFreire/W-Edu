@@ -1,19 +1,19 @@
 export interface ChatMessage {
-  id: number;
-  conversation_id: number;
-  sender_id: number;
+  id: string;
+  conversation_id: string;
+  sender_id: string;
   sender_name: string;
   body: string;
   created_at: string;
 }
 
 export interface ChatConversation {
-  id: number;
-  course_id: number;
+  id: string;
+  course_id: string;
   course_name: string;
-  student_id: number;
+  student_id: string;
   student_name: string;
-  instructor_id: number | null;
+  instructor_id: string | null;
   instructor_name: string | null;
   subject: string | null;
   messages_count: number;

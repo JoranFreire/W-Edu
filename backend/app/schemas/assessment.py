@@ -1,3 +1,4 @@
+from uuid import UUID
 from datetime import date, datetime
 
 from pydantic import BaseModel, Field, model_validator
@@ -50,7 +51,7 @@ class GradingSchemeUpdate(_SchemeRules):
 
 
 class GradingSchemeOut(BaseModel):
-    id: int | None
+    id: UUID | None
     name: str
     scale: GradingScale
     min_value: float
@@ -66,14 +67,14 @@ class GradingSchemeOut(BaseModel):
 
 
 class TeachingOfferingOut(BaseModel):
-    id: int
+    id: UUID
     name: str
-    course_id: int
-    instructor_id: int | None
-    term_id: int | None
-    subject_id: int | None
-    class_group_id: int | None
-    grading_scheme_id: int | None
+    course_id: UUID
+    instructor_id: UUID | None
+    term_id: UUID | None
+    subject_id: UUID | None
+    class_group_id: UUID | None
+    grading_scheme_id: UUID | None
     starts_at: datetime
     ends_at: datetime
 
@@ -83,10 +84,10 @@ class TeachingOfferingOut(BaseModel):
 class AssessmentItemCreate(BaseModel):
     name: str = Field(min_length=1, max_length=160)
     kind: AssessmentKind = AssessmentKind.test
-    grading_period_id: int | None = None
+    grading_period_id: UUID | None = None
     weight: float = Field(default=1, ge=0)
     max_score: float = Field(default=10, gt=0)
-    quiz_id: int | None = None
+    quiz_id: UUID | None = None
     due_on: date | None = None
 
 
@@ -95,32 +96,32 @@ class AssessmentItemUpdate(BaseModel):
     kind: AssessmentKind | None = None
     weight: float | None = Field(default=None, ge=0)
     max_score: float | None = Field(default=None, gt=0)
-    quiz_id: int | None = None
+    quiz_id: UUID | None = None
     due_on: date | None = None
 
 
 class AssessmentItemOut(BaseModel):
-    id: int
-    class_offering_id: int
-    grading_period_id: int | None
+    id: UUID
+    class_offering_id: UUID
+    grading_period_id: UUID | None
     name: str
     kind: AssessmentKind
     weight: float
     max_score: float
-    quiz_id: int | None
+    quiz_id: UUID | None
     due_on: date | None
 
     model_config = {"from_attributes": True}
 
 
 class GradeInput(BaseModel):
-    class_enrollment_id: int
+    class_enrollment_id: UUID
     score: float | None = Field(default=None, ge=0)
     notes: str | None = None
 
 
 class GradeRow(BaseModel):
-    class_enrollment_id: int
+    class_enrollment_id: UUID
     student: PersonSummary
     score: float | None
     notes: str | None
@@ -132,13 +133,13 @@ class QuizImportResult(BaseModel):
 
 
 class GradebookPeriod(BaseModel):
-    id: int | None
+    id: UUID | None
     name: str
     status: str
 
 
 class GradebookRow(BaseModel):
-    class_enrollment_id: int
+    class_enrollment_id: UUID
     student: PersonSummary
     scores: dict[str, float | None]
     period_averages: dict[str, float | None]
@@ -160,7 +161,7 @@ class DiaryEntryCreate(BaseModel):
     date: date
     lesson_count: int = Field(default=1, ge=1, le=12)
     content_taught: str = Field(min_length=1)
-    scheduled_meeting_id: int | None = None
+    scheduled_meeting_id: UUID | None = None
 
 
 class DiaryEntryUpdate(BaseModel):
@@ -169,25 +170,25 @@ class DiaryEntryUpdate(BaseModel):
 
 
 class DiaryEntryOut(BaseModel):
-    id: int
-    class_offering_id: int
+    id: UUID
+    class_offering_id: UUID
     date: date
     lesson_count: int
     content_taught: str
-    instructor_id: int | None
-    scheduled_meeting_id: int | None
+    instructor_id: UUID | None
+    scheduled_meeting_id: UUID | None
     locked: bool = False
 
 
 class DiaryAttendanceInput(BaseModel):
-    class_enrollment_id: int
+    class_enrollment_id: UUID
     absences: int = Field(ge=0)
     justified: bool = False
     note: str | None = Field(default=None, max_length=300)
 
 
 class DiaryAttendanceRow(BaseModel):
-    class_enrollment_id: int
+    class_enrollment_id: UUID
     student: PersonSummary
     absences: int
     justified: bool
@@ -199,18 +200,18 @@ class SyncEnrollmentsResult(BaseModel):
 
 
 class PeriodClosureOut(BaseModel):
-    grading_period_id: int
+    grading_period_id: UUID
     closed_students: int
 
 
 class PeriodResultOut(BaseModel):
-    grading_period_id: int
+    grading_period_id: UUID
     average: float | None
     absences: int
 
 
 class FinalResultRow(BaseModel):
-    class_enrollment_id: int
+    class_enrollment_id: UUID
     student: PersonSummary
     periods: list[PeriodResultOut]
     average: float | None
@@ -222,14 +223,14 @@ class FinalResultRow(BaseModel):
 
 class OfferingResultsOut(BaseModel):
     scheme: GradingSchemeOut
-    closed_period_ids: list[int]
-    pending_period_ids: list[int]
+    closed_period_ids: list[UUID]
+    pending_period_ids: list[UUID]
     finalized: bool
     rows: list[FinalResultRow]
 
 
 class RecoveryInput(BaseModel):
-    class_enrollment_id: int
+    class_enrollment_id: UUID
     score: float | None = Field(default=None, ge=0)
 
 
@@ -240,7 +241,7 @@ class ReportCardPeriod(BaseModel):
 
 
 class ReportCardEntry(BaseModel):
-    class_offering_id: int
+    class_offering_id: UUID
     offering_name: str
     periods: list[ReportCardPeriod]
     final_grade: float | None

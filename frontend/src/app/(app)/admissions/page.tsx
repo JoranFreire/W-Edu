@@ -15,7 +15,7 @@ export default function MyApplicationsPage() {
   const { applications, loading, error, upload, act } = useMyApplications();
   const { calls } = usePublicCalls(slug);
   useErrorToast(error, 'Erro ao carregar suas inscrições.');
-  const documentsOf = (callId: number) => calls.find((call) => call.id === callId)?.required_documents ?? [];
+  const documentsOf = (callId: string) => calls.find((call) => call.id === callId)?.required_documents ?? [];
 
   return (
     <div className="space-y-6">

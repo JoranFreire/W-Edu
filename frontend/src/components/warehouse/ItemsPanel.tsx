@@ -18,7 +18,7 @@ export default function ItemsPanel() {
   const { items, error, create, receive } = useWarehouseItems();
   const empty = { name: '', category: '', kind: 'consumable' as MaterialKind, unit: 'unidade', minStock: '0', location: '', cost: '' };
   const [draft, setDraft] = useState(empty);
-  const [entry, setEntry] = useState<Record<number, string>>({});
+  const [entry, setEntry] = useState<Record<string, string>>({});
   useErrorToast(error, 'Erro ao carregar os materiais.');
   const run = async (action: () => Promise<void>, success: string) => {
     try {

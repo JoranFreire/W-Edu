@@ -50,10 +50,10 @@ export default function AdminStudentsPage() {
   };
 
   const createUser = (input: NewUserInput) => run(() => people.createUser(input), 'Usuário criado!', 'Erro ao criar usuário.');
-  const updateUser = (id: number, input: UserUpdateInput) => run(() => people.updateUser(id, input), 'Usuário atualizado.', 'Erro ao atualizar usuário.');
+  const updateUser = (id: string, input: UserUpdateInput) => run(() => people.updateUser(id, input), 'Usuário atualizado.', 'Erro ao atualizar usuário.');
   const deleteUser = (user: User) => run(() => people.deleteUser(user.id), 'Usuário excluído.', 'Erro ao excluir usuário.');
   const createOrganization = (input: OrganizationInput) => run(() => people.createOrganization(input), 'Empresa criada!', 'Erro ao criar empresa.');
-  const updateOrganization = (id: number, input: OrganizationInput) => run(() => people.updateOrganization(id, input), 'Empresa atualizada.', 'Erro ao atualizar empresa.');
+  const updateOrganization = (id: string, input: OrganizationInput) => run(() => people.updateOrganization(id, input), 'Empresa atualizada.', 'Erro ao atualizar empresa.');
 
   if (people.loading && people.users.length === 0) return <Spinner />;
 

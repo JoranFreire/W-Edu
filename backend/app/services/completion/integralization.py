@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from sqlalchemy.orm import Session
 
@@ -24,7 +25,7 @@ class IntegralizationService:
         self.internships = InternshipRepository(db)
         self.final_projects = FinalProjectRepository(db)
 
-    def for_enrollment(self, enrollment_id: int) -> IntegralizationOut:
+    def for_enrollment(self, enrollment_id: UUID) -> IntegralizationOut:
         return self.build(self.lifecycle.get_or_404(enrollment_id))
 
     def for_student(self, student: Student) -> list[IntegralizationOut]:

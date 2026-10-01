@@ -12,6 +12,8 @@ a aplicacao deve conectar com um usuario comum (o dono das tabelas e coberto por
 ``FORCE ROW LEVEL SECURITY``).
 """
 
+from uuid import UUID
+
 from sqlalchemy import Table, event, text
 from sqlalchemy.engine import Connection
 from sqlalchemy.orm import ORMExecuteState, Session
@@ -21,7 +23,7 @@ from app.core.tenancy import SKIP_TENANT_FILTER, TenantMixin, bound_institution_
 SETTING = "app.institution_id"
 POLICY = "tenant_isolation"
 _CURRENT = f"nullif(current_setting('{SETTING}', true), '')"
-_CONDITION = f"{_CURRENT} IS NULL OR institution_id = {_CURRENT}::int"
+_CONDITION = f"{_CURRENT} IS NULL OR institution_id = {_CURRENT}::uuid"
 _SET = text("SELECT set_config(:name, :value, true)")
 
 
@@ -46,12 +48,12 @@ def _is_postgres(connection: Connection) -> bool:
     return connection.dialect.name == "postgresql"
 
 
-def _set_setting(connection: Connection, institution_id: int | None) -> None:
+def _set_setting(connection: Connection, institution_id: UUID | None) -> None:
     connection.execute(_SET, {"name": SETTING, "value": "" if institution_id is None else str(institution_id)})
 
 
 @on_bind
-def _apply_on_bind(session: Session, institution_id: int | None) -> None:
+def _apply_on_bind(session: Session, institution_id: UUID | None) -> None:
     # A transacao ja aberta (ex.: consulta do usuario autenticado) precisa da configuracao agora.
     if session.in_transaction():
         connection = session.connection()

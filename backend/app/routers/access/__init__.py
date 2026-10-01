@@ -1,5 +1,7 @@
 """Rotas dos perfis de acesso (/access): catalogo, perfis personalizados, atribuicoes e permissoes do usuario."""
 
+from uuid import UUID
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -44,20 +46,20 @@ def create_role(data: AccessRoleInput, db: Session = Depends(get_db), current: S
 
 
 @router.put("/roles/{role_id}", response_model=AccessRoleOut)
-def update_role(role_id: int, data: AccessRoleInput, db: Session = Depends(get_db), current: Student = Depends(get_current_access_manager)):
+def update_role(role_id: UUID, data: AccessRoleInput, db: Session = Depends(get_db), current: Student = Depends(get_current_access_manager)):
     return AccessRoleService(db).update(role_id, data, current)
 
 
 @router.delete("/roles/{role_id}", status_code=204)
-def delete_role(role_id: int, db: Session = Depends(get_db), current: Student = Depends(get_current_access_manager)):
+def delete_role(role_id: UUID, db: Session = Depends(get_db), current: Student = Depends(get_current_access_manager)):
     AccessRoleService(db).delete(role_id, current)
 
 
 @router.post("/roles/{role_id}/members", response_model=AccessRoleOut)
-def assign_role(role_id: int, data: AssignmentInput, db: Session = Depends(get_db), current: Student = Depends(get_current_access_manager)):
+def assign_role(role_id: UUID, data: AssignmentInput, db: Session = Depends(get_db), current: Student = Depends(get_current_access_manager)):
     return AccessRoleService(db).assign(role_id, data.user_id, current)
 
 
 @router.delete("/roles/{role_id}/members/{user_id}", response_model=AccessRoleOut)
-def unassign_role(role_id: int, user_id: int, db: Session = Depends(get_db), current: Student = Depends(get_current_access_manager)):
+def unassign_role(role_id: UUID, user_id: UUID, db: Session = Depends(get_db), current: Student = Depends(get_current_access_manager)):
     return AccessRoleService(db).unassign(role_id, user_id, current)

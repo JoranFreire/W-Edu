@@ -5,7 +5,7 @@ import type { Session } from '@/types/course';
 import { VoiceRealtimePanel } from '@/components/voice/VoiceRealtimePanel';
 
 export default function LessonVoiceSection({ lessonId, session, onSessionUpdate }: {
-  lessonId: number;
+  lessonId: string;
   session: Session | null;
   onSessionUpdate: (s: Session) => void;
 }) {

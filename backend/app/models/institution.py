@@ -1,3 +1,6 @@
+from uuid import UUID
+
+from app.core.ids import new_id
 from datetime import datetime, timezone
 import enum
 
@@ -29,7 +32,7 @@ class InstitutionStatus(str, enum.Enum):
 class Institution(Base):
     __tablename__ = "institutions"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
     slug: Mapped[str] = mapped_column(String(80), unique=True, index=True)
     name: Mapped[str] = mapped_column(String(200))
     legal_name: Mapped[str | None] = mapped_column(String(200))
@@ -48,9 +51,9 @@ class InstitutionMembership(Base):
     __tablename__ = "institution_memberships"
     __table_args__ = (UniqueConstraint("institution_id", "user_id"),)
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    institution_id: Mapped[int] = mapped_column(ForeignKey("institutions.id"), index=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
+    institution_id: Mapped[UUID] = mapped_column(ForeignKey("institutions.id"), index=True)
+    user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"), index=True)
     role: Mapped[UserRole] = mapped_column(SAEnum(UserRole), default=UserRole.student)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
@@ -62,7 +65,7 @@ class InstitutionMembership(Base):
 class Campus(TenantMixin, Base):
     __tablename__ = "campuses"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
     name: Mapped[str] = mapped_column(String(200))
     address: Mapped[str | None] = mapped_column(Text)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)

@@ -1,3 +1,4 @@
+from uuid import UUID
 from datetime import date, datetime
 
 from pydantic import BaseModel
@@ -19,7 +20,7 @@ class DossierContact(BaseModel):
 
 
 class DossierPerson(BaseModel):
-    id: int
+    id: UUID
     name: str
     email: str
     phone: str | None = None
@@ -27,7 +28,7 @@ class DossierPerson(BaseModel):
 
 class DossierGuardianLink(BaseModel):
     """Vinculo aluno-responsavel visto pelo lado da outra pessoa (responsavel ou dependente)."""
-    link_id: int
+    link_id: UUID
     person: DossierPerson
     relationship_kind: GuardianRelationship
     is_financial: bool
@@ -36,7 +37,7 @@ class DossierGuardianLink(BaseModel):
 
 
 class DossierProgramEnrollment(BaseModel):
-    id: int
+    id: UUID
     program_code: str
     program_name: str
     registration_number: str
@@ -46,7 +47,7 @@ class DossierProgramEnrollment(BaseModel):
 
 
 class DossierCourse(BaseModel):
-    course_id: int
+    course_id: UUID
     course_name: str
     total_lessons: int
     done_lessons: int
@@ -56,7 +57,7 @@ class DossierCourse(BaseModel):
 
 
 class DossierCertificate(BaseModel):
-    id: int
+    id: UUID
     course_name: str
     validation_code: str
     issued_at: datetime
@@ -64,7 +65,7 @@ class DossierCertificate(BaseModel):
 
 
 class DossierCharge(BaseModel):
-    id: int
+    id: UUID
     description: str | None = None
     amount_cents: int
     status: ChargeStatus
@@ -83,7 +84,7 @@ class DossierFinance(BaseModel):
 
 
 class DossierBenefit(BaseModel):
-    id: int
+    id: UUID
     item_name: str
     unit: str
     quantity: int
@@ -101,7 +102,7 @@ class DossierMaterialLine(BaseModel):
 
 
 class DossierMaterialRequest(BaseModel):
-    id: int
+    id: UUID
     purpose: str
     needed_on: date
     status: RequestStatus
@@ -111,7 +112,7 @@ class DossierMaterialRequest(BaseModel):
 
 
 class DossierOccurrence(BaseModel):
-    id: int
+    id: UUID
     kind: OccurrenceKind
     severity: OccurrenceSeverity
     description: str
@@ -124,7 +125,7 @@ class DossierOccurrences(BaseModel):
 
 
 class DossierOffering(BaseModel):
-    id: int
+    id: UUID
     name: str
     course_name: str
     term_name: str | None = None

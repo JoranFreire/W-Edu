@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -13,7 +15,7 @@ router = APIRouter(prefix="/programs")
 
 @router.get("", response_model=list[ProgramOut])
 def list_programs(
-    unit_id: int | None = None,
+    unit_id: UUID | None = None,
     level: ProgramLevel | None = None,
     status: ProgramStatus | None = None,
     db: Session = Depends(get_db),
@@ -28,13 +30,13 @@ def create_program(data: ProgramCreate, db: Session = Depends(get_db), _: Studen
 
 
 @router.get("/{program_id}", response_model=ProgramOut)
-def get_program(program_id: int, db: Session = Depends(get_db), _: Student = Depends(get_current_student)):
+def get_program(program_id: UUID, db: Session = Depends(get_db), _: Student = Depends(get_current_student)):
     return ProgramService(db).get_or_404(program_id)
 
 
 @router.patch("/{program_id}", response_model=ProgramOut)
 def update_program(
-    program_id: int,
+    program_id: UUID,
     data: ProgramUpdate,
     db: Session = Depends(get_db),
     _: Student = Depends(get_current_admin_or_coordinator),
@@ -43,5 +45,5 @@ def update_program(
 
 
 @router.delete("/{program_id}", status_code=204)
-def delete_program(program_id: int, db: Session = Depends(get_db), _: Student = Depends(get_current_admin)):
+def delete_program(program_id: UUID, db: Session = Depends(get_db), _: Student = Depends(get_current_admin)):
     ProgramService(db).delete(program_id)

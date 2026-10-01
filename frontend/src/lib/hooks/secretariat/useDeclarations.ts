@@ -9,14 +9,14 @@ import { declarationFileName } from '@/lib/secretariat/declarationLinks';
 import type { Declaration, DeclarationKind } from '@/types/secretariat';
 
 /** Declaracoes emitidas para a matricula: emissao, download e revogacao. */
-export function useDeclarations(enrollmentId: number) {
+export function useDeclarations(enrollmentId: string) {
   const request = useCallback(
     () => api.get<Declaration[]>(endpoints.secretariat.declarations(enrollmentId)).then((response) => response.data),
     [enrollmentId],
   );
   const { data = [], loading, error, reload } = useApiQuery(request);
 
-  const issue = async (kind: DeclarationKind, termId: number | null) => {
+  const issue = async (kind: DeclarationKind, termId: string | null) => {
     const { data: created } = await api.post<Declaration>(endpoints.secretariat.declarations(enrollmentId), { kind, term_id: termId });
     reload();
     return created;
@@ -25,7 +25,7 @@ export function useDeclarations(enrollmentId: number) {
     const { data: blob } = await api.get<Blob>(endpoints.secretariat.declarationPdf(declaration.id), { responseType: 'blob' });
     saveBlob(blob, declarationFileName(declaration.kind, declaration.validation_code));
   };
-  const revoke = async (declarationId: number, reason: string) => {
+  const revoke = async (declarationId: string, reason: string) => {
     await api.post(endpoints.secretariat.declarationRevoke(declarationId), { reason });
     reload();
   };

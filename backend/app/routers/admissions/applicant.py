@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends, File, Form, UploadFile
 from sqlalchemy.orm import Session
 
@@ -13,7 +15,7 @@ router = APIRouter()
 
 
 @router.post("/calls/{call_id}/apply", response_model=ApplicationOut, status_code=201)
-def apply(call_id: int, data: ApplicationCreate, db: Session = Depends(get_db), current: Student = Depends(get_current_student)):
+def apply(call_id: UUID, data: ApplicationCreate, db: Session = Depends(get_db), current: Student = Depends(get_current_student)):
     return ApplicationService(db).apply(current, call_id, data)
 
 
@@ -24,22 +26,22 @@ def my_applications(db: Session = Depends(get_db), current: Student = Depends(ge
 
 @router.post("/my/applications/{application_id}/documents", response_model=ApplicationOut, status_code=201)
 def upload_document(
-    application_id: int, kind: str = Form(...), file: UploadFile = File(...),
+    application_id: UUID, kind: str = Form(...), file: UploadFile = File(...),
     db: Session = Depends(get_db), current: Student = Depends(get_current_student),
 ):
     return ApplicationDocumentService(db).upload(current, application_id, kind, file)
 
 
 @router.post("/my/applications/{application_id}/withdraw", response_model=ApplicationOut)
-def withdraw(application_id: int, db: Session = Depends(get_db), current: Student = Depends(get_current_student)):
+def withdraw(application_id: UUID, db: Session = Depends(get_db), current: Student = Depends(get_current_student)):
     return ApplicationService(db).withdraw(current, application_id)
 
 
 @router.post("/my/applications/{application_id}/confirm", response_model=ApplicationOut)
-def confirm(application_id: int, db: Session = Depends(get_db), current: Student = Depends(get_current_student)):
+def confirm(application_id: UUID, db: Session = Depends(get_db), current: Student = Depends(get_current_student)):
     return ConvocationService(db).confirm(current, application_id)
 
 
 @router.post("/my/applications/{application_id}/decline", response_model=ApplicationOut)
-def decline(application_id: int, db: Session = Depends(get_db), current: Student = Depends(get_current_student)):
+def decline(application_id: UUID, db: Session = Depends(get_db), current: Student = Depends(get_current_student)):
     return ConvocationService(db).decline(current, application_id)

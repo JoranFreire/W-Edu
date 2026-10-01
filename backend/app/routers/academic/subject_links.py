@@ -1,5 +1,7 @@
 """Pre-requisitos e equivalencias entre disciplinas."""
 
+from uuid import UUID
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -13,13 +15,13 @@ router = APIRouter(prefix="/subjects/{subject_id}")
 
 
 @router.get("/prerequisites", response_model=list[SubjectSummary])
-def list_prerequisites(subject_id: int, db: Session = Depends(get_db), _: Student = Depends(get_current_student)):
+def list_prerequisites(subject_id: UUID, db: Session = Depends(get_db), _: Student = Depends(get_current_student)):
     return SubjectPrerequisiteService(db).list(subject_id)
 
 
 @router.post("/prerequisites", response_model=SubjectSummary, status_code=201)
 def add_prerequisite(
-    subject_id: int,
+    subject_id: UUID,
     data: SubjectLinkCreate,
     db: Session = Depends(get_db),
     _: Student = Depends(get_current_admin_or_coordinator),
@@ -29,8 +31,8 @@ def add_prerequisite(
 
 @router.delete("/prerequisites/{required_subject_id}", status_code=204)
 def remove_prerequisite(
-    subject_id: int,
-    required_subject_id: int,
+    subject_id: UUID,
+    required_subject_id: UUID,
     db: Session = Depends(get_db),
     _: Student = Depends(get_current_admin),
 ):
@@ -38,13 +40,13 @@ def remove_prerequisite(
 
 
 @router.get("/equivalences", response_model=list[SubjectSummary])
-def list_equivalences(subject_id: int, db: Session = Depends(get_db), _: Student = Depends(get_current_student)):
+def list_equivalences(subject_id: UUID, db: Session = Depends(get_db), _: Student = Depends(get_current_student)):
     return SubjectEquivalenceService(db).list(subject_id)
 
 
 @router.post("/equivalences", response_model=SubjectSummary, status_code=201)
 def add_equivalence(
-    subject_id: int,
+    subject_id: UUID,
     data: SubjectLinkCreate,
     db: Session = Depends(get_db),
     _: Student = Depends(get_current_admin_or_coordinator),
@@ -54,8 +56,8 @@ def add_equivalence(
 
 @router.delete("/equivalences/{equivalent_subject_id}", status_code=204)
 def remove_equivalence(
-    subject_id: int,
-    equivalent_subject_id: int,
+    subject_id: UUID,
+    equivalent_subject_id: UUID,
     db: Session = Depends(get_db),
     _: Student = Depends(get_current_admin),
 ):

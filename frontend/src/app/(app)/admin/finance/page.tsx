@@ -40,7 +40,7 @@ export default function AdminFinancePage() {
   const studentName = makeNameLookup(finance.students, 'Aluno');
   const organizationName = makeNameLookup(finance.organizations, 'Empresa');
   const planName = makeNameLookup(finance.plans, 'Plano');
-  const holderName = (studentId: number | null, organizationId: number | null) => studentName(studentId) || organizationName(organizationId);
+  const holderName = (studentId: string | null, organizationId: string | null) => studentName(studentId) || organizationName(organizationId);
   const describeCharge = (charge: Charge) => holderName(charge.student_id, charge.organization_id) || planName(charge.billing_plan_id) || 'Sem vínculo';
 
   const closeModal = () => setCreateModal(null);

@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from sqlalchemy.orm import Session
 
@@ -21,7 +22,7 @@ class TranscriptService:
         self.enrollments = ProgramEnrollmentRepository(db)
         self.lifecycle = EnrollmentLifecycleService(db)
 
-    def for_enrollment(self, enrollment_id: int) -> TranscriptOut:
+    def for_enrollment(self, enrollment_id: UUID) -> TranscriptOut:
         return self.build(self.lifecycle.get_or_404(enrollment_id))
 
     def for_student(self, student: Student) -> list[TranscriptOut]:

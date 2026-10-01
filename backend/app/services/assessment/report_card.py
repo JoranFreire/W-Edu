@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from sqlalchemy.orm import Session
 
@@ -20,7 +21,7 @@ class ReportCardService:
 
     def for_student(self, student: Student) -> list[ReportCardEntry]:
         enrollments = self.enrollments.for_student(student.id)
-        results: dict[int, list] = {}
+        results: dict[UUID, list] = {}
         for result in self.results.by_enrollments([e.id for e in enrollments]):
             results.setdefault(result.class_enrollment_id, []).append(result)
         cards = []

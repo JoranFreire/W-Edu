@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from sqlalchemy import or_
 
@@ -12,7 +13,7 @@ from app.repositories.academic._base import Repository
 class EnrollmentContractRepository(Repository[EnrollmentContract]):
     model = EnrollmentContract
 
-    def list_by_enrollment(self, enrollment_id: int) -> list[EnrollmentContract]:
+    def list_by_enrollment(self, enrollment_id: UUID) -> list[EnrollmentContract]:
         return (
             self.db.query(EnrollmentContract)
             .filter(EnrollmentContract.program_enrollment_id == enrollment_id)
@@ -20,7 +21,7 @@ class EnrollmentContractRepository(Repository[EnrollmentContract]):
             .all()
         )
 
-    def list_for_user(self, user_id: int) -> list[EnrollmentContract]:
+    def list_for_user(self, user_id: UUID) -> list[EnrollmentContract]:
         """Contratos do aluno e dos dependentes de quem e responsavel financeiro."""
         financial_of = (
             self.db.query(StudentGuardian.student_id)

@@ -11,12 +11,12 @@ export function useCourses() {
   const request = useCallback(() => api.get<Course[]>(endpoints.courses.list).then((response) => response.data), []);
   const { data = [], loading, error, reload } = useApiQuery(request);
 
-  const save = async (courseId: number | null, input: Partial<Course>) => {
+  const save = async (courseId: string | null, input: Partial<Course>) => {
     if (courseId) await api.patch(endpoints.courses.detail(courseId), input);
     else await api.post(endpoints.courses.list, input);
     reload();
   };
-  const remove = async (courseId: number) => {
+  const remove = async (courseId: string) => {
     await api.delete(endpoints.courses.detail(courseId));
     reload();
   };

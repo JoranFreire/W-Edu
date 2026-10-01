@@ -15,7 +15,7 @@ const statusLabels: Record<AssignmentSubmission['status'], string> = {
   returned: 'Devolvida',
 };
 
-export default function LessonAssignmentSection({ lessonId }: { lessonId: number }) {
+export default function LessonAssignmentSection({ lessonId }: { lessonId: string }) {
   const [submission, setSubmission] = useState<AssignmentSubmission | null>(null);
   const [text, setText] = useState('');
   const [file, setFile] = useState<File | null>(null);

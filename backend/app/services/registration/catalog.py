@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from sqlalchemy.orm import Session
 
@@ -30,18 +31,18 @@ class RegistrationCatalogService:
         self.terms = AcademicTermRepository(db)
         self.lifecycle = EnrollmentLifecycleService(db)
 
-    def for_window(self, student: Student, window_id: int) -> RegistrationCatalogOut:
+    def for_window(self, student: Student, window_id: UUID) -> RegistrationCatalogOut:
         window, enrollment = self.access.resolve(student, window_id)
         return self._build(enrollment, window.term_id, window)
 
-    def for_enrollment(self, program_enrollment_id: int, term_id: int) -> RegistrationCatalogOut:
+    def for_enrollment(self, program_enrollment_id: UUID, term_id: UUID) -> RegistrationCatalogOut:
         """Visao da secretaria, sem janela (sem limite de creditos)."""
         enrollment = self.lifecycle.get_or_404(program_enrollment_id)
         if not self.terms.get_by_id(term_id):
             raise not_found("Período letivo não encontrado")
         return self._build(enrollment, term_id, None)
 
-    def _build(self, enrollment: ProgramEnrollment, term_id: int, window: RegistrationWindow | None) -> RegistrationCatalogOut:
+    def _build(self, enrollment: ProgramEnrollment, term_id: UUID, window: RegistrationWindow | None) -> RegistrationCatalogOut:
         curriculum_subjects = {component.subject_id for component in enrollment.curriculum.components}
         offered = self.offerings.open_for_subjects(term_id, curriculum_subjects)
         plan = self.plans.build(enrollment, term_id, offered)

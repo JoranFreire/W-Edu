@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from sqlalchemy.orm import joinedload
 
@@ -18,9 +19,9 @@ class ProgramEnrollmentRepository(Repository[ProgramEnrollment]):
 
     def list(
         self,
-        program_id: int | None = None,
+        program_id: UUID | None = None,
         status: ProgramEnrollmentStatus | None = None,
-        student_id: int | None = None,
+        student_id: UUID | None = None,
     ) -> list[ProgramEnrollment]:
         query = self._query()
         if program_id is not None:
@@ -31,7 +32,7 @@ class ProgramEnrollmentRepository(Repository[ProgramEnrollment]):
             query = query.filter(ProgramEnrollment.student_id == student_id)
         return query.order_by(ProgramEnrollment.registration_number).all()
 
-    def get_open(self, student_id: int, program_id: int) -> ProgramEnrollment | None:
+    def get_open(self, student_id: UUID, program_id: UUID) -> ProgramEnrollment | None:
         return (
             self.db.query(ProgramEnrollment)
             .filter(

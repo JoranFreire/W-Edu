@@ -26,11 +26,11 @@ export function useMyCompletion() {
   }, []);
   const { data, loading, error, reload } = useApiQuery(request);
 
-  const submitActivity = async (enrollmentId: number, input: ActivityInput) => {
+  const submitActivity = async (enrollmentId: string, input: ActivityInput) => {
     await api.post(endpoints.completion.submitActivity(enrollmentId), input);
     reload();
   };
-  const withdrawActivity = async (activityId: number) => {
+  const withdrawActivity = async (activityId: string) => {
     await api.delete(endpoints.completion.myActivity(activityId));
     reload();
   };

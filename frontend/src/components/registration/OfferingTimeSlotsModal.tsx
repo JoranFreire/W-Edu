@@ -15,7 +15,7 @@ const emptySlot: TimeSlotInput = { weekday: 0, starts_at: '08:00', ends_at: '10:
 
 /** Horario semanal da oferta de disciplina (base do choque de horario na matricula). */
 export default function OfferingTimeSlotsModal({ offeringId, offeringName, onClose }: {
-  offeringId: number;
+  offeringId: string;
   offeringName: string;
   onClose: () => void;
 }) {

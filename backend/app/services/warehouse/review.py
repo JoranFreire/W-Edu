@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from datetime import datetime, timezone
 
@@ -26,7 +27,7 @@ class MaterialRequestReviewService:
     def list(self, status: RequestStatus | None) -> list[RequestOut]:
         return [request_out(r) for r in self.repo.list(status=status)]
 
-    def approve(self, request_id: int, data: ApprovalInput, reviewer: Student) -> RequestOut:
+    def approve(self, request_id: UUID, data: ApprovalInput, reviewer: Student) -> RequestOut:
         request = self._pending(request_id)
         by_id = {line.id: line for line in request.lines}
         decided = {approval.line_id: approval.quantity for approval in data.lines}
@@ -42,7 +43,7 @@ class MaterialRequestReviewService:
         request.return_due_on = (data.return_due_on or request.needed_on) if has_durable else None
         return self._close(request, RequestStatus.approved, data.note, reviewer)
 
-    def reject(self, request_id: int, data: RejectInput, reviewer: Student) -> RequestOut:
+    def reject(self, request_id: UUID, data: RejectInput, reviewer: Student) -> RequestOut:
         request = self._pending(request_id)
         for line in request.lines:
             line.quantity_approved = 0
@@ -60,7 +61,7 @@ class MaterialRequestReviewService:
         )
         return request_out(request)
 
-    def _pending(self, request_id: int) -> MaterialRequest:
+    def _pending(self, request_id: UUID) -> MaterialRequest:
         request = self.repo.get(request_id)
         if not request:
             raise not_found("Requisição não encontrada")

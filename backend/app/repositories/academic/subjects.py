@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from sqlalchemy import or_
 
@@ -21,7 +22,7 @@ class SubjectRepository(Repository[Subject]):
     def get_by_code(self, code: str) -> Subject | None:
         return self.db.query(Subject).filter(Subject.code == code).first()
 
-    def is_in_curriculum(self, subject_id: int) -> bool:
+    def is_in_curriculum(self, subject_id: UUID) -> bool:
         return (
             self.db.query(CurriculumComponent.id).filter(CurriculumComponent.subject_id == subject_id).first()
             is not None

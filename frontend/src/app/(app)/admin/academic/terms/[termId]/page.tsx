@@ -19,7 +19,7 @@ import type { TermStatus } from '@/types/academicCalendar';
 
 export default function AdminTermPage() {
   const router = useRouter();
-  const termId = Number(useParams<{ termId: string }>().termId);
+  const termId = useParams<{ termId: string }>().termId;
   const canDelete = isAdminRole(useAuthStore((state) => state.student?.role));
   const { terms, error, changeStatus } = useAcademicTerms();
   useErrorToast(error, 'Erro ao carregar período.');

@@ -9,10 +9,10 @@ import type { ForumThread } from '@/types/forum';
 
 const inputCls = 'block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-sm text-gray-900 dark:text-white';
 
-export default function CourseForumSection({ courseId, initialThreads }: { courseId: number; initialThreads: ForumThread[] }) {
+export default function CourseForumSection({ courseId, initialThreads }: { courseId: string; initialThreads: ForumThread[] }) {
   const [threads, setThreads] = useState<ForumThread[]>(initialThreads);
   const [form, setForm] = useState({ title: '', body: '' });
-  const [replyBody, setReplyBody] = useState<Record<number, string>>({});
+  const [replyBody, setReplyBody] = useState<Record<string, string>>({});
 
   const createThread = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,7 +26,7 @@ export default function CourseForumSection({ courseId, initialThreads }: { cours
     }
   };
 
-  const createReply = async (threadId: number) => {
+  const createReply = async (threadId: string) => {
     const body = replyBody[threadId]?.trim();
     if (!body) return;
     try {

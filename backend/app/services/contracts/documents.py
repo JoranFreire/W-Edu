@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from datetime import datetime, timezone
 
@@ -31,7 +32,7 @@ class ContractArchive:
         self.documents = DocumentRepository(db)
         self.versions = DocumentVersionRepository(db)
 
-    def archive(self, contract: EnrollmentContract, author_id: int | None, note: str) -> Document:
+    def archive(self, contract: EnrollmentContract, author_id: UUID | None, note: str) -> Document:
         document = self.documents.get_by_id(contract.document_id) if contract.document_id else None
         if document is None:
             document = self.documents.create(Document(

@@ -7,7 +7,7 @@ import { useApiQuery } from '@/lib/hooks/useApiQuery';
 import type { Transcript } from '@/types/secretariat';
 
 /** Historico escolar de uma matricula (visao da secretaria). */
-export function useTranscript(enrollmentId: number) {
+export function useTranscript(enrollmentId: string) {
   const request = useCallback(
     () => api.get<Transcript>(endpoints.secretariat.transcript(enrollmentId)).then((response) => response.data),
     [enrollmentId],

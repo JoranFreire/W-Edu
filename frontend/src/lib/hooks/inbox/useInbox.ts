@@ -14,7 +14,7 @@ export function useInbox(unreadOnly: boolean) {
   );
   const { data = [], loading, error, reload } = useApiQuery(request);
 
-  const markRead = async (noticeId: number) => {
+  const markRead = async (noticeId: string) => {
     await api.post(endpoints.notifications.inboxRead(noticeId));
     reload();
   };

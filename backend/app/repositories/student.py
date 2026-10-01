@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from sqlalchemy.orm import Session
 
 from app.core.tenancy import UNSCOPED
@@ -16,7 +18,7 @@ class StudentRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def get_by_id(self, student_id: int) -> Student | None:
+    def get_by_id(self, student_id: UUID) -> Student | None:
         return self.db.get(Student, student_id)
 
     def get_by_email(self, email: str) -> Student | None:
@@ -34,7 +36,7 @@ class StudentRepository:
             .all()
         )
 
-    def list_by_organization(self, organization_id: int) -> list[Student]:
+    def list_by_organization(self, organization_id: UUID) -> list[Student]:
         return (
             self.db.query(Student)
             .filter(Student.organization_id == organization_id)
@@ -65,7 +67,7 @@ class OrganizationRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def get_by_id(self, organization_id: int) -> Organization | None:
+    def get_by_id(self, organization_id: UUID) -> Organization | None:
         return self.db.get(Organization, organization_id)
 
     def get_by_name(self, name: str) -> Organization | None:
@@ -90,10 +92,10 @@ class ProfileRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def get_student_profile(self, student_id: int) -> StudentProfile | None:
+    def get_student_profile(self, student_id: UUID) -> StudentProfile | None:
         return self.db.query(StudentProfile).filter(StudentProfile.student_id == student_id).first()
 
-    def get_instructor_profile(self, student_id: int) -> InstructorProfile | None:
+    def get_instructor_profile(self, student_id: UUID) -> InstructorProfile | None:
         return self.db.query(InstructorProfile).filter(InstructorProfile.student_id == student_id).first()
 
     def create_student_profile(self, profile: StudentProfile) -> StudentProfile:
@@ -118,7 +120,7 @@ class InstructorAvailabilityRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def list_by_instructor_profile(self, instructor_profile_id: int) -> list[InstructorAvailability]:
+    def list_by_instructor_profile(self, instructor_profile_id: UUID) -> list[InstructorAvailability]:
         return (
             self.db.query(InstructorAvailability)
             .filter(InstructorAvailability.instructor_profile_id == instructor_profile_id)
@@ -137,7 +139,7 @@ class InstructorAvailabilityRepository:
         self.db.refresh(availability)
         return availability
 
-    def get_by_id(self, availability_id: int) -> InstructorAvailability | None:
+    def get_by_id(self, availability_id: UUID) -> InstructorAvailability | None:
         return self.db.get(InstructorAvailability, availability_id)
 
     def delete(self, availability: InstructorAvailability) -> None:
@@ -149,7 +151,7 @@ class InstructorRatingRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def list_by_instructor_profile(self, instructor_profile_id: int) -> list[InstructorRating]:
+    def list_by_instructor_profile(self, instructor_profile_id: UUID) -> list[InstructorRating]:
         return (
             self.db.query(InstructorRating)
             .filter(InstructorRating.instructor_profile_id == instructor_profile_id)

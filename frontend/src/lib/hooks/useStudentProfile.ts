@@ -8,7 +8,7 @@ import type { StudentProfile } from '@/types/auth';
 export type StudentProfileInput = Pick<StudentProfile, 'phone' | 'document' | 'position' | 'department' | 'bio'>;
 
 /** Perfil complementar do usuario e sua atualizacao (junto com o nome). */
-export function useStudentProfile(userId: number) {
+export function useStudentProfile(userId: string) {
   const request = useCallback(
     () => api.get<StudentProfile>(`/users/${userId}/student-profile`).then((response) => response.data),
     [userId],

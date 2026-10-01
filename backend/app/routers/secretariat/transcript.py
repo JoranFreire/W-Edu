@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -11,7 +13,7 @@ router = APIRouter()
 
 
 @router.get("/enrollments/{enrollment_id}/transcript", response_model=TranscriptOut)
-def get_transcript(enrollment_id: int, db: Session = Depends(get_db), _: Student = Depends(get_current_secretariat)):
+def get_transcript(enrollment_id: UUID, db: Session = Depends(get_db), _: Student = Depends(get_current_secretariat)):
     return TranscriptService(db).for_enrollment(enrollment_id)
 
 

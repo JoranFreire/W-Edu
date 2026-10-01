@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -51,7 +53,7 @@ def create_event(data: NotificationEventCreate, db: Session = Depends(get_db), _
 
 
 @router.post("/events/{event_id}/retry", response_model=NotificationEventOut)
-def retry_event(event_id: int, db: Session = Depends(get_db), _: Student = Depends(get_current_admin_or_coordinator)):
+def retry_event(event_id: UUID, db: Session = Depends(get_db), _: Student = Depends(get_current_admin_or_coordinator)):
     return NotificationEventService(db).retry(event_id)
 
 

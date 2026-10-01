@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -11,13 +13,13 @@ router = APIRouter()
 
 
 @router.get("/offerings/{offering_id}/items", response_model=list[AssessmentItemOut])
-def list_items(offering_id: int, db: Session = Depends(get_db), current: Student = Depends(get_current_teaching_staff)):
+def list_items(offering_id: UUID, db: Session = Depends(get_db), current: Student = Depends(get_current_teaching_staff)):
     return AssessmentItemService(db).list(offering_id, current)
 
 
 @router.post("/offerings/{offering_id}/items", response_model=AssessmentItemOut, status_code=201)
 def create_item(
-    offering_id: int,
+    offering_id: UUID,
     data: AssessmentItemCreate,
     db: Session = Depends(get_db),
     current: Student = Depends(get_current_teaching_staff),
@@ -26,10 +28,10 @@ def create_item(
 
 
 @router.patch("/items/{item_id}", response_model=AssessmentItemOut)
-def update_item(item_id: int, data: AssessmentItemUpdate, db: Session = Depends(get_db), current: Student = Depends(get_current_teaching_staff)):
+def update_item(item_id: UUID, data: AssessmentItemUpdate, db: Session = Depends(get_db), current: Student = Depends(get_current_teaching_staff)):
     return AssessmentItemService(db).update(item_id, data, current)
 
 
 @router.delete("/items/{item_id}", status_code=204)
-def delete_item(item_id: int, db: Session = Depends(get_db), current: Student = Depends(get_current_teaching_staff)):
+def delete_item(item_id: UUID, db: Session = Depends(get_db), current: Student = Depends(get_current_teaching_staff)):
     AssessmentItemService(db).delete(item_id, current)

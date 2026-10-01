@@ -1,5 +1,6 @@
 """Vinculos academicos opcionais de uma oferta: periodo letivo, disciplina, turma-grupo e esquema de notas."""
 
+from uuid import UUID
 from dataclasses import dataclass
 
 from sqlalchemy.orm import Session
@@ -11,10 +12,10 @@ from app.services.academic.errors import bad_request, not_found
 
 @dataclass(frozen=True)
 class AcademicLinks:
-    term_id: int | None
-    subject_id: int | None
-    class_group_id: int | None
-    grading_scheme_id: int | None = None
+    term_id: UUID | None
+    subject_id: UUID | None
+    class_group_id: UUID | None
+    grading_scheme_id: UUID | None = None
 
 
 class OfferingAcademicLinks:

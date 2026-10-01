@@ -4,8 +4,8 @@ export type AttendanceStatus = 'present' | 'late' | 'absent';
 export type AttendanceMethod = 'manual' | 'qr_code' | 'webhook' | 'biometric' | 'facial';
 
 export interface Location {
-  id: number;
-  campus_id: number | null;
+  id: string;
+  campus_id: string | null;
   name: string;
   address: string | null;
   is_active: boolean;
@@ -13,8 +13,8 @@ export interface Location {
 }
 
 export interface Room {
-  id: number;
-  location_id: number;
+  id: string;
+  location_id: string;
   name: string;
   capacity: number;
   resources: string | null;
@@ -23,30 +23,30 @@ export interface Room {
 }
 
 export interface ClassOffering {
-  id: number;
-  course_id: number;
+  id: string;
+  course_id: string;
   name: string;
   starts_at: string;
   ends_at: string;
   capacity: number;
   status: ClassStatus;
-  location_id: number | null;
-  room_id: number | null;
-  instructor_id: number | null;
-  term_id: number | null;
-  subject_id: number | null;
-  class_group_id: number | null;
-  grading_scheme_id: number | null;
-  funding_source_id?: number | null;
+  location_id: string | null;
+  room_id: string | null;
+  instructor_id: string | null;
+  term_id: string | null;
+  subject_id: string | null;
+  class_group_id: string | null;
+  grading_scheme_id: string | null;
+  funding_source_id?: string | null;
   max_absence_percent?: number | null;
   created_at: string;
 }
 
 export interface ScheduledMeeting {
-  id: number;
-  class_offering_id: number;
-  lesson_id: number | null;
-  room_id: number | null;
+  id: string;
+  class_offering_id: string;
+  lesson_id: string | null;
+  room_id: string | null;
   title: string;
   starts_at: string;
   ends_at: string;
@@ -58,7 +58,7 @@ export interface ScheduledMeeting {
 }
 
 export interface InstructorAgendaAvailability {
-  id: number;
+  id: string;
   day_of_week: number;
   start_time: string;
   end_time: string;
@@ -66,12 +66,12 @@ export interface InstructorAgendaAvailability {
 }
 
 export interface InstructorAgendaMeeting {
-  id: number;
-  class_offering_id: number;
+  id: string;
+  class_offering_id: string;
   class_name: string;
-  course_id: number;
+  course_id: string;
   course_name: string;
-  room_id: number | null;
+  room_id: string | null;
   room_name: string | null;
   title: string;
   starts_at: string;
@@ -83,11 +83,11 @@ export interface InstructorAgendaMeeting {
 export interface InstructorAgendaSuggestion {
   starts_at: string;
   ends_at: string;
-  availability_id: number;
+  availability_id: string;
 }
 
 export interface InstructorAgenda {
-  instructor_id: number;
+  instructor_id: string;
   instructor_name: string;
   range_start: string;
   range_end: string;
@@ -97,8 +97,8 @@ export interface InstructorAgenda {
 }
 
 export interface CheckinToken {
-  id: number;
-  scheduled_meeting_id: number;
+  id: string;
+  scheduled_meeting_id: string;
   token: string;
   expires_at: string;
   is_active: boolean;
@@ -106,10 +106,10 @@ export interface CheckinToken {
 }
 
 export interface AttendanceRecord {
-  id: number;
-  scheduled_meeting_id: number;
-  class_offering_id: number;
-  student_id: number;
+  id: string;
+  scheduled_meeting_id: string;
+  class_offering_id: string;
+  student_id: string;
   status: AttendanceStatus;
   method: AttendanceMethod;
   recorded_at: string;
@@ -117,8 +117,8 @@ export interface AttendanceRecord {
 }
 
 export interface MeetingAttendanceSummary {
-  meeting_id: number;
-  class_offering_id: number;
+  meeting_id: string;
+  class_offering_id: string;
   total_enrolled: number;
   present: number;
   late: number;
@@ -127,7 +127,7 @@ export interface MeetingAttendanceSummary {
 }
 
 export interface MeetingAttendanceReportRow {
-  student_id: number;
+  student_id: string;
   student_name: string;
   student_email: string;
   status: AttendanceStatus;

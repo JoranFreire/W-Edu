@@ -66,7 +66,7 @@ export default function ProgramFormModal({ program, units, onSave, onClose }: {
           </select>
         </label>
         <label className={labelCls}>Unidade
-          <select value={form.unit_id ?? ''} onChange={(e) => set({ unit_id: e.target.value ? Number(e.target.value) : null })} className={`mt-1 ${inputCls}`}>
+          <select value={form.unit_id ?? ''} onChange={(e) => set({ unit_id: e.target.value || null })} className={`mt-1 ${inputCls}`}>
             <option value="">Nenhuma</option>
             {units.map((unit) => <option key={unit.id} value={unit.id}>{unit.name}</option>)}
           </select>

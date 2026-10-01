@@ -14,7 +14,7 @@ export function useBenefitItems() {
     await api.post(endpoints.social.items, input);
     reload();
   };
-  const receive = async (itemId: number, input: StockEntryInput) => {
+  const receive = async (itemId: string, input: StockEntryInput) => {
     await api.post(endpoints.social.stock(itemId), input);
     reload();
   };

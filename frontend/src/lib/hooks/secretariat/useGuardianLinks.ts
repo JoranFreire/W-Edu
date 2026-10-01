@@ -19,7 +19,7 @@ export interface GuardianLinkInput {
 export type GuardianFlags = Partial<Pick<GuardianLink, 'is_financial' | 'can_pick_up' | 'is_primary'>>;
 
 /** Responsaveis vinculados ao aluno (secretaria). */
-export function useGuardianLinks(studentId: number) {
+export function useGuardianLinks(studentId: string) {
   const request = useCallback(
     () => api.get<GuardianLink[]>(endpoints.guardians.links(studentId)).then((response) => response.data),
     [studentId],
@@ -30,11 +30,11 @@ export function useGuardianLinks(studentId: number) {
     await api.post(endpoints.guardians.links(studentId), input);
     reload();
   };
-  const update = async (linkId: number, flags: GuardianFlags) => {
+  const update = async (linkId: string, flags: GuardianFlags) => {
     await api.patch(endpoints.guardians.link(linkId), flags);
     reload();
   };
-  const remove = async (linkId: number) => {
+  const remove = async (linkId: string) => {
     await api.delete(endpoints.guardians.link(linkId));
     reload();
   };

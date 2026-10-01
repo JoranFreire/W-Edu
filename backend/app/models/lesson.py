@@ -1,3 +1,6 @@
+from uuid import UUID
+
+from app.core.ids import new_id
 from datetime import datetime, timezone
 from sqlalchemy import String, Text, Integer, ForeignKey, DateTime, Enum as SAEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -20,9 +23,9 @@ class LessonType(str, enum.Enum):
 class Lesson(TenantMixin, Base):
     __tablename__ = "lessons"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    course_id: Mapped[int] = mapped_column(ForeignKey("courses.id"), index=True)
-    module_id: Mapped[int | None] = mapped_column(ForeignKey("course_modules.id"), nullable=True, index=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
+    course_id: Mapped[UUID] = mapped_column(ForeignKey("courses.id"), index=True)
+    module_id: Mapped[UUID | None] = mapped_column(ForeignKey("course_modules.id"), nullable=True, index=True)
     title: Mapped[str] = mapped_column(String(200))
     content: Mapped[str | None] = mapped_column(Text)
     order: Mapped[int] = mapped_column(Integer, default=0)

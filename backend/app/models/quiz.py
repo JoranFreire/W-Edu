@@ -1,3 +1,6 @@
+from uuid import UUID
+
+from app.core.ids import new_id
 from datetime import datetime, timezone
 from sqlalchemy import ForeignKey, DateTime, Integer, Text, JSON, Boolean, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -9,8 +12,8 @@ from app.core.tenancy import TenantMixin
 class Quiz(TenantMixin, Base):
     __tablename__ = "quizzes"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    lesson_id: Mapped[int] = mapped_column(ForeignKey("lessons.id"), unique=True, index=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
+    lesson_id: Mapped[UUID] = mapped_column(ForeignKey("lessons.id"), unique=True, index=True)
     passing_score: Mapped[int] = mapped_column(Integer, default=70)
     max_attempts: Mapped[int] = mapped_column(Integer, default=0)  # 0 = unlimited
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
@@ -23,8 +26,8 @@ class Quiz(TenantMixin, Base):
 class QuizQuestion(TenantMixin, Base):
     __tablename__ = "quiz_questions"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    quiz_id: Mapped[int] = mapped_column(ForeignKey("quizzes.id"), index=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
+    quiz_id: Mapped[UUID] = mapped_column(ForeignKey("quizzes.id"), index=True)
     question: Mapped[str] = mapped_column(Text)
     options: Mapped[list] = mapped_column(JSON)  # ["opção A", "opção B", ...]
     correct_index: Mapped[int] = mapped_column(Integer)
@@ -37,9 +40,9 @@ class QuizAttempt(TenantMixin, Base):
     __tablename__ = "quiz_attempts"
     __table_args__ = (UniqueConstraint("student_id", "quiz_id", "attempted_at"),)
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    student_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
-    quiz_id: Mapped[int] = mapped_column(ForeignKey("quizzes.id"), index=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
+    student_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"), index=True)
+    quiz_id: Mapped[UUID] = mapped_column(ForeignKey("quizzes.id"), index=True)
     score: Mapped[int] = mapped_column(Integer)  # 0-100
     passed: Mapped[bool] = mapped_column(Boolean)
     answers: Mapped[dict] = mapped_column(JSON)  # {str(question_id): selected_index}

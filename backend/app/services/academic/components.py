@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from sqlalchemy.orm import Session
 
 from app.models.academic import CurriculumComponent
@@ -17,7 +19,7 @@ class CurriculumComponentService:
         self.curricula = CurriculumService(db)
         self.subjects = SubjectService(db)
 
-    def add(self, curriculum_id: int, data: CurriculumComponentCreate) -> CurriculumComponent:
+    def add(self, curriculum_id: UUID, data: CurriculumComponentCreate) -> CurriculumComponent:
         curriculum = self.curricula.get_draft_or_409(curriculum_id)
         subject = self.subjects.get_or_404(data.subject_id)
         if not subject.is_active:
@@ -26,15 +28,15 @@ class CurriculumComponentService:
             raise conflict("Disciplina já está na matriz")
         return self.repo.save(CurriculumComponent(curriculum_id=curriculum.id, **data.model_dump()))
 
-    def update(self, component_id: int, data: CurriculumComponentUpdate) -> CurriculumComponent:
+    def update(self, component_id: UUID, data: CurriculumComponentUpdate) -> CurriculumComponent:
         component = self._get_editable(component_id)
         apply_patch(component, data, clearable=frozenset({"hours", "credits"}))
         return self.repo.save(component)
 
-    def remove(self, component_id: int) -> None:
+    def remove(self, component_id: UUID) -> None:
         self.repo.delete(self._get_editable(component_id))
 
-    def _get_editable(self, component_id: int) -> CurriculumComponent:
+    def _get_editable(self, component_id: UUID) -> CurriculumComponent:
         component = self.repo.get_by_id(component_id)
         if not component:
             raise not_found("Componente não encontrado")

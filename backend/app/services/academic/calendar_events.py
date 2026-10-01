@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from datetime import date
 
@@ -20,7 +21,7 @@ class CalendarEventService:
         self.repo = CalendarEventRepository(db)
         self.terms = AcademicTermService(db)
 
-    def list(self, term_id: int | None = None, start: date | None = None, end: date | None = None) -> list[CalendarEvent]:
+    def list(self, term_id: UUID | None = None, start: date | None = None, end: date | None = None) -> list[CalendarEvent]:
         return self.repo.list(term_id=term_id, start=start, end=end)
 
     def create(self, data: CalendarEventCreate) -> CalendarEvent:
@@ -28,7 +29,7 @@ class CalendarEventService:
         self._validate_in_term(event)
         return self.repo.save(event)
 
-    def update(self, event_id: int, data: CalendarEventUpdate) -> CalendarEvent:
+    def update(self, event_id: UUID, data: CalendarEventUpdate) -> CalendarEvent:
         event = self.get_or_404(event_id)
         apply_patch(event, data, clearable=frozenset({"ends_on"}))
         if event.ends_on and event.ends_on < event.starts_on:
@@ -36,16 +37,16 @@ class CalendarEventService:
         self._validate_in_term(event)
         return self.repo.save(event)
 
-    def delete(self, event_id: int) -> None:
+    def delete(self, event_id: UUID) -> None:
         self.repo.delete(self.get_or_404(event_id))
 
-    def get_or_404(self, event_id: int) -> CalendarEvent:
+    def get_or_404(self, event_id: UUID) -> CalendarEvent:
         event = self.repo.get_by_id(event_id)
         if not event:
             raise not_found("Evento não encontrado")
         return event
 
-    def summary(self, term_id: int) -> TermCalendarSummary:
+    def summary(self, term_id: UUID) -> TermCalendarSummary:
         term = self.terms.get_or_404(term_id)
         events = self.repo.list(start=term.starts_on, end=term.ends_on)
         return summarize(term.starts_on, term.ends_on, events)
