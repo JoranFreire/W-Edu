@@ -34,6 +34,12 @@ Se você é o **responsável financeiro**, **Mensalidades** mostra as parcelas d
 
 **Contratos** reúne os contratos de matrícula e rematrícula dos dependentes. Leia, baixe o PDF e clique em **Aceitar**. O aceite fica registrado e pode ser conferido em `/validate-contract` pelo código do contrato.
 
+## Conforme o tipo da instituição
+
+- **Escola**: uso completo (boletim, comunicados, ocorrências, agenda, mensalidades e contratos).
+- **Curso gratuito ou profissionalizante com alunos menores**: acompanhe os avisos de frequência, porque faltas além do limite levam ao desligamento.
+- **Faculdade**: em geral, só o responsável financeiro usa o acesso, para mensalidades e contratos.
+
 ## Dúvidas frequentes
 
 - **Não vejo um dos meus filhos**: peça à secretaria para vincular o aluno à sua conta.

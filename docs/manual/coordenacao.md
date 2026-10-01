@@ -15,7 +15,7 @@ A coordenação monta a estrutura acadêmica, os cursos e as turmas, acompanha p
 | **Agenda** | Turmas de cursos, instrutores, salas e unidades, encontros presenciais ou lives |
 | **Certificados** | Regras, emissão e validação |
 | **Comunicação** | Avisos enviados e modelos das mensagens |
-| **Usuários** | Cadastro de pessoas |
+| **Usuários** | Cadastro de pessoas, filtros por perfil e dossiê de cada pessoa (responsáveis, matrículas, ocorrências) |
 | **Almoxarifado** | Relatórios de consumo (operação fica com a administração) |
 
 ## Estrutura acadêmica (Acadêmico)
@@ -66,3 +66,13 @@ Em **Comunicação**:
 ## Secretaria, professores e almoxarifado
 
 Você tem as mesmas rotinas da secretaria ([manual da secretaria](secretaria.md)) e pode requisitar materiais como os professores. No **Almoxarifado**, a coordenação vê os **Relatórios** de consumo por turma, professor e material, estoque baixo e empréstimos atrasados.
+
+## Conforme o tipo da instituição
+
+- **Escola**: etapas de ensino, componentes curriculares e matriz por série; ano letivo com bimestres; acompanhamento dos diários e do resultado final.
+- **Universidade**: cursos de graduação com créditos, pré-requisitos, optativas, horas complementares, estágio e TCC; avaliação das atividades complementares.
+- **Profissionalizante**: cursos técnicos por módulo, ou cursos livres com aulas, trilhas e certificados.
+- **Curso gratuito / programa social**: turmas com limite de faltas, readmissão de desligados e regras de certificado.
+- **Corporativo**: conteúdos, trilhas, encontros (presenciais ou lives) e certificados por curso.
+
+Detalhes no [guia por tipo de instituição](tipos-de-instituicao.md).

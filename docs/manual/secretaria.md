@@ -76,7 +76,7 @@ Em **Modelos de contrato**, cadastre o texto base dos contratos de matrícula e 
 
 Em **Programas sociais** (Financiadores):
 
-1. **Cadastrar financiador** (prefeitura, empresa, fundo…) e vincular as turmas que ele financia.
+1. **Cadastrar financiador** (prefeitura, empresa, fundo…) e, em **Turmas financiadas**, vincular as turmas que ele financia e o limite de faltas de cada uma.
 2. Em **Benefícios e estoque**, use **Cadastrar item** (lanche, kit, vale-transporte…) e registre as **entradas** de estoque (compra ou doação).
 3. A **entrega** dos benefícios aos presentes em cada encontro é registrada no diário da turma (aba **Benefícios**, botão **Registrar entrega**), pelo professor ou pela coordenação.
 4. **Prestação de contas** de cada financiador: inscritos, matriculados, ativos, concluintes, desistentes e desligados, evasão, benefícios entregues e materiais do almoxarifado usados nas turmas. Use **Baixar planilha (CSV)** para enviar ao financiador.
@@ -93,3 +93,12 @@ Em turmas com limite de faltas, o aluno que passa do limite é desligado automat
 ## Financeiro do aluno
 
 Com acesso ao financeiro, a aba **Financeiro** da ficha mostra as mensalidades do aluno. Ali você pode **Conceder** bolsas e descontos (percentual ou valor fixo, com vigência; o desconto de pontualidade só vale pagando até o vencimento) e **Encerrar** os vigentes; o valor das parcelas futuras é recalculado. Os planos de mensalidade e a geração das cobranças ficam com a administração.
+
+## Conforme o tipo da instituição
+
+- **Escola**: matrícula e rematrícula anual, responsáveis, declarações de matrícula e de frequência, transferências.
+- **Universidade**: **Janelas de matrícula**, exceções na aba **Disciplinas**, **Aproveitamento**, histórico com CR e conclusão.
+- **Profissionalizante pago**: contratos, mensalidades (bolsas e descontos), declarações e conclusão.
+- **Curso gratuito / programa social**: **Editais** (conferência de comprovantes e reservas, seleção e prazos de confirmação) e **Programas sociais** (financiadores, estoque de benefícios e prestação de contas).
+
+Detalhes no [guia por tipo de instituição](tipos-de-instituicao.md).

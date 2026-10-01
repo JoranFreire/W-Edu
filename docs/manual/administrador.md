@@ -16,6 +16,19 @@ O administrador configura a instituição, gerencia usuários e permissões, o f
 Em **Usuários**:
 
 - **Usuários**: crie, edite e desative pessoas, definindo o papel básico: Aluno, Professor, Coordenador, Secretaria, Responsável, Gestor de empresa ou Administrador.
+  - **Filtros por perfil** no topo da lista (Alunos, Responsáveis, Professores, Coordenação, Secretaria…), com a quantidade de cada um, e **busca** por nome ou e-mail. O último filtro fica lembrado.
+  - Clique no nome para abrir o **dossiê** da pessoa, um cartão com abas:
+    - **Resumo**: indicadores (cursos concluídos, certificados, valor em aberto, ocorrências, benefícios) e, ao lado, a **ficha** com perfil, contato, documento, empresa e data de cadastro;
+    - **Responsáveis** (do aluno) ou **Dependentes** (do responsável): parentesco, contato e marcas de financeiro, principal e pode buscar; cada pessoa abre o próprio dossiê;
+    - **Acadêmico**: matrículas em programas, com **Abrir ficha** para a ficha completa na Secretaria, e as turmas que o professor leciona;
+    - **Cursos**: em andamento e **concluídos**, com o progresso nas aulas;
+    - **Certificados**: emitidos, com o código de validação;
+    - **Benefícios**: o que o aluno recebeu nos programas sociais (lanche, kit, transporte);
+    - **Materiais**: requisições ao almoxarifado (pedido, aprovado, recebido e devolvido);
+    - **Financeiro**: resumo e extrato das cobranças, inclusive as que a pessoa paga como responsável;
+    - **Ocorrências**: histórico do aluno em todas as turmas.
+
+    As abas aparecem conforme o perfil da pessoa e as suas permissões. O financeiro, por exemplo, só aparece para quem tem acesso ao financeiro.
 - **Empresas**: organizações vinculadas (o gestor de empresa vê financeiro, documentos, relatórios e usuários só da sua empresa).
 
 ## Perfis de acesso
@@ -75,3 +88,7 @@ Tudo o que a coordenação, a secretaria e os professores fazem também está di
 ## Mais de uma instituição
 
 Se você administra mais de uma instituição, troque no seletor do topo. Dados, usuários e configurações são sempre da instituição selecionada; nada é compartilhado entre elas.
+
+## Conforme o tipo da instituição
+
+Escolha o **tipo** em **Instituição** antes de montar a estrutura acadêmica: ele define os nomes usados em todas as telas. O roteiro de implantação de cada tipo (escola, universidade, profissionalizante pago, curso gratuito/programa social, corporativo e mista) está no [guia por tipo de instituição](tipos-de-instituicao.md).

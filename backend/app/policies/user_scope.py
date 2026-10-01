@@ -17,6 +17,12 @@ def ensure_academic_user_scope(current: Student, target: Student) -> None:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Perfil fora do escopo")
 
 
+def ensure_can_view_user(current: Student, target: Student) -> None:
+    """Consulta (dossie): a equipe ve qualquer pessoa da instituicao; gestor de empresa, so a propria empresa."""
+    if current.role == UserRole.company_manager and target.organization_id != current.organization_id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Usuário fora da empresa")
+
+
 def ensure_availability_scope(current: Student, service: StudentService, availability_id: int) -> InstructorAvailability:
     availability = service.availability_repo.get_by_id(availability_id)
     if not availability:

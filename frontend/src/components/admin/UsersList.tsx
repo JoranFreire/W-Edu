@@ -1,20 +1,30 @@
 'use client';
 
-import { PencilIcon, TrashIcon, UserCircleIcon, UsersIcon } from '@heroicons/react/24/outline';
+import Link from 'next/link';
+import { ChevronRightIcon, PencilIcon, TrashIcon, UsersIcon } from '@heroicons/react/24/outline';
 import type { Organization, User } from '@/types/auth';
 import { roleLabels } from '@/types/auth';
 
 const roleLabel: Record<string, string> = roleLabels;
 
-export default function UsersList({ users, organizations, canDelete, canManageUser, onEdit, onProfile, onDelete }: {
+/** Lista de usuarios; o nome abre o dossie da pessoa. */
+export default function UsersList({ users, organizations, canDelete, canManageUser, onEdit, onDelete, filtered = false }: {
   users: User[];
   organizations: Organization[];
   canDelete: boolean;
   canManageUser: (user: User) => boolean;
   onEdit: (user: User) => void;
-  onProfile: (user: User) => void;
   onDelete: (id: number) => void;
+  /** Lista vazia por causa do filtro (e nao por falta de cadastro). */
+  filtered?: boolean;
 }) {
+  if (users.length === 0 && filtered) {
+    return (
+      <div className="rounded-xl border border-dashed border-gray-300 bg-white p-8 text-center text-sm text-gray-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400">
+        Nenhum usuário encontrado com esse filtro.
+      </div>
+    );
+  }
   if (users.length === 0) {
     return (
       <div className="rounded-xl border border-dashed border-gray-300 bg-white p-10 text-center dark:border-gray-600 dark:bg-gray-800">
@@ -31,17 +41,19 @@ export default function UsersList({ users, organizations, canDelete, canManageUs
     <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 divide-y divide-gray-100 dark:divide-gray-700">
       {users.map((user) => (
         <div key={user.id} className="flex items-center justify-between px-5 py-4">
-          <div className="flex items-center space-x-4">
-            <div className="w-9 h-9 bg-indigo-600 rounded-full flex items-center justify-center">
+          <Link href={`/admin/users/${user.id}`} aria-label={`Dossiê de ${user.name}`} className="group flex min-w-0 items-center space-x-4">
+            <div className="w-9 h-9 shrink-0 bg-indigo-600 rounded-full flex items-center justify-center">
               <span className="text-white text-sm font-medium">{user.name.charAt(0).toUpperCase()}</span>
             </div>
-            <div>
-              <p className="text-sm font-medium text-gray-900 dark:text-white">{user.name}</p>
+            <div className="min-w-0">
+              <p className="flex items-center gap-1 text-sm font-medium text-gray-900 group-hover:text-indigo-700 dark:text-white dark:group-hover:text-indigo-300">
+                {user.name}<ChevronRightIcon className="h-3.5 w-3.5 opacity-0 transition-opacity group-hover:opacity-100" />
+              </p>
               <p className="text-xs text-gray-500 dark:text-gray-400">
                 {user.email}{user.organization_id ? ` · ${organizations.find((o) => o.id === user.organization_id)?.name ?? 'Empresa'}` : ''}
               </p>
             </div>
-          </div>
+          </Link>
           <div className="flex items-center space-x-3">
             <span className={`text-xs px-2 py-1 rounded-full font-medium ${['admin', 'institution_admin', 'super_admin'].includes(user.role) ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' : user.role === 'instructor' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'}`}>
               {roleLabel[user.role]}
@@ -52,14 +64,11 @@ export default function UsersList({ users, organizations, canDelete, canManageUs
             <p className="text-xs text-gray-400 hidden sm:block">{new Date(user.created_at).toLocaleDateString('pt-BR')}</p>
             {canManageUser(user) && (
               <>
-                <button onClick={() => onEdit(user)} className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors">
+                <button onClick={() => onEdit(user)} aria-label={`Editar ${user.name}`} className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors">
                   <PencilIcon className="w-4 h-4" />
                 </button>
-                <button onClick={() => onProfile(user)} className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors">
-                  <UserCircleIcon className="w-4 h-4" />
-                </button>
                 {canDelete && (
-                  <button onClick={() => onDelete(user.id)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">
+                  <button onClick={() => onDelete(user.id)} aria-label={`Excluir ${user.name}`} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">
                     <TrashIcon className="w-4 h-4" />
                   </button>
                 )}

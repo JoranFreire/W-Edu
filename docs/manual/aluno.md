@@ -71,6 +71,16 @@ Precisa de uma exceção (pré-requisito, limite de créditos)? Fale com a secre
 
 **Certificados** mostra os certificados emitidos, com download do PDF e o **código de validação**. Qualquer pessoa confere a autenticidade em `/validate-certificate`.
 
+## Conforme o tipo da sua instituição
+
+- **Escola**: o dia a dia é a **Agenda escolar**, o **Boletim** por bimestre e os **Avisos**. Matrícula em disciplinas e integralização normalmente não aparecem.
+- **Universidade**: **Matrícula em disciplinas** a cada semestre e **Integralização** (atividades complementares, estágio e TCC) são centrais.
+- **Profissionalizante pago**: aulas por módulo, **Mensalidades**, **Contratos** e **Certificados**; nos cursos técnicos, o estágio fica em **Integralização**.
+- **Curso gratuito / programa social**: a entrada é pelo edital em `/inscricoes`. Acompanhe **Inscrições**, os **Benefícios** e a frequência: faltar além do limite leva ao desligamento.
+- **Corporativo**: catálogo, **Trilhas**, **Progresso** e **Certificados**.
+
+Detalhes no [guia por tipo de instituição](tipos-de-instituicao.md).
+
 ## Dúvidas frequentes
 
 - **Não vejo meu boletim**: as notas só aparecem depois que o professor fecha a etapa.

@@ -43,6 +43,7 @@ EXPECTED: list[ExpectedRoute] = [
     ("GET", "/assignments/lessons/{lesson_id}/submissions", "get_current_admin_or_coordinator"),
     ("PATCH", "/assignments/submissions/{submission_id}", "get_current_admin_or_coordinator"),
     ("DELETE", "/admin/users/{student_id}", "get_current_admin"),
+    ("GET", "/admin/users/{student_id}/dossier", "get_current_academic_staff"),
     ("POST", "/admin/quizzes", "get_current_admin_or_coordinator"),
     ("PATCH", "/admin/quizzes/lesson/{lesson_id}", "get_current_admin_or_coordinator"),
     ("DELETE", "/admin/quizzes/lesson/{lesson_id}", "get_current_admin"),

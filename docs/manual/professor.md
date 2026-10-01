@@ -65,6 +65,15 @@ Se a escola usa o almoxarifado, **Requisições de material** permite pedir iten
 
 Você também tem acesso ao catálogo de cursos, **Progresso**, **Boletim**, **Avisos**, **Histórico escolar**, **Certificados** e **Sessões de Voz** como usuário — veja o [manual do aluno](aluno.md).
 
+## Conforme o tipo da instituição
+
+- **Escola**: chamada diária, notas por **bimestre**, agenda de tarefas e ocorrências; o responsável recebe tudo.
+- **Universidade**: notas por etapa (N1/N2) e, como **orientador**, validação das horas de estágio e avaliação do TCC.
+- **Profissionalizante**: aulas práticas com **requisição de materiais**; empréstimo de ferramentas com devolução.
+- **Curso gratuito / programa social**: chamada em **todo** encontro (a frequência pode desligar o aluno) e **Registrar entrega** dos benefícios aos presentes.
+
+Detalhes no [guia por tipo de instituição](tipos-de-instituicao.md).
+
 ## Dúvidas frequentes
 
 - **Não vejo uma turma**: você precisa estar vinculado como instrutor da turma. Peça à coordenação.
