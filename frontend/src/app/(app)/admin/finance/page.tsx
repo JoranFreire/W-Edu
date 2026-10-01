@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { BanknotesIcon, CreditCardIcon, DocumentTextIcon } from '@heroicons/react/24/outline';
 import BillingPlanForm from '@/components/admin/BillingPlanForm';
 import ChargeForm from '@/components/admin/ChargeForm';
@@ -9,6 +10,7 @@ import ChargesList from '@/components/admin/finance/ChargesList';
 import PlansList from '@/components/admin/finance/PlansList';
 import SubscriptionsList from '@/components/admin/finance/SubscriptionsList';
 import Modal from '@/components/common/Modal';
+import { secondaryButtonCls } from '@/components/common/formStyles';
 import SectionHeader from '@/components/common/SectionHeader';
 import Spinner from '@/components/common/Spinner';
 import TabNav, { type TabItem } from '@/components/common/TabNav';
@@ -56,9 +58,12 @@ export default function AdminFinancePage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Financeiro</h1>
-        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Planos, assinaturas e cobranças.</p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Financeiro</h1>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Planos, assinaturas e cobranças.</p>
+        </div>
+        {isAdmin && <Link href="/admin/finance/tuition" className={secondaryButtonCls}>Mensalidades educacionais</Link>}
       </div>
 
       <div className="space-y-5">

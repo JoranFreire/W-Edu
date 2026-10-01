@@ -200,10 +200,10 @@ Implementado na Fase 14 (entrega 1), em `/secretariat`: `program_enrollment_even
 
 ## 7. Financeiro Educacional
 
-- Mensalidade por programa, turma-grupo ou credito cursado.
+- Mensalidade por programa, turma-grupo ou credito cursado. Implementado na Fase 17 (entrega 1), em `/tuition`: `tuition_plans` (periodo letivo, base programa/turma-grupo/credito, valor, parcelas e primeiro vencimento) gera as parcelas em `charges` (agora com matricula, plano, numero da parcela, pagador, valor bruto, descontos, multa, juros e valor pago; unicas por matricula/plano/parcela, entao gerar de novo so cria as que faltam). Por credito, o valor usa os creditos inscritos no periodo.
 - Contrato de matricula e rematricula gerado no GED.
-- Bolsas, descontos (irmaos, pontualidade, convenio) e multa/juros.
-- Responsavel financeiro distinto do aluno.
+- Bolsas, descontos (irmaos, pontualidade, convenio) e multa/juros. Implementado na Fase 17 (entrega 1): `student_discounts` (bolsa, irmaos, convenio, pontualidade ou outro; percentual ou valor fixo; vigencia), aplicados na geracao; a pontualidade so vale pagando ate o vencimento. Multa e juros de mora (padrao 2% e 1% ao mes, pro rata die) ficam em `institutions.settings["finance"]`; regras puras em `app/services/tuition/rules.py`. A baixa calcula o valor pago na data.
+- Responsavel financeiro distinto do aluno. Implementado na Fase 17 (entrega 1): o vinculo de responsavel marcado como financeiro vira o pagador (`charges.payer_id`) das parcelas geradas; aluno e pagador veem o extrato em `/tuition/my/charges`.
 - Planos SaaS por instituicao, cobrados pelo `super_admin`.
 
 ---

@@ -97,6 +97,13 @@ def get_current_school_staff(current: Student = Depends(get_current_student)) ->
     return current
 
 
+def get_current_finance_staff(current: Student = Depends(get_current_student)) -> Student:
+    """Financeiro educacional (bolsas, descontos e extratos): administradores e secretaria."""
+    if current.role not in ADMIN_ROLES | {UserRole.secretary}:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Acesso restrito ao financeiro")
+    return current
+
+
 def get_current_guardian(current: Student = Depends(get_current_student)) -> Student:
     """Portal do responsavel."""
     if current.role != UserRole.guardian:

@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
-from app.routers import assignments, auth, users, students, courses, lessons, enrollments, progress, sessions, webhooks, admin, quiz, learning_paths, schedule, certificates, notifications, finance, documents, analytics, forum, chat, institutions, platform, academic, assessment, secretariat, guardians, school_life, registration, completion
+from app.routers import assignments, auth, users, students, courses, lessons, enrollments, progress, sessions, webhooks, admin, quiz, learning_paths, schedule, certificates, notifications, finance, documents, analytics, forum, chat, institutions, platform, academic, assessment, secretariat, guardians, school_life, registration, completion, tuition
 from app.services.notification_worker import run_notification_worker
 
 
@@ -65,6 +65,7 @@ app.include_router(guardians.router, prefix="/guardians", tags=["guardians"])
 app.include_router(school_life.router, prefix="/school", tags=["school"])
 app.include_router(registration.router, prefix="/registration", tags=["registration"])
 app.include_router(completion.router, prefix="/completion", tags=["completion"])
+app.include_router(tuition.router, prefix="/tuition", tags=["tuition"])
 
 
 @app.get("/health")
