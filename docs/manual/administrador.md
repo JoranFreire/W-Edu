@@ -17,7 +17,18 @@ Em **Usuários**:
 
 - **Usuários**: crie, edite e desative pessoas, definindo o papel básico: Aluno, Professor, Coordenador, Secretaria, Responsável, Gestor de empresa ou Administrador.
   - **Filtros por perfil** no topo da lista (Alunos, Responsáveis, Professores, Coordenação, Secretaria…), com a quantidade de cada um, e **busca** por nome ou e-mail. O último filtro fica lembrado.
-  - Clique no nome para abrir o **dossiê** da pessoa: dados pessoais; **responsáveis** do aluno, com parentesco, contato e indicação de financeiro, principal e quem pode buscar; **dependentes** do responsável; matrículas, com o atalho **Abrir ficha** para a ficha completa na Secretaria; cursos e certificados; resumo financeiro; ocorrências recentes; e turmas que o professor leciona. Cada responsável e cada dependente abre o próprio dossiê. As seções aparecem conforme as suas permissões (o financeiro, por exemplo, só para quem tem acesso ao financeiro).
+  - Clique no nome para abrir o **dossiê** da pessoa, um cartão com abas:
+    - **Resumo**: indicadores (cursos concluídos, certificados, valor em aberto, ocorrências, benefícios) e, ao lado, a **ficha** com perfil, contato, documento, empresa e data de cadastro;
+    - **Responsáveis** (do aluno) ou **Dependentes** (do responsável): parentesco, contato e marcas de financeiro, principal e pode buscar; cada pessoa abre o próprio dossiê;
+    - **Acadêmico**: matrículas em programas, com **Abrir ficha** para a ficha completa na Secretaria, e as turmas que o professor leciona;
+    - **Cursos**: em andamento e **concluídos**, com o progresso nas aulas;
+    - **Certificados**: emitidos, com o código de validação;
+    - **Benefícios**: o que o aluno recebeu nos programas sociais (lanche, kit, transporte);
+    - **Materiais**: requisições ao almoxarifado (pedido, aprovado, recebido e devolvido);
+    - **Financeiro**: resumo e extrato das cobranças, inclusive as que a pessoa paga como responsável;
+    - **Ocorrências**: histórico do aluno em todas as turmas.
+
+    As abas aparecem conforme o perfil da pessoa e as suas permissões. O financeiro, por exemplo, só aparece para quem tem acesso ao financeiro.
 - **Empresas**: organizações vinculadas (o gestor de empresa vê financeiro, documentos, relatórios e usuários só da sua empresa).
 
 ## Perfis de acesso
