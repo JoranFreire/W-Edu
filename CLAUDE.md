@@ -1,6 +1,6 @@
 # W-Edu — Convenções
 
-Plataforma educacional SaaS multi-instituição: backend FastAPI + SQLAlchemy + PostgreSQL (`backend/`), frontend Next.js 16 + React 19 + Tailwind 4 (`frontend/`). Visão e roadmap: `ROADMAP.md`, `docs/MULTI_INSTITUTION.md`, `docs/PERMISSIONS.md`.
+Plataforma educacional SaaS multi-instituição: backend FastAPI + SQLAlchemy + PostgreSQL (`backend/`), frontend Next.js 16 + React 19 + Tailwind 4 (`frontend/`), app Flutter para alunos e responsáveis (`frontend-mobile/`). Visão e roadmap: `ROADMAP.md`, `docs/MULTI_INSTITUTION.md`, `docs/PERMISSIONS.md`.
 
 ## Princípio obrigatório: responsabilidade única (SRP)
 
@@ -27,6 +27,11 @@ Vale para todo código tocado, novo ou antigo. Ao alterar um arquivo que mistura
 - Erros de API: `apiErrorMessage(error, fallback)`; nunca `catch (e: any)`.
 - Ids são `string` (UUID): nada de `Number(id)` em parâmetros de rota ou selects; mapas por id são `Record<string, …>`.
 - Estado de `localStorage`: `useStoredValue`; formulário que parte de dados carregados: componente filho com `key` e estado inicial por props.
+
+**Mobile** (`frontend-mobile/`)
+- Riverpod 3 + go_router + dio + flutter_secure_storage, por feature: `features/<x>/{data/, <x>_providers.dart, screens/, widgets/}`; dependências `features` → `shared` → `core`.
+- Repositório só faz HTTP → model; estado remoto em provider com `AsyncValue` (carregando, erro e vazio via `ListaRemota`).
+- Abas por papel em `router/rotas.dart` (`Aba.visivelPara`); o redirect bloqueia rota de aba não permitida.
 
 ## Multi-tenant
 
@@ -74,6 +79,12 @@ npx tsc --noEmit
 npm run lint      # ESLint flat config (next lint não existe no Next 16)
 npm run build
 npm run test:e2e  # Playwright; exige API com banco do scripts/seed_e2e.py (ver frontend/e2e/README.md)
+```
+
+Mobile (`frontend-mobile/`):
+```bash
+flutter analyze
+flutter test
 ```
 
 Teste de carga: `backend/loadtest/README.md`.
