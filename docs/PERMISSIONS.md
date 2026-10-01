@@ -246,6 +246,17 @@ O limite de alunos do plano vale no cadastro de usuarios com papel aluno (409 ao
 
 Escopo do instrutor em `app/policies/retention_access.py`.
 
+## Almoxarifado (`/warehouse`)
+
+| Recurso | Permissao |
+| --- | --- |
+| Ver materiais e saldo | qualquer permissao do almoxarifado (`get_current_warehouse_user`) |
+| Requisitar, acompanhar e cancelar as proprias requisicoes (pendentes ou aprovadas) | `warehouse.request` (turma vinculada: so as que ministra, salvo coordenacao) |
+| Cadastrar materiais, lancar entradas, aprovar/recusar, registrar retirada e devolucao | `warehouse.manage` |
+| Estoque baixo, devolucoes atrasadas e consumo | `warehouse.reports` |
+
+O almoxarife e um perfil de acesso com `warehouse.manage` (por padrao so administradores a tem).
+
 ## Caixa de avisos (`/notifications/me`)
 
 | Recurso | Todos os papeis |

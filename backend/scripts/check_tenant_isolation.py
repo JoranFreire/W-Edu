@@ -397,6 +397,20 @@ async def run() -> int:
         r = await client.get(f"/retention/offerings/{class_a}", headers=admin_b)
         c.expect(r.status_code == 404, f"B cannot read A retention: {r.status_code}")
 
+        # Almoxarifado: materiais e requisicoes de A invisiveis para B.
+        r = await client.post("/warehouse/items", json={"name": "Papel A"}, headers=admin_a)
+        material_a = r.json().get("id")
+        r = await client.get("/warehouse/items", headers=admin_b)
+        c.expect(r.json() == [], f"B lists no A materials: {r.json()}")
+        r = await client.post(f"/warehouse/items/{material_a}/entries", json={"quantity": 5, "received_on": "2027-01-01"}, headers=admin_b)
+        c.expect(r.status_code == 404, f"B cannot stock A material: {r.status_code}")
+        r = await client.post("/warehouse/requests", json={"purpose": "X", "needed_on": "2027-01-01", "lines": [{"item_id": material_a, "quantity": 1}]}, headers=admin_b)
+        c.expect(r.status_code == 404, f"B cannot request A material: {r.status_code}")
+        r = await client.post("/warehouse/requests", json={"purpose": "Aula", "needed_on": "2027-01-01", "lines": [{"item_id": material_a, "quantity": 1}]}, headers=admin_a)
+        request_a = r.json().get("id")
+        r = await client.post(f"/warehouse/requests/{request_a}/reject", json={"note": "x"}, headers=admin_b)
+        c.expect(r.status_code == 404, f"B cannot reject A request: {r.status_code}")
+
         # Contratos: modelo e contrato de A invisiveis para B.
         r = await client.post("/contracts/templates", json={"name": "Contrato A", "body": "Contrato de {student_name}."}, headers=admin_a)
         template_a = r.json().get("id")

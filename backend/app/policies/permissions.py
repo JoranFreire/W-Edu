@@ -19,3 +19,9 @@ def ensure_permission(user: Student, key: str, detail: str) -> Student:
     if not has_permission(user, key):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=detail)
     return user
+
+
+def ensure_any_permission(user: Student, keys: tuple[str, ...], detail: str) -> Student:
+    if not any(has_permission(user, key) for key in keys):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=detail)
+    return user

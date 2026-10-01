@@ -7,11 +7,13 @@ import io
 from sqlalchemy.orm import Session
 
 from app.models.admissions import SeatKind
+from app.repositories.warehouse import MaterialRequestRepository
 from app.repositories.social import BenefitDeliveryRepository, BenefitStockRepository, FundingSourceRepository, SocialIndicatorRepository
 from app.schemas.social_programs import BenefitUsage, FundingReportOut, FundingSourceOut, OfferingIndicators, ProfileOut
 from app.services.social.funding import FundingSourceService
 from app.services.social.minimum_wage import MinimumWage, MinimumWageProvider
 from app.services.social.rules import indicators, profile_counts
+from app.services.warehouse.reports import consumption
 
 
 
@@ -25,6 +27,7 @@ class FundingReportService:
         self.deliveries = BenefitDeliveryRepository(db)
         self.stock = BenefitStockRepository(db)
         self.minimum_wage = MinimumWageProvider(db)
+        self.material_requests = MaterialRequestRepository(db)
 
     def report(self, funding_id: int, minimum_wage_cents: int | None = None) -> FundingReportOut:
         """Faixas de renda pelo salario minimo informado ou, sem ele, o do Banco Central."""
@@ -45,12 +48,15 @@ class FundingReportService:
         answers = [(a.birth_date, a.schooling, a.family_income_cents, a.household_size, a.seat_kind == SeatKind.reserved)
                    for a in self.indicators.confirmed_answers(ids)]
         usage = [BenefitUsage(item_name=name, unit=unit, quantity=quantity, cost_cents=cost) for name, unit, quantity, cost in self.deliveries.usage(ids)]
-        spent = sum(item.cost_cents for item in usage)
+        materials = consumption(self.material_requests.delivered_for_offerings(ids)).by_item
+        spent = sum(item.cost_cents for item in usage) + sum(row.cost_cents for row in materials)
         return FundingReportOut(
             funding=FundingSourceOut.model_validate(funding), offerings=rows, totals=totals,
             profile=ProfileOut(**profile_counts(answers, date.today(), wage.cents)), benefits=usage,
             minimum_wage_cents=wage.cents, minimum_wage_source=wage.source,
-            stock_received_cents=self.stock.received_cost(funding.id), benefits_cost_cents=spent,
+            stock_received_cents=self.stock.received_cost(funding.id), benefits_cost_cents=sum(item.cost_cents for item in usage),
+            materials=[BenefitUsage(item_name=row.label, unit="", quantity=row.quantity, cost_cents=row.cost_cents) for row in materials],
+            materials_cost_cents=sum(row.cost_cents for row in materials),
             budget_balance_cents=funding.amount_cents - spent if funding.amount_cents is not None else None,
         )
 
@@ -69,4 +75,8 @@ class FundingReportService:
         writer.writerow(["Benefício", "Unidade", "Quantidade", "Custo (R$)"])
         for item in report.benefits:
             writer.writerow([item.item_name, item.unit, item.quantity, f"{item.cost_cents / 100:.2f}".replace(".", ",")])
+        writer.writerow([])
+        writer.writerow(["Material do almoxarifado", "Quantidade", "Custo (R$)"])
+        for item in report.materials:
+            writer.writerow([item.item_name, item.quantity, f"{item.cost_cents / 100:.2f}".replace(".", ",")])
         return buffer.getvalue()

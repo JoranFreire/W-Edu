@@ -77,6 +77,8 @@ export interface FundingReport {
   benefits: { item_name: string; unit: string; quantity: number; cost_cents: number }[];
   stock_received_cents: number;
   benefits_cost_cents: number;
+  materials: { item_name: string; unit: string; quantity: number; cost_cents: number }[];
+  materials_cost_cents: number;
   budget_balance_cents: number | null;
   minimum_wage_cents: number;
   minimum_wage_source: 'bcb' | 'seed' | 'informed' | 'fallback';
