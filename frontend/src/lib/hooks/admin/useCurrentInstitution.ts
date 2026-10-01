@@ -6,6 +6,7 @@ import { endpoints } from '@/lib/api/endpoints';
 import { useApiQuery } from '@/lib/hooks/useApiQuery';
 import { useAuthStore } from '@/store/authStore';
 import type { Institution, InstitutionBranding, InstitutionType } from '@/types/institution';
+import type { PublicProfile } from '@/types/publicSite';
 
 export interface InstitutionInput {
   name: string;
@@ -27,5 +28,11 @@ export function useCurrentInstitution() {
     await fetchInstitution();
   };
 
-  return { institution: query.data, loading: query.loading, error: query.error, save };
+  /** Conteudo da pagina publica; campos vazios sao limpos. */
+  const savePublicProfile = async (profile: PublicProfile) => {
+    await api.patch<Institution>(endpoints.institutions.current, { public_profile: profile });
+    query.reload();
+  };
+
+  return { institution: query.data, loading: query.loading, error: query.error, save, savePublicProfile };
 }

@@ -14,6 +14,7 @@ from app.repositories.access import AccessRoleRepository
 from app.repositories.student import StudentRepository
 from app.services.institution import InstitutionService
 from app.services.people.roles import UserRoleService
+from app.services.public_site.domains import InstitutionDomainService
 from app.services.tenant_access import TenantAccessService
 from app.policies.roles import has_any_role, has_role, is_super_admin
 
@@ -40,9 +41,18 @@ def requested_institution_ref(request: Request) -> str | None:
     return request.headers.get(INSTITUTION_HEADER) or slug_from_host(host)
 
 
+def request_institution_ref(request: Request, db: Session) -> str | None:
+    """Instituicao pedida: header `X-Institution`, subdominio ou dominio proprio do cliente (ex.: escola.com.br)."""
+    explicit = requested_institution_ref(request)
+    if explicit:
+        return explicit
+    host = request.headers.get("x-forwarded-host") or request.headers.get("host")
+    return InstitutionDomainService(db).ref_for_host(host)
+
+
 def _activate_institution(request: Request, db: Session, student: Student, payload: dict) -> None:
-    """Resolve a instituicao (header, subdominio ou token) e vincula a sessao do banco."""
-    requested = requested_institution_ref(request) or payload.get("inst")
+    """Resolve a instituicao (header, subdominio, dominio proprio ou token) e vincula a sessao do banco."""
+    requested = request_institution_ref(request, db) or payload.get("inst")
     institution = TenantAccessService(db).resolve_for_user(student, requested)
     bind_institution(db, institution.id)
     request.state.institution = institution
@@ -52,8 +62,8 @@ def _activate_institution(request: Request, db: Session, student: Student, paylo
 
 
 def get_public_institution(request: Request, db: Session = Depends(get_db)) -> Institution:
-    """Rotas publicas por instituicao (catalogo de editais): header, subdominio ou `?institution=`; filtra a sessao."""
-    ref = requested_institution_ref(request) or request.query_params.get("institution")
+    """Rotas publicas por instituicao (catalogo de editais): header, subdominio, dominio proprio ou `?institution=`."""
+    ref = request_institution_ref(request, db) or request.query_params.get("institution")
     institution = InstitutionService(db).get_public(ref)
     bind_institution(db, institution.id)
     return institution

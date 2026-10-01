@@ -17,6 +17,9 @@ class InstitutionRepository:
     def get_by_slug(self, slug: str) -> Institution | None:
         return self.db.query(Institution).filter(Institution.slug == slug).first()
 
+    def get_by_custom_domain(self, hostname: str) -> Institution | None:
+        return self.db.query(Institution).filter(Institution.custom_domain == hostname).first()
+
     def get_by_ref(self, ref: str | UUID) -> Institution | None:
         """Instituicao pelo id (UUID) ou pelo slug."""
         institution_id = parse_id(ref)

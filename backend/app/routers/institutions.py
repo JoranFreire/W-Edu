@@ -1,10 +1,10 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.dependencies import get_current_admin, get_current_institution, get_current_student, requested_institution_ref
+from app.dependencies import get_current_admin, get_current_institution, get_current_student, request_institution_ref
 from app.models.institution import Institution
 from app.models.student import Student
 from app.schemas.institution import CampusCreate, CampusOut, CampusUpdate, InstitutionOut, InstitutionSummary, InstitutionUpdate
@@ -15,11 +15,12 @@ router = APIRouter()
 
 
 @router.get("/public", response_model=InstitutionSummary | None)
-def get_public(db: Session = Depends(get_db), institution_ref: str | None = Depends(requested_institution_ref)):
-    """Marca da instituicao do subdominio/header, para telas publicas (login).
+def get_public(request: Request, db: Session = Depends(get_db)):
+    """Marca da instituicao do subdominio, dominio proprio ou header, para telas publicas (login).
 
     No dominio principal nao ha instituicao: responde null (nao e erro); referencia desconhecida da 404.
     """
+    institution_ref = request_institution_ref(request, db)
     if not institution_ref:
         return None
     return InstitutionService(db).get_public(institution_ref)

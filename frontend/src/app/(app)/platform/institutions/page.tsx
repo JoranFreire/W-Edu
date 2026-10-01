@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { GlobeAltIcon, PlusIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 import CreateInstitutionForm from '@/components/platform/CreateInstitutionForm';
+import DomainModal from '@/components/platform/DomainModal';
 import InstitutionsTable from '@/components/platform/InstitutionsTable';
 import { type NewInstitutionInput, usePlatformInstitutions } from '@/lib/hooks/platform/usePlatformInstitutions';
 import { useErrorToast } from '@/lib/hooks/useErrorToast';
@@ -14,6 +15,7 @@ export default function PlatformInstitutionsPage() {
   const { institution: current, switchInstitution } = useAuthStore();
   const platform = usePlatformInstitutions();
   const [showForm, setShowForm] = useState(false);
+  const [editingDomain, setEditingDomain] = useState<Institution | null>(null);
   useErrorToast(platform.error, 'Erro ao carregar instituições.');
 
   const create = async (input: NewInstitutionInput) => {
@@ -50,9 +52,12 @@ export default function PlatformInstitutionsPage() {
         {platform.loading && platform.institutions.length === 0 ? (
           <p className="p-6 text-sm text-gray-500 dark:text-gray-400">Carregando...</p>
         ) : (
-          <InstitutionsTable institutions={platform.institutions} activeSlug={current?.slug} onStatusChange={changeStatus} onEnter={enter} />
+          <InstitutionsTable institutions={platform.institutions} activeSlug={current?.slug} onStatusChange={changeStatus} onEnter={enter} onDomain={setEditingDomain} />
         )}
       </div>
+      {editingDomain && (
+        <DomainModal key={editingDomain.id} institution={editingDomain} onSave={(domain) => platform.setDomain(editingDomain, domain)} onClose={() => setEditingDomain(null)} />
+      )}
     </div>
   );
 }

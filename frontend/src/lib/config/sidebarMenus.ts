@@ -4,7 +4,7 @@ import {
   HomeIcon, BookOpenIcon, ChartBarIcon, MicrophoneIcon, Cog6ToothIcon,
   UsersIcon, AcademicCapIcon, CalendarDaysIcon, ChatBubbleLeftRightIcon,
   BanknotesIcon, Squares2X2Icon, MapIcon, ShieldCheckIcon, DocumentTextIcon,
-  BuildingLibraryIcon, GlobeAltIcon, BellIcon, CreditCardIcon, RectangleStackIcon, PencilSquareIcon, ClipboardDocumentCheckIcon, ChartPieIcon, BriefcaseIcon, ArchiveBoxIcon, BuildingStorefrontIcon, KeyIcon, DocumentDuplicateIcon, MegaphoneIcon, GiftIcon, FolderOpenIcon, DocumentChartBarIcon, UserGroupIcon,
+  BuildingLibraryIcon, GlobeAltIcon, BellIcon, CreditCardIcon, RectangleStackIcon, PencilSquareIcon, ClipboardDocumentCheckIcon, ChartPieIcon, BriefcaseIcon, ArchiveBoxIcon, BuildingStorefrontIcon, KeyIcon, DocumentDuplicateIcon, InboxArrowDownIcon, MegaphoneIcon, GiftIcon, FolderOpenIcon, DocumentChartBarIcon, UserGroupIcon,
 } from '@heroicons/react/24/outline';
 
 interface MenuItem { name: string; href: string; icon: ComponentType<{ className?: string }> }
@@ -52,6 +52,7 @@ export const adminMenu: MenuItem[] = [
 export const superAdminMenu: MenuItem[] = [
   { name: 'Plataforma', href: '/platform/institutions', icon: GlobeAltIcon },
   { name: 'Planos SaaS', href: '/platform/plans', icon: CreditCardIcon },
+  { name: 'Interessados', href: '/platform/leads', icon: InboxArrowDownIcon },
   ...adminMenu,
 ];
 

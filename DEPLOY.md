@@ -101,6 +101,17 @@ TENANT_BASE_DOMAIN=wedu.com.br
 NEXT_PUBLIC_TENANT_BASE_DOMAIN=wedu.com.br
 ```
 
+#### Domínio próprio do cliente
+
+Uma instituição pode usar o próprio domínio (ex.: `escola.com.br`): na raiz ele mostra a página pública dela (cursos, inscrições abertas, contatos) e o acesso ao sistema, enquanto o domínio da plataforma mostra a página de contratação.
+
+1. O super admin cadastra o domínio em **Plataforma → Instituições → Domínio**.
+2. O cliente aponta o domínio para o servidor (registro `A` para o IP ou `CNAME` para o domínio da plataforma).
+3. O nginx precisa aceitar o host (o `server_name _;` padrão já aceita qualquer um) e repassá-lo (`proxy_set_header Host $host;` e `X-Forwarded-Host $host;`, já no `deploy/nginx.conf`).
+4. Emita o certificado HTTPS do domínio (ex.: `certbot --nginx -d escola.com.br`), ou use um proxy com TLS sob demanda (Caddy) para muitos clientes.
+
+As páginas públicas são renderizadas no servidor do Next, que chama a API em `API_INTERNAL_URL` (padrão `http://localhost:8000`; no Docker, `http://backend:8000`).
+
 O isolamento no banco usa Row Level Security. A API deve conectar com um usuário **que não seja superusuário** do PostgreSQL (o `setup.sh` já cria o usuário `wedu`, dono do banco); superusuários ignoram as políticas.
 
 ## Portas internas

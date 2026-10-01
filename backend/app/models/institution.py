@@ -41,6 +41,9 @@ class Institution(Base):
     status: Mapped[InstitutionStatus] = mapped_column(SAEnum(InstitutionStatus), default=InstitutionStatus.active)
     settings: Mapped[dict] = mapped_column(JSON, default=dict)
     branding: Mapped[dict] = mapped_column(JSON, default=dict)
+    # Pagina publica: dominio proprio do cliente (ex.: escola.com.br) e o conteudo exibido (apresentacao, contatos).
+    custom_domain: Mapped[str | None] = mapped_column(String(253), unique=True, index=True)
+    public_profile: Mapped[dict] = mapped_column(JSON, default=dict, server_default="{}")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     memberships: Mapped[list["InstitutionMembership"]] = relationship(back_populates="institution", cascade="all, delete-orphan")
