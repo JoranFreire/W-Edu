@@ -40,6 +40,12 @@ class Settings(BaseSettings):
     ASSIGNMENTS_STORAGE_DIR: str = str(Path(__file__).resolve().parents[2] / "storage" / "assignments")
     VIDEOS_STORAGE_DIR: str = str(Path(__file__).resolve().parents[2] / "storage" / "videos")
 
+    # Salario minimo de referencia (faixas de renda da prestacao de contas): serie 1619 do SGS do Banco Central.
+    # Vazio desliga a consulta e usa o valor de reserva.
+    MINIMUM_WAGE_API_URL: str = "https://api.bcb.gov.br/dados/serie/bcdata.sgs.1619/dados"
+    MINIMUM_WAGE_FALLBACK_CENTS: int = 162100
+    MINIMUM_WAGE_CACHE_HOURS: int = 24
+
     ALLOWED_ORIGINS: list[str] = ["http://localhost:3002"]
 
     model_config = {"env_file": ".env", "extra": "ignore"}

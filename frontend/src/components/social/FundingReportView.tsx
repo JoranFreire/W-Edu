@@ -3,6 +3,12 @@ import { schoolingLabels } from '@/lib/academic/admissionLabels';
 import type { Schooling } from '@/types/admissions';
 import type { FundingReport } from '@/types/socialPrograms';
 
+const wageSources: Record<FundingReport['minimum_wage_source'], string> = {
+  bcb: 'Banco Central',
+  informed: 'valor informado',
+  fallback: 'valor de reserva; Banco Central indisponível',
+};
+
 function Distribution({ title, values, labels }: { title: string; values: Record<string, number>; labels?: Record<string, string> }) {
   return (
     <div>
@@ -36,7 +42,10 @@ export default function FundingReportView({ report }: { report: FundingReport })
         <Distribution title="Renda por pessoa" values={report.profile.income_per_capita} />
         <Distribution title="Escolaridade" values={report.profile.schooling} labels={schoolingLabels as Record<Schooling, string>} />
       </div>
-      <p className="text-xs text-gray-500 dark:text-gray-400">Perfil de {report.profile.respondents} matriculado(s) pelo edital; {report.profile.reserved_seats} em vaga reservada.</p>
+      <p className="text-xs text-gray-500 dark:text-gray-400">
+        Perfil de {report.profile.respondents} matriculado(s) pelo edital; {report.profile.reserved_seats} em vaga reservada.
+        Renda em salários mínimos de {formatMoney(report.minimum_wage_cents)} ({wageSources[report.minimum_wage_source]}).
+      </p>
       <div>
         <h3 className="mb-1 text-sm font-semibold text-gray-900 dark:text-white">Benefícios entregues</h3>
         {report.benefits.length === 0 ? <p className="text-sm text-gray-500 dark:text-gray-400">Nenhuma entrega.</p> : (
