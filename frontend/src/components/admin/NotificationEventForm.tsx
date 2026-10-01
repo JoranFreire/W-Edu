@@ -5,10 +5,11 @@ import { PaperAirplaneIcon, SparklesIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 import api from '@/lib/api/client';
 import { endpoints } from '@/lib/api/endpoints';
+import { notificationChannelLabels, notificationEventLabels } from '@/lib/notifications/labels';
 import type { NotificationChannel, NotificationEventType } from '@/types/notification';
 
-const eventTypes: NotificationEventType[] = ['class_created', 'meeting_created', 'meeting_reminder', 'absence_registered', 'attendance_recorded', 'content_published', 'certificate_issued', 'grades_published'];
-const channels: NotificationChannel[] = ['internal', 'whatsapp', 'email', 'push'];
+const eventTypes = Object.keys(notificationEventLabels) as NotificationEventType[];
+const channels = Object.keys(notificationChannelLabels) as NotificationChannel[];
 const inputCls = 'block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-sm text-gray-900 dark:text-white';
 
 export default function NotificationEventForm({ onCreated, onCancel, variant = 'card' }: {
@@ -53,10 +54,10 @@ export default function NotificationEventForm({ onCreated, onCancel, variant = '
         </div>
       )}
       <select value={form.event_type} onChange={(e) => setForm((p) => ({ ...p, event_type: e.target.value as NotificationEventType }))} className={inputCls}>
-        {eventTypes.map((t) => <option key={t} value={t}>{t}</option>)}
+        {eventTypes.map((t) => <option key={t} value={t}>{notificationEventLabels[t]}</option>)}
       </select>
       <select value={form.channel} onChange={(e) => setForm((p) => ({ ...p, channel: e.target.value as NotificationChannel }))} className={inputCls}>
-        {channels.map((c) => <option key={c} value={c}>{c}</option>)}
+        {channels.map((c) => <option key={c} value={c}>{notificationChannelLabels[c]}</option>)}
       </select>
       <input value={form.template_key} onChange={(e) => setForm((p) => ({ ...p, template_key: e.target.value }))} placeholder="template_key" className={inputCls} />
       <textarea value={form.payload} onChange={(e) => setForm((p) => ({ ...p, payload: e.target.value }))} rows={7} className={`${inputCls} font-mono`} />

@@ -10,7 +10,12 @@ export type NotificationEventType =
   | 'certificate_issued'
   | 'grades_published'
   | 'occurrence_registered'
-  | 'agenda_published';
+  | 'agenda_published'
+  | 'waitlist_promoted'
+  | 'activity_reviewed'
+  | 'admission_called'
+  | 'absence_dismissal'
+  | 'material_request_decided';
 
 export interface NotificationTemplate {
   id: number;

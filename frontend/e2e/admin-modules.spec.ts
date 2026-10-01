@@ -33,6 +33,9 @@ test('comunicacao: eventos e templates', async ({ page }) => {
   await expect(page.getByText('Eventos recentes')).toBeVisible();
   await page.getByRole('tab', { name: /Templates/ }).click();
   await expect(page.getByText('Modelos disponíveis por canal.')).toBeVisible();
+  // Destaque no nome de negocio; o codigo interno aparece so como detalhe.
+  await expect(page.getByRole('heading', { name: 'Desligamento por faltas' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'absence_dismissal' })).toHaveCount(0);
 });
 
 test('relatorios carregam', async ({ page }) => {
