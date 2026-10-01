@@ -1,5 +1,29 @@
 # W-Edu - Matriz de Permissoes
 
+## Perfis de acesso (RBAC)
+
+A autorizacao e por permissao. Cada guard de `app/dependencies.py` exige uma chave do catalogo (`app/services/access/catalog.py`):
+
+| Permissao | Guard | Papeis que ja a concedem |
+| --- | --- | --- |
+| `institution.manage` | `get_current_admin` | admin, institution_admin, super_admin |
+| `access.manage` | `get_current_access_manager` | admin, institution_admin, super_admin |
+| `academic.manage` | `get_current_admin_or_coordinator` | administradores e coordinator |
+| `teaching.access` | `get_current_teaching_staff` | administradores, coordinator e instructor |
+| `secretariat.access` | `get_current_secretariat` | administradores, coordinator e secretary |
+| `school_life.access` | `get_current_school_staff` | administradores, coordinator, instructor e secretary |
+| `finance.access` | `get_current_finance_staff` | administradores e secretary |
+| `warehouse.request` | `get_current_warehouse_requester` | administradores, coordinator e instructor |
+| `warehouse.manage` | `get_current_warehouse_manager` | administradores |
+| `warehouse.reports` | `get_current_warehouse_reader` | administradores e coordinator |
+
+Os papeis (`users.role`) viram perfis padrao com exatamente as permissoes acima, entao o comportamento anterior se mantem. Perfis personalizados da instituicao (`/access/roles`) somam permissoes a qualquer membro (exceto responsaveis e super admin); as permissoes efetivas sao carregadas na autenticacao e expostas em `/access/me`. Ninguem concede, altera, atribui ou exclui perfil com permissao que nao possui. Plataforma (`get_current_super_admin`), portal do responsavel (`get_current_guardian`) e os guards com escopo de empresa seguem por identidade/papel. Escopos que dependem dos dados (ex.: o instrutor so nas turmas que ministra) continuam nas policies e ainda consideram o papel.
+
+| Recurso | Quem |
+| --- | --- |
+| Catalogo, perfis padrao, perfis personalizados, membros e atribuicoes (`/access`) | `access.manage` |
+| Proprias permissoes (`/access/me`) | Qualquer usuario autenticado |
+
 Este documento registra a regra operacional por papel. A nomenclatura `User` e `/users` e a direcao nova da API; `Student` e `/students` permanecem como compatibilidade de dominio/API, embora a tabela fisica de identidade seja `users`.
 
 ## Papeis

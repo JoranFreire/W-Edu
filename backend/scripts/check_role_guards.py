@@ -13,6 +13,10 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from app.dependencies import (
+    get_current_access_manager,
+    get_current_warehouse_manager,
+    get_current_warehouse_reader,
+    get_current_warehouse_requester,
     ensure_super_admin_boundary,
     get_current_academic_staff,
     get_current_admin,
@@ -84,6 +88,13 @@ def assert_scope_forbidden(name: str, current_role: UserRole, target_role: UserR
     raise AssertionError(f"{name}: expected {current_role.value} managing {target_role.value} to be forbidden")
 
 
+def check_granted_permission() -> None:
+    """Perfil personalizado: um aluno com `secretariat.access` concedida passa no guard da secretaria."""
+    user = fake_user(UserRole.student)
+    user.granted_permissions = frozenset({"secretariat.access"})
+    get_current_secretariat(user)
+
+
 def main() -> int:
     failures: list[str] = []
     checks = [
@@ -125,6 +136,14 @@ def main() -> int:
             [*ADMIN_ROLES, UserRole.coordinator, UserRole.secretary],
             [UserRole.student, UserRole.instructor, UserRole.company_manager, UserRole.guardian],
         ),
+        ("access_manager", get_current_access_manager, [*ADMIN_ROLES],
+         [UserRole.student, UserRole.instructor, UserRole.coordinator, UserRole.secretary, UserRole.company_manager, UserRole.guardian]),
+        ("warehouse_requester", get_current_warehouse_requester, [*ADMIN_ROLES, UserRole.coordinator, UserRole.instructor],
+         [UserRole.student, UserRole.secretary, UserRole.company_manager, UserRole.guardian]),
+        ("warehouse_manager", get_current_warehouse_manager, [*ADMIN_ROLES],
+         [UserRole.student, UserRole.instructor, UserRole.coordinator, UserRole.secretary, UserRole.company_manager, UserRole.guardian]),
+        ("warehouse_reader", get_current_warehouse_reader, [*ADMIN_ROLES, UserRole.coordinator],
+         [UserRole.student, UserRole.instructor, UserRole.secretary, UserRole.company_manager, UserRole.guardian]),
         (
             "finance_staff",
             get_current_finance_staff,
@@ -139,6 +158,7 @@ def main() -> int:
         ),
     ]
 
+    check_granted_permission()
     for name, fn, allowed_roles, forbidden_roles in checks:
         for role in allowed_roles:
             organization_id = 1 if role == UserRole.company_manager else None

@@ -4,7 +4,7 @@ import {
   HomeIcon, BookOpenIcon, ChartBarIcon, MicrophoneIcon, Cog6ToothIcon,
   UsersIcon, AcademicCapIcon, CalendarDaysIcon, ChatBubbleLeftRightIcon,
   BanknotesIcon, Squares2X2Icon, MapIcon, ShieldCheckIcon, DocumentTextIcon,
-  BuildingLibraryIcon, GlobeAltIcon, BellIcon, CreditCardIcon, RectangleStackIcon, PencilSquareIcon, ClipboardDocumentCheckIcon, ChartPieIcon, BriefcaseIcon, DocumentDuplicateIcon, MegaphoneIcon, GiftIcon, FolderOpenIcon, DocumentChartBarIcon, UserGroupIcon,
+  BuildingLibraryIcon, GlobeAltIcon, BellIcon, CreditCardIcon, RectangleStackIcon, PencilSquareIcon, ClipboardDocumentCheckIcon, ChartPieIcon, BriefcaseIcon, ArchiveBoxIcon, BuildingStorefrontIcon, KeyIcon, DocumentDuplicateIcon, MegaphoneIcon, GiftIcon, FolderOpenIcon, DocumentChartBarIcon, UserGroupIcon,
 } from '@heroicons/react/24/outline';
 
 interface MenuItem { name: string; href: string; icon: ComponentType<{ className?: string }> }
@@ -105,6 +105,27 @@ export const companyManagerMenu: MenuItem[] = [
   { name: 'Meus certificados', href: '/certificates', icon: ShieldCheckIcon },
   { name: 'Configurações', href: '/settings', icon: Cog6ToothIcon },
 ];
+
+/** Itens liberados por permissao (perfis de acesso); entram no menu de quem nao os tem pelo papel. */
+const permissionMenu: { permissions: string[]; item: MenuItem }[] = [
+  { permissions: ['teaching.access'], item: { name: 'Diário de classe', href: '/teaching', icon: PencilSquareIcon } },
+  { permissions: ['secretariat.access'], item: { name: 'Secretaria', href: '/admin/secretariat', icon: FolderOpenIcon } },
+  { permissions: ['academic.manage'], item: { name: 'Acadêmico', href: '/admin/academic', icon: RectangleStackIcon } },
+  { permissions: ['warehouse.request'], item: { name: 'Requisições de material', href: '/warehouse', icon: ArchiveBoxIcon } },
+  { permissions: ['warehouse.manage', 'warehouse.reports'], item: { name: 'Almoxarifado', href: '/admin/warehouse', icon: BuildingStorefrontIcon } },
+  { permissions: ['access.manage'], item: { name: 'Perfis de acesso', href: '/admin/access', icon: KeyIcon } },
+];
+
+export function menuForUser(role: UserRole | undefined, permissions: string[]): MenuItem[] {
+  const base = menuForRole(role);
+  const extra = permissionMenu
+    .filter(({ permissions: required, item }) => required.some((key) => permissions.includes(key)) && !base.some((entry) => entry.href === item.href))
+    .map(({ item }) => item);
+  if (extra.length === 0) return base;
+  // Mantem Configuracoes por ultimo.
+  const settings = base.filter((entry) => entry.href === '/settings');
+  return [...base.filter((entry) => entry.href !== '/settings'), ...extra, ...settings];
+}
 
 export function menuForRole(role: UserRole | undefined): MenuItem[] {
   if (role === 'super_admin') return superAdminMenu;

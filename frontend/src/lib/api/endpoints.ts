@@ -208,6 +208,16 @@ export const endpoints = {
     evaluate: (offeringId: number) => `/retention/offerings/${offeringId}/evaluate`,
     readmit: (enrollmentId: number) => `/retention/enrollments/${enrollmentId}/readmit`,
   },
+  access: {
+    me: '/access/me',
+    permissions: '/access/permissions',
+    builtIn: '/access/built-in',
+    members: '/access/members',
+    roles: '/access/roles',
+    role: (id: number) => `/access/roles/${id}`,
+    roleMembers: (id: number) => `/access/roles/${id}/members`,
+    roleMember: (id: number, userId: number) => `/access/roles/${id}/members/${userId}`,
+  },
   courses: {
     list: '/courses',
     detail: (id: number) => `/courses/${id}`,

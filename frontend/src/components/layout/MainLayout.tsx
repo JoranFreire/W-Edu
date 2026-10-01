@@ -11,11 +11,11 @@ import { useAuthStore } from '@/store/authStore';
 
 export function MainLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const { student, institution } = useAuthStore();
+  const { student, institution, permissions } = useAuthStore();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [storedCollapsed, setStoredCollapsed] = useStoredValue('w-edu-sidebar-collapsed');
   const sidebarCollapsed = storedCollapsed === 'true';
-  const hasAccess = canAccessPath(student?.role, pathname);
+  const hasAccess = canAccessPath(student?.role, pathname, permissions);
 
   useEffect(() => {
     applyBranding(institution?.branding);

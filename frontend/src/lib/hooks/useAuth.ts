@@ -5,7 +5,7 @@ import { useAuthStore } from '@/store/authStore';
 
 export function useAuth() {
   const store = useAuthStore();
-  const { student, fetchStudent, fetchInstitution } = store;
+  const { student, fetchStudent, fetchInstitution, fetchPermissions } = store;
   const studentId = student?.id;
 
   useEffect(() => {
@@ -14,12 +14,13 @@ export function useAuth() {
     }
   }, [student, fetchStudent]);
 
-  // Atualiza instituicao/branding uma vez por usuario carregado.
+  // Atualiza instituicao/branding e permissoes uma vez por usuario carregado.
   useEffect(() => {
     if (localStorage.getItem('access_token') && studentId) {
       fetchInstitution();
+      fetchPermissions();
     }
-  }, [studentId, fetchInstitution]);
+  }, [studentId, fetchInstitution, fetchPermissions]);
 
   return {
     ...store,

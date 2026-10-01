@@ -31,6 +31,7 @@ from app.models.saas import InstitutionSubscription, PlatformInvoice, SaasPlan
 from app.models.admissions import AdmissionApplication, AdmissionCall, ApplicationDocument
 from app.models.social_programs import BenefitDelivery, BenefitItem, BenefitStockEntry, FundingSource
 from app.models.reference_values import MinimumWageValue
+from app.models.access import AccessRole, AccessRoleAssignment
 from app.models.guardians import StudentGuardian
 from app.models.school_life import AgendaItem, StudentOccurrence
 from app.models.secretariat import AcademicDeclaration, CreditTransfer, ProgramEnrollmentEvent, TermRegistration
@@ -83,4 +84,5 @@ __all__ = [
     "SaasPlan", "InstitutionSubscription", "PlatformInvoice",
     "AdmissionCall", "AdmissionApplication", "ApplicationDocument",
     "FundingSource", "BenefitItem", "BenefitStockEntry", "BenefitDelivery", "MinimumWageValue",
+    "AccessRole", "AccessRoleAssignment",
 ]
