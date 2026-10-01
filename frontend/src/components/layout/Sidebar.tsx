@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 import { useAuthStore } from '@/store/authStore';
-import { menuForRole } from '@/lib/config/sidebarMenus';
+import { menuForRole, menuForUser } from '@/lib/config/sidebarMenus';
 import { institutionDisplayName } from '@/lib/institution/branding';
 
 interface SidebarProps {
@@ -17,9 +17,9 @@ interface SidebarProps {
 
 export function Sidebar({ open, collapsed, onClose, onToggleCollapse }: SidebarProps) {
   const pathname = usePathname();
-  const { student, institution } = useAuthStore();
-  const menuItems = menuForRole(student?.role);
-  const isAdminArea = menuItems !== menuForRole('student');
+  const { student, institution, permissions } = useAuthStore();
+  const menuItems = menuForUser(student?.role, permissions);
+  const isAdminArea = menuForRole(student?.role) !== menuForRole('student');
   const displayName = institutionDisplayName(institution);
   const logoUrl = institution?.branding?.logo_url;
   const logo = logoUrl ? (

@@ -52,6 +52,8 @@ campuses                 id, institution_id, name, address, is_active
 
 ### 2.3 Papeis
 
+Desde o RBAC, os papeis abaixo sao perfis padrao: cada um concede um conjunto de permissoes do catalogo (`app/services/access/catalog.py`), e a instituicao cria perfis personalizados (`access_roles`, `access_role_assignments`, com TenantMixin e RLS) para somar permissoes a qualquer membro. Detalhes em `docs/PERMISSIONS.md`.
+
 | Papel | Escopo |
 |---|---|
 | `super_admin` | Plataforma inteira: cria instituicoes, planos SaaS e suporte |

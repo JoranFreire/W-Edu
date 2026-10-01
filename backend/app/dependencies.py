@@ -8,6 +8,8 @@ from app.core.tenancy import bind_institution
 from app.core.tenant_host import slug_from_host
 from app.models.institution import Institution
 from app.models.student import ADMIN_ROLES, Student, UserRole
+from app.policies.permissions import ensure_permission
+from app.repositories.access import AccessRoleRepository
 from app.repositories.student import StudentRepository
 from app.services.institution import InstitutionService
 from app.services.tenant_access import TenantAccessService
@@ -40,6 +42,8 @@ def _activate_institution(request: Request, db: Session, student: Student, paylo
     institution = TenantAccessService(db).resolve_for_user(student, requested)
     bind_institution(db, institution.id)
     request.state.institution = institution
+    # Perfis de acesso da instituicao somam permissoes ao papel do usuario (RBAC).
+    student.granted_permissions = AccessRoleRepository(db).permissions_of(student.id)
 
 
 def get_public_institution(request: Request, db: Session = Depends(get_db)) -> Institution:
@@ -74,43 +78,53 @@ def get_current_super_admin(current: Student = Depends(get_current_student)) -> 
 
 
 def get_current_admin(current: Student = Depends(get_current_student)) -> Student:
-    if current.role not in ADMIN_ROLES:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Acesso restrito a administradores")
-    return current
+    """Permissao `institution.manage` (administradores, ou perfil que a conceda)."""
+    return ensure_permission(current, "institution.manage", "Acesso restrito a administradores")
 
 
 def get_current_admin_or_coordinator(current: Student = Depends(get_current_student)) -> Student:
-    if current.role not in ADMIN_ROLES | {UserRole.coordinator}:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Acesso restrito a administradores e coordenadores")
-    return current
+    """Permissao `academic.manage` (administradores e coordenadores, ou perfil que a conceda)."""
+    return ensure_permission(current, "academic.manage", "Acesso restrito a administradores e coordenadores")
 
 
 def get_current_teaching_staff(current: Student = Depends(get_current_student)) -> Student:
-    """Quem lanca notas e diario: administradores, coordenadores e instrutores (escopo por oferta na policy)."""
-    if current.role not in ADMIN_ROLES | {UserRole.coordinator, UserRole.instructor}:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Acesso restrito a docentes e coordenação")
-    return current
+    """Permissao `teaching.access`: quem lanca notas e diario (escopo por oferta na policy)."""
+    return ensure_permission(current, "teaching.access", "Acesso restrito a docentes e coordenação")
 
 
 def get_current_secretariat(current: Student = Depends(get_current_student)) -> Student:
-    """Secretaria academica: administradores, coordenadores e secretarios."""
-    if current.role not in ADMIN_ROLES | {UserRole.coordinator, UserRole.secretary}:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Acesso restrito à secretaria")
-    return current
+    """Permissao `secretariat.access`: secretaria academica."""
+    return ensure_permission(current, "secretariat.access", "Acesso restrito à secretaria")
 
 
 def get_current_school_staff(current: Student = Depends(get_current_student)) -> Student:
-    """Equipe escolar (ocorrencias e agenda): administradores, coordenadores, instrutores e secretarios."""
-    if current.role not in ADMIN_ROLES | {UserRole.coordinator, UserRole.instructor, UserRole.secretary}:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Acesso restrito à equipe escolar")
-    return current
+    """Permissao `school_life.access`: equipe escolar (ocorrencias, agenda, frequencia e beneficios)."""
+    return ensure_permission(current, "school_life.access", "Acesso restrito à equipe escolar")
 
 
 def get_current_finance_staff(current: Student = Depends(get_current_student)) -> Student:
-    """Financeiro educacional (bolsas, descontos e extratos): administradores e secretaria."""
-    if current.role not in ADMIN_ROLES | {UserRole.secretary}:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Acesso restrito ao financeiro")
-    return current
+    """Permissao `finance.access`: financeiro educacional."""
+    return ensure_permission(current, "finance.access", "Acesso restrito ao financeiro")
+
+
+def get_current_access_manager(current: Student = Depends(get_current_student)) -> Student:
+    """Permissao `access.manage`: perfis de acesso da instituicao."""
+    return ensure_permission(current, "access.manage", "Acesso restrito à gestão de perfis")
+
+
+def get_current_warehouse_requester(current: Student = Depends(get_current_student)) -> Student:
+    """Permissao `warehouse.request`: quem pede materiais ao almoxarifado."""
+    return ensure_permission(current, "warehouse.request", "Sem permissão para requisitar materiais")
+
+
+def get_current_warehouse_manager(current: Student = Depends(get_current_student)) -> Student:
+    """Permissao `warehouse.manage`: quem opera o almoxarifado."""
+    return ensure_permission(current, "warehouse.manage", "Acesso restrito ao almoxarifado")
+
+
+def get_current_warehouse_reader(current: Student = Depends(get_current_student)) -> Student:
+    """Permissao `warehouse.reports`: relatorios do almoxarifado."""
+    return ensure_permission(current, "warehouse.reports", "Sem permissão para relatórios do almoxarifado")
 
 
 def get_current_guardian(current: Student = Depends(get_current_student)) -> Student:
