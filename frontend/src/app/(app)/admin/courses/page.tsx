@@ -1,16 +1,21 @@
 'use client';
 
 import { useState } from 'react';
-import { BookOpenIcon, PencilIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { BookOpenIcon, PlusIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 import ConfirmDialog from '@/components/admin/ConfirmDialog';
 import CourseModal from '@/components/admin/CourseModal';
+import CourseCatalogActions from '@/components/admin/courses/CourseCatalogActions';
 import CourseDetail from '@/components/admin/courses/CourseDetail';
 import BackButton from '@/components/common/BackButton';
+import CollectionView from '@/components/common/CollectionView';
 import Spinner from '@/components/common/Spinner';
+import ViewModeToggle from '@/components/common/ViewModeToggle';
 import CourseCard from '@/components/courses/CourseCard';
+import CourseRow from '@/components/courses/CourseRow';
 import { useCourses } from '@/lib/hooks/admin/useCourses';
 import { useErrorToast } from '@/lib/hooks/useErrorToast';
+import { useViewMode } from '@/lib/hooks/useViewMode';
 import { useAuthStore } from '@/store/authStore';
 import { isAdminRole } from '@/types/auth';
 import type { Course } from '@/types/course';
@@ -22,6 +27,7 @@ export default function AdminCoursesPage() {
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [editing, setEditing] = useState<{ course?: Course } | null>(null);
   const [courseToDelete, setCourseToDelete] = useState<Course | null>(null);
+  const [viewMode, setViewMode] = useViewMode('admin-courses');
   useErrorToast(catalog.error, 'Erro ao carregar cursos.');
 
   // O curso aberto vem sempre da lista atual, para refletir edicoes.
@@ -47,6 +53,16 @@ export default function AdminCoursesPage() {
 
   if (catalog.loading && catalog.courses.length === 0) return <Spinner />;
 
+  const actionsFor = (course: Course) => (
+    <CourseCatalogActions
+      course={course}
+      canDelete={canDelete}
+      onManage={() => setSelectedId(course.id)}
+      onEdit={() => setEditing({ course })}
+      onDelete={() => setCourseToDelete(course)}
+    />
+  );
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -55,10 +71,13 @@ export default function AdminCoursesPage() {
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Catálogo, módulos, aulas e pré-requisitos.</p>
         </div>
         {!selectedCourse && (
-          <button onClick={() => setEditing({})} className="flex items-center justify-center space-x-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700">
-            <PlusIcon className="w-4 h-4" />
-            <span>Novo Curso</span>
-          </button>
+          <div className="flex items-center gap-3">
+            {catalog.courses.length > 0 && <ViewModeToggle mode={viewMode} onChange={setViewMode} />}
+            <button onClick={() => setEditing({})} className="flex flex-1 items-center justify-center space-x-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700 sm:flex-none">
+              <PlusIcon className="w-4 h-4" />
+              <span>Novo Curso</span>
+            </button>
+          </div>
         )}
       </div>
 
@@ -73,33 +92,25 @@ export default function AdminCoursesPage() {
           <p className="text-gray-500 dark:text-gray-400">Nenhum curso criado ainda.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {catalog.courses.map((course) => (
+        <CollectionView
+          mode={viewMode}
+          items={catalog.courses}
+          itemKey={(course) => course.id}
+          label="Cursos"
+          renderCard={(course) => (
             <CourseCard
-              key={course.id}
               course={course}
               emptyDescription="Sem descrição cadastrada."
               footer={(
                 <>
                   {course.agent_id && <p className="mt-3 truncate text-xs text-gray-500 dark:text-gray-400">Agente: {course.agent_id}</p>}
-                  <div className="mt-5 flex flex-wrap items-center gap-2">
-                    <button onClick={() => setSelectedId(course.id)} className="rounded-lg bg-indigo-600 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-700">
-                      Gerenciar curso
-                    </button>
-                    <button onClick={() => setEditing({ course })} aria-label={`Editar ${course.name}`} className="rounded-lg border border-gray-300 p-2 text-gray-500 transition-colors hover:bg-gray-50 hover:text-indigo-600 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
-                      <PencilIcon className="h-4 w-4" />
-                    </button>
-                    {canDelete && (
-                      <button onClick={() => setCourseToDelete(course)} aria-label={`Excluir ${course.name}`} className="rounded-lg border border-gray-300 p-2 text-gray-500 transition-colors hover:bg-red-50 hover:text-red-600 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-red-900/20">
-                        <TrashIcon className="h-4 w-4" />
-                      </button>
-                    )}
-                  </div>
+                  <div className="mt-5">{actionsFor(course)}</div>
                 </>
               )}
             />
-          ))}
-        </div>
+          )}
+          renderRow={(course) => <CourseRow course={course} emptyDescription="Sem descrição cadastrada." actions={actionsFor(course)} />}
+        />
       )}
 
       {editing && <CourseModal course={editing.course} onClose={() => setEditing(null)} onSave={saveCourse} />}

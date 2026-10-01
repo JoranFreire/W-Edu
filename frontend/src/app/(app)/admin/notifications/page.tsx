@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 import NotificationEventForm from '@/components/admin/NotificationEventForm';
 import FailEventModal from '@/components/admin/notifications/FailEventModal';
 import NotificationEventsList from '@/components/admin/notifications/NotificationEventsList';
-import NotificationTemplatesGrid from '@/components/admin/notifications/NotificationTemplatesGrid';
+import NotificationTemplatesSection from '@/components/admin/notifications/NotificationTemplatesSection';
 import Modal from '@/components/common/Modal';
 import SectionHeader from '@/components/common/SectionHeader';
 import Spinner from '@/components/common/Spinner';
@@ -82,10 +82,7 @@ export default function AdminNotificationsPage() {
             </>
           )}
           {activeTab === 'templates' && (
-            <>
-              <SectionHeader title="Templates" description="Modelos disponíveis por canal." />
-              <NotificationTemplatesGrid templates={notifications.templates} />
-            </>
+            <NotificationTemplatesSection templates={notifications.templates} />
           )}
         </div>
       </div>
