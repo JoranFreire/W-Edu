@@ -1,6 +1,6 @@
 'use client';
 
-import { useQrScanner } from '@/lib/hooks/social/useQrScanner';
+import { useQrScanner } from '@/lib/hooks/useQrScanner';
 
 /** Visor da camera; sem camera (ou sem permissao), avisa para digitar o codigo. */
 export default function QrScanner({ active, onCode }: { active: boolean; onCode: (value: string) => void }) {

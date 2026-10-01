@@ -156,3 +156,27 @@ Map<String, dynamic> beneficioJson(String id, {String status = 'released', Strin
       'released_at': '2026-10-01T10:00:00Z',
       'redeemed_at': status == 'redeemed' ? '2026-10-01T12:00:00Z' : null,
     };
+
+Map<String, dynamic> acessoJson({List<String> permissoes = const []}) => {'role': 'student', 'roles': ['student'], 'permissions': permissoes};
+
+Map<String, dynamic> requisicaoJson(String id, {String status = 'approved', String? codigo}) => {
+      'id': id,
+      'requester': {'id': 'u-1', 'name': 'Ana Souza', 'email': 'ana@escola.example.com'},
+      'class_offering_id': null,
+      'class_offering_name': 'Artes 6A',
+      'purpose': 'Mural da primavera',
+      'needed_on': '2099-10-03',
+      'status': status,
+      'decision_note': null,
+      'decided_at': null,
+      'delivered_at': null,
+      'return_due_on': null,
+      'overdue': false,
+      'created_at': '2026-10-01T10:00:00Z',
+      'pickup_code': codigo,
+      'qr_payload': codigo == null ? null : 'wedu-material:$codigo',
+      'lines': [
+        {'id': 'l-$id', 'item_id': 'i-1', 'item_name': 'Papel A4', 'kind': 'consumable', 'unit': 'resma', 'quantity_requested': 3,
+         'quantity_approved': 2, 'quantity_delivered': 0, 'quantity_returned': 0, 'quantity_lost': 0, 'outstanding': 0},
+      ],
+    };

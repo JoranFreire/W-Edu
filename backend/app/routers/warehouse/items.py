@@ -6,8 +6,9 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.dependencies import get_current_warehouse_manager, get_current_warehouse_user
 from app.models.student import Student
-from app.schemas.warehouse import EntryCreate, EntryOut, ItemCreate, ItemOut, ItemUpdate
+from app.schemas.warehouse import EntryCreate, EntryOut, ItemCreate, ItemOut, ItemUpdate, MovementOut
 from app.services.warehouse.catalog import WarehouseCatalogService
+from app.services.warehouse.history import WarehouseHistoryService
 
 router = APIRouter(prefix="/items")
 
@@ -35,3 +36,8 @@ def item_entries(item_id: UUID, db: Session = Depends(get_db), _: Student = Depe
 @router.post("/{item_id}/entries", response_model=ItemOut, status_code=201)
 def receive(item_id: UUID, data: EntryCreate, db: Session = Depends(get_db), current: Student = Depends(get_current_warehouse_manager)):
     return WarehouseCatalogService(db).receive(item_id, data, current)
+
+
+@router.get("/{item_id}/history", response_model=list[MovementOut])
+def item_history(item_id: UUID, db: Session = Depends(get_db), _: Student = Depends(get_current_warehouse_manager)):
+    return WarehouseHistoryService(db).of_item(item_id)

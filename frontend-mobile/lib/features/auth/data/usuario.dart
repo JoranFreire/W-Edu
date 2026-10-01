@@ -12,6 +12,7 @@ class Usuario {
     required this.papel,
     required this.papeis,
     required this.instituicao,
+    this.permissoes = const [],
   });
 
   final String id;
@@ -25,15 +26,19 @@ class Usuario {
   final List<String> papeis;
   final Instituicao instituicao;
 
+  /// Permissões na instituição (`/access/me`): papéis padrão mais perfis de acesso.
+  final List<String> permissoes;
+
   bool get ehAluno => papeis.contains('student');
   bool get ehResponsavel => papeis.contains('guardian');
+  bool get podeRequisitarMaterial => permissoes.contains('warehouse.request');
 
   String get primeiroNome => nome.split(' ').first;
 
   /// Separa o cache de cada conta (e instituição) no mesmo aparelho.
   String get chaveDoCache => '${instituicao.id}_$id';
 
-  factory Usuario.fromJson(Map<String, dynamic> json, Instituicao instituicao) {
+  factory Usuario.fromJson(Map<String, dynamic> json, Instituicao instituicao, {List<String> permissoes = const []}) {
     final papel = json['role'] as String;
     final papeis = (json['roles'] as List<dynamic>? ?? const []).cast<String>();
     return Usuario(
@@ -43,6 +48,7 @@ class Usuario {
       papel: papel,
       papeis: papeis.isEmpty ? [papel] : papeis,
       instituicao: instituicao,
+      permissoes: permissoes,
     );
   }
 }

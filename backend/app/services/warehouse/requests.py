@@ -42,7 +42,8 @@ class MaterialRequestService:
         return request_out(self.repo.get(request.id))
 
     def list_mine(self, requester: Student) -> list[RequestOut]:
-        return [request_out(r) for r in sorted(self.repo.list(requester_id=requester.id), key=lambda r: r.id, reverse=True)]
+        mine = sorted(self.repo.list(requester_id=requester.id), key=lambda r: r.id, reverse=True)
+        return [request_out(r, with_pickup_code=True) for r in mine]
 
     def cancel(self, requester: Student, request_id: UUID) -> RequestOut:
         request = self.repo.get(request_id)

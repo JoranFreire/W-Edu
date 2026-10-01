@@ -134,7 +134,7 @@ class Checker:
 async def check_versions(c: Checker, h: dict, institutions: dict, ids: dict) -> None:
     await c.call("GET", "/sync/versions", 401, "versions need login", {})
     start = await c.versions(h["ana"], "initial versions")
-    c.expect(start == {"notifications": 0, "agenda": 0, "report_card": 0, "dependents": 0, "benefits": 0}, f"initial: {start}")
+    c.expect(start == {"notifications": 0, "agenda": 0, "report_card": 0, "dependents": 0, "benefits": 0, "materials": 0}, f"initial: {start}")
 
     publish_notice(institutions["alfa"], ids["ana"])
     after_notice = await c.versions(h["ana"], "after notice")
@@ -178,7 +178,7 @@ async def check_dependents(c: Checker, h: dict, ids: dict) -> None:
     c.expect(renamed["dependents"] == linked["dependents"] + 1, f"student name bumps dependents: {renamed}")
 
     other = await c.versions(h["beta"], "other institution")
-    c.expect(other == {"notifications": 0, "agenda": 0, "report_card": 0, "dependents": 0, "benefits": 0}, f"versions are per institution: {other}")
+    c.expect(other == {"notifications": 0, "agenda": 0, "report_card": 0, "dependents": 0, "benefits": 0, "materials": 0}, f"versions are per institution: {other}")
 
 
 async def run() -> int:

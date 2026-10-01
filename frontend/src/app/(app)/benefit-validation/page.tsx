@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Spinner from '@/components/common/Spinner';
 import { inputCls, secondaryButtonCls, sectionCls } from '@/components/common/formStyles';
-import QrScanner from '@/components/social/vouchers/QrScanner';
+import QrScanner from '@/components/common/QrScanner';
 import VoucherCheckCard from '@/components/social/vouchers/VoucherCheckCard';
 import { useVoucherValidation } from '@/lib/hooks/social/useVoucherValidation';
 import { useAuthStore } from '@/store/authStore';

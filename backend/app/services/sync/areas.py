@@ -10,14 +10,16 @@ from app.models.schedule import ClassEnrollment, ClassOffering
 from app.models.social_programs import BenefitItem, BenefitVoucher
 from app.models.school_life import AgendaItem
 from app.models.student import Student
+from app.models.warehouse import MaterialRequest, MaterialRequestLine, MaterialReturn, WarehouseItem
 
 NOTIFICATIONS = "notifications"
 AGENDA = "agenda"
 REPORT_CARD = "report_card"
 DEPENDENTS = "dependents"
 BENEFITS = "benefits"
+MATERIALS = "materials"
 
-AREAS = (NOTIFICATIONS, AGENDA, REPORT_CARD, DEPENDENTS, BENEFITS)
+AREAS = (NOTIFICATIONS, AGENDA, REPORT_CARD, DEPENDENTS, BENEFITS, MATERIALS)
 
 track(NotificationEvent, NOTIFICATIONS)
 track(AgendaItem, AGENDA)
@@ -33,3 +35,7 @@ track(StudentGuardian, DEPENDENTS)
 track(Student, DEPENDENTS, columns=("name", "email"))
 track(BenefitVoucher, BENEFITS)
 track(BenefitItem, BENEFITS, columns=("name", "unit", "kind"))
+track(MaterialRequest, MATERIALS)
+track(MaterialRequestLine, MATERIALS)
+track(MaterialReturn, MATERIALS)
+track(WarehouseItem, MATERIALS, columns=("name", "unit", "kind"))

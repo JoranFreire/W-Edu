@@ -1,9 +1,10 @@
 from uuid import UUID
 from datetime import date, datetime
+from typing import Literal
 
 from pydantic import BaseModel, Field
 
-from app.models.warehouse import EntryOrigin, MaterialKind, RequestStatus
+from app.models.warehouse import DeliveryMethod, EntryOrigin, MaterialKind, RequestStatus
 from app.schemas.academic_groups import PersonSummary
 
 
@@ -37,6 +38,7 @@ class ItemOut(BaseModel):
     unit_cost_cents: int
     is_active: bool
     available: int      # no almoxarifado agora
+    reserved: int = 0   # aprovado e ainda nao retirado (livre para aprovar = available - reserved)
     on_loan: int        # permanentes emprestados
     below_minimum: bool
 
@@ -99,6 +101,19 @@ class LineReturn(BaseModel):
 
 class ReturnInput(BaseModel):
     lines: list[LineReturn] = Field(min_length=1)
+    note: str | None = Field(default=None, max_length=2000)
+
+
+class ManualDeliveryInput(BaseModel):
+    """Retirada sem o QR (ex.: professor sem celular): fica registrado o motivo."""
+
+    note: str = Field(min_length=3, max_length=2000)
+
+
+class PickupCodeInput(BaseModel):
+    """QR lido (com ou sem o prefixo) ou codigo digitado."""
+
+    code: str = Field(min_length=4, max_length=120)
 
 
 class RequestLineOut(BaseModel):
@@ -126,6 +141,12 @@ class RequestOut(BaseModel):
     decision_note: str | None
     decided_at: datetime | None
     delivered_at: datetime | None
+    delivered_by_name: str | None = None
+    delivery_method: DeliveryMethod | None = None
+    delivery_note: str | None = None
+    # So para quem pediu, enquanto aprovada: e o QR mostrado na retirada.
+    pickup_code: str | None = None
+    qr_payload: str | None = None
     return_due_on: date | None
     overdue: bool
     created_at: datetime
@@ -143,3 +164,15 @@ class ConsumptionOut(BaseModel):
     by_requester: list[ConsumptionRow]
     by_offering: list[ConsumptionRow]
     total_cost_cents: int
+
+
+class MovementOut(BaseModel):
+    """Linha do historico (extrato) do material."""
+
+    occurred_at: datetime
+    kind: Literal["entry", "delivery", "return", "loss"]
+    quantity: int
+    person: str | None
+    detail: str | None
+    request_id: UUID | None = None
+    method: DeliveryMethod | None = None

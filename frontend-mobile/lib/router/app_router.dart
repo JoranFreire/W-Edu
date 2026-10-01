@@ -12,6 +12,7 @@ import '../features/boletim/screens/boletim_screen.dart';
 import '../features/dependentes/screens/dependente_screen.dart';
 import '../features/dependentes/screens/dependentes_screen.dart';
 import '../features/inicio/screens/inicio_screen.dart';
+import '../features/materiais/screens/materiais_screen.dart';
 import '../features/perfil/screens/perfil_screen.dart';
 import 'rotas.dart';
 import 'shell_screen.dart';
@@ -38,7 +39,10 @@ final routerProvider = Provider<GoRouter>((ref) {
           _aba(GoRoute(
             path: Rotas.inicio,
             builder: (_, _) => const InicioScreen(),
-            routes: [GoRoute(path: Rotas.beneficios.substring(1), builder: (_, _) => const BeneficiosScreen())],
+            routes: [
+              GoRoute(path: Rotas.beneficios.substring(1), builder: (_, _) => const BeneficiosScreen()),
+              GoRoute(path: Rotas.materiais.substring(1), builder: (_, _) => const MateriaisScreen()),
+            ],
           )),
           _aba(GoRoute(path: Rotas.avisos, builder: (_, _) => const AvisosScreen())),
           _aba(GoRoute(path: Rotas.agenda, builder: (_, _) => const AgendaScreen())),

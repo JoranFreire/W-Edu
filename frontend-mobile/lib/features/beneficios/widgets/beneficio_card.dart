@@ -22,7 +22,7 @@ class BeneficioCard extends StatelessWidget {
     return Card(
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
-        onTap: beneficio.paraRetirar ? () => QrBeneficioView.abrir(context, beneficio) : null,
+        onTap: beneficio.paraRetirar ? () => abrirQrDoBeneficio(context, beneficio) : null,
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Row(
@@ -44,7 +44,7 @@ class BeneficioCard extends StatelessWidget {
               ),
               if (beneficio.paraRetirar)
                 FilledButton.tonalIcon(
-                  onPressed: () => QrBeneficioView.abrir(context, beneficio),
+                  onPressed: () => abrirQrDoBeneficio(context, beneficio),
                   icon: const Icon(Icons.qr_code_2_rounded),
                   label: const Text('Mostrar QR'),
                 ),

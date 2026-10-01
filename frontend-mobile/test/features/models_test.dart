@@ -7,6 +7,7 @@ import 'package:wedu_mobile/features/avisos/data/aviso.dart';
 import 'package:wedu_mobile/features/beneficios/data/beneficio.dart';
 import 'package:wedu_mobile/features/boletim/data/boletim.dart';
 import 'package:wedu_mobile/features/dependentes/data/dependente.dart';
+import 'package:wedu_mobile/features/materiais/data/requisicao.dart';
 
 import '../helpers/fakes.dart';
 
@@ -63,5 +64,18 @@ void main() {
     expect(TipoBeneficio.de(null), TipoBeneficio.outro);
     expect(lista.last.situacao(), SituacaoBeneficio.vencido);
     expect(lista[1].situacao(), SituacaoBeneficio.retirado);
+  });
+
+  test('requisições: aprovadas com QR primeiro; linha mostra o que vale agora', () {
+    final lista = Requisicao.lista([requisicaoJson('1', status: 'pending'), requisicaoJson('2', codigo: 'ABC')]);
+    expect(lista.map((r) => r.id), ['2', '1']);
+    expect(lista.first.paraRetirar, isTrue);
+    expect(lista.first.linhas.single.resumo, 'Papel A4: 2 resma');
+    expect(lista.last.situacao, SituacaoRequisicao.pendente);
+  });
+
+  test('permissões vêm do acesso', () {
+    final usuario = Usuario.fromJson(usuarioJson(role: 'instructor'), Instituicao.fromJson(instituicaoJson()), permissoes: ['warehouse.request']);
+    expect(usuario.podeRequisitarMaterial, isTrue);
   });
 }

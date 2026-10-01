@@ -2,6 +2,7 @@
 
 import toast from 'react-hot-toast';
 import MaterialRequestForm from '@/components/warehouse/MaterialRequestForm';
+import PickupQrButton from '@/components/warehouse/PickupQrButton';
 import RequestCard from '@/components/warehouse/RequestCard';
 import { secondaryButtonCls, sectionCls } from '@/components/common/formStyles';
 import { apiErrorMessage } from '@/lib/api/errors';
@@ -28,7 +29,7 @@ export default function WarehouseRequestsPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Requisições de material</h1>
-        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Peça materiais do almoxarifado para aulas e atividades; toda requisição passa por aprovação.</p>
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Peça materiais do almoxarifado para aulas e atividades; toda requisição passa por aprovação. Aprovada, mostre o QR de retirada no almoxarifado.</p>
       </div>
       <section className={sectionCls}>
         <MaterialRequestForm items={items} offerings={offerings} onSubmit={create} />
@@ -40,7 +41,10 @@ export default function WarehouseRequestsPage() {
             {requests.map((request) => (
               <RequestCard key={request.id} request={request}>
                 {(request.status === 'pending' || request.status === 'approved') && (
-                  <button onClick={() => handleCancel(request.id)} aria-label={`Cancelar requisição ${request.purpose}`} className={secondaryButtonCls}>Cancelar</button>
+                  <div className="flex flex-wrap gap-2">
+                    <PickupQrButton request={request} />
+                    <button onClick={() => handleCancel(request.id)} aria-label={`Cancelar requisição ${request.purpose}`} className={secondaryButtonCls}>Cancelar</button>
+                  </div>
                 )}
               </RequestCard>
             ))}

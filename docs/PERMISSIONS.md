@@ -257,7 +257,8 @@ Escopo do instrutor em `app/policies/retention_access.py`.
 | --- | --- |
 | Ver materiais e saldo | qualquer permissao do almoxarifado (`get_current_warehouse_user`) |
 | Requisitar, acompanhar e cancelar as proprias requisicoes (pendentes ou aprovadas) | `warehouse.request` (turma vinculada: so as que ministra, salvo coordenacao) |
-| Cadastrar materiais, lancar entradas, aprovar/recusar, registrar retirada e devolucao | `warehouse.manage` |
+| Cadastrar materiais, lancar entradas, aprovar/recusar (aprovar reserva o saldo), ler o QR de retirada, registrar retirada (sem QR: com motivo) e devolucao, historico por material | `warehouse.manage` |
+| QR de retirada da propria requisicao aprovada (so quem pediu recebe o codigo) | `warehouse.request` |
 | Estoque baixo, devolucoes atrasadas e consumo | `warehouse.reports` |
 
 O almoxarife e um perfil de acesso com `warehouse.manage` (por padrao so administradores a tem).

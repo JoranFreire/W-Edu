@@ -10,6 +10,7 @@ import '../../auth/auth_providers.dart';
 import '../../auth/data/usuario.dart';
 import '../../avisos/avisos_providers.dart';
 import '../../beneficios/beneficios_providers.dart';
+import '../../materiais/materiais_providers.dart';
 import '../../dependentes/dependentes_providers.dart';
 import '../widgets/resumo_card.dart';
 
@@ -56,6 +57,19 @@ class InicioScreen extends ConsumerWidget {
               ),
               ..._beneficios(context, ref),
             ],
+            if (usuario.podeRequisitarMaterial) ...[
+              const SizedBox(height: 12),
+              ResumoCard(
+                icone: Icons.inventory_2_rounded,
+                titulo: 'Requisições de material',
+                valor: switch (ref.watch(minhasRequisicoesProvider)) {
+                  AsyncData(:final value) => _retirar(value.where((r) => r.paraRetirar).length),
+                  AsyncError() => 'Toque para ver',
+                  _ => '…',
+                },
+                onTap: () => context.go(Rotas.materiais),
+              ),
+            ],
             if (usuario.ehResponsavel) ...[
               const SizedBox(height: 12),
               ResumoCard(
@@ -82,6 +96,7 @@ class InicioScreen extends ConsumerWidget {
       if (usuario.ehAluno) ref.atualizarDaApi(minhaAgendaProvider, ChavesAgenda.minha),
       if (usuario.ehAluno) ref.atualizarDaApi(meusBeneficiosProvider, ChavesBeneficios.meus),
       if (usuario.ehResponsavel) ref.atualizarDaApi(dependentesProvider, ChavesDependentes.lista),
+      if (usuario.podeRequisitarMaterial) ref.atualizarDaApi(minhasRequisicoesProvider, ChavesMateriais.minhas),
     ].map((atualizacao) => atualizacao.then<void>((_) {}, onError: (_) {})).wait;
   }
 
@@ -100,6 +115,8 @@ class InicioScreen extends ConsumerWidget {
       ),
     ];
   }
+
+  String _retirar(int aprovadas) => aprovadas == 0 ? 'Nada para retirar' : '$aprovadas para retirar';
 
   /// O primeiro item de hoje em diante.
   String _proximo(List<(String, DateTime)> itens) {

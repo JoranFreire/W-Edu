@@ -1,6 +1,6 @@
 # W-Edu — App mobile
 
-App Flutter para alunos e responsáveis: início, avisos, agenda, boletim, dependentes e benefícios liberados (QR para a retirada, disponível offline).
+App Flutter para alunos e responsáveis: início, avisos, agenda, boletim, dependentes, benefícios liberados e requisições de material (QR para a retirada, disponível offline).
 As abas seguem os papéis da pessoa na instituição (quem é aluno e responsável vê as duas coisas).
 
 Stack: Riverpod 3 + go_router + dio + flutter_secure_storage, organizado por feature.

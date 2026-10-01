@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from datetime import date
 
+from app.core import qr
 from app.models.social_programs import BenefitVoucher
 from app.schemas.academic_groups import PersonSummary
 from app.schemas.benefit_vouchers import VoucherOut
@@ -12,13 +13,12 @@ QR_PREFIX = "wedu-beneficio:"
 
 
 def qr_payload(code: str) -> str:
-    return f"{QR_PREFIX}{code}"
+    return qr.qr_payload(QR_PREFIX, code)
 
 
 def code_from_scan(value: str) -> str:
     """Aceita o conteudo lido do QR ou o codigo digitado."""
-    value = value.strip()
-    return value[len(QR_PREFIX):] if value.startswith(QR_PREFIX) else value
+    return qr.code_from_scan(QR_PREFIX, value)
 
 
 def voucher_out(voucher: BenefitVoucher, today: date | None = None) -> VoucherOut:

@@ -33,7 +33,7 @@ from app.models.admissions import AdmissionApplication, AdmissionCall, Applicati
 from app.models.social_programs import BenefitDelivery, BenefitItem, BenefitStockEntry, BenefitVoucher, FundingSource
 from app.models.reference_values import MinimumWageValue
 from app.models.access import AccessRole, AccessRoleAssignment
-from app.models.warehouse import MaterialRequest, MaterialRequestLine, WarehouseEntry, WarehouseItem
+from app.models.warehouse import MaterialRequest, MaterialRequestLine, MaterialReturn, WarehouseEntry, WarehouseItem
 from app.models.guardians import StudentGuardian
 from app.models.data_version import DataVersion
 from app.models.school_life import AgendaItem, StudentOccurrence
@@ -90,5 +90,5 @@ __all__ = [
     "AdmissionCall", "AdmissionApplication", "ApplicationDocument",
     "FundingSource", "BenefitItem", "BenefitStockEntry", "BenefitDelivery", "BenefitVoucher", "MinimumWageValue",
     "AccessRole", "AccessRoleAssignment",
-    "WarehouseItem", "WarehouseEntry", "MaterialRequest", "MaterialRequestLine",
+    "WarehouseItem", "WarehouseEntry", "MaterialRequest", "MaterialRequestLine", "MaterialReturn",
 ]

@@ -5,42 +5,37 @@ from datetime import datetime, timezone
 
 from sqlalchemy.orm import Session
 
+from app.core import qr
 from app.models.student import Student
-from app.models.warehouse import MaterialRequest, RequestStatus
-from app.repositories.warehouse import MaterialRequestRepository, WarehouseItemRepository
+from app.models.warehouse import DeliveryMethod, MaterialRequest, MaterialReturn, RequestStatus
+from app.repositories.warehouse import MaterialRequestRepository, MaterialReturnRepository, WarehouseItemRepository
 from app.schemas.warehouse import RequestOut, ReturnInput
 from app.services.academic.errors import bad_request, conflict, not_found
 from app.services.warehouse.catalog import WarehouseCatalogService
 from app.services.warehouse.rules import outstanding, validate_return
-from app.services.warehouse.views import request_out
+from app.services.warehouse.views import QR_PREFIX, request_out
 
 
 class MaterialFulfillmentService:
-    """Retirada do que foi aprovado (com saldo) e devolucao dos permanentes, com avaria ou perda."""
+    """Retirada do que foi aprovado (pelo QR de quem pediu ou, sem ele, com justificativa) e devolucao dos permanentes."""
 
     def __init__(self, db: Session):
         self.repo = MaterialRequestRepository(db)
+        self.returns = MaterialReturnRepository(db)
         self.items = WarehouseItemRepository(db)
         self.catalog = WarehouseCatalogService(db)
 
-    def deliver(self, request_id: UUID, operator: Student) -> RequestOut:
-        request = self._get(request_id)
-        if request.status != RequestStatus.approved:
-            raise conflict("Só requisições aprovadas são retiradas")
-        lines = [line for line in request.lines if line.quantity_approved]
-        locked = self.items.lock_many([line.item_id for line in lines])
-        balances = self.catalog.balances(list(locked))
-        short = [f"{line.item.name} ({balances[line.item_id]} disponível(is))" for line in lines if line.quantity_approved > balances[line.item_id]]
-        if short:
-            raise conflict("Saldo insuficiente: " + ", ".join(short))
-        for line in lines:
-            line.quantity_delivered, line.unit_cost_cents = line.quantity_approved, locked[line.item_id].unit_cost_cents
-        request.delivered_by_id, request.delivered_at = operator.id, datetime.now(timezone.utc)
-        request.status = RequestStatus.delivered if any(outstanding(line) for line in lines) else RequestStatus.closed
-        self.repo.commit()
-        return request_out(request)
+    def lookup(self, scanned: str) -> RequestOut:
+        """Le o QR: mostra a requisicao para conferir (retirada ou devolucao) sem mudar nada."""
+        return request_out(self._by_code(scanned))
 
-    def register_return(self, request_id: UUID, data: ReturnInput) -> RequestOut:
+    def pickup(self, scanned: str, operator: Student) -> RequestOut:
+        return self._deliver(self._by_code(scanned, lock=True), operator, DeliveryMethod.qr, None)
+
+    def deliver(self, request_id: UUID, operator: Student, note: str) -> RequestOut:
+        return self._deliver(self._get(request_id), operator, DeliveryMethod.manual, note)
+
+    def register_return(self, request_id: UUID, data: ReturnInput, operator: Student) -> RequestOut:
         request = self._get(request_id)
         if request.status != RequestStatus.delivered:
             raise conflict("Não há materiais emprestados nesta requisição")
@@ -51,12 +46,42 @@ class MaterialFulfillmentService:
                 raise bad_request("Linha não pertence à requisição")
             if problem := validate_return(line, item.returned, item.lost):
                 raise bad_request(problem)
+            if not (item.returned or item.lost):
+                continue
             line.quantity_returned += item.returned
             line.quantity_lost += item.lost
+            self.returns.add(MaterialReturn(
+                request_id=request.id, line_id=line.id, item_id=line.item_id, returned=item.returned, lost=item.lost,
+                note=data.note, received_by_id=operator.id,
+            ))
         if not any(outstanding(line) for line in request.lines):
             request.status = RequestStatus.closed
         self.repo.commit()
         return request_out(request)
+
+    def _deliver(self, request: MaterialRequest, operator: Student, method: DeliveryMethod, note: str | None) -> RequestOut:
+        if request.status != RequestStatus.approved:
+            raise conflict("Esta requisição já foi retirada" if request.status in (RequestStatus.delivered, RequestStatus.closed)
+                           else "Só requisições aprovadas são retiradas")
+        lines = [line for line in request.lines if line.quantity_approved]
+        locked = self.items.lock_many([line.item_id for line in lines])
+        balances = self.catalog.balances(list(locked))
+        short = [f"{line.item.name} ({balances[line.item_id]} disponível(is))" for line in lines if line.quantity_approved > balances[line.item_id]]
+        if short:
+            raise conflict("Saldo insuficiente: " + ", ".join(short))
+        for line in lines:
+            line.quantity_delivered, line.unit_cost_cents = line.quantity_approved, locked[line.item_id].unit_cost_cents
+        request.delivered_by_id, request.delivered_at = operator.id, datetime.now(timezone.utc)
+        request.delivery_method, request.delivery_note = method, note
+        request.status = RequestStatus.delivered if any(outstanding(line) for line in lines) else RequestStatus.closed
+        self.repo.commit()
+        return request_out(self.repo.get(request.id))
+
+    def _by_code(self, scanned: str, *, lock: bool = False) -> MaterialRequest:
+        request = self.repo.get_by_pickup_code(qr.code_from_scan(QR_PREFIX, scanned), lock=lock)
+        if not request:
+            raise not_found("QR de requisição não reconhecido")
+        return request
 
     def _get(self, request_id: UUID) -> MaterialRequest:
         request = self.repo.get(request_id)

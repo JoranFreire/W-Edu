@@ -29,7 +29,8 @@ void main() {
       ..on('GET school/my/agenda', (_) => (200, [agendaJson('ag1')]))
       ..on('GET assessment/my/report-card', (_) => (200, [boletimJson()]))
       ..on('GET guardians/me/dependents', (_) => (200, [dependenteJson()]))
-      ..on('GET social/my/vouchers', (_) => (200, <Object>[]));
+      ..on('GET social/my/vouchers', (_) => (200, <Object>[]))
+      ..on('GET access/me', (_) => (200, acessoJson()));
   });
 
   Future<void> abrirApp(WidgetTester tester) async {
@@ -181,5 +182,36 @@ void main() {
     await abrirApp(tester);
     expect(find.text('Olá, Ana!'), findsOneWidget);
     expect(find.text('Benefícios'), findsNothing);
+  });
+
+  testWidgets('professor abre o QR de retirada da requisição aprovada, mesmo sem rede', (tester) async {
+    tokens.atual = 't-1';
+    await cache.salvar('sessao', EntradaCache(null, {
+      'usuario': usuarioJson(role: 'instructor'),
+      'instituicao': instituicaoJson(),
+      'acesso': acessoJson(permissoes: ['warehouse.request']),
+    }));
+    await cache.salvar('i-1_u-1/requisicoes', EntradaCache(1, [requisicaoJson('r1', codigo: 'RET123'), requisicaoJson('r2', status: 'pending')]));
+    for (final rota in ['GET users/me', 'GET institutions/current', 'GET access/me', 'GET sync/versions', 'GET notifications/me/summary', 'GET warehouse/my/requests']) {
+      servidor.on(rota, (req) => throw semRede(req));
+    }
+    await abrirApp(tester);
+
+    expect(find.text('1 para retirar'), findsOneWidget);
+    await tester.tap(find.text('Requisições de material'));
+    await tester.pumpAndSettle();
+    expect(find.text('Aguardando aprovação'), findsOneWidget);
+    await tester.tap(find.text('QR de retirada'));
+    await tester.pumpAndSettle();
+    expect(find.byType(QrImageView), findsOneWidget);
+    expect(find.text('RET123'), findsOneWidget);
+  });
+
+  testWidgets('sem permissão de requisitar, o início não mostra materiais', (tester) async {
+    tokens.atual = 't-1';
+    servidor.on('GET users/me', (_) => (200, usuarioJson()));
+    await abrirApp(tester);
+    expect(find.text('Olá, Ana!'), findsOneWidget);
+    expect(find.text('Requisições de material'), findsNothing);
   });
 }

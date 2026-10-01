@@ -5,4 +5,5 @@ abstract final class Areas {
   static const boletim = 'report_card';
   static const dependentes = 'dependents';
   static const beneficios = 'benefits';
+  static const materiais = 'materials';
 }
