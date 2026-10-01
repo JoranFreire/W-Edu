@@ -8,13 +8,14 @@ import EditOrganizationModal from '@/components/admin/EditOrganizationModal';
 import EditUserModal from '@/components/admin/EditUserModal';
 import NewUserModal from '@/components/admin/NewUserModal';
 import OrganizationsSection from '@/components/admin/OrganizationsSection';
-import ProfileModal from '@/components/admin/ProfileModal';
 import UsersList from '@/components/admin/UsersList';
+import UsersFilterBar from '@/components/admin/users/UsersFilterBar';
 import NewOrganizationModal from '@/components/admin/people/NewOrganizationModal';
 import Spinner from '@/components/common/Spinner';
 import TabNav, { type TabItem } from '@/components/common/TabNav';
 import { apiErrorMessage } from '@/lib/api/errors';
 import { type NewUserInput, type OrganizationInput, type UserUpdateInput, usePeople } from '@/lib/hooks/admin/usePeople';
+import { useUserFilters } from '@/lib/hooks/admin/useUserFilters';
 import { useErrorToast } from '@/lib/hooks/useErrorToast';
 import { assignableRoles, canManageUser } from '@/lib/users/rolePolicy';
 import { useAuthStore } from '@/store/authStore';
@@ -24,7 +25,6 @@ type PeopleTab = 'users' | 'organizations';
 type Dialog =
   | { kind: 'newUser' }
   | { kind: 'editUser'; user: User }
-  | { kind: 'profile'; user: User }
   | { kind: 'deleteUser'; user: User }
   | { kind: 'newOrganization' }
   | { kind: 'editOrganization'; organization: Organization }
@@ -36,6 +36,7 @@ export default function AdminStudentsPage() {
   const people = usePeople();
   const [activeTab, setActiveTab] = useState<PeopleTab>('users');
   const [dialog, setDialog] = useState<Dialog>(null);
+  const filters = useUserFilters(people.users);
   useErrorToast(people.error, 'Erro ao carregar usuários.');
 
   const close = () => setDialog(null);
@@ -88,18 +89,21 @@ export default function AdminStudentsPage() {
         <TabNav tabs={tabs} active={activeTab} onChange={setActiveTab} ariaLabel="Usuários e empresas" idPrefix="people" />
         <div id={`people-${activeTab}`} role="tabpanel">
           {activeTab === 'users' && (
-            <UsersList
-              users={people.users}
-              organizations={people.organizations}
-              canDelete={isAdmin}
-              canManageUser={(user) => canManageUser(student?.role, user)}
-              onEdit={(user) => setDialog({ kind: 'editUser', user })}
-              onProfile={(user) => setDialog({ kind: 'profile', user })}
-              onDelete={(id) => {
-                const user = people.users.find((item) => item.id === id);
-                if (user) setDialog({ kind: 'deleteUser', user });
-              }}
-            />
+            <div className="space-y-4">
+              <UsersFilterBar filter={filters.filter} onFilter={filters.setFilter} counts={filters.counts} query={filters.query} onQuery={filters.setQuery} />
+              <UsersList
+                users={filters.filtered}
+                filtered={people.users.length > 0}
+                organizations={people.organizations}
+                canDelete={isAdmin}
+                canManageUser={(user) => canManageUser(student?.role, user)}
+                onEdit={(user) => setDialog({ kind: 'editUser', user })}
+                onDelete={(id) => {
+                  const user = people.users.find((item) => item.id === id);
+                  if (user) setDialog({ kind: 'deleteUser', user });
+                }}
+              />
+            </div>
           )}
           {activeTab === 'organizations' && (
             <OrganizationsSection organizations={people.organizations} isAdmin={isAdmin} showCreateForm={false} onCreated={people.reload}
@@ -110,7 +114,6 @@ export default function AdminStudentsPage() {
 
       {dialog?.kind === 'newUser' && <NewUserModal organizations={people.organizations} availableRoles={roles} onClose={close} onSave={createUser} />}
       {dialog?.kind === 'editUser' && <EditUserModal user={dialog.user} organizations={people.organizations} availableRoles={roles} onClose={close} onSave={updateUser} />}
-      {dialog?.kind === 'profile' && <ProfileModal user={dialog.user} onClose={close} onSaved={people.reload} />}
       {dialog?.kind === 'deleteUser' && (
         <ConfirmDialog
           title="Excluir usuário"

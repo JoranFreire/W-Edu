@@ -6,6 +6,8 @@ from app.dependencies import ensure_super_admin_boundary, get_current_academic_s
 from app.models.student import Student, UserRole
 from app.policies.user_scope import PRIVILEGED_ROLES, ensure_academic_user_scope
 from app.schemas.student import StudentCreate, StudentOut, StudentUpdate
+from app.schemas.user_dossier import UserDossier
+from app.services.people.dossier import UserDossierService
 from app.services.student import StudentService
 
 router = APIRouter()
@@ -18,6 +20,11 @@ def list_all_students(db: Session = Depends(get_db), current: Student = Depends(
     if current.role == UserRole.company_manager:
         return service.list_by_organization(current.organization_id)
     return service.list_all()
+
+
+@router.get("/users/{student_id}/dossier", response_model=UserDossier)
+def user_dossier(student_id: int, db: Session = Depends(get_db), current: Student = Depends(get_current_academic_staff)):
+    return UserDossierService(db).build(current, student_id)
 
 
 @router.post("/students", response_model=StudentOut, status_code=201)
