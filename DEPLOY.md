@@ -1,5 +1,17 @@
 # W-Edu — Deploy
 
+## Ambiente local com Docker
+
+```bash
+docker compose up --build -d                  # Postgres (porta 5433), API (8000) e frontend (3000)
+docker compose --profile demo run --rm seed   # contas e cursos de demonstracao (opcional)
+```
+
+Acesse http://localhost:3000. Contas de demonstracao (senha `e2e-senha-123`): `admin@alfa.example.com`
+(admin da Escola Alfa e da Faculdade Beta), `instrutor@alfa.example.com`, `aluno@alfa.example.com` e
+`root@e2e.example.com` (super admin). A API conecta com o papel `wedu`, sem superusuario, entao o RLS vale.
+`docker compose down -v` apaga banco e arquivos.
+
 ## Pré-requisitos
 - Ubuntu 22.04+
 - Git
