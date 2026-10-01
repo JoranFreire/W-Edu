@@ -43,8 +43,11 @@ class MemberOut(BaseModel):
     name: str
     email: str
     role: UserRole
+    roles: list[UserRole] = []
 
 
 class MyAccessOut(BaseModel):
     role: UserRole
+    # Papeis na instituicao ativa (o principal primeiro): o menu junta as areas de todos.
+    roles: list[UserRole] = []
     permissions: list[str]

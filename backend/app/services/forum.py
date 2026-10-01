@@ -11,6 +11,7 @@ from app.repositories.course import CourseRepository
 from app.repositories.enrollment import EnrollmentRepository
 from app.repositories.forum import ForumRepository
 from app.schemas.forum import ForumPostCreate, ForumPostOut, ForumThreadCreate, ForumThreadOut
+from app.policies.roles import has_any_role, has_role
 
 
 class ForumService:
@@ -56,11 +57,11 @@ class ForumService:
         return course
 
     def _ensure_course_access(self, course_id: UUID, current: Student) -> None:
-        if current.role in ADMIN_ROLES | {UserRole.coordinator, UserRole.instructor}:
+        if has_any_role(current, ADMIN_ROLES | {UserRole.coordinator, UserRole.instructor}):
             return
         if self.enrollment_repo.get_by_student_and_course(current.id, course_id):
             return
-        if current.role == UserRole.company_manager and current.organization_id:
+        if has_role(current, UserRole.company_manager) and current.organization_id:
             has_org_student = (
                 self.db.query(Student.id)
                 .join(Enrollment, Enrollment.student_id == Student.id)

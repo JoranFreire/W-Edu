@@ -14,6 +14,7 @@ from app.models.schedule import AttendanceRecord, AttendanceStatus, ClassEnrollm
 from app.models.student import Student, UserRole
 from app.schemas.analytics import ClassAnalyticsOut, CourseAnalyticsOut, StudentAnalyticsOut
 from app.models.finance import Charge, ChargeStatus
+from app.policies.roles import has_role
 from sqlalchemy import func
 from ._base import AnalyticsBase
 
@@ -23,7 +24,7 @@ class EntityAnalyticsService(AnalyticsBase):
         super().__init__(db)
 
     def courses(self, current: Student) -> list[CourseAnalyticsOut]:
-        organization_id = current.organization_id if current.role == UserRole.company_manager else None
+        organization_id = current.organization_id if has_role(current, UserRole.company_manager) else None
         query = self.db.query(Course).order_by(Course.name)
         if organization_id is not None:
             query = query.join(Enrollment, Enrollment.course_id == Course.id).join(Student, Student.id == Enrollment.student_id).filter(Student.organization_id == organization_id).distinct()

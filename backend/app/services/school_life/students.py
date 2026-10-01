@@ -8,6 +8,7 @@ from app.models.student import Student, UserRole
 from app.repositories.student import StudentRepository
 from app.services.academic.errors import not_found
 from app.services.membership import MembershipService
+from app.policies.roles import has_role
 
 
 class SchoolStudentLookup:
@@ -20,6 +21,6 @@ class SchoolStudentLookup:
 
     def get_or_404(self, student_id: UUID) -> Student:
         student = self.users.get_by_id(student_id)
-        if not student or student.role != UserRole.student or not self.memberships.get(bound_institution_id(self.db), student.id):
+        if not student or not self.memberships.get(bound_institution_id(self.db), student.id) or not has_role(student, UserRole.student):
             raise not_found("Aluno não encontrado")
         return student

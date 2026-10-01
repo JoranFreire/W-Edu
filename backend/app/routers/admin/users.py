@@ -1,12 +1,13 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.dependencies import ensure_super_admin_boundary, get_current_academic_staff, get_current_admin
 from app.models.student import Student, UserRole
-from app.policies.user_scope import PRIVILEGED_ROLES, ensure_academic_user_scope
+from app.policies.roles import has_role, is_admin
+from app.policies.user_scope import ensure_academic_user_scope, ensure_can_assign_roles, requested_roles
 from app.schemas.student import StudentCreate, StudentOut, StudentUpdate
 from app.schemas.user_dossier import UserDossier
 from app.services.people.dossier import UserDossierService
@@ -19,7 +20,7 @@ router = APIRouter()
 @router.get("/users", response_model=list[StudentOut])
 def list_all_students(db: Session = Depends(get_db), current: Student = Depends(get_current_academic_staff)):
     service = StudentService(db)
-    if current.role == UserRole.company_manager:
+    if has_role(current, UserRole.company_manager) and not is_admin(current):
         return service.list_by_organization(current.organization_id)
     return service.list_all()
 
@@ -32,11 +33,9 @@ def user_dossier(student_id: UUID, db: Session = Depends(get_db), current: Stude
 @router.post("/students", response_model=StudentOut, status_code=201)
 @router.post("/users", response_model=StudentOut, status_code=201)
 def create_student(data: StudentCreate, db: Session = Depends(get_db), current: Student = Depends(get_current_academic_staff)):
-    ensure_super_admin_boundary(current, data.role)
-    if current.role in {UserRole.company_manager, UserRole.coordinator}:
-        if data.role in PRIVILEGED_ROLES:
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Perfil sem permissão para criar este papel")
-    if current.role == UserRole.company_manager:
+    ensure_super_admin_boundary(current, data.role, roles=data.roles)
+    ensure_can_assign_roles(current, requested_roles(data.role, data.roles))
+    if has_role(current, UserRole.company_manager) and not is_admin(current):
         data = data.model_copy(update={"organization_id": current.organization_id})
     return StudentService(db).create(data)
 
@@ -49,14 +48,12 @@ def update_student(
     db: Session = Depends(get_db),
     current: Student = Depends(get_current_academic_staff),
 ):
-    ensure_super_admin_boundary(current, data.role, StudentService(db).get_or_404(student_id))
-    if current.role in {UserRole.company_manager, UserRole.coordinator}:
-        target = StudentService(db).get_or_404(student_id)
-        ensure_academic_user_scope(current, target)
-    if current.role == UserRole.company_manager:
+    target = StudentService(db).get_or_404(student_id)
+    ensure_super_admin_boundary(current, data.role, target, roles=data.roles)
+    ensure_academic_user_scope(current, target)
+    ensure_can_assign_roles(current, requested_roles(data.role, data.roles))
+    if has_role(current, UserRole.company_manager) and not is_admin(current):
         data = data.model_copy(update={"organization_id": current.organization_id})
-    if current.role in {UserRole.company_manager, UserRole.coordinator} and data.role in PRIVILEGED_ROLES:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Perfil sem permissão para atribuir este papel")
     return StudentService(db).update(student_id, data)
 
 

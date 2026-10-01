@@ -13,12 +13,14 @@ import { useUserDossier } from '@/lib/hooks/admin/useUserDossier';
 import { useErrorToast } from '@/lib/hooks/useErrorToast';
 import { canManageUser } from '@/lib/users/rolePolicy';
 import { useAuthStore } from '@/store/authStore';
+import { useCurrentRoles } from '@/lib/hooks/useCurrentRoles';
 
 /** Dossie da pessoa: um cartao com o cabecalho e as abas (resumo, familia, academico, cursos, financeiro...). */
 export default function UserDossierPage() {
   const { userId } = useParams<{ userId: string }>();
   const router = useRouter();
-  const { student, permissions } = useAuthStore();
+  const { permissions } = useAuthStore();
+  const { roles: currentRoles } = useCurrentRoles();
   const { dossier, loading, error, reload } = useUserDossier(userId);
   const [editingContact, setEditingContact] = useState(false);
   useErrorToast(error, 'Erro ao carregar o dossiê.');
@@ -27,7 +29,7 @@ export default function UserDossierPage() {
   if (!dossier) return <p className="text-sm text-gray-500 dark:text-gray-400">Dossiê indisponível.</p>;
 
   const { user } = dossier;
-  const actions = canManageUser(student?.role, user) ? (
+  const actions = canManageUser(currentRoles, user) ? (
     <button type="button" onClick={() => setEditingContact(true)} className={secondaryButtonCls}>
       <PencilSquareIcon className="h-4 w-4" /><span>Editar dados de contato</span>
     </button>

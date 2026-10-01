@@ -14,14 +14,13 @@ import { useBenefitItems } from '@/lib/hooks/social/useBenefitItems';
 import { useFundingSources } from '@/lib/hooks/social/useFundingSources';
 import { useOfferingFunding } from '@/lib/hooks/social/useOfferingFunding';
 import { useErrorToast } from '@/lib/hooks/useErrorToast';
-import { useAuthStore } from '@/store/authStore';
-import { isAdminRole } from '@/types/auth';
+import { useCurrentRoles } from '@/lib/hooks/useCurrentRoles';
 
 /** Programas sociais: financiadores, turmas financiadas, itens de beneficio e estoque. */
 export default function SocialProgramsPage() {
   const router = useRouter();
-  const role = useAuthStore((state) => state.student?.role);
-  const coordination = isAdminRole(role) || role === 'coordinator';
+  const { isAdmin, has } = useCurrentRoles();
+  const coordination = isAdmin || has('coordinator');
   const { fundingSources, error, create } = useFundingSources();
   const { items, create: createItem, receive } = useBenefitItems();
   const { offerings, save } = useOfferingFunding();

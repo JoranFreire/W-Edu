@@ -10,7 +10,9 @@ from app.models.enrollment import Enrollment
 from app.models.finance import Charge, ChargeStatus, Subscription, SubscriptionStatus
 from app.models.progress import Progress, ProgressStatus
 from app.models.schedule import ClassEnrollment, ClassOffering, ScheduledMeeting
+from app.core.tenancy import bound_institution_id
 from app.models.student import Organization, Student, UserRole
+from app.repositories.member_roles import MemberRoleRepository
 from app.schemas.analytics import AnalyticsOverviewOut
 from ._base import AnalyticsBase
 
@@ -46,7 +48,10 @@ class AnalyticsOverviewService(AnalyticsBase):
         return q.count()
 
     def _count_role(self, role: UserRole, organization_id: UUID | None) -> int:
-        q = self.db.query(Student).filter(Student.role == role)
+        institution_id = bound_institution_id(self.db)
+        q = self.db.query(Student)
+        # Conta cada pessoa em todos os papeis que ela tem na instituicao (aluno e professor contam nos dois).
+        q = q.filter(Student.id.in_(MemberRoleRepository(self.db).user_ids_with_role(institution_id, [role]))) if institution_id else q.filter(Student.role == role)
         if organization_id is not None:
             q = q.filter(Student.organization_id == organization_id)
         return q.count()

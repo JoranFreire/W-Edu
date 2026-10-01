@@ -11,10 +11,12 @@ import type { PersonSummary } from '@/types/academicGroups';
 import type { Occurrence } from '@/types/schoolLife';
 import OccurrenceForm from './OccurrenceForm';
 import OccurrenceList from './OccurrenceList';
+import { useCurrentRoles } from '@/lib/hooks/useCurrentRoles';
 
 /** Ocorrencias do aluno na ficha da secretaria: historico, registro e remocao. */
 export default function OccurrencesPanel({ student }: { student: PersonSummary }) {
   const user = useAuthStore((state) => state.student);
+  const { roles } = useCurrentRoles();
   const { occurrences, error, register, remove } = useStudentOccurrences(student.id);
   useErrorToast(error, 'Erro ao carregar ocorrências.');
 
@@ -35,7 +37,7 @@ export default function OccurrencesPanel({ student }: { student: PersonSummary }
       <OccurrenceList
         occurrences={occurrences}
         onRemove={handleRemove}
-        canRemove={(occurrence) => canRemoveSchoolRecord(user, occurrence.reported_by?.id)}
+        canRemove={(occurrence) => canRemoveSchoolRecord(user?.id, roles, occurrence.reported_by?.id)}
       />
     </section>
   );

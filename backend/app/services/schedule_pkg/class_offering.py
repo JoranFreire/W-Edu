@@ -13,6 +13,7 @@ from app.repositories.student import StudentRepository
 from app.schemas.schedule import ClassJoinOut, ClassOfferingCreate, ClassOfferingUpdate
 from app.services.notifications.events import NotificationEventService
 from app.services.schedule_pkg.academic_links import AcademicLinks, OfferingAcademicLinks
+from app.policies.roles import has_role
 
 
 CLEARABLE = {"funding_source_id", "max_absence_percent"}
@@ -124,7 +125,7 @@ class ClassOfferingService:
         instructor = self.student_repo.get_by_id(instructor_id) if instructor_id else None
         if instructor_id and not instructor:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Instrutor não encontrado")
-        if instructor and instructor.role != UserRole.instructor:
+        if instructor and not has_role(instructor, UserRole.instructor):
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Usuário selecionado não é instrutor")
 
     def _validate_funding(self, funding_source_id: UUID | None) -> None:

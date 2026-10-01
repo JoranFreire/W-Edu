@@ -7,6 +7,7 @@ from app.models.quiz import Quiz, QuizAttempt
 from app.models.lesson import Lesson
 from app.models.schedule import AttendanceRecord, AttendanceStatus, ClassEnrollment, ClassOffering
 from app.models.student import Student, UserRole
+from app.policies.roles import has_role
 
 
 class AnalyticsBase:
@@ -19,7 +20,7 @@ class AnalyticsBase:
         return round(value / total * 100)
 
     def _organization_scope(self, current: Student | None) -> int | None:
-        if current and current.role == UserRole.company_manager:
+        if current and has_role(current, UserRole.company_manager):
             return current.organization_id
         return None
 

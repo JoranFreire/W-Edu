@@ -32,7 +32,7 @@ Vale para todo código tocado, novo ou antigo. Ao alterar um arquivo que mistura
 - Consulta global deliberada: `.execution_options(**UNSCOPED)`, com comentário justificando (suspende também o RLS durante a instrução).
 - Instituição da requisição: header `X-Institution` > subdomínio (`TENANT_BASE_DOMAIN`) > claim `inst` do token.
 - RLS no PostgreSQL (`app/core/tenant_rls.py`) é a segunda barreira; a aplicação nunca deve conectar como superusuário.
-- Papel efetivo ainda é `users.role`; `institution_memberships.role` é mantido em sincronia.
+- Papéis por instituição: a pessoa pode acumular vários no mesmo vínculo (aluno e professor, por exemplo) e ter papéis diferentes em cada instituição (`institution_member_roles`; `users.role` e `institution_memberships.role` guardam só o principal). Teste papel com `has_role`/`has_any_role` (`app/policies/roles.py`), que vale para quem faz a requisição e para outras pessoas; nunca `user.role == ...`, exceto `is_super_admin` (papel da plataforma). No frontend: `useCurrentRoles()` para quem está logado e `rolesOf(user)` para os demais.
 
 ## Verificações antes de commitar
 
@@ -60,6 +60,7 @@ python scripts/check_access_flow.py
 python scripts/check_warehouse_flow.py
 python scripts/check_notifications_flow.py
 python scripts/check_user_dossier_flow.py
+python scripts/check_multi_roles_flow.py
 python scripts/check_rls.py                     # Postgres com superusuario em DATABASE_URL; cria role/banco proprios
 alembic upgrade head && alembic check           # migration alinhada aos models
 ```

@@ -11,14 +11,13 @@ import SubjectsSection from '@/components/admin/academic/SubjectsSection';
 import UnitsSection from '@/components/admin/academic/UnitsSection';
 import TabNav, { type TabItem } from '@/components/common/TabNav';
 import { useTerminology } from '@/lib/hooks/useTerminology';
-import { useAuthStore } from '@/store/authStore';
-import { isAdminRole } from '@/types/auth';
+import { useCurrentRoles } from '@/lib/hooks/useCurrentRoles';
 
 type AcademicTab = 'programs' | 'subjects' | 'terms' | 'groups' | 'enrollments' | 'schemes' | 'units';
 
 export default function AdminAcademicPage() {
   const terms = useTerminology();
-  const canDelete = isAdminRole(useAuthStore((state) => state.student?.role));
+  const canDelete = useCurrentRoles().isAdmin;
   const [tab, setTab] = useState<AcademicTab>('programs');
   const tabs: TabItem<AcademicTab>[] = [
     { id: 'programs', label: terms.programs, icon: ClipboardDocumentListIcon },

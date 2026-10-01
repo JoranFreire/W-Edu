@@ -15,7 +15,10 @@ O administrador configura a instituição, gerencia usuários e permissões, o f
 
 Em **Usuários**:
 
-- **Usuários**: crie, edite e desative pessoas, definindo o papel básico: Aluno, Professor, Coordenador, Secretaria, Responsável, Gestor de empresa ou Administrador.
+- **Usuários**: crie, edite e desative pessoas e marque os **papéis** de cada uma: Aluno, Instrutor, Coordenador, Secretaria, Gestor de empresa ou Administrador.
+  - Uma pessoa pode ter **vários papéis** ao mesmo tempo, como professora que também faz uma pós na instituição. Escolha o **papel principal**: ele aparece primeiro e define a tela inicial. O menu junta as áreas de todos os papéis.
+  - Os papéis valem por instituição: a mesma conta pode ser professora numa escola e aluna em outra.
+  - Ao **matricular** alguém num programa (mesmo um professor), a pessoa ganha o papel de aluno. Ao **vincular** uma conta existente como responsável de um aluno, ela ganha o papel de responsável sem perder os outros.
   - **Filtros por perfil** no topo da lista (Alunos, Responsáveis, Professores, Coordenação, Secretaria…), com a quantidade de cada um, e **busca** por nome ou e-mail. O último filtro fica lembrado.
   - Clique no nome para abrir o **dossiê** da pessoa, um cartão com abas:
     - **Resumo**: indicadores (cursos concluídos, certificados, valor em aberto, ocorrências, benefícios) e, ao lado, a **ficha** com perfil, contato, documento, empresa e data de cadastro;

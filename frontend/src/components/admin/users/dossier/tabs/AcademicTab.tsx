@@ -3,6 +3,7 @@ import { EmptyPanel, PanelTitle, listCls, rowCls } from '@/components/admin/user
 import { enrollmentStatusLabels } from '@/lib/academic/labels';
 import { formatIsoDate } from '@/lib/dates';
 import type { UserDossier } from '@/types/userDossier';
+import { rolesOf } from '@/types/auth';
 
 /** Matriculas em programas (com atalho para a ficha da secretaria) e turmas que a pessoa leciona. */
 export default function AcademicTab({ dossier, canOpenRecord, canOpenDiary }: { dossier: UserDossier; canOpenRecord: boolean; canOpenDiary: boolean }) {
@@ -10,7 +11,7 @@ export default function AcademicTab({ dossier, canOpenRecord, canOpenDiary }: { 
   const teaching = dossier.teaching ?? [];
   return (
     <div className="space-y-6">
-      {(dossier.program_enrollments && (enrollments.length > 0 || dossier.user.role === 'student')) && (
+      {(dossier.program_enrollments && (enrollments.length > 0 || rolesOf(dossier.user).includes('student'))) && (
         <div>
           <PanelTitle>Matrículas em programas</PanelTitle>
           {enrollments.length === 0 ? <EmptyPanel>Nenhuma matrícula em programa.</EmptyPanel> : (

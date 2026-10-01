@@ -1,11 +1,11 @@
 from uuid import UUID
 
-from app.core.ids import new_id
 from datetime import datetime, timezone
 from sqlalchemy import String, Text, Integer, ForeignKey, DateTime, Enum as SAEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 import enum
 
+from app.core.ids import new_id
 from app.core.database import Base
 from app.core.tenancy import TenantMixin
 

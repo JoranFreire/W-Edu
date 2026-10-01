@@ -120,8 +120,18 @@ async def check_links(c: Checker, sec: dict, ids: dict) -> dict[str, int]:
     link_beto = await c.call("POST", f"/guardians/students/{ids['beto']}/links", 201, "existing guardian reused", sec,
                              json={"name": "Maria", "email": "maria@example.com", "relationship_kind": "mother"})
     c.expect(link_beto.get("guardian", {}).get("id") == link_ana["guardian"]["id"], "same guardian account for siblings")
-    await c.call("POST", f"/guardians/students/{ids['ana']}/links", 409, "email of a non-guardian", sec,
-                 json={"name": "Prof", "email": "prof@example.com"})
+    # Conta de outro papel (professor) passa a ser tambem responsavel, sem perder o papel que tinha.
+    prof_link = await c.call("POST", f"/guardians/students/{ids['ana']}/links", 201, "teacher becomes guardian too", sec,
+                             json={"name": "Prof", "email": "prof@example.com", "relationship_kind": "father"})
+    prof = await c.login("prof@example.com")
+    access = await c.call("GET", "/access/me", 200, "teacher access", prof)
+    c.expect({"instructor", "guardian"} <= set(access.get("roles", [])), f"teacher and guardian roles: {access}")
+    await c.call("GET", "/assessment/teaching/offerings", 200, "still teaches", prof)
+    kids = await c.call("GET", "/guardians/me/dependents", 200, "teacher sees dependents", prof)
+    c.expect([d["student"]["name"] for d in kids] == ["Ana"], f"teacher dependents: {kids}")
+    await c.call("DELETE", f"/guardians/links/{prof_link['id']}", 204, "remove teacher link", sec)
+    await c.call("POST", f"/guardians/students/{ids['ana']}/links", 409, "student cannot guard herself", sec,
+                 json={"name": "Ana", "email": "ana@example.com"})
     await c.call("POST", f"/guardians/students/{ids['ana']}/links", 400, "new account needs password", sec,
                  json={"name": "Sem senha", "email": "semsenha@example.com"})
     await c.call("POST", f"/guardians/students/{ids['prof']}/links", 404, "only students have guardians", sec,

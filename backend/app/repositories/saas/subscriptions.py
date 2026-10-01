@@ -1,10 +1,12 @@
 from __future__ import annotations
 from uuid import UUID
 
-from app.models.institution import InstitutionMembership
+from sqlalchemy import func
+
 from app.models.saas import InstitutionSubscription
 from app.models.student import UserRole
 from app.repositories.academic._base import Repository
+from app.repositories.member_roles import MemberRoleRepository
 
 
 class InstitutionSubscriptionRepository(Repository[InstitutionSubscription]):
@@ -14,12 +16,6 @@ class InstitutionSubscriptionRepository(Repository[InstitutionSubscription]):
         return self.db.query(InstitutionSubscription).filter(InstitutionSubscription.institution_id == institution_id).first()
 
     def active_students(self, institution_id: UUID) -> int:
-        return (
-            self.db.query(InstitutionMembership.id)
-            .filter(
-                InstitutionMembership.institution_id == institution_id,
-                InstitutionMembership.role == UserRole.student,
-                InstitutionMembership.is_active.is_(True),
-            )
-            .count()
-        )
+        # Alunos ativos da instituicao, inclusive quem tambem tem outro papel nela.
+        students = MemberRoleRepository(self.db).user_ids_with_role(institution_id, [UserRole.student]).subquery()
+        return self.db.query(func.count()).select_from(students).scalar() or 0

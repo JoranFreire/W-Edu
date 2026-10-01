@@ -12,6 +12,7 @@ from app.repositories.course import CourseRepository
 from app.repositories.enrollment import EnrollmentRepository
 from app.repositories.student import StudentRepository
 from app.schemas.chat import ChatConversationCreate, ChatConversationOut, ChatMessageCreate, ChatMessageOut
+from app.policies.roles import has_any_role, has_role
 
 
 class ChatService:
@@ -23,7 +24,7 @@ class ChatService:
         self.student_repo = StudentRepository(db)
 
     def list_conversations(self, current: Student) -> list[ChatConversationOut]:
-        conversations = self.repo.list_all() if current.role in ADMIN_ROLES | {UserRole.coordinator} else self.repo.list_for_user(current.id)
+        conversations = self.repo.list_all() if has_any_role(current, ADMIN_ROLES | {UserRole.coordinator}) else self.repo.list_for_user(current.id)
         return [self._conversation_out(conversation, include_messages=False) for conversation in conversations]
 
     def create_conversation(self, current: Student, data: ChatConversationCreate) -> ChatConversationOut:
@@ -65,16 +66,16 @@ class ChatService:
         if instructor_id is None:
             return None
         instructor = self.student_repo.get_by_id(instructor_id)
-        if not instructor or instructor.role not in ADMIN_ROLES | {UserRole.instructor, UserRole.coordinator}:
+        if not instructor or not has_any_role(instructor, ADMIN_ROLES | {UserRole.instructor, UserRole.coordinator}):
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Instrutor inválido")
         return instructor.id
 
     def _ensure_course_access(self, course_id: UUID, current: Student) -> None:
-        if current.role in ADMIN_ROLES | {UserRole.coordinator, UserRole.instructor}:
+        if has_any_role(current, ADMIN_ROLES | {UserRole.coordinator, UserRole.instructor}):
             return
         if self.enrollment_repo.get_by_student_and_course(current.id, course_id):
             return
-        if current.role == UserRole.company_manager and current.organization_id:
+        if has_role(current, UserRole.company_manager) and current.organization_id:
             has_org_student = (
                 self.db.query(Student.id)
                 .join(Enrollment, Enrollment.student_id == Student.id)
@@ -87,7 +88,7 @@ class ChatService:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Acesso ao chat restrito ao curso")
 
     def _ensure_conversation_access(self, conversation: ChatConversation, current: Student) -> None:
-        if current.role in ADMIN_ROLES | {UserRole.coordinator}:
+        if has_any_role(current, ADMIN_ROLES | {UserRole.coordinator}):
             return
         if conversation.student_id == current.id or conversation.instructor_id == current.id:
             return

@@ -13,14 +13,13 @@ import { apiErrorMessage } from '@/lib/api/errors';
 import { formatIsoDate } from '@/lib/dates';
 import { useAcademicTerms } from '@/lib/hooks/admin/academic/useAcademicTerms';
 import { useErrorToast } from '@/lib/hooks/useErrorToast';
-import { useAuthStore } from '@/store/authStore';
-import { isAdminRole } from '@/types/auth';
 import type { TermStatus } from '@/types/academicCalendar';
+import { useCurrentRoles } from '@/lib/hooks/useCurrentRoles';
 
 export default function AdminTermPage() {
   const router = useRouter();
   const termId = useParams<{ termId: string }>().termId;
-  const canDelete = isAdminRole(useAuthStore((state) => state.student?.role));
+  const canDelete = useCurrentRoles().isAdmin;
   const { terms, error, changeStatus } = useAcademicTerms();
   useErrorToast(error, 'Erro ao carregar período.');
   const term = terms.find((item) => item.id === termId);

@@ -15,9 +15,11 @@ from app.models.student import (
     StudentProfile,
     UserRole,
 )
+from app.policies.roles import forget_roles, has_any_role, has_role
 from app.repositories.student import OrganizationRepository, ProfileRepository, StudentRepository
 from app.repositories.student import InstructorAvailabilityRepository, InstructorRatingRepository
 from app.services.membership import MembershipService
+from app.services.people.roles import UserRoleService
 from app.services.saas.seats import StudentSeatPolicy
 from app.schemas.student import (
     InstructorProfileUpdate,
@@ -30,6 +32,14 @@ from app.schemas.student import (
     StudentProfileUpdate,
     StudentUpdate,
 )
+
+
+def role_set(role: UserRole, roles: list[UserRole] | None) -> tuple[UserRole, frozenset[UserRole]]:
+    """Papel principal e conjunto completo: sem lista, so o principal; com lista, o principal entra nela."""
+    if not roles:
+        return role, frozenset({role})
+    primary = role if role in roles else roles[0]
+    return primary, frozenset(roles) | {primary}
 
 
 class StudentService:
@@ -49,19 +59,21 @@ class StudentService:
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="E-mail já cadastrado")
         if data.organization_id and not self.org_repo.get_by_id(data.organization_id):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Empresa não encontrada")
-        if data.role == UserRole.student:
+        primary, roles = role_set(data.role, data.roles)
+        if UserRole.student in roles:
             StudentSeatPolicy(self.db).ensure_available(institution_id)
         student = Student(
             name=data.name,
             email=data.email,
             password_hash=hash_password(data.password),
-            role=data.role,
+            role=primary,
             organization_id=data.organization_id,
         )
         self.db.add(student)
         self.db.flush()
-        MembershipService(self.db).add_member(institution_id, student)
+        MembershipService(self.db).add_member(institution_id, student, roles)
         student = self.repo.create(student)
+        forget_roles(student)
         self.ensure_default_profile(student)
         return student
 
@@ -72,24 +84,28 @@ class StudentService:
         return student
 
     def list_all(self) -> list[Student]:
-        return self.repo.list_all()
+        return UserRoleService(self.db).load_many(self.repo.list_all())
 
     def list_by_organization(self, organization_id: UUID) -> list[Student]:
-        return self.repo.list_by_organization(organization_id)
+        return UserRoleService(self.db).load_many(self.repo.list_by_organization(organization_id))
 
     def update(self, student_id: UUID, data: StudentUpdate) -> Student:
         student = self.get_or_404(student_id)
-        payload = data.model_dump(exclude_none=True)
+        payload = data.model_dump(exclude_none=True, exclude={"roles"})
         if "email" in payload and payload["email"] != student.email and self.repo.get_by_email(payload["email"]):
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="E-mail já cadastrado")
         if "organization_id" in payload and payload["organization_id"] and not self.org_repo.get_by_id(payload["organization_id"]):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Empresa não encontrada")
+        institution_id = bound_institution_id(self.db)
+        if data.roles is not None and institution_id is not None:
+            self._change_roles(student, institution_id, data.role, data.roles)
+            payload.pop("role", None)
         for field, value in payload.items():
             setattr(student, field, value)
-        institution_id = bound_institution_id(self.db)
         if institution_id is not None:
             MembershipService(self.db).sync_member_role(institution_id, student)
         student = self.repo.update(student)
+        forget_roles(student)
         self.ensure_default_profile(student)
         return student
 
@@ -101,10 +117,20 @@ class StudentService:
             return
         self.repo.delete(student)
 
+    def _change_roles(self, student: Student, institution_id: UUID, role: UserRole | None, roles: list[UserRole]) -> None:
+        """Troca os papeis na instituicao ativa; o principal e `role` (ou o atual, se continuar na lista)."""
+        keep = role or (student.role if student.role in roles else None)
+        primary, wanted = role_set(keep or (roles[0] if roles else student.role), roles)
+        if UserRole.student in wanted and not has_role(student, UserRole.student):
+            StudentSeatPolicy(self.db).ensure_available(institution_id)
+        MembershipService(self.db).set_roles(institution_id, student, primary, wanted)
+        student.role = primary
+        forget_roles(student)
+
     def ensure_default_profile(self, student: Student) -> None:
-        if student.role == UserRole.student and not self.profile_repo.get_student_profile(student.id):
+        if has_role(student, UserRole.student) and not self.profile_repo.get_student_profile(student.id):
             self.profile_repo.create_student_profile(StudentProfile(student_id=student.id))
-        if student.role == UserRole.instructor and not self.profile_repo.get_instructor_profile(student.id):
+        if has_role(student, UserRole.instructor) and not self.profile_repo.get_instructor_profile(student.id):
             self.profile_repo.create_instructor_profile(InstructorProfile(student_id=student.id))
 
     def update_student_profile(self, student_id: UUID, data: StudentProfileUpdate) -> StudentProfile:
@@ -125,7 +151,7 @@ class StudentService:
 
     def update_instructor_profile(self, student_id: UUID, data: InstructorProfileUpdate) -> InstructorProfile:
         student = self.get_or_404(student_id)
-        if student.role != UserRole.instructor:
+        if not has_role(student, UserRole.instructor):
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Usuário não é instrutor")
         profile = self.profile_repo.get_instructor_profile(student_id)
         if not profile:
@@ -136,7 +162,7 @@ class StudentService:
 
     def get_instructor_profile(self, student_id: UUID) -> InstructorProfile:
         student = self.get_or_404(student_id)
-        if student.role != UserRole.instructor:
+        if not has_role(student, UserRole.instructor):
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Usuário não é instrutor")
         profile = self.profile_repo.get_instructor_profile(student_id)
         if not profile:
@@ -218,7 +244,7 @@ class OrganizationService:
         return self.repo.list_all()
 
     def list_for_user(self, current: Student) -> list[Organization]:
-        if current.role in ADMIN_ROLES | {UserRole.coordinator}:
+        if has_any_role(current, ADMIN_ROLES | {UserRole.coordinator}):
             return self.repo.list_all()
         if current.organization_id is None:
             return []

@@ -36,5 +36,6 @@ export interface AccessMember {
 
 export interface MyAccess {
   role: UserRole;
+  roles: UserRole[];
   permissions: string[];
 }

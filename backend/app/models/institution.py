@@ -1,12 +1,12 @@
 from uuid import UUID
 
-from app.core.ids import new_id
 from datetime import datetime, timezone
 import enum
 
 from sqlalchemy import JSON, Boolean, DateTime, Enum as SAEnum, ForeignKey, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from app.core.ids import new_id
 from app.core.database import Base
 from app.core.tenancy import TenantMixin
 from app.models.student import UserRole
@@ -60,6 +60,25 @@ class InstitutionMembership(Base):
 
     institution: Mapped["Institution"] = relationship(back_populates="memberships")
     user: Mapped["Student"] = relationship()
+    # Papeis da pessoa nesta instituicao (aluno e professor ao mesmo tempo, por exemplo); `role` e o principal.
+    member_roles: Mapped[list["MemberRole"]] = relationship(back_populates="membership", cascade="all, delete-orphan", lazy="selectin")
+
+    @property
+    def roles(self) -> frozenset[UserRole]:
+        return frozenset(item.role for item in self.member_roles) | {self.role}
+
+
+class MemberRole(Base):
+    """Um papel da pessoa na instituicao. Sem TenantMixin, como o vinculo: lido antes de escolher a instituicao."""
+
+    __tablename__ = "institution_member_roles"
+    __table_args__ = (UniqueConstraint("membership_id", "role"),)
+
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
+    membership_id: Mapped[UUID] = mapped_column(ForeignKey("institution_memberships.id", ondelete="CASCADE"), index=True)
+    role: Mapped[UserRole] = mapped_column(SAEnum(UserRole))
+
+    membership: Mapped["InstitutionMembership"] = relationship(back_populates="member_roles")
 
 
 class Campus(TenantMixin, Base):

@@ -9,7 +9,7 @@ from app.models.student import (
     StudentProfile,
     User,
 )
-from app.models.institution import Campus, Institution, InstitutionMembership
+from app.models.institution import Campus, Institution, InstitutionMembership, MemberRole
 from app.models.academic import (
     AcademicUnit,
     Curriculum,
@@ -70,7 +70,7 @@ from app.core.tenant_rls import install_create_hooks as _install_rls, tenant_tab
 _install_rls(_tenant_tables(_Base))
 
 __all__ = [
-    "User", "Student", "Organization", "Institution", "InstitutionMembership", "Campus", "StudentProfile", "InstructorProfile", "InstructorAvailability", "InstructorRating",
+    "User", "Student", "Organization", "Institution", "InstitutionMembership", "MemberRole", "Campus", "StudentProfile", "InstructorProfile", "InstructorAvailability", "InstructorRating",
     "Course", "CourseModule", "LearningPath", "LearningPathCourse", "CoursePrerequisite", "CourseCompletionRule", "Lesson", "Enrollment",
     "Progress", "Session", "Attendance", "AssignmentSubmission",
     "Quiz", "QuizQuestion", "QuizAttempt", "Certificate", "ChatConversation", "ChatMessage", "NotificationTemplate", "NotificationEvent", "BillingPlan", "Subscription", "Charge",

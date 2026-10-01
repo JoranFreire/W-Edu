@@ -11,13 +11,11 @@ import Spinner from '@/components/common/Spinner';
 import { apiErrorMessage } from '@/lib/api/errors';
 import { type LearningPathInput, useLearningPaths } from '@/lib/hooks/admin/useLearningPaths';
 import { useErrorToast } from '@/lib/hooks/useErrorToast';
-import { useAuthStore } from '@/store/authStore';
-import { isAdminRole } from '@/types/auth';
 import type { LearningPath } from '@/types/course';
+import { useCurrentRoles } from '@/lib/hooks/useCurrentRoles';
 
 export default function AdminLearningPathsPage() {
-  const { student } = useAuthStore();
-  const canDelete = isAdminRole(student?.role);
+  const canDelete = useCurrentRoles().isAdmin;
   const paths = useLearningPaths();
   const [editing, setEditing] = useState<{ path?: LearningPath } | null>(null);
   const [addingToPathId, setAddingToPathId] = useState<string | null>(null);

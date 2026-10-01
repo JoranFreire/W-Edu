@@ -7,6 +7,7 @@ import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 import { useAuthStore } from '@/store/authStore';
 import { menuForRole, menuForUser } from '@/lib/config/sidebarMenus';
 import { institutionDisplayName } from '@/lib/institution/branding';
+import { useCurrentRoles } from '@/lib/hooks/useCurrentRoles';
 
 interface SidebarProps {
   open: boolean;
@@ -17,9 +18,11 @@ interface SidebarProps {
 
 export function Sidebar({ open, collapsed, onClose, onToggleCollapse }: SidebarProps) {
   const pathname = usePathname();
-  const { student, institution, permissions } = useAuthStore();
-  const menuItems = menuForUser(student?.role, permissions);
-  const isAdminArea = menuForRole(student?.role) !== menuForRole('student');
+  const { institution, permissions } = useAuthStore();
+  const { roles } = useCurrentRoles();
+  const menuItems = menuForUser(roles, permissions);
+  // Modo gestao para quem tem algum papel de equipe (alem de aluno ou responsavel).
+  const isAdminArea = roles.some((role) => role !== 'guardian' && menuForRole(role) !== menuForRole('student'));
   const displayName = institutionDisplayName(institution);
   const logoUrl = institution?.branding?.logo_url;
   const logo = logoUrl ? (

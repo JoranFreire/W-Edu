@@ -10,6 +10,7 @@ from app.schemas.student import StudentOut
 from app.schemas.user_dossier import DossierContact, UserDossier
 from app.services.people.dossier import academic, family, finance, learning, school_life, warehouse
 from app.services.student import StudentService
+from app.policies.roles import has_any_role, has_role
 
 
 def _contact(user: Student) -> DossierContact:
@@ -40,7 +41,7 @@ class UserDossierService:
             organization_name=user.organization.name if user.organization else None,
             contact=_contact(user),
             guardians=family.guardians_of(self.db, user) if sees_family else None,
-            dependents=family.dependents_of(self.db, user) if sees_family and user.role == UserRole.guardian else None,
+            dependents=family.dependents_of(self.db, user) if sees_family and has_role(user, UserRole.guardian) else None,
             program_enrollments=academic.program_enrollments_of(self.repo, user) if _any(current, "secretariat.access", "academic.manage") else None,
             courses=learning.courses_of(self.db, user),
             certificates=learning.certificates_of(self.db, user),
@@ -48,5 +49,5 @@ class UserDossierService:
             occurrences=school_life.occurrences_of(self.db, user) if has_permission(current, "school_life.access") else None,
             benefits=school_life.benefits_of(self.repo, user) if sees_family else None,
             materials=warehouse.material_requests_of(self.repo, user) if _any(current, "warehouse.manage", "warehouse.reports") else None,
-            teaching=academic.offerings_taught_by(self.repo, user) if user.role in {UserRole.instructor, UserRole.coordinator} else None,
+            teaching=academic.offerings_taught_by(self.repo, user) if has_any_role(user, {UserRole.instructor, UserRole.coordinator}) else None,
         )

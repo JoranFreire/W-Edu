@@ -16,7 +16,7 @@ import { useInstitutionUsers } from '@/lib/hooks/admin/useInstitutionUsers';
 import { useErrorToast } from '@/lib/hooks/useErrorToast';
 import { useTerminology } from '@/lib/hooks/useTerminology';
 import type { ClassGroup } from '@/types/academicGroups';
-import { isAdminRole } from '@/types/auth';
+import { isAdminRole, rolesOf } from '@/types/auth';
 import ClassGroupFormModal from './ClassGroupFormModal';
 
 export default function ClassGroupsSection({ canDelete }: { canDelete: boolean }) {
@@ -30,7 +30,7 @@ export default function ClassGroupsSection({ canDelete }: { canDelete: boolean }
   const [toDelete, setToDelete] = useState<ClassGroup | null>(null);
   useErrorToast(error, 'Erro ao carregar turmas.');
 
-  const teachers = users.filter((user) => user.role === 'instructor' || user.role === 'coordinator' || isAdminRole(user.role));
+  const teachers = users.filter((user) => rolesOf(user).some((role) => role === 'instructor' || role === 'coordinator' || isAdminRole(role)));
   const termName = (id: string) => terms.find((term) => term.id === id)?.name;
   const programCode = (id: string) => programs.find((program) => program.id === id)?.code;
 

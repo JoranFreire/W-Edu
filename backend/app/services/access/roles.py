@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from app.models.access import AccessRole, AccessRoleAssignment
 from app.models.student import Student, UserRole
 from app.policies.permissions import effective_permissions
+from app.policies.roles import can_receive_profiles
 from app.repositories.access import AccessRoleRepository
 from app.repositories.student import StudentRepository
 from app.schemas.academic_groups import PersonSummary
@@ -56,7 +57,7 @@ class AccessRoleService:
         role = self._get_or_404(role_id)
         self._grantable(role.permissions or [], actor)
         user = self.users.get_by_id(user_id)
-        if not user or user.role in (UserRole.super_admin, UserRole.guardian):
+        if not user or not can_receive_profiles(user):
             raise not_found("Usuário não encontrado")
         if not self.repo.assignment(role.id, user.id):
             self.repo.add(AccessRoleAssignment(role_id=role.id, user_id=user.id))

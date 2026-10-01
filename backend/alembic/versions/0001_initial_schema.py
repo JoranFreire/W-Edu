@@ -7,7 +7,8 @@ Create Date: 2026-10-01 12:03:12.615182
 Esquema completo com ids UUID (versao 7, gerados pela aplicacao em app/core/ids.py).
 Substitui as migrations anteriores, de ids inteiros; o banco foi recriado na homologacao.
 
-Alem das tabelas: instituicao padrao, tabela local do salario minimo (serie 1619 do SGS
+Inclui os papeis por vinculo (`institution_member_roles`: a pessoa pode ser aluno e professor na mesma
+instituicao). Alem das tabelas: instituicao padrao, tabela local do salario minimo (serie 1619 do SGS
 do Banco Central, desde 2000) e a politica `tenant_isolation` (RLS) nas tabelas de dados da
 instituicao (models com TenantMixin; ficam de fora os vinculos usuario-instituicao e as tabelas
 da plataforma, como assinatura e faturas SaaS). Mantida em sincronia com app/core/tenant_rls.py.
@@ -735,6 +736,15 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_institution_memberships_institution_id'), 'institution_memberships', ['institution_id'], unique=False)
     op.create_index(op.f('ix_institution_memberships_user_id'), 'institution_memberships', ['user_id'], unique=False)
+    op.create_table('institution_member_roles',
+    sa.Column('id', sa.Uuid(), nullable=False),
+    sa.Column('membership_id', sa.Uuid(), nullable=False),
+    sa.Column('role', sa.Enum('student', 'instructor', 'coordinator', 'company_manager', 'admin', 'super_admin', 'institution_admin', 'secretary', 'guardian', name='userrole'), nullable=False),
+    sa.ForeignKeyConstraint(['membership_id'], ['institution_memberships.id'], ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('membership_id', 'role')
+    )
+    op.create_index(op.f('ix_institution_member_roles_membership_id'), 'institution_member_roles', ['membership_id'], unique=False)
     op.create_table('instructor_profiles',
     sa.Column('id', sa.Uuid(), nullable=False),
     sa.Column('student_id', sa.Uuid(), nullable=False),
@@ -2314,6 +2324,8 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_instructor_profiles_student_id'), table_name='instructor_profiles')
     op.drop_table('instructor_profiles')
     op.drop_index(op.f('ix_institution_memberships_user_id'), table_name='institution_memberships')
+    op.drop_index(op.f('ix_institution_member_roles_membership_id'), table_name='institution_member_roles')
+    op.drop_table('institution_member_roles')
     op.drop_index(op.f('ix_institution_memberships_institution_id'), table_name='institution_memberships')
     op.drop_table('institution_memberships')
     op.drop_index(op.f('ix_forum_threads_institution_id'), table_name='forum_threads')

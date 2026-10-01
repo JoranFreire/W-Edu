@@ -1,71 +1,58 @@
 'use client';
 
 import { useState } from 'react';
-import type { Organization, User, UserRole } from '@/types/auth';
+import RolesField, { type RolesValue } from '@/components/admin/users/RolesField';
+import FormActions from '@/components/common/FormActions';
+import Modal from '@/components/common/Modal';
+import { inputCls, labelCls } from '@/components/common/formStyles';
+import type { UserUpdateInput } from '@/lib/hooks/admin/usePeople';
+import type { RoleOption } from '@/lib/users/rolePolicy';
+import { type Organization, type User, rolesOf } from '@/types/auth';
 
+/** Edicao de usuario; papeis que a pessoa logada nao atribui (ex.: responsavel) ficam como estao. */
 export default function EditUserModal({ user, organizations, availableRoles, onClose, onSave }: {
   user: User;
   organizations: Organization[];
-  availableRoles: Array<[UserRole, string]>;
+  availableRoles: RoleOption[];
   onClose: () => void;
-  onSave: (id: string, data: { name: string; email: string; role: UserRole; organization_id: string | null; is_active: boolean }) => Promise<void>;
+  onSave: (id: string, data: UserUpdateInput) => Promise<void>;
 }) {
-  const [name, setName] = useState(user.name);
-  const [email, setEmail] = useState(user.email);
-  const [role, setRole] = useState<UserRole>(user.role);
-  const [organizationId, setOrganizationId] = useState(user.organization_id?.toString() ?? '');
-  const [isActive, setIsActive] = useState(user.is_active);
+  const assignable = availableRoles.map(([role]) => role);
+  const current = rolesOf(user);
+  const locked = current.filter((role) => !assignable.includes(role));
+  const [form, setForm] = useState({ name: user.name, email: user.email, organizationId: user.organization_id ?? '', isActive: user.is_active });
+  const [roles, setRoles] = useState<RolesValue>({ roles: current.filter((role) => assignable.includes(role)), primary: user.role });
   const [saving, setSaving] = useState(false);
+  const set = (patch: Partial<typeof form>) => setForm({ ...form, ...patch });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const submit = async (event: React.FormEvent) => {
+    event.preventDefault();
     setSaving(true);
-    await onSave(user.id, { name, email, role, organization_id: organizationId ? organizationId : null, is_active: isActive });
+    await onSave(user.id, {
+      name: form.name, email: form.email, organization_id: form.organizationId || null, is_active: form.isActive,
+      role: roles.primary, roles: [...roles.roles, ...locked],
+    });
     setSaving(false);
   };
 
-  const inputCls = 'block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500';
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md p-6 space-y-4">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Editar usuário</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nome *</label>
-            <input value={name} onChange={(e) => setName(e.target.value)} required className={inputCls} />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">E-mail *</label>
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className={inputCls} />
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Perfil</label>
-              <select value={role} onChange={(e) => setRole(e.target.value as UserRole)} className={inputCls}>
-                {availableRoles.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Empresa</label>
-              <select value={organizationId} onChange={(e) => setOrganizationId(e.target.value)} className={inputCls}>
-                <option value="">Sem empresa</option>
-                {organizations.map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}
-              </select>
-            </div>
-          </div>
-          <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-            <input type="checkbox" checked={isActive} onChange={(e) => setIsActive(e.target.checked)} className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
-            Usuário ativo
-          </label>
-          <div className="flex justify-end space-x-3 pt-2">
-            <button type="button" onClick={onClose} className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white">Cancelar</button>
-            <button type="submit" disabled={saving} className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50">
-              {saving ? 'Salvando...' : 'Salvar usuário'}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+    <Modal title="Editar usuário" size="lg" onClose={onClose}>
+      <form onSubmit={submit} className="space-y-4">
+        <label className={labelCls}>Nome *<input required value={form.name} onChange={(e) => set({ name: e.target.value })} className={`mt-1 ${inputCls}`} /></label>
+        <label className={labelCls}>E-mail *<input required type="email" value={form.email} onChange={(e) => set({ email: e.target.value })} className={`mt-1 ${inputCls}`} /></label>
+        <RolesField options={availableRoles} value={roles} locked={locked} onChange={setRoles} />
+        <label className={labelCls}>Empresa
+          <select value={form.organizationId} onChange={(e) => set({ organizationId: e.target.value })} className={`mt-1 ${inputCls}`}>
+            <option value="">Sem empresa</option>
+            {organizations.map((organization) => <option key={organization.id} value={organization.id}>{organization.name}</option>)}
+          </select>
+        </label>
+        <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+          <input type="checkbox" checked={form.isActive} onChange={(e) => set({ isActive: e.target.checked })} className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
+          Usuário ativo
+        </label>
+        <FormActions saving={saving} disabled={roles.roles.length + locked.length === 0} onCancel={onClose} submitLabel="Salvar usuário" />
+      </form>
+    </Modal>
   );
 }

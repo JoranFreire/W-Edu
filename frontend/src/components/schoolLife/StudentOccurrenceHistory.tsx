@@ -8,10 +8,12 @@ import { canRemoveSchoolRecord } from '@/lib/schoolLife/removalRules';
 import { useAuthStore } from '@/store/authStore';
 import type { Occurrence } from '@/types/schoolLife';
 import OccurrenceList from './OccurrenceList';
+import { useCurrentRoles } from '@/lib/hooks/useCurrentRoles';
 
 /** Historico de ocorrencias de um aluno para o professor; remove so as que ele registrou. */
 export default function StudentOccurrenceHistory({ studentId }: { studentId: string }) {
   const user = useAuthStore((state) => state.student);
+  const { roles } = useCurrentRoles();
   const { occurrences, error, remove } = useStudentOccurrences(studentId);
   useErrorToast(error, 'Erro ao carregar o histórico do aluno.');
 
@@ -29,7 +31,7 @@ export default function StudentOccurrenceHistory({ studentId }: { studentId: str
     <OccurrenceList
       occurrences={occurrences}
       onRemove={handleRemove}
-      canRemove={(occurrence) => canRemoveSchoolRecord(user, occurrence.reported_by?.id)}
+      canRemove={(occurrence) => canRemoveSchoolRecord(user?.id, roles, occurrence.reported_by?.id)}
     />
   );
 }
