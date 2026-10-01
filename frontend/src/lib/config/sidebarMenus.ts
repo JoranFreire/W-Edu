@@ -4,7 +4,7 @@ import {
   HomeIcon, BookOpenIcon, ChartBarIcon, MicrophoneIcon, Cog6ToothIcon,
   UsersIcon, AcademicCapIcon, CalendarDaysIcon, ChatBubbleLeftRightIcon,
   BanknotesIcon, Squares2X2Icon, MapIcon, ShieldCheckIcon, DocumentTextIcon,
-  BuildingLibraryIcon, GlobeAltIcon, BellIcon, RectangleStackIcon, PencilSquareIcon, FolderOpenIcon, DocumentChartBarIcon, UserGroupIcon,
+  BuildingLibraryIcon, GlobeAltIcon, BellIcon, RectangleStackIcon, PencilSquareIcon, ClipboardDocumentCheckIcon, FolderOpenIcon, DocumentChartBarIcon, UserGroupIcon,
 } from '@heroicons/react/24/outline';
 
 interface MenuItem { name: string; href: string; icon: ComponentType<{ className?: string }> }
@@ -14,6 +14,7 @@ export const studentMenu: MenuItem[] = [
   { name: 'Meus Cursos', href: '/courses', icon: BookOpenIcon },
   { name: 'Progresso', href: '/progress', icon: ChartBarIcon },
   { name: 'Boletim', href: '/report-card', icon: ChartBarIcon },
+  { name: 'Matrícula em disciplinas', href: '/registration', icon: ClipboardDocumentCheckIcon },
   { name: 'Agenda escolar', href: '/school-agenda', icon: CalendarDaysIcon },
   { name: 'Avisos', href: '/notifications', icon: BellIcon },
   { name: 'Histórico escolar', href: '/transcript', icon: DocumentChartBarIcon },
@@ -66,7 +67,7 @@ export const coordinatorMenu: MenuItem[] = [
 export const instructorMenu: MenuItem[] = [
   { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
   { name: 'Diário de classe', href: '/teaching', icon: PencilSquareIcon },
-  ...studentMenu.filter((item) => item.href !== '/dashboard' && item.href !== '/school-agenda'),
+  ...studentMenu.filter((item) => !['/dashboard', '/school-agenda', '/registration'].includes(item.href)),
 ];
 
 export const secretaryMenu: MenuItem[] = [

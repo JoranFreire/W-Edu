@@ -30,6 +30,21 @@ class SubjectPrerequisiteRepository(Repository[SubjectPrerequisite]):
         """Pares (disciplina, pre-requisito) da instituicao, para checar ciclos."""
         return self.db.query(SubjectPrerequisite.subject_id, SubjectPrerequisite.required_subject_id).all()
 
+    def required_names(self, subject_ids: set[int]) -> dict[int, dict[int, str]]:
+        """Pre-requisitos de cada disciplina, com o nome de cada exigida."""
+        if not subject_ids:
+            return {}
+        rows = (
+            self.db.query(SubjectPrerequisite.subject_id, Subject.id, Subject.name)
+            .join(Subject, Subject.id == SubjectPrerequisite.required_subject_id)
+            .filter(SubjectPrerequisite.subject_id.in_(subject_ids))
+            .all()
+        )
+        required: dict[int, dict[int, str]] = {}
+        for subject_id, required_id, name in rows:
+            required.setdefault(subject_id, {})[required_id] = name
+        return required
+
     def edges_for(self, subject_ids: list[int]) -> list[tuple[int, int]]:
         return (
             self.db.query(SubjectPrerequisite.subject_id, SubjectPrerequisite.required_subject_id)

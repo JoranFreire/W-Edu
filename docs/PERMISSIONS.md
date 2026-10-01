@@ -145,6 +145,16 @@ O guard `get_current_school_staff` cobre a equipe escolar; o escopo por turma e 
 
 Cada registro de ocorrencia, publicacao na agenda e resultado final publicado gera um aviso para o aluno e um para cada responsavel vinculado (sem repetir o responsavel de irmaos da mesma turma).
 
+## Matricula por disciplina (`/registration`)
+
+| Recurso | Student | Instructor | Coordinator | Secretary | Admin |
+| --- | --- | --- | --- | --- | --- |
+| Criar, editar e remover janelas de matricula | Nao | Nao | Sim | Sim | Sim |
+| Definir horario semanal das ofertas | Nao | Nao | Sim | Nao | Sim |
+| Ver horario das ofertas | Sim | Sim | Sim | Sim | Sim |
+| Ver janelas abertas, catalogo, inscrever e cancelar | Janela aberta do proprio programa | Nao | Nao | Nao | Nao |
+| Catalogo do aluno e inscricao fora da janela (com excecao opcional) | Nao | Nao | Sim | Sim | Sim |
+
 ## Caixa de avisos (`/notifications/me`)
 
 | Recurso | Todos os papeis |

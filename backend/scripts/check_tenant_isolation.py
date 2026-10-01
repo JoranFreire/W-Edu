@@ -229,6 +229,11 @@ async def run() -> int:
             headers=admin_a,
         )
         c.expect(r.status_code == 201, f"A opens class with own instructor: {r.status_code} {r.text}")
+        class_a = r.json().get("id")
+        r = await client.post(f"/registration/offerings/{class_a}/time-slots", json={"weekday": 0, "starts_at": "08:00", "ends_at": "10:00"}, headers=admin_b)
+        c.expect(r.status_code == 404, f"B cannot set A offering slots: {r.status_code}")
+        r = await client.get(f"/registration/offerings/{class_a}/time-slots", headers=admin_b)
+        c.expect(r.status_code == 404, f"B cannot read A offering slots: {r.status_code}")
 
         r = await client.post(
             f"/users/{instr_a}/availability",
@@ -359,6 +364,18 @@ async def run() -> int:
         c.expect(r.status_code == 404, f"B cannot publish on A agenda: {r.status_code}")
         r = await client.get(f"/school/class-groups/{group_a}/agenda", headers=admin_b)
         c.expect(r.status_code == 404, f"B cannot read A agenda: {r.status_code}")
+        # Matricula por disciplina: janela e catalogo de A invisiveis para B.
+        window = {"term_id": term_a, "name": "Janela", "opens_at": "2027-01-01T00:00:00Z", "closes_at": "2027-01-10T00:00:00Z"}
+        r = await client.post("/registration/windows", json=window, headers=admin_b)
+        c.expect(r.status_code == 404, f"B cannot open window on A term: {r.status_code}")
+        r = await client.post("/registration/windows", json=window, headers=admin_a)
+        window_a = r.json().get("id")
+        r = await client.get("/registration/windows", headers=admin_b)
+        c.expect(r.json() == [], f"B lists no A windows: {r.json()}")
+        r = await client.delete(f"/registration/windows/{window_a}", headers=admin_b)
+        c.expect(r.status_code == 404, f"B cannot delete A window: {r.status_code}")
+        r = await client.get(f"/registration/program-enrollments/{enrollment_a}/terms/{term_a}/catalog", headers=admin_b)
+        c.expect(r.status_code == 404, f"B cannot read A registration catalog: {r.status_code}")
         r = await client.get(f"/secretariat/declarations/validate/{declaration_a.get('validation_code')}")
         c.expect(r.json().get("valid") is True and r.json().get("institution_name") == "Escola A", f"public validation names the issuer: {r.text}")
 
