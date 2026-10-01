@@ -5,6 +5,7 @@ from pydantic import BaseModel, EmailStr, Field
 
 from app.models.institution import InstitutionStatus, InstitutionType
 from app.models.student import UserRole
+from app.schemas.public_profile import PublicProfile
 
 
 SLUG_PATTERN = r"^[a-z0-9]+(?:-[a-z0-9]+)*$"
@@ -25,6 +26,8 @@ class InstitutionOut(InstitutionSummary):
     document: str | None
     status: InstitutionStatus
     settings: dict
+    custom_domain: str | None = None
+    public_profile: dict = {}
     created_at: datetime
 
 
@@ -52,6 +55,8 @@ class InstitutionUpdate(BaseModel):
     type: InstitutionType | None = None
     settings: dict | None = None
     branding: dict | None = None
+    # Conteudo da pagina publica (apresentacao, contatos); campos ausentes sao limpos.
+    public_profile: PublicProfile | None = None
 
 
 class PlatformInstitutionUpdate(InstitutionUpdate):

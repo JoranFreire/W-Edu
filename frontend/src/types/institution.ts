@@ -1,4 +1,5 @@
 import type { UserRole } from '@/types/auth';
+import type { PublicProfile } from '@/types/publicSite';
 
 export type InstitutionType = 'school' | 'university' | 'vocational' | 'corporate' | 'mixed';
 export type InstitutionStatus = 'active' | 'suspended' | 'archived';
@@ -22,6 +23,9 @@ export interface Institution extends InstitutionSummary {
   document: string | null;
   status: InstitutionStatus;
   settings: Record<string, unknown>;
+  /** Dominio proprio (ex.: escola.com.br); definido pela administracao da plataforma. */
+  custom_domain: string | null;
+  public_profile: PublicProfile;
   created_at: string;
 }
 

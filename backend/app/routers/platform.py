@@ -7,8 +7,10 @@ from app.core.database import get_db
 from app.dependencies import get_current_super_admin
 from app.models.student import Student
 from app.schemas.institution import CampusOut, InstitutionCreate, InstitutionOut, PlatformInstitutionUpdate
+from app.schemas.public_site import CustomDomainInput
 from app.services.campus import CampusService
 from app.services.institution import InstitutionService
+from app.services.public_site.domains import InstitutionDomainService
 
 router = APIRouter()
 
@@ -37,6 +39,17 @@ def update_institution(
 ):
     service = InstitutionService(db)
     return service.update(service.get_or_404(institution_id), data)
+
+
+@router.put("/institutions/{institution_id}/domain", response_model=InstitutionOut)
+def set_institution_domain(
+    institution_id: UUID,
+    data: CustomDomainInput,
+    db: Session = Depends(get_db),
+    _: Student = Depends(get_current_super_admin),
+):
+    institution = InstitutionService(db).get_or_404(institution_id)
+    return InstitutionDomainService(db).set_custom_domain(institution, data.custom_domain)
 
 
 @router.get("/institutions/{institution_id}/campuses", response_model=list[CampusOut])

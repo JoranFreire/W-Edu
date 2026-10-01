@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
-from app.routers import assignments, auth, users, students, courses, lessons, enrollments, progress, sessions, webhooks, admin, quiz, learning_paths, schedule, certificates, notifications, finance, documents, analytics, forum, chat, institutions, platform, academic, assessment, secretariat, guardians, school_life, registration, completion, tuition, contracts, saas, admissions, retention, social, access, warehouse
+from app.routers import assignments, auth, users, students, courses, lessons, enrollments, progress, sessions, webhooks, admin, quiz, learning_paths, schedule, certificates, notifications, finance, documents, analytics, forum, chat, institutions, platform, academic, assessment, secretariat, guardians, school_life, registration, completion, tuition, contracts, saas, admissions, retention, social, access, warehouse, public_site, sales_leads
 from app.services.notification_worker import run_notification_worker
 
 
@@ -58,6 +58,8 @@ app.include_router(forum.router, prefix="/forum", tags=["forum"])
 app.include_router(chat.router, prefix="/chat", tags=["chat"])
 app.include_router(institutions.router, prefix="/institutions", tags=["institutions"])
 app.include_router(platform.router, prefix="/platform", tags=["platform"])
+app.include_router(sales_leads.router, prefix="/platform/leads", tags=["platform"])
+app.include_router(public_site.router, prefix="/public", tags=["public"])
 app.include_router(academic.router, prefix="/academic", tags=["academic"])
 app.include_router(assessment.router, prefix="/assessment", tags=["assessment"])
 app.include_router(secretariat.router, prefix="/secretariat", tags=["secretariat"])

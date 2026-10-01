@@ -24,6 +24,10 @@ ExpectedRoute = tuple[str, str, str]
 
 
 EXPECTED: list[ExpectedRoute] = [
+    ("GET", "/platform/leads", "get_current_super_admin"),
+    ("PATCH", "/platform/leads/{lead_id}", "get_current_super_admin"),
+    ("PUT", "/platform/institutions/{institution_id}/domain", "get_current_super_admin"),
+    ("PATCH", "/institutions/current", "get_current_admin"),
     ("POST", "/courses", "get_current_admin_or_coordinator"),
     ("PATCH", "/courses/{course_id}", "get_current_admin_or_coordinator"),
     ("DELETE", "/courses/{course_id}", "get_current_admin"),

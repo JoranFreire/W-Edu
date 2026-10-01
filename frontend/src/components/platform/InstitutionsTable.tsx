@@ -2,11 +2,12 @@ import Link from 'next/link';
 import { ArrowRightCircleIcon } from '@heroicons/react/24/outline';
 import { type Institution, type InstitutionStatus, institutionStatusLabels, institutionTypeLabels } from '@/types/institution';
 
-export default function InstitutionsTable({ institutions, activeSlug, onStatusChange, onEnter }: {
+export default function InstitutionsTable({ institutions, activeSlug, onStatusChange, onEnter, onDomain }: {
   institutions: Institution[];
   activeSlug: string | undefined;
   onStatusChange: (institution: Institution, status: InstitutionStatus) => void;
   onEnter: (institution: Institution) => void;
+  onDomain: (institution: Institution) => void;
 }) {
   return (
     <table className="min-w-full divide-y divide-gray-200 text-sm dark:divide-gray-700">
@@ -24,7 +25,7 @@ export default function InstitutionsTable({ institutions, activeSlug, onStatusCh
           <tr key={institution.id}>
             <td className="px-4 py-3">
               <p className="font-medium text-gray-900 dark:text-white">{institution.name}</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">{institution.slug}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">{institution.slug}{institution.custom_domain ? ` · ${institution.custom_domain}` : ''}</p>
             </td>
             <td className="px-4 py-3 text-gray-700 dark:text-gray-300">{institutionTypeLabels[institution.type]}</td>
             <td className="px-4 py-3">
@@ -39,6 +40,9 @@ export default function InstitutionsTable({ institutions, activeSlug, onStatusCh
             </td>
             <td className="px-4 py-3 text-gray-700 dark:text-gray-300">{new Date(institution.created_at).toLocaleDateString('pt-BR')}</td>
             <td className="space-x-4 px-4 py-3 text-right">
+              <button onClick={() => onDomain(institution)} aria-label={`Domínio de ${institution.name}`} className="text-sm font-medium text-indigo-600 hover:text-indigo-700">
+                Domínio
+              </button>
               <Link href={`/platform/institutions/${institution.id}/plan`} aria-label={`Plano de ${institution.name}`} className="text-sm font-medium text-indigo-600 hover:text-indigo-700">
                 Plano
               </Link>

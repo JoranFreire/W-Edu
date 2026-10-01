@@ -21,6 +21,8 @@ Vale para todo código tocado, novo ou antigo. Ao alterar um arquivo que mistura
 - Dados: hooks em `src/lib/hooks/` (admin em `src/lib/hooks/admin/`) sobre `useApiQuery`. Nada de `useEffect(() => { load() })` com `setState` manual.
 - Componentes: um propósito cada; reutilizáveis em `src/components/common/` (`Modal`, `TabNav`, `SectionHeader`, `Spinner`, `StatusBadge`, `FormActions`, `formStyles`).
 - Utilitários puros em `src/lib/` (`dates.ts`, `files/saveBlob.ts`, `api/errors.ts`, `text/slugify.ts`).
+- Rotas da API em `src/lib/api/endpoints/`, um módulo por área (`academic.ts`, `secretariat.ts`, `finance.ts`…); `index.ts` reúne tudo em `endpoints`. Rota nova entra no módulo da área, não num arquivo único.
+- Páginas públicas renderizadas no servidor (`/` e `/instituicao/[slug]`) buscam dados por `src/lib/publicSite/server.ts` (chama a API em `API_INTERNAL_URL`). Na raiz, o domínio da plataforma mostra a contratação (`components/landing/`) e o domínio do cliente (subdomínio ou domínio próprio) mostra a instituição (`components/institutionHome/`).
 - Nomenclatura acadêmica (série/semestre/módulo, disciplina/componente): `useTerminology()` (presets em `src/lib/institution/terminology.ts`); não fixe esses termos nas telas.
 - Erros de API: `apiErrorMessage(error, fallback)`; nunca `catch (e: any)`.
 - Ids são `string` (UUID): nada de `Number(id)` em parâmetros de rota ou selects; mapas por id são `Record<string, …>`.
@@ -30,7 +32,7 @@ Vale para todo código tocado, novo ou antigo. Ao alterar um arquivo que mistura
 
 - Todo model de dados de instituição herda `TenantMixin`; o filtro por `institution_id` e o preenchimento no insert são automáticos (`app/core/tenancy.py`, `app/core/tenant_integrity.py`).
 - Consulta global deliberada: `.execution_options(**UNSCOPED)`, com comentário justificando (suspende também o RLS durante a instrução).
-- Instituição da requisição: header `X-Institution` > subdomínio (`TENANT_BASE_DOMAIN`) > claim `inst` do token.
+- Instituição da requisição: header `X-Institution` > subdomínio (`TENANT_BASE_DOMAIN`) > domínio próprio (`institutions.custom_domain`) > claim `inst` do token (`request_institution_ref` em `app/dependencies.py`).
 - RLS no PostgreSQL (`app/core/tenant_rls.py`) é a segunda barreira; a aplicação nunca deve conectar como superusuário.
 - Papéis por instituição: a pessoa pode acumular vários no mesmo vínculo (aluno e professor, por exemplo) e ter papéis diferentes em cada instituição (`institution_member_roles`; `users.role` e `institution_memberships.role` guardam só o principal). Teste papel com `has_role`/`has_any_role` (`app/policies/roles.py`), que vale para quem faz a requisição e para outras pessoas; nunca `user.role == ...`, exceto `is_super_admin` (papel da plataforma). No frontend: `useCurrentRoles()` para quem está logado e `rolesOf(user)` para os demais.
 
@@ -61,6 +63,7 @@ python scripts/check_warehouse_flow.py
 python scripts/check_notifications_flow.py
 python scripts/check_user_dossier_flow.py
 python scripts/check_multi_roles_flow.py
+python scripts/check_public_site_flow.py
 python scripts/check_rls.py                     # Postgres com superusuario em DATABASE_URL; cria role/banco proprios
 alembic upgrade head && alembic check           # migration alinhada aos models
 ```

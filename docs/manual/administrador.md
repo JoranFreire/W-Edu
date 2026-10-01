@@ -5,6 +5,7 @@ O administrador configura a instituição, gerencia usuários e permissões, o f
 ## Primeiros passos (implantação)
 
 1. **Instituição**: nome, identidade visual (logo e **cor principal**), tipo de instituição (define os termos usados nas telas: série/semestre/módulo, disciplina/componente) e unidades (campi). O plano contratado aparece na mesma página.
+   - **Página pública**: frase de destaque, apresentação, como se matricular, telefone, WhatsApp, e-mail, site, Instagram e endereço. A página mostra também os cursos ativos e as **inscrições abertas**, com as cores e o logo da instituição. Ela fica no endereço da instituição (subdomínio ou domínio próprio) e em `/instituicao/<identificador>`; use **Ver página** para conferir. O domínio próprio (ex.: `escola.com.br`) é configurado pela administração da plataforma.
 2. **Usuários**: cadastre coordenadores, secretaria, professores e alunos. Em **Empresas**, cadastre organizações parceiras (para turmas corporativas ou gestores de empresa).
 3. **Acadêmico**: monte programas, disciplinas, matrizes, períodos letivos e turmas (veja o [manual da coordenação](coordenacao.md)).
 4. **Perfis de acesso**: conceda permissões extras quando alguém acumula funções.

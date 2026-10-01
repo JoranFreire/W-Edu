@@ -13,7 +13,7 @@ export interface NewInstitutionInput {
   admin: { name: string; email: string; password: string } | null;
 }
 
-/** Instituicoes da plataforma (super admin): listagem, criacao e status. */
+/** Instituicoes da plataforma (super admin): listagem, criacao, status e dominio proprio. */
 export function usePlatformInstitutions() {
   const request = useCallback(() => api.get<Institution[]>(endpoints.platform.institutions).then((response) => response.data), []);
   const { data = [], loading, error, reload } = useApiQuery(request);
@@ -27,5 +27,11 @@ export function usePlatformInstitutions() {
     reload();
   };
 
-  return { institutions: data, loading, error, create, setStatus };
+  /** Dominio proprio (ex.: escola.com.br); vazio remove. */
+  const setDomain = async (institution: Institution, customDomain: string) => {
+    await api.put(endpoints.platform.institutionDomain(institution.id), { custom_domain: customDomain || null });
+    reload();
+  };
+
+  return { institutions: data, loading, error, create, setStatus, setDomain };
 }

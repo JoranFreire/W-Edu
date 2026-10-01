@@ -15,9 +15,12 @@ RUN npm run build
 
 FROM node:24-alpine
 WORKDIR /app
+# Paginas publicas (contratacao e instituicao) sao renderizadas no servidor e chamam a API direto.
+ARG API_INTERNAL_URL=http://backend:8000
 ENV NODE_ENV=production \
     NEXT_TELEMETRY_DISABLED=1 \
-    PORT=3000
+    PORT=3000 \
+    API_INTERNAL_URL=$API_INTERNAL_URL
 COPY --from=build /app ./
 EXPOSE 3000
 CMD ["node", "server.mjs"]

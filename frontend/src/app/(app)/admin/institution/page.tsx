@@ -2,13 +2,14 @@
 
 import CampusesSection from '@/components/admin/institution/CampusesSection';
 import InstitutionSettingsForm from '@/components/admin/institution/InstitutionSettingsForm';
+import PublicPageSection from '@/components/admin/institution/PublicPageSection';
 import CurrentPlanSection from '@/components/saas/CurrentPlanSection';
 import Spinner from '@/components/common/Spinner';
 import { useCurrentInstitution } from '@/lib/hooks/admin/useCurrentInstitution';
 import { useErrorToast } from '@/lib/hooks/useErrorToast';
 
 export default function InstitutionSettingsPage() {
-  const { institution, error, save } = useCurrentInstitution();
+  const { institution, error, save, savePublicProfile } = useCurrentInstitution();
   useErrorToast(error, 'Erro ao carregar a instituição.');
 
   if (!institution) return error ? null : <Spinner />;
@@ -20,6 +21,7 @@ export default function InstitutionSettingsPage() {
         <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Identificador: <code>{institution.slug}</code></p>
       </div>
       <InstitutionSettingsForm key={institution.id} institution={institution} onSave={save} />
+      <PublicPageSection key={`page-${institution.id}`} institution={institution} onSave={savePublicProfile} />
       <CampusesSection />
       <CurrentPlanSection />
     </div>

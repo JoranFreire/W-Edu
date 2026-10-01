@@ -1,0 +1,25 @@
+/** Agenda: turmas de cursos, encontros, salas e unidades. */
+export const scheduleEndpoints = {
+  schedule: {
+    locations: '/schedule/locations',
+    location: (id: string) => `/schedule/locations/${id}`,
+    rooms: '/schedule/rooms',
+    room: (id: string) => `/schedule/rooms/${id}`,
+    classes: '/schedule/classes',
+    class: (id: string) => `/schedule/classes/${id}`,
+    classMeetings: (id: string) => `/schedule/classes/${id}/meetings`,
+    classEnrollments: (id: string) => `/schedule/classes/${id}/enrollments`,
+    classWaitlist: (id: string) => `/schedule/classes/${id}/waitlist`,
+    joinClass: (id: string) => `/schedule/classes/${id}/join`,
+    instructorAgenda: (id: string) => `/schedule/instructors/${id}/agenda`,
+    meetings: '/schedule/meetings',
+    meeting: (id: string) => `/schedule/meetings/${id}`,
+    closeMeeting: (id: string) => `/schedule/meetings/${id}/close`,
+    meetingSummary: (id: string) => `/schedule/meetings/${id}/summary`,
+    checkinTokens: (meetingId: string) => `/schedule/meetings/${meetingId}/checkin-tokens`,
+    checkIn: (token: string) => `/schedule/check-in/${token}`,
+    attendance: (meetingId: string) => `/schedule/meetings/${meetingId}/attendance`,
+    attendanceReport: (meetingId: string) => `/schedule/meetings/${meetingId}/attendance-report`,
+    practicalAssessments: (meetingId: string) => `/schedule/meetings/${meetingId}/practical-assessments`,
+  },
+};

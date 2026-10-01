@@ -19,6 +19,10 @@ class SaasPlanService:
     def list(self) -> list[SaasPlan]:
         return self.repo.list()
 
+    def public(self) -> list[SaasPlan]:
+        """Planos oferecidos na pagina de contratacao: so os ativos, do mais barato ao mais caro."""
+        return sorted((plan for plan in self.repo.list() if plan.is_active), key=lambda plan: plan.monthly_price_cents)
+
     def get_or_404(self, plan_id: UUID) -> SaasPlan:
         plan = self.repo.get_by_id(plan_id)
         if not plan:

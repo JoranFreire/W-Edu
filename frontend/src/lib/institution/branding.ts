@@ -14,6 +14,13 @@ export function isValidBrandColor(color: string | undefined | null): color is st
   return !!color && HEX_COLOR.test(color);
 }
 
+/** Cor da instituicao aplicada so a um trecho da pagina (paginas publicas renderizadas no servidor). */
+export function brandingStyle(branding: InstitutionBranding | undefined | null): Record<string, string> {
+  const color = branding?.primary_color;
+  if (!isValidBrandColor(color)) return {};
+  return Object.fromEntries(Object.entries(SHADES).map(([variable, value]) => [variable, value.replace('VAR', color)]));
+}
+
 export function applyBranding(branding: InstitutionBranding | undefined | null) {
   if (typeof document === 'undefined') return;
   const root = document.documentElement;
