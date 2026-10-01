@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -14,11 +14,14 @@ from app.services.institution import InstitutionService
 router = APIRouter()
 
 
-@router.get("/public", response_model=InstitutionSummary)
+@router.get("/public", response_model=InstitutionSummary | None)
 def get_public(db: Session = Depends(get_db), institution_ref: str | None = Depends(requested_institution_ref)):
-    """Marca da instituicao do subdominio/header, para telas publicas (login)."""
+    """Marca da instituicao do subdominio/header, para telas publicas (login).
+
+    No dominio principal nao ha instituicao: responde null (nao e erro); referencia desconhecida da 404.
+    """
     if not institution_ref:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Instituição não informada")
+        return None
     return InstitutionService(db).get_public(institution_ref)
 
 

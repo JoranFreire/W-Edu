@@ -12,13 +12,17 @@ test('usuarios: filtro por perfil e dossie do aluno com o responsavel', async ({
 
   await login(page, users.admin);
   await page.goto('/admin/users');
-  const filters = page.getByRole('group', { name: 'Filtrar por perfil' });
-  await filters.getByRole('button', { name: /^Responsáveis/ }).click();
+  const role = page.getByLabel('Perfil', { exact: true });
+  await role.selectOption('guardians');
   await expect(page.getByRole('link', { name: `Dossiê de ${guardianName}`, exact: true })).toBeVisible();
   await expect(page.getByRole('link', { name: `Dossiê de ${aluno.name}`, exact: true })).toHaveCount(0);
 
-  await filters.getByRole('button', { name: /^Alunos/ }).click();
+  await role.selectOption('students');
   await page.getByLabel('Buscar usuário').fill(`dossie ${suffix}`);
+  await expect(page.getByRole('status').filter({ hasText: /^1 de \d+$/ })).toBeVisible();
+  await page.getByLabel('Situação').selectOption('inactive');
+  await expect(page.getByText('Nenhum usuário encontrado com esse filtro.')).toBeVisible();
+  await page.getByLabel('Situação').selectOption('active');
   await page.getByRole('link', { name: `Dossiê de ${aluno.name}`, exact: true }).click();
 
   await expect(page.getByRole('heading', { name: aluno.name, level: 1 })).toBeVisible();
@@ -48,5 +52,7 @@ test('usuarios: filtro por perfil e dossie do aluno com o responsavel', async ({
 
   // Volta para a lista no ultimo filtro escolhido.
   await page.getByRole('button', { name: 'Voltar para usuários' }).click();
-  await expect(filters.getByRole('button', { name: /^Alunos/ })).toHaveAttribute('aria-pressed', 'true');
+  await expect(role).toHaveValue('students');
+  await page.getByRole('button', { name: /Limpar filtros/ }).click();
+  await expect(role).toHaveValue('all');
 });

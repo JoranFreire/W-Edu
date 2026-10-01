@@ -90,7 +90,18 @@ export default function AdminStudentsPage() {
         <div id={`people-${activeTab}`} role="tabpanel">
           {activeTab === 'users' && (
             <div className="space-y-4">
-              <UsersFilterBar filter={filters.filter} onFilter={filters.setFilter} counts={filters.counts} query={filters.query} onQuery={filters.setQuery} />
+              <UsersFilterBar
+                filters={filters.filters}
+                onChange={filters.update}
+                counts={filters.counts}
+                query={filters.query}
+                onQuery={filters.setQuery}
+                organizations={people.organizations}
+                shown={filters.filtered.length}
+                total={people.users.length}
+                active={filters.active}
+                onReset={filters.reset}
+              />
               <UsersList
                 users={filters.filtered}
                 filtered={people.users.length > 0}
