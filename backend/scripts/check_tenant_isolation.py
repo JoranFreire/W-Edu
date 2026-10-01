@@ -364,6 +364,27 @@ async def run() -> int:
         c.expect(r.status_code == 404, f"B cannot publish on A agenda: {r.status_code}")
         r = await client.get(f"/school/class-groups/{group_a}/agenda", headers=admin_b)
         c.expect(r.status_code == 404, f"B cannot read A agenda: {r.status_code}")
+        # Mensalidades: plano, descontos e extrato de A invisiveis para B.
+        plan = {"name": "Mensalidade", "term_id": term_a, "program_id": program_a, "amount_cents": 1000, "first_due_on": "2027-02-10"}
+        r = await client.post("/tuition/plans", json=plan, headers=admin_b)
+        c.expect(r.status_code == 404, f"B cannot create plan on A term: {r.status_code}")
+        r = await client.post("/tuition/plans", json=plan, headers=admin_a)
+        plan_a = r.json().get("id")
+        r = await client.post(f"/tuition/plans/{plan_a}/generate", headers=admin_b)
+        c.expect(r.status_code == 404, f"B cannot generate A plan: {r.status_code}")
+        r = await client.post(f"/tuition/plans/{plan_a}/generate", headers=admin_a)
+        c.expect(r.json().get("created", 0) >= 1, f"A generates own plan: {r.text}")
+        r = await client.get(f"/tuition/enrollments/{enrollment_a}/charges", headers=admin_b)
+        c.expect(r.status_code == 404, f"B cannot read A statement: {r.status_code}")
+        r = await client.get(f"/tuition/enrollments/{enrollment_a}/charges", headers=admin_a)
+        charge_a = r.json()[0]["id"]
+        r = await client.post(f"/tuition/charges/{charge_a}/settle", json={}, headers=admin_b)
+        c.expect(r.status_code == 404, f"B cannot settle A charge: {r.status_code}")
+        r = await client.post(f"/tuition/enrollments/{enrollment_a}/discounts", json={"percent": 10, "valid_from": "2027-01-01"}, headers=admin_b)
+        c.expect(r.status_code == 404, f"B cannot grant discount to A: {r.status_code}")
+        r = await client.get("/tuition/plans", headers=admin_b)
+        c.expect(r.json() == [], f"B lists no A plans: {r.json()}")
+
         # Requisitos de conclusao: estagio, TCC e integralizacao de A invisiveis para B.
         r = await client.post(f"/completion/enrollments/{enrollment_a}/internships", json={"company_name": "X", "starts_on": "2027-03-01"}, headers=admin_b)
         c.expect(r.status_code == 404, f"B cannot register internship for A: {r.status_code}")

@@ -19,6 +19,7 @@ export const studentMenu: MenuItem[] = [
   { name: 'Avisos', href: '/notifications', icon: BellIcon },
   { name: 'Histórico escolar', href: '/transcript', icon: DocumentChartBarIcon },
   { name: 'Integralização', href: '/completion', icon: ChartPieIcon },
+  { name: 'Mensalidades', href: '/payments', icon: BanknotesIcon },
   { name: 'Certificados', href: '/certificates', icon: ShieldCheckIcon },
   { name: 'Sessões de Voz', href: '/sessions', icon: MicrophoneIcon },
   { name: 'Configurações', href: '/settings', icon: Cog6ToothIcon },
@@ -71,7 +72,7 @@ export const instructorMenu: MenuItem[] = [
   { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
   { name: 'Diário de classe', href: '/teaching', icon: PencilSquareIcon },
   { name: 'Orientações', href: '/teaching/advising', icon: BriefcaseIcon },
-  ...studentMenu.filter((item) => !['/dashboard', '/school-agenda', '/registration', '/completion'].includes(item.href)),
+  ...studentMenu.filter((item) => !['/dashboard', '/school-agenda', '/registration', '/completion', '/payments'].includes(item.href)),
 ];
 
 export const secretaryMenu: MenuItem[] = [
@@ -84,6 +85,7 @@ export const secretaryMenu: MenuItem[] = [
 
 export const guardianMenu: MenuItem[] = [
   { name: 'Meus dependentes', href: '/guardian', icon: UserGroupIcon },
+  { name: 'Mensalidades', href: '/payments', icon: BanknotesIcon },
   { name: 'Avisos', href: '/notifications', icon: BellIcon },
   { name: 'Configurações', href: '/settings', icon: Cog6ToothIcon },
 ];

@@ -75,11 +75,11 @@ export async function enrollInSeedProgram(request: APIRequestContext, studentId:
   return enrollment;
 }
 
-/** Responsavel novo (conta criada pela secretaria) vinculado ao aluno. */
-export async function linkGuardian(request: APIRequestContext, studentId: number, name: string, email: string, institution = 'escola-alfa') {
+/** Responsavel novo (conta criada pela secretaria) vinculado ao aluno; `isFinancial` o torna o pagador. */
+export async function linkGuardian(request: APIRequestContext, studentId: number, name: string, email: string, institution = 'escola-alfa', isFinancial = false) {
   const response = await request.post(`${API_URL}/guardians/students/${studentId}/links`, {
     headers: await adminHeaders(request, institution),
-    data: { name, email, password: E2E_PASSWORD, relationship_kind: 'mother' },
+    data: { name, email, password: E2E_PASSWORD, relationship_kind: 'mother', is_financial: isFinancial },
   });
   if (!response.ok()) throw new Error(`linkGuardian: ${response.status()} ${await response.text()}`);
 }

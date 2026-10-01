@@ -140,6 +140,18 @@ export const endpoints = {
     advising: '/completion/advising',
     advisors: '/completion/advisors',
   },
+  tuition: {
+    plans: '/tuition/plans',
+    plan: (id: number) => `/tuition/plans/${id}`,
+    generate: (id: number) => `/tuition/plans/${id}/generate`,
+    settings: '/tuition/settings',
+    discounts: (enrollmentId: number) => `/tuition/enrollments/${enrollmentId}/discounts`,
+    deactivateDiscount: (id: number) => `/tuition/discounts/${id}/deactivate`,
+    statement: (enrollmentId: number) => `/tuition/enrollments/${enrollmentId}/charges`,
+    myCharges: '/tuition/my/charges',
+    quote: (chargeId: number) => `/tuition/charges/${chargeId}/quote`,
+    settle: (chargeId: number) => `/tuition/charges/${chargeId}/settle`,
+  },
   courses: {
     list: '/courses',
     detail: (id: number) => `/courses/${id}`,

@@ -89,6 +89,7 @@ class Subscription(TenantMixin, Base):
 
 class Charge(TenantMixin, Base):
     __tablename__ = "charges"
+    __table_args__ = (UniqueConstraint("program_enrollment_id", "tuition_plan_id", "installment_number", name="uq_charges_tuition_installment"),)
 
     id: Mapped[int] = mapped_column(primary_key=True)
     billing_plan_id: Mapped[int | None] = mapped_column(ForeignKey("billing_plans.id"), nullable=True, index=True)
@@ -113,10 +114,23 @@ class Charge(TenantMixin, Base):
     paid_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     description: Mapped[str | None] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    # Mensalidade (Fase 17): parcela de um plano para a matricula, pagador e composicao do valor.
+    program_enrollment_id: Mapped[int | None] = mapped_column(ForeignKey("program_enrollments.id"), nullable=True, index=True)
+    tuition_plan_id: Mapped[int | None] = mapped_column(ForeignKey("tuition_plans.id"), nullable=True, index=True)
+    installment_number: Mapped[int | None] = mapped_column(Integer)
+    # Responsavel financeiro que paga (vazio: o proprio aluno).
+    payer_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True, index=True)
+    gross_amount_cents: Mapped[int | None] = mapped_column(Integer)
+    discount_cents: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
+    punctuality_discount_cents: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
+    fine_cents: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
+    interest_cents: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
+    amount_paid_cents: Mapped[int | None] = mapped_column(Integer)
 
     billing_plan: Mapped["BillingPlan | None"] = relationship(back_populates="charges")
     subscription: Mapped["Subscription | None"] = relationship(back_populates="charges")
-    student: Mapped["Student | None"] = relationship(back_populates="charges")
+    student: Mapped["Student | None"] = relationship(back_populates="charges", foreign_keys=[student_id])
+    payer: Mapped["Student | None"] = relationship(foreign_keys=[payer_id])
     organization: Mapped["Organization | None"] = relationship(back_populates="charges")
     course: Mapped["Course | None"] = relationship(back_populates="charges")
     class_offering: Mapped["ClassOffering | None"] = relationship(back_populates="charges")

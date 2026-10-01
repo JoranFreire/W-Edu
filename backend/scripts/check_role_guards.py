@@ -18,6 +18,7 @@ from app.dependencies import (
     get_current_admin,
     get_current_admin_or_company_manager,
     get_current_admin_or_coordinator,
+    get_current_finance_staff,
     get_current_guardian,
     get_current_school_staff,
     get_current_secretariat,
@@ -123,6 +124,12 @@ def main() -> int:
             get_current_secretariat,
             [*ADMIN_ROLES, UserRole.coordinator, UserRole.secretary],
             [UserRole.student, UserRole.instructor, UserRole.company_manager, UserRole.guardian],
+        ),
+        (
+            "finance_staff",
+            get_current_finance_staff,
+            [*ADMIN_ROLES, UserRole.secretary],
+            [UserRole.student, UserRole.instructor, UserRole.coordinator, UserRole.company_manager, UserRole.guardian],
         ),
         (
             "school_staff",

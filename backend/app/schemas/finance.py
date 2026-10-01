@@ -123,5 +123,15 @@ class ChargeOut(BaseModel):
     paid_at: datetime | None
     description: str | None
     created_at: datetime
+    program_enrollment_id: int | None = None
+    tuition_plan_id: int | None = None
+    installment_number: int | None = None
+    payer_id: int | None = None
+    gross_amount_cents: int | None = None
+    discount_cents: int = 0
+    punctuality_discount_cents: int = 0
+    fine_cents: int = 0
+    interest_cents: int = 0
+    amount_paid_cents: int | None = None
 
     model_config = {"from_attributes": True}

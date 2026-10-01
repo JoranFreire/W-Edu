@@ -70,7 +70,7 @@ class Student(Base):
         foreign_keys="Certificate.issued_by_id",
     )
     subscriptions: Mapped[list["Subscription"]] = relationship(back_populates="student")
-    charges: Mapped[list["Charge"]] = relationship(back_populates="student")
+    charges: Mapped[list["Charge"]] = relationship(back_populates="student", foreign_keys="Charge.student_id")
 
 
 User = Student

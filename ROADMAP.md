@@ -4,7 +4,7 @@
 
 **Fase:** 2 — Voz com Professor IA (em andamento)  
 **Ultima atualizacao:** 2026-10-01  
-**Proximo marco:** Fase 17 — Perfil Profissionalizante e Financeiro Educacional. Fase 16 (matricula por disciplina, creditos, TCC, estagio e atividades complementares) concluida.
+**Proximo marco:** Fase 17 — contratos no GED e planos SaaS por instituicao. Mensalidades, bolsas, descontos, multa/juros e responsavel financeiro concluidos.
 
 ## Visao Alvo
 
@@ -304,10 +304,10 @@ Objetivo: estrutura comum a escola, universidade e profissionalizante.
 ### Fase 17 — Perfil Profissionalizante e Financeiro Educacional
 
 - [ ] Programas tecnicos com estagio supervisionado e carga horaria minima.
-- [ ] Mensalidade por programa, turma-grupo ou credito.
+- [x] Mensalidade por programa, turma-grupo ou credito (planos por periodo letivo com geracao idempotente das parcelas).
 - [ ] Contratos de matricula/rematricula no GED.
-- [ ] Bolsas, descontos, multa e juros.
-- [ ] Responsavel financeiro distinto do aluno.
+- [x] Bolsas, descontos, multa e juros (bolsa, irmaos, convenio e pontualidade com vigencia; multa e juros pro rata configuraveis por instituicao).
+- [x] Responsavel financeiro distinto do aluno (pagador da parcela e extrato proprio em Mensalidades).
 - [ ] Planos SaaS por instituicao.
 - [ ] Futuro: SISTEC.
 

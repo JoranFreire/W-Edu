@@ -170,6 +170,19 @@ Cada registro de ocorrencia, publicacao na agenda e resultado final publicado ge
 | Validar horas de estagio e registrar entrega/defesa do TCC | Nao | Se orientador | Sim | Nao | Sim |
 | Orientacoes em andamento (`/completion/advising`) | Nao | As proprias | Todas | Nao | Todas |
 
+## Mensalidades (`/tuition`)
+
+| Recurso | Student | Guardian | Coordinator | Secretary | Admin |
+| --- | --- | --- | --- | --- | --- |
+| Planos de mensalidade e geracao das parcelas | Nao | Nao | Nao | Nao | Sim |
+| Ver multa e juros | Nao | Nao | Nao | Sim | Sim |
+| Alterar multa e juros | Nao | Nao | Nao | Nao | Sim |
+| Bolsas e descontos da matricula; extrato da matricula | Nao | Nao | Nao | Sim | Sim |
+| Baixa da parcela (pagamento) | Nao | Nao | Nao | Nao | Sim |
+| Proprio extrato (como aluno ou pagador) e valor a pagar hoje | Sim | Sim | Sim | Sim | Sim |
+
+O guard `get_current_finance_staff` cobre administracao e secretaria; a consulta de uma cobranca pelo aluno ou pagador fica em `app/policies/tuition_access.py`.
+
 ## Caixa de avisos (`/notifications/me`)
 
 | Recurso | Todos os papeis |
