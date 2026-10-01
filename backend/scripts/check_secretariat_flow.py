@@ -210,7 +210,7 @@ async def check_credits_and_transcript(c: Checker, h: dict, ctx: dict, enrollmen
     c.expect(rows == {"S1": ("completed", 8.0, "2027"), "S2": ("completed", 6.0, "2027"), "S3": ("credited", 9.0, "Faculdade X")}, f"transcript rows: {rows}")
     summary = transcript["summary"]
     expected = {"cr": 7.4, "mandatory_hours": 120, "mandatory_hours_done": 120, "elective_hours_done": 40, "hours_done": 160,
-                "integralization": 100.0, "completed_components": 3, "total_components": 3}
+                "integralization": 100.0, "completed_components": 3, "total_components": 3, "credits_done": 10, "mandatory_credits": 8}
     c.expect(summary == expected, f"transcript summary: {summary}")
     mine = await c.call("GET", "/secretariat/my/transcripts", 200, "student transcripts", h["ana"])
     c.expect([t["program_code"] for t in mine] == ["ADM"] and mine[0]["summary"]["cr"] == 7.4, f"student sees own transcript: {mine}")

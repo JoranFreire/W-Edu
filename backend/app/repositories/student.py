@@ -8,6 +8,7 @@ from app.models.student import (
     Organization,
     Student,
     StudentProfile,
+    UserRole,
 )
 
 
@@ -24,6 +25,14 @@ class StudentRepository:
 
     def list_all(self) -> list[Student]:
         return self.db.query(Student).order_by(Student.created_at.desc()).all()
+
+    def list_active_by_roles(self, roles: set[UserRole]) -> list[Student]:
+        return (
+            self.db.query(Student)
+            .filter(Student.role.in_(roles), Student.is_active.is_(True))
+            .order_by(Student.name)
+            .all()
+        )
 
     def list_by_organization(self, organization_id: int) -> list[Student]:
         return (

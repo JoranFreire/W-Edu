@@ -4,7 +4,7 @@
 
 **Fase:** 2 — Voz com Professor IA (em andamento)  
 **Ultima atualizacao:** 2026-10-01  
-**Proximo marco:** Fase 16 — Perfil Universidade (creditos, TCC, estagio e atividades complementares). Matricula por disciplina concluida.
+**Proximo marco:** Fase 17 — Perfil Profissionalizante e Financeiro Educacional. Fase 16 (matricula por disciplina, creditos, TCC, estagio e atividades complementares) concluida.
 
 ## Visao Alvo
 
@@ -297,8 +297,8 @@ Objetivo: estrutura comum a escola, universidade e profissionalizante.
 ### Fase 16 — Perfil Universidade
 
 - [x] Janela de matricula por disciplina com pre-requisitos, choque de horario e vagas (limite de creditos, lista de espera com promocao automatica e excecao pela secretaria).
-- [ ] Creditos e integralizacao.
-- [ ] TCC, estagio e atividades complementares.
+- [x] Creditos e integralizacao (creditos cumpridos frente ao total do programa ou da matriz obrigatoria; requisitos de conclusao consolidados).
+- [x] TCC, estagio e atividades complementares (diario de horas de estagio validado pelo orientador; defesa e nota do TCC; atividades aprovadas pela secretaria).
 - [ ] Futuro: ENADE e e-MEC.
 
 ### Fase 17 — Perfil Profissionalizante e Financeiro Educacional

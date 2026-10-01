@@ -101,6 +101,8 @@ class TranscriptSummary(BaseModel):
     integralization: float
     completed_components: int
     total_components: int
+    credits_done: int
+    mandatory_credits: int
 
 
 class TranscriptOut(BaseModel):

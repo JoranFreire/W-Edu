@@ -9,7 +9,7 @@ from app.services.academic.errors import conflict, not_found
 from app.services.academic.patch import apply_patch
 from app.services.academic.units import AcademicUnitService
 
-CLEARABLE = frozenset({"unit_id", "degree", "duration_terms", "total_hours", "total_credits"})
+CLEARABLE = frozenset({"unit_id", "degree", "duration_terms", "total_hours", "total_credits", "complementary_hours", "internship_hours"})
 
 
 class ProgramService:

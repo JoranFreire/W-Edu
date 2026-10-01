@@ -42,6 +42,10 @@ DEFAULT_TEMPLATES = {
         "Vaga confirmada",
         "Abriu vaga e você foi matriculado em {offering_name} ({subject_name}).",
     ),
+    (NotificationEventType.activity_reviewed, NotificationChannel.internal): (
+        "Atividade complementar avaliada",
+        "{title}: {status_label} ({hours} h).",
+    ),
     (NotificationEventType.meeting_reminder, NotificationChannel.internal): (
         "Lembrete de encontro",
         "Você tem um encontro em {starts_at}: {meeting_title}.",

@@ -22,12 +22,12 @@ class TranscriptService:
         self.lifecycle = EnrollmentLifecycleService(db)
 
     def for_enrollment(self, enrollment_id: int) -> TranscriptOut:
-        return self._build(self.lifecycle.get_or_404(enrollment_id))
+        return self.build(self.lifecycle.get_or_404(enrollment_id))
 
     def for_student(self, student: Student) -> list[TranscriptOut]:
-        return [self._build(enrollment) for enrollment in self.enrollments.list(student_id=student.id)]
+        return [self.build(enrollment) for enrollment in self.enrollments.list(student_id=student.id)]
 
-    def _build(self, enrollment: ProgramEnrollment) -> TranscriptOut:
+    def build(self, enrollment: ProgramEnrollment) -> TranscriptOut:
         curriculum = enrollment.curriculum
         components = [
             Component(c.subject_id, c.subject.code, c.subject.name, c.term_number, c.kind, effective_hours(c), effective_credits(c))

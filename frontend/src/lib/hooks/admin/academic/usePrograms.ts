@@ -15,6 +15,9 @@ export interface ProgramInput {
   duration_terms: number | null;
   total_hours: number | null;
   total_credits: number | null;
+  complementary_hours: number | null;
+  internship_hours: number | null;
+  requires_final_project: boolean;
   status: ProgramStatus;
 }
 

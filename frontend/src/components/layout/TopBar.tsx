@@ -60,7 +60,7 @@ export function TopBar({ onMenuClick }: TopBarProps) {
       <div className="flex items-center space-x-3">
         <InstitutionSwitcher />
 
-        <InboxBell />
+        <InboxBell key={pathname} />
 
         <button
           onClick={toggle}
