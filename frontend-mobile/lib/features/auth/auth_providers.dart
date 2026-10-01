@@ -1,12 +1,13 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/cache/cache_providers.dart';
 import '../../core/network/network_providers.dart';
 import 'data/auth_repository.dart';
 import 'data/usuario.dart';
 
 final authRepositoryProvider = Provider<AuthRepository>(
-  (ref) => AuthRepository(ref.watch(dioProvider), ref.watch(tokenStoreProvider)),
+  (ref) => AuthRepository(ref.watch(dioProvider), ref.watch(tokenStoreProvider), ref.watch(cacheLocalProvider)),
 );
 
 /// Quem está logado. `null` é "ninguém"; carregando é "ainda não sei" (o app
@@ -18,11 +19,21 @@ final authProvider = AsyncNotifierProvider<AuthNotifier, Usuario?>(AuthNotifier.
 class AuthNotifier extends AsyncNotifier<Usuario?> {
   @override
   Future<Usuario?> build() async {
-    // A API recusou o token em alguma requisição: a sessão acabou.
-    ref.listen(sessaoExpiradaProvider, (_, _) => state = const AsyncData(null));
-
     final repo = ref.read(authRepositoryProvider);
+    // A API recusou o token em alguma requisição: a sessão acabou (e o cache dela).
+    ref.listen(sessaoExpiradaProvider, (_, _) {
+      repo.sair();
+      state = const AsyncData(null);
+    });
+
     if (!await repo.temSessao()) return null;
+
+    // Com a sessão salva, abre na hora (inclusive offline) e confere em segundo plano.
+    final salva = await repo.sessaoSalva();
+    if (salva != null) {
+      _conferir(repo);
+      return salva;
+    }
 
     try {
       return await repo.eu();
@@ -30,6 +41,17 @@ class AuthNotifier extends AsyncNotifier<Usuario?> {
       if (e.response?.statusCode != 401) rethrow;
       await repo.sair();
       return null;
+    }
+  }
+
+  /// Atualiza nome, papéis e instituição. Sem rede, fica com a salva; token
+  /// recusado cai no aviso de sessão expirada (acima).
+  Future<void> _conferir(AuthRepository repo) async {
+    try {
+      final usuario = await repo.eu();
+      if (ref.mounted) state = AsyncData(usuario);
+    } on Object {
+      // Mantém a sessão salva.
     }
   }
 
@@ -44,6 +66,9 @@ class AuthNotifier extends AsyncNotifier<Usuario?> {
     state = const AsyncData(null);
   }
 }
+
+/// Dono do cache das telas: cada conta (e instituição) tem o seu.
+final donoDoCacheProvider = Provider<String>((ref) => ref.watch(usuarioProvider.select((usuario) => usuario.chaveDoCache)));
 
 /// Atalho para as telas que só existem com alguém logado.
 final usuarioProvider = NotifierProvider<UsuarioLogado, Usuario>(UsuarioLogado.new);

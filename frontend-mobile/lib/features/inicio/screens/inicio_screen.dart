@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/cache/observar_area.dart';
 import '../../../core/format/datas.dart';
 import '../../../router/rotas.dart';
 import '../../agenda/agenda_providers.dart';
 import '../../auth/auth_providers.dart';
+import '../../auth/data/usuario.dart';
 import '../../avisos/avisos_providers.dart';
 import '../../dependentes/dependentes_providers.dart';
 import '../widgets/resumo_card.dart';
@@ -23,11 +25,7 @@ class InicioScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: Text(usuario.instituicao.nome)),
       body: RefreshIndicator(
-        onRefresh: () async {
-          ref.invalidate(avisosNaoLidosProvider);
-          if (usuario.ehAluno) ref.invalidate(minhaAgendaProvider);
-          if (usuario.ehResponsavel) ref.invalidate(dependentesProvider);
-        },
+        onRefresh: () => _atualizar(ref, usuario),
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
@@ -73,6 +71,15 @@ class InicioScreen extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  /// Puxar para atualizar: cada resumo direto da API; sem rede, fica o salvo.
+  Future<void> _atualizar(WidgetRef ref, Usuario usuario) async {
+    await [
+      ref.atualizarDaApi(avisosNaoLidosProvider, ChavesAvisos.resumo),
+      if (usuario.ehAluno) ref.atualizarDaApi(minhaAgendaProvider, ChavesAgenda.minha),
+      if (usuario.ehResponsavel) ref.atualizarDaApi(dependentesProvider, ChavesDependentes.lista),
+    ].map((atualizacao) => atualizacao.then<void>((_) {}, onError: (_) {})).wait;
   }
 
   /// O primeiro item de hoje em diante.

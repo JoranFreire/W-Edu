@@ -16,6 +16,9 @@ class Dependente {
 
   String get primeiroNome => nome.split(' ').first;
 
+  static List<Dependente> lista(Object? json) =>
+      [for (final item in json as List<dynamic>) Dependente.fromJson(item as Map<String, dynamic>)];
+
   factory Dependente.fromJson(Map<String, dynamic> json) {
     final aluno = json['student'] as Map<String, dynamic>;
     return Dependente(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/network/api_error.dart';
 import 'estados.dart';
 
 /// Lista vinda da API com os três estados (carregando, erro, vazio) e "puxar
@@ -31,7 +32,7 @@ class ListaRemota<T> extends StatelessWidget {
     return switch (valor) {
       AsyncValue(:final error?, hasValue: false) => ErroView(erro: error, onTentarDeNovo: onRecarregar),
       AsyncValue(value: final itens?) => RefreshIndicator(
-          onRefresh: onRecarregar,
+          onRefresh: () => _recarregar(context),
           child: itens.isEmpty
               // Rolavel mesmo vazia, para o "puxar para atualizar" funcionar.
               ? ListView(children: [SizedBox(height: 320, child: EstadoVazio(texto: textoVazio, icone: iconeVazio))])
@@ -47,5 +48,15 @@ class ListaRemota<T> extends StatelessWidget {
         ),
       _ => const Carregando(),
     };
+  }
+
+  /// Com a lista na tela, uma falha ao atualizar só avisa: o que está salvo continua.
+  Future<void> _recarregar(BuildContext context) async {
+    final mensagens = ScaffoldMessenger.of(context);
+    try {
+      await onRecarregar();
+    } on Object catch (erro) {
+      mensagens.showSnackBar(SnackBar(content: Text(mensagemDeErro(erro, 'Não foi possível atualizar.'))));
+    }
   }
 }
