@@ -3,7 +3,6 @@ from __future__ import annotations
 from sqlalchemy.orm import Session
 
 from app.models.academic_calendar import GradingPeriodStatus, TermStatus
-from app.models.notification import NotificationEventType
 from app.models.schedule import ClassEnrollment, ClassEnrollmentResult, ClassEnrollmentStatus, ClassOffering, ClassStatus
 from app.models.student import Student
 from app.policies.assessment_locks import ensure_offering_open, is_offering_finalized
@@ -16,9 +15,9 @@ from app.services.assessment.averages import mean_of
 from app.services.assessment.closures import PeriodClosureService
 from app.services.assessment.errors import bad_request, conflict
 from app.services.assessment.offerings import TeachingOfferingService
-from app.services.assessment.result_rules import RESULT_LABELS, decide
+from app.services.assessment.result_notices import ResultNoticeService
+from app.services.assessment.result_rules import decide
 from app.services.assessment.snapshot import NO_PERIOD, OfferingScores
-from app.services.notifications.events import NotificationEventService
 
 RECOVERABLE = {ClassEnrollmentResult.recovery, ClassEnrollmentResult.failed}
 UNFINISHED = {ClassEnrollmentResult.in_progress, ClassEnrollmentResult.recovery}
@@ -36,7 +35,7 @@ class FinalResultService:
         self.periods = GradingPeriodRepository(db)
         self.diary = ClassDiaryRepository(db)
         self.attendance = DiaryAttendanceRepository(db)
-        self.notifications = NotificationEventService(db)
+        self.notices = ResultNoticeService(db)
 
     def overview(self, offering_id: int, user: Student) -> OfferingResultsOut:
         offering = self.offerings.get_for_teaching(offering_id, user)
@@ -107,14 +106,7 @@ class FinalResultService:
         for enrollment in enrollments:
             enrollment.status = ClassEnrollmentStatus.completed
         self.db.commit()
-        for enrollment in enrollments:
-            self.notifications.publish(
-                NotificationEventType.grades_published,
-                {"class_name": offering.name, "result_label": RESULT_LABELS[enrollment.result]},
-                recipient_student_id=enrollment.student_id,
-                class_offering_id=offering.id,
-                course_id=offering.course_id,
-            )
+        self.notices.published(offering, enrollments)
         return self.overview(offering_id, user)
 
     def _apply(self, offering: ClassOffering) -> list[ClassEnrollment]:

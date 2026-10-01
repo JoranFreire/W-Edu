@@ -10,11 +10,12 @@ const severityCls: Record<Occurrence['severity'], string> = {
   high: 'bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-300',
 };
 
-/** Lista de ocorrencias; a acao de ciencia (responsavel) e a remocao (equipe) sao opcionais. */
-export default function OccurrenceList({ occurrences, onAcknowledge, onRemove }: {
+/** Lista de ocorrencias; a acao de ciencia (responsavel) e a remocao (equipe, filtrada por `canRemove`) sao opcionais. */
+export default function OccurrenceList({ occurrences, onAcknowledge, onRemove, canRemove }: {
   occurrences: Occurrence[];
   onAcknowledge?: (occurrence: Occurrence) => void;
   onRemove?: (occurrence: Occurrence) => void;
+  canRemove?: (occurrence: Occurrence) => boolean;
 }) {
   if (occurrences.length === 0) return <p className="text-sm text-gray-500 dark:text-gray-400">Nenhuma ocorrência registrada.</p>;
   return (
@@ -45,7 +46,7 @@ export default function OccurrenceList({ occurrences, onAcknowledge, onRemove }:
                     <CheckIcon className="h-4 w-4" /> Ciente
                   </button>
                 )}
-                {onRemove && (
+                {onRemove && (canRemove?.(occurrence) ?? true) && (
                   <button onClick={() => onRemove(occurrence)} aria-label={`Remover ${label}`} className={dangerIconButtonCls}>
                     <TrashIcon className="h-4 w-4" />
                   </button>

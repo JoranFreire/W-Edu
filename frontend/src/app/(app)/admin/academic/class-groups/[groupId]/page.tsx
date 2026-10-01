@@ -1,19 +1,31 @@
 'use client';
 
+import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { CalendarDaysIcon, UsersIcon } from '@heroicons/react/24/outline';
 import ClassGroupRoster from '@/components/admin/academic/groups/ClassGroupRoster';
+import ClassAgendaPanel from '@/components/schoolLife/ClassAgendaPanel';
 import BackButton from '@/components/common/BackButton';
 import Spinner from '@/components/common/Spinner';
+import TabNav, { type TabItem } from '@/components/common/TabNav';
 import { shiftLabels } from '@/lib/academic/labels';
 import { useClassGroup } from '@/lib/hooks/admin/academic/useClassGroup';
 import { useProgramEnrollments } from '@/lib/hooks/admin/academic/useProgramEnrollments';
 import { useErrorToast } from '@/lib/hooks/useErrorToast';
+
+type GroupTab = 'roster' | 'agenda';
+
+const tabs: TabItem<GroupTab>[] = [
+  { id: 'roster', label: 'Alunos', icon: UsersIcon },
+  { id: 'agenda', label: 'Agenda', icon: CalendarDaysIcon },
+];
 
 export default function AdminClassGroupPage() {
   const router = useRouter();
   const groupId = Number(useParams<{ groupId: string }>().groupId);
   const { group, members, error, addMember, removeMember } = useClassGroup(groupId);
   const { enrollments } = useProgramEnrollments({ program_id: group?.program_id, status: 'active' });
+  const [tab, setTab] = useState<GroupTab>('roster');
   useErrorToast(error, 'Turma não encontrada.');
 
   if (!group) return <Spinner />;
@@ -28,7 +40,11 @@ export default function AdminClassGroupPage() {
           {shiftLabels[group.shift]} · {group.member_count}{group.capacity ? ` de ${group.capacity}` : ''} alunos
         </p>
       </div>
-      <ClassGroupRoster members={members} candidates={candidates} onAdd={addMember} onRemove={removeMember} />
+      <TabNav tabs={tabs} active={tab} onChange={setTab} ariaLabel="Turma" idPrefix="group" />
+      <div id={`group-${tab}`} role="tabpanel">
+        {tab === 'roster' && <ClassGroupRoster members={members} candidates={candidates} onAdd={addMember} onRemove={removeMember} />}
+        {tab === 'agenda' && <ClassAgendaPanel groupId={groupId} offeringId={null} />}
+      </div>
     </div>
   );
 }

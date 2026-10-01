@@ -177,6 +177,10 @@ export const endpoints = {
     processDue: '/notifications/events/process-due',
     eventSent: (id: number) => `/notifications/events/${id}/mark-sent`,
     eventFailed: (id: number) => `/notifications/events/${id}/mark-failed`,
+    inbox: '/notifications/me',
+    inboxSummary: '/notifications/me/summary',
+    inboxReadAll: '/notifications/me/read-all',
+    inboxRead: (id: number) => `/notifications/me/${id}/read`,
   },
   lessons: {
     videoStream: (id: number) => `/lessons/${id}/video/stream`,

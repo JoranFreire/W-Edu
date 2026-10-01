@@ -61,3 +61,19 @@ class NotificationEventOut(BaseModel):
     created_at: datetime
 
     model_config = {"from_attributes": True}
+
+
+class InboxNoticeOut(BaseModel):
+    id: int
+    event_type: NotificationEventType
+    title: str
+    body: str
+    payload: dict
+    read_at: datetime | None
+    created_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+class InboxSummaryOut(BaseModel):
+    unread: int

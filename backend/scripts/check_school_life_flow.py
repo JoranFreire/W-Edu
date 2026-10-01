@@ -1,4 +1,4 @@
-"""Exercise school life (phase 15, delivery 2): occurrences, class agenda and the guardian portal view.
+"""Exercise school life (phase 15, delivery 2): occurrences, class agenda, the guardian portal view and inboxes.
 
 Uses a temporary SQLite database by default (set DATABASE_URL to use PostgreSQL).
 """
@@ -137,6 +137,10 @@ async def check_occurrences(c: Checker, h: dict, ids: dict, ctx: dict) -> dict[s
     listed = await c.call("GET", f"/school/students/{ids['ana']}/occurrences", 200, "list occurrences", coord)
     c.expect([o["kind"] for o in listed] == ["merit", "behavior"], f"newest first: {listed}")
     await c.call("GET", f"/school/students/{ids['ana']}/occurrences", 403, "guardian uses the portal", await c.login("maria@example.com"))
+    history = await c.call("GET", f"/school/students/{ids['ana']}/occurrences", 200, "instructor sees history of own student", prof)
+    c.expect(len(history) == 2, f"instructor history: {history}")
+    await c.call("GET", f"/school/students/{ids['ana']}/occurrences", 403, "instructor without the student", h["outro"])
+    await c.call("GET", f"/school/students/{ids['carla']}/occurrences", 200, "secretary sees any student", h["secretaria"])
 
     await c.call("DELETE", f"/school/occurrences/{registered['id']}", 403, "other instructor cannot remove", h["outro"])
     temp = await c.call("POST", "/school/occurrences", 201, "occurrence to remove", h["outro"],
@@ -186,6 +190,27 @@ async def check_portal(c: Checker, ids: dict, occ: dict) -> None:
     c.expect(titles.count("Nova ocorrência") == 2 and titles.count("Agenda da turma") == 3, f"family notices: {titles}")
 
 
+async def check_inbox(c: Checker, h: dict) -> None:
+    """O responsavel recebe os avisos na propria caixa; cada usuario so le e marca os seus."""
+    maria = await c.login("maria@example.com")
+    inbox = await c.call("GET", "/notifications/me", 200, "guardian inbox", maria)
+    titles = [n["title"] for n in inbox]
+    c.expect(titles.count("Nova ocorrência") == 2 and titles.count("Agenda da turma") == 3, f"guardian inbox: {titles}")
+    summary = await c.call("GET", "/notifications/me/summary", 200, "guardian unread", maria)
+    c.expect(summary.get("unread") == 5, f"unread before reading: {summary}")
+    read = await c.call("POST", f"/notifications/me/{inbox[0]['id']}/read", 200, "mark one read", maria)
+    c.expect(read.get("read_at") is not None, f"read_at set: {read}")
+    unread = await c.call("GET", "/notifications/me", 200, "unread only", maria, params={"unread_only": True})
+    c.expect(len(unread) == 4, f"unread list: {unread}")
+    await c.call("POST", f"/notifications/me/{inbox[0]['id']}/read", 404, "other user's notice", h["bia"])
+    cleared = await c.call("POST", "/notifications/me/read-all", 200, "mark all read", maria)
+    c.expect(cleared.get("unread") == 0, f"all read: {cleared}")
+    bia = await c.call("GET", "/notifications/me", 200, "student inbox", h["bia"])
+    c.expect([n["title"] for n in bia].count("Agenda da turma") == 3, f"student keeps own notices: {bia}")
+    carla = await c.call("GET", "/notifications/me", 200, "student without notices", h["carla"])
+    c.expect(carla == [], f"no notices: {carla}")
+
+
 async def run() -> int:
     ids = seed()
     transport = httpx.ASGITransport(app=app)
@@ -196,6 +221,7 @@ async def run() -> int:
         occ = await check_occurrences(c, h, ids, ctx)
         await check_agenda(c, h, ids, ctx)
         await check_portal(c, ids, occ)
+        await check_inbox(c, h)
 
     if c.failures:
         print("School life flow check failed:")

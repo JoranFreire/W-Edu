@@ -11,8 +11,8 @@ router = APIRouter()
 
 
 @router.get("/students/{student_id}/occurrences", response_model=list[OccurrenceOut])
-def list_occurrences(student_id: int, db: Session = Depends(get_db), _: Student = Depends(get_current_school_staff)):
-    return OccurrenceService(db).list_for_student(student_id)
+def list_occurrences(student_id: int, db: Session = Depends(get_db), current: Student = Depends(get_current_school_staff)):
+    return OccurrenceService(db).list_for_student(student_id, current)
 
 
 @router.post("/occurrences", response_model=OccurrenceOut, status_code=201)

@@ -5,10 +5,10 @@ from datetime import date
 from sqlalchemy.orm import Session
 
 from app.models.school_life import StudentOccurrence
-from app.models.student import Student
-from app.policies.school_life_access import ensure_can_remove
+from app.models.student import Student, UserRole
+from app.policies.school_life_access import ensure_can_remove, ensure_can_view_history
 from app.repositories.academic import ClassGroupRepository
-from app.repositories.school_life import OccurrenceRepository
+from app.repositories.school_life import OccurrenceRepository, TeachingScopeRepository
 from app.schemas.school_life import OccurrenceCreate
 from app.services.academic.errors import not_found
 from app.services.school_life.family_notices import FamilyNoticeService
@@ -16,16 +16,18 @@ from app.services.school_life.students import SchoolStudentLookup
 
 
 class OccurrenceService:
-    """Registro de ocorrencias do aluno pela equipe escolar, com aviso a familia."""
+    """Registro e historico de ocorrencias do aluno pela equipe escolar, com aviso a familia."""
 
     def __init__(self, db: Session):
         self.repo = OccurrenceRepository(db)
         self.groups = ClassGroupRepository(db)
         self.students = SchoolStudentLookup(db)
+        self.scope = TeachingScopeRepository(db)
         self.notices = FamilyNoticeService(db)
 
-    def list_for_student(self, student_id: int) -> list[StudentOccurrence]:
+    def list_for_student(self, student_id: int, viewer: Student) -> list[StudentOccurrence]:
         self.students.get_or_404(student_id)
+        ensure_can_view_history(viewer, viewer.role == UserRole.instructor and self.scope.teaches_student(viewer.id, student_id))
         return self.repo.list_by_student(student_id)
 
     def register(self, data: OccurrenceCreate, reporter: Student) -> StudentOccurrence:
