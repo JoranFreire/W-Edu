@@ -78,7 +78,9 @@ Em **Programas sociais** (Financiadores):
 
 1. **Cadastrar financiador** (prefeitura, empresa, fundo…) e, em **Turmas financiadas**, vincular as turmas que ele financia e o limite de faltas de cada uma.
 2. Em **Benefícios e estoque**, use **Cadastrar item** (lanche, kit, vale-transporte…) e registre as **entradas** de estoque (compra ou doação).
-3. A **entrega** dos benefícios aos presentes em cada encontro é registrada no diário da turma (aba **Benefícios**, botão **Registrar entrega**), pelo professor ou pela coordenação.
+3. A **entrega** dos benefícios aos presentes em cada encontro é registrada no diário da turma (aba **Benefícios**), de dois jeitos:
+   - **Registrar entrega**: entregue na hora, em lote;
+   - **Liberar com QR**: vale para qualquer item (lanche, kit de material, uniforme, vale-transporte…). Escolha **para quem**: a **turma toda** (material, uniforme, transporte), **por encontro** (o lanche vai só para os presentes) ou **um aluno**. Cada aluno recebe um QR no app (o estoque fica reservado até a retirada ou o vencimento). Na retirada, quem atende abre **Validar benefícios**, lê o QR com a câmera (ou digita o código), confere o nome do aluno e toca em **Confirmar retirada**: a entrega entra na prestação de contas. Para a cantina, crie em **Perfis de acesso** um perfil só com **Validar benefícios (QR)**.
 4. **Prestação de contas** de cada financiador: inscritos, matriculados, ativos, concluintes, desistentes e desligados, evasão, benefícios entregues e materiais do almoxarifado usados nas turmas. Use **Baixar planilha (CSV)** para enviar ao financiador.
 
 ### Frequência e desligamento

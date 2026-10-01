@@ -20,7 +20,7 @@ Diário de classe, orientações, agenda das turmas e requisição de materiais.
 | **Agenda** | Publicar tarefas, provas, eventos e avisos para a turma |
 | **Ocorrências** | Registrar ocorrências de alunos e ver o histórico deles |
 | **Frequência e evasão** | Acompanhar faltas e risco de desligamento (cursos com limite de faltas) |
-| **Benefícios** | Registrar a entrega de lanche/material aos presentes (programas sociais) |
+| **Benefícios** | Registrar a entrega de lanche/material aos presentes ou **liberar com QR** para retirada: lanche por encontro, material/uniforme/transporte para a turma toda ou para um aluno (programas sociais) |
 
 ### Lançar notas
 
@@ -58,7 +58,7 @@ Se a escola usa o almoxarifado, **Requisições de material** permite pedir iten
 1. No formulário da página, informe a **Data de uso**, a **Finalidade** (ex.: "atividade de pintura") e, se quiser, a **Turma**.
 2. Clique em **Adicionar material** para cada item e informe a quantidade. O saldo em estoque aparece ao lado de cada material.
 3. Clique em **Enviar requisição**. Toda requisição passa por **aprovação** (total ou parcial); você recebe um aviso com a decisão.
-4. Retire os materiais no almoxarifado. Itens permanentes (tesoura, caixa de som…) são **emprestados** e precisam ser devolvidos até a data combinada.
+4. Aprovada, abra o **QR de retirada** (no site, em **Minhas requisições**, ou no app **W-Edu**, em **Requisições de material**, que abre mesmo sem internet) e mostre no almoxarifado: a retirada fica registrada em seu nome. Itens permanentes (tesoura, caixa de som…) são **emprestados** e precisam ser devolvidos até a data combinada.
 5. Em **Minhas requisições** você acompanha a situação e pode **Cancelar requisição** enquanto ela estiver pendente.
 
 ## Para o seu próprio uso

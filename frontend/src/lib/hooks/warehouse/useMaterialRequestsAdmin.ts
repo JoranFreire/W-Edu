@@ -6,7 +6,7 @@ import { endpoints } from '@/lib/api/endpoints';
 import { useApiQuery } from '@/lib/hooks/useApiQuery';
 import type { MaterialRequest, RequestStatus } from '@/types/warehouse';
 
-/** Requisicoes para o almoxarifado: aprovar (por linha), recusar, retirar e registrar devolucao. */
+/** Requisicoes para o almoxarifado: aprovar (por linha), recusar, retirar (sem QR: com motivo) e registrar devolucao. */
 export function useMaterialRequestsAdmin(status: RequestStatus | '') {
   const request = useCallback(
     () => api.get<MaterialRequest[]>(endpoints.warehouse.requests, { params: { status: status || undefined } }).then((response) => response.data),
@@ -17,5 +17,5 @@ export function useMaterialRequestsAdmin(status: RequestStatus | '') {
     await api.post(endpoints.warehouse.action(id, action), body);
     reload();
   };
-  return { requests: data, error, act };
+  return { requests: data, error, act, reload };
 }

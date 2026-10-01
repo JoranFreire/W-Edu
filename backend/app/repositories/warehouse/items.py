@@ -3,7 +3,7 @@ from uuid import UUID
 
 from sqlalchemy import func
 
-from app.models.warehouse import MaterialRequestLine, WarehouseEntry, WarehouseItem
+from app.models.warehouse import MaterialRequest, MaterialRequestLine, RequestStatus, WarehouseEntry, WarehouseItem
 from app.repositories.academic._base import Repository
 
 
@@ -34,6 +34,21 @@ class WarehouseItemRepository(Repository[WarehouseItem]):
             ).filter(MaterialRequestLine.item_id.in_(item_ids)).group_by(MaterialRequestLine.item_id).all()
         }
         return {item_id: (int(received.get(item_id) or 0), *moved.get(item_id, (0, 0, 0))) for item_id in item_ids}
+
+
+    def reserved(self, item_ids: list[UUID], excluding_request_id: UUID | None = None) -> dict[UUID, int]:
+        """Aprovado e ainda nao retirado: sai do disponivel para novas aprovacoes."""
+        if not item_ids:
+            return {}
+        query = (
+            self.db.query(MaterialRequestLine.item_id, func.sum(MaterialRequestLine.quantity_approved))
+            .join(MaterialRequest, MaterialRequest.id == MaterialRequestLine.request_id)
+            .filter(MaterialRequest.status == RequestStatus.approved, MaterialRequestLine.item_id.in_(item_ids))
+        )
+        if excluding_request_id is not None:
+            query = query.filter(MaterialRequest.id != excluding_request_id)
+        totals = {item_id: int(total or 0) for item_id, total in query.group_by(MaterialRequestLine.item_id).all()}
+        return {item_id: totals.get(item_id, 0) for item_id in item_ids}
 
 
 class WarehouseEntryRepository(Repository[WarehouseEntry]):

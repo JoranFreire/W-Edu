@@ -10,10 +10,12 @@ from app.policies.guardian_access import ensure_financial, ensure_linked
 from app.repositories.guardians import GuardianLinkRepository
 from app.schemas.academic_groups import PersonSummary
 from app.schemas.assessment import ReportCardEntry
+from app.schemas.benefit_vouchers import VoucherOut
 from app.schemas.guardians import DependentOut
 from app.schemas.secretariat import TranscriptOut
 from app.services.assessment.report_card import ReportCardService
 from app.services.secretariat.transcript import TranscriptService
+from app.services.social.student_vouchers import StudentVoucherService
 
 
 class GuardianPortalService:
@@ -23,6 +25,7 @@ class GuardianPortalService:
         self.repo = GuardianLinkRepository(db)
         self.report_cards = ReportCardService(db)
         self.transcripts = TranscriptService(db)
+        self.vouchers = StudentVoucherService(db)
 
     def dependents(self, guardian: Student) -> list[DependentOut]:
         return [
@@ -41,6 +44,10 @@ class GuardianPortalService:
 
     def notices(self, guardian: Student, student_id: UUID) -> list[NotificationEvent]:
         return self.repo.notices_for(self._dependent(guardian, student_id).id)
+
+    def vouchers_of(self, guardian: Student, student_id: UUID) -> list[VoucherOut]:
+        """Beneficios liberados do dependente: o responsavel mostra o QR (criancas sem celular)."""
+        return self.vouchers.for_student(self._dependent(guardian, student_id).id)
 
     def charges(self, guardian: Student, student_id: UUID) -> list[Charge]:
         link = ensure_linked(self.repo.get(student_id, guardian.id))

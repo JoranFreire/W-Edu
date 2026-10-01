@@ -5,7 +5,7 @@ from datetime import date
 
 from sqlalchemy.orm import Session
 
-from app.models.schedule import AttendanceStatus, ClassEnrollmentStatus, ClassOffering
+from app.models.schedule import ClassEnrollmentStatus, ClassOffering
 from app.models.social_programs import BenefitDelivery, BenefitItem
 from app.models.student import Student
 from app.policies.retention_access import ensure_can_follow
@@ -14,8 +14,8 @@ from app.repositories.social import BenefitDeliveryRepository, BenefitItemReposi
 from app.schemas.academic_groups import PersonSummary
 from app.schemas.social_programs import DeliveryOut, IndividualDeliveryInput, MeetingDeliveryInput, MeetingDeliveryOut
 from app.services.academic.errors import conflict, not_found
-
-PRESENT = (AttendanceStatus.present, AttendanceStatus.late)
+from app.services.social.recipients import meeting_recipients
+from app.services.social.stock import StockAvailability
 
 
 def delivery_out(delivery: BenefitDelivery) -> DeliveryOut:
@@ -35,6 +35,7 @@ class BenefitDeliveryService:
         self.deliveries = BenefitDeliveryRepository(db)
         self.meetings = ScheduledMeetingRepository(db)
         self.offerings = ClassOfferingRepository(db)
+        self.stock = StockAvailability(db)
 
     def deliver_in_meeting(self, meeting_id: UUID, data: MeetingDeliveryInput, user: Student) -> MeetingDeliveryOut:
         meeting = self.meetings.get_by_id(meeting_id)
@@ -42,19 +43,16 @@ class BenefitDeliveryService:
             raise not_found("Encontro não encontrado")
         ensure_can_follow(user, meeting.class_offering)
         item = self._item(data.item_id)
-        if item.requires_attendance:
-            students = {r.student_id for r in meeting.attendance_records if r.status in PRESENT}
-        else:
-            students = {e.student_id for e in self.meetings.list_active_enrollments(meeting.class_offering_id)}
+        students = meeting_recipients(meeting, item, self.meetings)
         students -= self.deliveries.delivered_in_meeting(meeting.id, item.id)
-        self._ensure_stock(item, len(students) * data.quantity)
+        self.stock.ensure(item, len(students) * data.quantity)
         for student_id in sorted(students):
             self.db.add(BenefitDelivery(
                 item_id=item.id, student_id=student_id, class_offering_id=meeting.class_offering_id, scheduled_meeting_id=meeting.id,
                 quantity=data.quantity, unit_cost_cents=item.unit_cost_cents, delivered_on=meeting.starts_at.date(), delivered_by_id=user.id,
             ))
         self.db.commit()
-        return MeetingDeliveryOut(delivered=len(students), remaining_stock=self.items.balances([item.id])[item.id])
+        return MeetingDeliveryOut(delivered=len(students), remaining_stock=self.stock.available(item))
 
     def deliver_to_student(self, data: IndividualDeliveryInput, user: Student) -> DeliveryOut:
         offering = self._offering(data.class_offering_id)
@@ -63,7 +61,7 @@ class BenefitDeliveryService:
         if not enrollment or enrollment.status != ClassEnrollmentStatus.active:
             raise not_found("Aluno não inscrito nesta turma")
         item = self._item(data.item_id)
-        self._ensure_stock(item, data.quantity)
+        self.stock.ensure(item, data.quantity)
         delivery = self.deliveries.save(BenefitDelivery(
             item_id=item.id, student_id=data.student_id, class_offering_id=offering.id, quantity=data.quantity,
             unit_cost_cents=item.unit_cost_cents, delivered_on=data.delivered_on or date.today(), delivered_by_id=user.id,
@@ -84,11 +82,6 @@ class BenefitDeliveryService:
         if not item.is_active:
             raise conflict("Item inativo")
         return item
-
-    def _ensure_stock(self, item: BenefitItem, needed: int) -> None:
-        available = self.items.balances([item.id])[item.id]
-        if needed > available:
-            raise conflict(f"Estoque insuficiente de {item.name}: {available} disponível(is), {needed} necessário(s)")
 
     def _offering(self, offering_id: UUID) -> ClassOffering:
         offering = self.offerings.get_by_id(offering_id)

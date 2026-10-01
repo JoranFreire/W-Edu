@@ -31,5 +31,5 @@ export function useOfferingBenefits(offeringId: string) {
     reload();
     return result;
   };
-  return { benefits: data, error, deliver };
+  return { benefits: data, error, deliver, reload };
 }

@@ -41,4 +41,15 @@ void main() {
     expect(redirecionar(AsyncData(responsavel), Rotas.dependente('s-1')), isNull);
     expect(redirecionar(AsyncData(aluno), Rotas.dependentes), Rotas.inicio);
   });
+
+  test('benefícios próprios só para quem é aluno', () {
+    expect(redirecionar(AsyncData(_usuario(['student'])), Rotas.beneficios), isNull);
+    expect(redirecionar(AsyncData(_usuario(['guardian'])), Rotas.beneficios), Rotas.inicio);
+  });
+
+  test('requisições de material só para quem pode requisitar', () {
+    final professor = Usuario.fromJson(usuarioJson(role: 'instructor'), Instituicao.fromJson(instituicaoJson()), permissoes: ['warehouse.request']);
+    expect(redirecionar(AsyncData(professor), Rotas.materiais), isNull);
+    expect(redirecionar(AsyncData(_usuario(['student'])), Rotas.materiais), Rotas.inicio);
+  });
 }

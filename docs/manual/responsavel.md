@@ -17,6 +17,7 @@ Para pais, mães e responsáveis. Uma única conta acompanha todos os seus depen
 | **Comunicados** | Avisos da escola enviados ao aluno |
 | **Ocorrências** | Ocorrências registradas (comportamento, saúde, elogios…), com data e descrição |
 | **Agenda** | Tarefas, provas, eventos e avisos das turmas do aluno |
+| **Benefícios** | Lanche, kit ou outro benefício liberado ao aluno, com o **QR** para mostrar na retirada (útil para crianças sem celular) |
 
 ## Avisos
 

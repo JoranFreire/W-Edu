@@ -26,14 +26,15 @@ class AuthRepository {
     return eu();
   }
 
-  /// A pessoa e a instituição ativa (a do token), juntas. `Future.wait` repassa
+  /// A pessoa, a instituição ativa (a do token) e as permissões nela, juntas. `Future.wait` repassa
   /// o próprio erro da API (o `.wait` de record o embrulharia e o 401 se perderia).
   Future<Usuario> eu() async {
-    final [pessoa, instituicao] = await Future.wait([
+    final [pessoa, instituicao, acesso] = await Future.wait([
       _dio.get<Map<String, dynamic>>('users/me'),
       _dio.get<Map<String, dynamic>>('institutions/current'),
+      _dio.get<Map<String, dynamic>>('access/me'),
     ]);
-    final dados = {'usuario': pessoa.data!, 'instituicao': instituicao.data!};
+    final dados = {'usuario': pessoa.data!, 'instituicao': instituicao.data!, 'acesso': acesso.data!};
     final usuario = _ler(dados);
     await _cache.salvar(_chaveSessao, EntradaCache(null, dados));
     return usuario;
@@ -58,6 +59,11 @@ class AuthRepository {
 
   Usuario _ler(Object? dados) {
     final json = dados as Map<String, dynamic>;
-    return Usuario.fromJson(json['usuario'] as Map<String, dynamic>, Instituicao.fromJson(json['instituicao'] as Map<String, dynamic>));
+    final acesso = json['acesso'] as Map<String, dynamic>? ?? const {};
+    return Usuario.fromJson(
+      json['usuario'] as Map<String, dynamic>,
+      Instituicao.fromJson(json['instituicao'] as Map<String, dynamic>),
+      permissoes: (acesso['permissions'] as List<dynamic>? ?? const []).cast<String>(),
+    );
   }
 }

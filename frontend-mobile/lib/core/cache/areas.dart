@@ -4,4 +4,6 @@ abstract final class Areas {
   static const agenda = 'agenda';
   static const boletim = 'report_card';
   static const dependentes = 'dependents';
+  static const beneficios = 'benefits';
+  static const materiais = 'materials';
 }

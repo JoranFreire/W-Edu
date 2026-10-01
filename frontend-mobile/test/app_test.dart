@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import 'package:wedu_mobile/app.dart';
 import 'package:wedu_mobile/core/cache/cache_local.dart';
 import 'package:wedu_mobile/core/cache/cache_providers.dart';
@@ -27,7 +28,9 @@ void main() {
       ..on('GET notifications/me', (_) => (200, [avisoJson('a1')]))
       ..on('GET school/my/agenda', (_) => (200, [agendaJson('ag1')]))
       ..on('GET assessment/my/report-card', (_) => (200, [boletimJson()]))
-      ..on('GET guardians/me/dependents', (_) => (200, [dependenteJson()]));
+      ..on('GET guardians/me/dependents', (_) => (200, [dependenteJson()]))
+      ..on('GET social/my/vouchers', (_) => (200, <Object>[]))
+      ..on('GET access/me', (_) => (200, acessoJson()));
   });
 
   Future<void> abrirApp(WidgetTester tester) async {
@@ -151,5 +154,64 @@ void main() {
     expect(find.text('Entrar'), findsOneWidget);
     expect(tokens.atual, isNull);
     expect(cache.entradas, isEmpty);
+  });
+
+  testWidgets('aluno abre o QR do benefício liberado, mesmo sem rede', (tester) async {
+    tokens.atual = 't-1';
+    await cache.salvar('sessao', EntradaCache(null, {'usuario': usuarioJson(), 'instituicao': instituicaoJson()}));
+    await cache.salvar('i-1_u-1/beneficios', EntradaCache(1, [beneficioJson('1', validoAte: '2099-12-31'), beneficioJson('2', status: 'redeemed', item: 'Kit', tipo: 'material')]));
+    for (final rota in ['GET users/me', 'GET institutions/current', 'GET sync/versions', 'GET notifications/me/summary', 'GET school/my/agenda', 'GET social/my/vouchers']) {
+      servidor.on(rota, (req) => throw semRede(req));
+    }
+    await abrirApp(tester);
+
+    expect(find.text('1 para retirar'), findsOneWidget);
+    await tester.tap(find.text('Benefícios'));
+    await tester.pumpAndSettle();
+    expect(find.text('Retirado'), findsOneWidget);
+    expect(find.text('Material'), findsOneWidget);
+    await tester.tap(find.text('Mostrar QR'));
+    await tester.pumpAndSettle();
+    expect(find.byType(QrImageView), findsOneWidget);
+    expect(find.text('COD1'), findsOneWidget);
+  });
+
+  testWidgets('sem benefício liberado, o início não mostra o cartão', (tester) async {
+    tokens.atual = 't-1';
+    servidor.on('GET users/me', (_) => (200, usuarioJson()));
+    await abrirApp(tester);
+    expect(find.text('Olá, Ana!'), findsOneWidget);
+    expect(find.text('Benefícios'), findsNothing);
+  });
+
+  testWidgets('professor abre o QR de retirada da requisição aprovada, mesmo sem rede', (tester) async {
+    tokens.atual = 't-1';
+    await cache.salvar('sessao', EntradaCache(null, {
+      'usuario': usuarioJson(role: 'instructor'),
+      'instituicao': instituicaoJson(),
+      'acesso': acessoJson(permissoes: ['warehouse.request']),
+    }));
+    await cache.salvar('i-1_u-1/requisicoes', EntradaCache(1, [requisicaoJson('r1', codigo: 'RET123'), requisicaoJson('r2', status: 'pending')]));
+    for (final rota in ['GET users/me', 'GET institutions/current', 'GET access/me', 'GET sync/versions', 'GET notifications/me/summary', 'GET warehouse/my/requests']) {
+      servidor.on(rota, (req) => throw semRede(req));
+    }
+    await abrirApp(tester);
+
+    expect(find.text('1 para retirar'), findsOneWidget);
+    await tester.tap(find.text('Requisições de material'));
+    await tester.pumpAndSettle();
+    expect(find.text('Aguardando aprovação'), findsOneWidget);
+    await tester.tap(find.text('QR de retirada'));
+    await tester.pumpAndSettle();
+    expect(find.byType(QrImageView), findsOneWidget);
+    expect(find.text('RET123'), findsOneWidget);
+  });
+
+  testWidgets('sem permissão de requisitar, o início não mostra materiais', (tester) async {
+    tokens.atual = 't-1';
+    servidor.on('GET users/me', (_) => (200, usuarioJson()));
+    await abrirApp(tester);
+    expect(find.text('Olá, Ana!'), findsOneWidget);
+    expect(find.text('Requisições de material'), findsNothing);
   });
 }

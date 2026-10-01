@@ -3,7 +3,8 @@
 from app.repositories.social.benefits import BenefitDeliveryRepository, BenefitItemRepository, BenefitStockRepository
 from app.repositories.social.funding import FundingSourceRepository
 from app.repositories.social.indicators import SocialIndicatorRepository
+from app.repositories.social.vouchers import BenefitVoucherRepository
 
 __all__ = [
-    "BenefitDeliveryRepository", "BenefitItemRepository", "BenefitStockRepository", "FundingSourceRepository", "SocialIndicatorRepository",
+    "BenefitDeliveryRepository", "BenefitItemRepository", "BenefitStockRepository", "BenefitVoucherRepository", "FundingSourceRepository", "SocialIndicatorRepository",
 ]

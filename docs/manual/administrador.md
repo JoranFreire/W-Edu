@@ -72,8 +72,10 @@ Em **Financeiro**:
 
 Em **Almoxarifado**:
 
-- **Materiais**: **Cadastrar** o material (nome, tipo **consumo** ou **permanente**, unidade, categoria, local de guarda, estoque mínimo, custo) e lançar **Entradas** de estoque.
-- **Requisições**: as requisições dos professores chegam aqui. Analise e **Aprovar** (pode ajustar quantidades, aprovação parcial) ou **Recusar** com observação. Depois, **Registrar retirada** e, para itens permanentes, **Registrar devolução** (com data limite).
+- **Materiais**: **Cadastrar** o material (nome, tipo **consumo** ou **permanente**, unidade, categoria, local de guarda, estoque mínimo, custo) e lançar **Entradas** de estoque. O saldo mostra o **disponível**, o **reservado** (aprovado e ainda não retirado) e o **emprestado**. **Histórico** abre o extrato do material: entradas, retiradas (quem retirou, se com QR, quem entregou), devoluções (quem recebeu) e perdas.
+- **Requisições**: as requisições dos professores chegam aqui. Analise e **Aprovar** (pode ajustar quantidades, aprovação parcial) ou **Recusar** com observação. **Aprovar reserva o saldo**: não é possível aprovar mais do que está livre.
+- **Retirada com QR**: o professor mostra o **QR de retirada** (site ou app). Use **Ler QR da requisição** (câmera ou código digitado), confira quem pediu e os itens e **Confirmar retirada**. Sem o QR, a retirada é possível informando o **motivo**, que fica registrado.
+- **Devolução** (itens permanentes): leia o mesmo QR (ou abra a requisição), informe devolvidos e perdidos/avariados e uma observação; quem recebeu e quando ficam no histórico.
 - **Relatórios**: consumo por turma, professor e material; estoque baixo; devoluções atrasadas. O custo dos materiais usados em turmas financiadas entra na prestação de contas do financiador.
 
 ## Documentos e relatórios

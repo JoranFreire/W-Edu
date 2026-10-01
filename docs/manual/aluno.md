@@ -65,7 +65,7 @@ Precisa de uma exceção (pré-requisito, limite de créditos)? Fale com a secre
 
 ## Benefícios
 
-**Benefícios** lista o que você recebeu de programas sociais da instituição (lanche, kit de material, vale-transporte…), com data e quantidade. Em cursos com limite de faltas, a frequência abaixo do mínimo pode levar ao desligamento: você é avisado em **Avisos**.
+**Benefícios** mostra, no topo, o que foi **liberado para retirada**: cada um tem um **QR** (e um código embaixo). Na cantina ou na entrega do kit, mostre o QR, no app **W-Edu** ele abre mesmo sem internet. Depois vem a lista do que você já recebeu de programas sociais da instituição (lanche, kit de material, vale-transporte…), com data e quantidade. Em cursos com limite de faltas, a frequência abaixo do mínimo pode levar ao desligamento: você é avisado em **Avisos**.
 
 ## Certificados
 

@@ -110,3 +110,41 @@ class BenefitDelivery(TenantMixin, Base):
 
     item: Mapped["BenefitItem"] = relationship()
     student: Mapped["Student"] = relationship(foreign_keys=[student_id])
+
+
+class VoucherStatus(str, enum.Enum):
+    released = "released"    # liberado, aguardando retirada
+    redeemed = "redeemed"    # QR validado: virou entrega
+    cancelled = "cancelled"
+
+
+class BenefitVoucher(TenantMixin, Base):
+    """Beneficio liberado ao aluno, retirado com o QR do app: reserva o estoque ate a validacao (ou o vencimento).
+
+    O ``code`` vai no QR; quem valida confere aluno e item antes de confirmar, e a confirmacao vira uma
+    ``BenefitDelivery`` (prestacao de contas igual a da entrega direta).
+    """
+
+    __tablename__ = "benefit_vouchers"
+
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
+    code: Mapped[str] = mapped_column(String(40), unique=True, index=True)
+    item_id: Mapped[UUID] = mapped_column(ForeignKey("benefit_items.id"), index=True)
+    student_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"), index=True)
+    class_offering_id: Mapped[UUID] = mapped_column(ForeignKey("class_offerings.id"), index=True)
+    scheduled_meeting_id: Mapped[UUID | None] = mapped_column(ForeignKey("scheduled_meetings.id"), index=True)
+    quantity: Mapped[int] = mapped_column(Integer, default=1)
+    status: Mapped[VoucherStatus] = mapped_column(SAEnum(VoucherStatus), default=VoucherStatus.released, index=True)
+    valid_until: Mapped[date | None] = mapped_column(Date)
+    released_by_id: Mapped[UUID | None] = mapped_column(ForeignKey("users.id"))
+    released_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+    redeemed_by_id: Mapped[UUID | None] = mapped_column(ForeignKey("users.id"))
+    redeemed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    delivery_id: Mapped[UUID | None] = mapped_column(ForeignKey("benefit_deliveries.id"))
+
+    item: Mapped["BenefitItem"] = relationship()
+    student: Mapped["Student"] = relationship(foreign_keys=[student_id])
+    class_offering: Mapped["ClassOffering"] = relationship()
+
+    def is_expired(self, today: date) -> bool:
+        return self.status == VoucherStatus.released and self.valid_until is not None and self.valid_until < today

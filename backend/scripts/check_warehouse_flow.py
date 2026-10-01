@@ -134,7 +134,7 @@ async def check_request_cycle(c: Checker, h: dict, ids: dict, ctx: dict) -> None
     await c.call("POST", "/warehouse/requests", 400, "repeated item", prof, json={**payload, "lines": [{"item_id": ctx["paper"], "quantity": 1}] * 2})
     request = await c.call("POST", "/warehouse/requests", 201, "teacher requests", prof, json=payload)
     c.expect(request["status"] == "pending" and request["class_offering_name"] == "Artes 6A", f"request: {request}")
-    await c.call("POST", f"/warehouse/requests/{request['id']}/deliver", 409, "no withdrawal before approval", almox)
+    await c.call("POST", f"/warehouse/requests/{request['id']}/deliver", 409, "no withdrawal before approval", almox, json={"note": "Sem celular"})
     await c.call("POST", f"/warehouse/requests/{request['id']}/approve", 403, "teacher cannot approve", prof, json={"lines": []})
     lines = {line["item_id"]: line["id"] for line in request["lines"]}
     await c.call("POST", f"/warehouse/requests/{request['id']}/approve", 400, "above requested", almox,
@@ -147,8 +147,21 @@ async def check_request_cycle(c: Checker, h: dict, ids: dict, ctx: dict) -> None
     with SessionLocal() as db:
         notices = db.query(NotificationEvent).filter(NotificationEvent.event_type == NotificationEventType.material_request_decided).count()
     c.expect(notices == 1, f"teacher notified: {notices}")
-    delivered = await c.call("POST", f"/warehouse/requests/{request['id']}/deliver", 200, "withdrawal", almox)
+    managed = next(r for r in await c.call("GET", "/warehouse/requests", 200, "manager queue", almox) if r["id"] == request["id"])
+    c.expect(managed["pickup_code"] is None, "manager never sees the pickup code")
+    items = {i["name"]: i for i in await c.call("GET", "/warehouse/items", 200, "reserved after approval", almox)}
+    c.expect((items["Papel A4"]["available"], items["Papel A4"]["reserved"]) == (10, 3), f"reservation: {items['Papel A4']}")
+    mine = next(r for r in await c.call("GET", "/warehouse/my/requests", 200, "teacher gets the QR", prof) if r["id"] == request["id"])
+    c.expect(mine["pickup_code"] and mine["qr_payload"] == f"wedu-material:{mine['pickup_code']}", f"teacher QR: {mine}")
+    await c.call("POST", "/warehouse/requests/lookup", 403, "teacher cannot scan", prof, json={"code": mine["qr_payload"]})
+    await c.call("POST", "/warehouse/requests/lookup", 404, "unknown QR", almox, json={"code": "nao-existe"})
+    looked = await c.call("POST", "/warehouse/requests/lookup", 200, "scan shows the request", almox, json={"code": mine["qr_payload"]})
+    c.expect(looked["requester"]["name"] == "Prof" and looked["status"] == "approved", f"lookup: {looked}")
+    delivered = await c.call("POST", "/warehouse/requests/pickup", 200, "withdrawal by QR", almox, json={"code": mine["qr_payload"]})
     c.expect(delivered["status"] == "delivered" and line_of(delivered, ctx["ball"])["outstanding"] == 2, f"delivered: {delivered}")
+    c.expect(delivered["delivery_method"] == "qr" and delivered["delivered_by_name"] == "Almox", f"delivery audit: {delivered}")
+    twice = await c.call("POST", "/warehouse/requests/pickup", 409, "same QR twice", almox, json={"code": mine["pickup_code"]})
+    c.expect("já foi retirada" in twice.get("detail", ""), f"twice: {twice}")
     items = {i["name"]: i for i in await c.call("GET", "/warehouse/items", 200, "balances", almox)}
     c.expect((items["Papel A4"]["available"], items["Bola de vôlei"]["available"], items["Bola de vôlei"]["on_loan"]) == (7, 1, 2), f"balances: {items}")
 
@@ -156,20 +169,35 @@ async def check_request_cycle(c: Checker, h: dict, ids: dict, ctx: dict) -> None
     paper_line = line_of(delivered, ctx["paper"])["id"]
     await c.call("POST", f"/warehouse/requests/{request['id']}/returns", 400, "consumables do not return", almox, json={"lines": [{"line_id": paper_line, "returned": 1}]})
     await c.call("POST", f"/warehouse/requests/{request['id']}/returns", 400, "more than on loan", almox, json={"lines": [{"line_id": ball_line, "returned": 3}]})
-    partial = await c.call("POST", f"/warehouse/requests/{request['id']}/returns", 200, "one ball back", almox, json={"lines": [{"line_id": ball_line, "returned": 1}]})
+    # Na devolucao, o mesmo QR localiza a requisicao.
+    found = await c.call("POST", "/warehouse/requests/lookup", 200, "scan to return", almox, json={"code": mine["qr_payload"]})
+    c.expect(found["status"] == "delivered", f"lookup for return: {found}")
+    partial = await c.call("POST", f"/warehouse/requests/{request['id']}/returns", 200, "one ball back", almox,
+                           json={"lines": [{"line_id": ball_line, "returned": 1}], "note": "Bola murcha, ok"})
     c.expect(partial["status"] == "delivered", f"still out: {partial}")
     closed = await c.call("POST", f"/warehouse/requests/{request['id']}/returns", 200, "one ball lost", almox, json={"lines": [{"line_id": ball_line, "lost": 1}]})
     c.expect(closed["status"] == "closed", f"closed: {closed}")
     await c.call("POST", f"/warehouse/my/requests/{request['id']}/cancel", 409, "cannot cancel after withdrawal", prof)
+    history = await c.call("GET", f"/warehouse/items/{ctx['ball']}/history", 200, "ball history", almox)
+    c.expect([(m["kind"], m["quantity"]) for m in history] == [("loss", 1), ("return", 1), ("delivery", 2), ("entry", 3)], f"history: {history}")
+    c.expect(history[1]["detail"] == "recebido por Almox · Bola murcha, ok" and history[2]["method"] == "qr", f"history details: {history}")
+    await c.call("GET", f"/warehouse/items/{ctx['ball']}/history", 403, "teacher has no history", prof)
 
 
 async def check_stock_and_reports(c: Checker, h: dict, ctx: dict) -> None:
     prof, almox = h["prof"], h["almox"]
     big = await c.call("POST", "/warehouse/requests", 201, "big request", prof, json={"purpose": "Mural", "needed_on": "2027-03-12", "lines": [{"item_id": ctx["paper"], "quantity": 8}]})
-    await c.call("POST", f"/warehouse/requests/{big['id']}/approve", 200, "approve 8", almox, json={"lines": [{"line_id": big["lines"][0]["id"], "quantity": 8}]})
-    short = await c.call("POST", f"/warehouse/requests/{big['id']}/deliver", 409, "not enough paper", almox)
-    c.expect("7 disponível(is)" in short.get("detail", ""), f"stock message: {short}")
-    await c.call("POST", f"/warehouse/my/requests/{big['id']}/cancel", 200, "teacher cancels approved request", prof)
+    short = await c.call("POST", f"/warehouse/requests/{big['id']}/approve", 409, "cannot approve beyond stock", almox,
+                         json={"lines": [{"line_id": big["lines"][0]["id"], "quantity": 8}]})
+    c.expect("7 livre(s)" in short.get("detail", ""), f"stock message: {short}")
+    # Aprovar reserva: duas aprovacoes nao prometem o mesmo papel.
+    first = await c.call("POST", "/warehouse/requests", 201, "first of two", prof, json={"purpose": "Cartaz", "needed_on": "2027-03-12", "lines": [{"item_id": ctx["paper"], "quantity": 5}]})
+    await c.call("POST", f"/warehouse/requests/{first['id']}/approve", 200, "approve 5", almox, json={"lines": [{"line_id": first["lines"][0]["id"], "quantity": 5}]})
+    reserved = await c.call("POST", f"/warehouse/requests/{big['id']}/approve", 409, "only 2 free after reservation", almox,
+                            json={"lines": [{"line_id": big["lines"][0]["id"], "quantity": 3}]})
+    c.expect("2 livre(s)" in reserved.get("detail", ""), f"reserved message: {reserved}")
+    await c.call("POST", f"/warehouse/my/requests/{first['id']}/cancel", 200, "teacher cancels approved request (frees the reservation)", prof)
+    await c.call("POST", f"/warehouse/my/requests/{big['id']}/cancel", 200, "teacher cancels pending request", prof)
 
     rejected = await c.call("POST", "/warehouse/requests", 201, "request to reject", prof, json={"purpose": "X", "needed_on": "2027-03-13", "lines": [{"item_id": ctx["ball"], "quantity": 1}]})
     await c.call("POST", f"/warehouse/requests/{rejected['id']}/reject", 422, "reject needs a note", almox, json={})
@@ -180,7 +208,9 @@ async def check_stock_and_reports(c: Checker, h: dict, ctx: dict) -> None:
                                                                             "lines": [{"item_id": ctx["ball"], "quantity": 1}, {"item_id": ctx["paper"], "quantity": 3}]})
     await c.call("POST", f"/warehouse/requests/{loan['id']}/approve", 200, "approve loan", almox,
                  json={"lines": [{"line_id": line["id"], "quantity": line["quantity_requested"]} for line in loan["lines"]], "return_due_on": "2026-09-02"})
-    await c.call("POST", f"/warehouse/requests/{loan['id']}/deliver", 200, "deliver loan", almox)
+    await c.call("POST", f"/warehouse/requests/{loan['id']}/deliver", 422, "manual withdrawal needs a reason", almox, json={})
+    manual = await c.call("POST", f"/warehouse/requests/{loan['id']}/deliver", 200, "deliver loan without QR", almox, json={"note": "Professor sem celular"})
+    c.expect((manual["delivery_method"], manual["delivery_note"]) == ("manual", "Professor sem celular"), f"manual delivery: {manual}")
     overdue = await c.call("GET", "/warehouse/reports/overdue", 200, "overdue loans", h["coord"])
     c.expect([r["id"] for r in overdue] == [loan["id"]] and overdue[0]["overdue"], f"overdue: {overdue}")
     low = await c.call("GET", "/warehouse/reports/low-stock", 200, "low stock", h["coord"])
@@ -194,7 +224,7 @@ async def check_stock_and_reports(c: Checker, h: dict, ctx: dict) -> None:
     report = await c.call("GET", f"/social/funding-sources/{ctx['funding']}/report", 200, "funder sees materials", h["coord"])
     c.expect(report["materials_cost_cents"] == 31000 and report["budget_balance_cents"] == 69000, f"funding materials: {report['materials']}")
     mine = await c.call("GET", "/warehouse/my/requests", 200, "teacher history", prof)
-    c.expect([r["status"] for r in mine] == ["delivered", "rejected", "cancelled", "closed"], f"history: {[r['status'] for r in mine]}")
+    c.expect([r["status"] for r in mine] == ["delivered", "rejected", "cancelled", "cancelled", "closed"], f"history: {[r['status'] for r in mine]}")
 
 
 async def run() -> int:

@@ -14,12 +14,27 @@ class MaterialRequestRepository:
 
     def _query(self):
         return self.db.query(MaterialRequest).options(
-            joinedload(MaterialRequest.requester), joinedload(MaterialRequest.class_offering),
+            joinedload(MaterialRequest.requester), joinedload(MaterialRequest.class_offering), joinedload(MaterialRequest.delivered_by),
             selectinload(MaterialRequest.lines).joinedload(MaterialRequestLine.item),
         )
 
     def get(self, request_id: UUID) -> MaterialRequest | None:
         return self._query().filter(MaterialRequest.id == request_id).first()
+
+    def get_by_pickup_code(self, code: str, *, lock: bool = False) -> MaterialRequest | None:
+        query = self._query().filter(MaterialRequest.pickup_code == code)
+        # Trava na retirada: o mesmo QR lido duas vezes nao entrega duas vezes.
+        return query.with_for_update(of=MaterialRequest).first() if lock else query.first()
+
+    def delivered_lines_of_item(self, item_id: UUID) -> list[MaterialRequestLine]:
+        return (
+            self.db.query(MaterialRequestLine)
+            .options(joinedload(MaterialRequestLine.request).joinedload(MaterialRequest.requester),
+                     joinedload(MaterialRequestLine.request).joinedload(MaterialRequest.delivered_by))
+            .join(MaterialRequest, MaterialRequest.id == MaterialRequestLine.request_id)
+            .filter(MaterialRequestLine.item_id == item_id, MaterialRequestLine.quantity_delivered > 0)
+            .all()
+        )
 
     def list(self, status: RequestStatus | None = None, requester_id: UUID | None = None) -> list[MaterialRequest]:
         query = self._query()

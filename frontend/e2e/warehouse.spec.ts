@@ -1,7 +1,7 @@
 import { expect, expectToast, login, test, uniqueSuffix } from './support/fixtures';
 import { users } from './support/users';
 
-test('professor requisita material, almoxarifado aprova parcialmente e registra a retirada', async ({ page }) => {
+test('professor requisita material, almoxarifado aprova parcialmente e entrega pelo QR do professor', async ({ page }) => {
   const suffix = uniqueSuffix();
   const material = `Papel crepom ${suffix}`;
   const purpose = `Festa junina ${suffix}`;
@@ -36,9 +36,28 @@ test('professor requisita material, almoxarifado aprova parcialmente e registra 
   await page.getByLabel(`Aprovar ${material}`).fill('4');
   await page.getByRole('button', { name: `Aprovar requisição ${purpose}` }).click();
   await expectToast(page, 'Requisição analisada.');
-  await page.getByLabel('Situação das requisições').selectOption('approved');
-  await page.getByRole('button', { name: `Registrar retirada de ${purpose}` }).click();
-  await expectToast(page, 'Retirada registrada.');
+
+  // O professor abre o QR de retirada (so ele recebe o codigo).
+  await page.evaluate(() => window.localStorage.clear());
+  await login(page, users.instrutor);
+  await page.getByRole('link', { name: 'Requisições de material' }).first().click();
+  await page.getByRole('button', { name: `QR de retirada de ${purpose}` }).click();
+  await expect(page.getByRole('img', { name: `QR da requisição ${purpose}` })).toBeVisible();
+  const code = (await page.getByRole('dialog').locator('p.font-mono').textContent())!.trim();
+
+  // No balcao, o almoxarifado le o QR (aqui, digitando o codigo) e confirma.
+  await page.evaluate(() => window.localStorage.clear());
+  await login(page, users.admin);
+  await page.goto('/admin/warehouse');
+  await page.getByRole('button', { name: 'Ler QR da requisição' }).click();
+  await page.getByLabel('Código da requisição').fill(code);
+  await page.getByRole('button', { name: 'Conferir' }).click();
+  await expect(page.getByText(new RegExp(`Instrutor.* · ${purpose}`))).toBeVisible();
+  await page.getByRole('button', { name: 'Confirmar retirada' }).click();
+  await expectToast(page, 'Retirada registrada com QR.');
+  await page.getByRole('tab', { name: /Materiais/ }).click();
+  await page.getByRole('button', { name: `Histórico de ${material}` }).click();
+  await expect(page.getByRole('dialog').getByText(/Retirada −4 pacote .* com QR/)).toBeVisible();
 
   await page.evaluate(() => window.localStorage.clear());
   await login(page, users.instrutor);
@@ -46,4 +65,5 @@ test('professor requisita material, almoxarifado aprova parcialmente e registra 
   const card = page.getByRole('listitem').filter({ hasText: purpose });
   await expect(card.getByText('Concluída')).toBeVisible();
   await expect(card.getByText(`${material}: 6 pacote pedido(s) · 4 aprovado(s) · 4 retirado(s)`)).toBeVisible();
+  await expect(card.getByText(/Retirada com QR · entregue por/)).toBeVisible();
 });

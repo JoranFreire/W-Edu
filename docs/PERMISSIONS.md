@@ -12,6 +12,7 @@ A autorizacao e por permissao. Cada guard de `app/dependencies.py` exige uma cha
 | `teaching.access` | `get_current_teaching_staff` | administradores, coordinator e instructor |
 | `secretariat.access` | `get_current_secretariat` | administradores, coordinator e secretary |
 | `school_life.access` | `get_current_school_staff` | administradores, coordinator, instructor e secretary |
+| `benefits.redeem` | `get_current_benefit_validator` | administradores, coordinator, instructor e secretary (perfil "Cantina" pode ter só esta) |
 | `finance.access` | `get_current_finance_staff` | administradores e secretary |
 | `warehouse.request` | `get_current_warehouse_requester` | administradores, coordinator e instructor |
 | `warehouse.manage` | `get_current_warehouse_manager` | administradores |
@@ -240,9 +241,13 @@ O limite de alunos do plano vale no cadastro de usuarios com papel aluno (409 ao
 | Listar financiadores e ver/baixar a prestacao de contas | Nao | Nao | Sim | Sim | Sim |
 | Itens de beneficio e entradas de estoque | Nao | Ver itens | Sim | Sim | Sim |
 | Entregar beneficios e ver entregas da turma | Nao | Turmas que ministra | Sim | Sim | Sim |
+| Liberar beneficio com QR (encontro, turma toda ou aluno), ver e cancelar os liberados da turma | Nao | Turmas que ministra | Sim | Sim | Sim |
+| Conferir e validar o QR na retirada (`benefits.redeem`) | Nao | Sim | Sim | Sim | Sim |
 | Ver frequencia e risco de evasao da turma | Nao | Turmas que ministra | Sim | Sim | Sim |
 | Reavaliar desligamentos e readmitir aluno | Nao | Nao | Sim | Sim | Sim |
-| Proprios beneficios recebidos | Sim | Sim | Sim | Sim | Sim |
+| Proprios beneficios recebidos e liberados (QR) | Sim | Sim | Sim | Sim | Sim |
+
+O responsavel ve os beneficios liberados de cada dependente (`/guardians/me/dependents/{id}/vouchers`).
 
 Escopo do instrutor em `app/policies/retention_access.py`.
 
@@ -252,7 +257,8 @@ Escopo do instrutor em `app/policies/retention_access.py`.
 | --- | --- |
 | Ver materiais e saldo | qualquer permissao do almoxarifado (`get_current_warehouse_user`) |
 | Requisitar, acompanhar e cancelar as proprias requisicoes (pendentes ou aprovadas) | `warehouse.request` (turma vinculada: so as que ministra, salvo coordenacao) |
-| Cadastrar materiais, lancar entradas, aprovar/recusar, registrar retirada e devolucao | `warehouse.manage` |
+| Cadastrar materiais, lancar entradas, aprovar/recusar (aprovar reserva o saldo), ler o QR de retirada, registrar retirada (sem QR: com motivo) e devolucao, historico por material | `warehouse.manage` |
+| QR de retirada da propria requisicao aprovada (so quem pediu recebe o codigo) | `warehouse.request` |
 | Estoque baixo, devolucoes atrasadas e consumo | `warehouse.reports` |
 
 O almoxarife e um perfil de acesso com `warehouse.manage` (por padrao so administradores a tem).

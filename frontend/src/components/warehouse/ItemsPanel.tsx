@@ -11,14 +11,16 @@ import { todayIso } from '@/lib/dates';
 import { reaisToCents } from '@/lib/finance/tuitionLabels';
 import { useWarehouseItems } from '@/lib/hooks/warehouse/useWarehouseItems';
 import { useErrorToast } from '@/lib/hooks/useErrorToast';
-import type { MaterialKind } from '@/types/warehouse';
+import type { MaterialKind, WarehouseItem } from '@/types/warehouse';
+import ItemHistoryModal from './ItemHistoryModal';
 
-/** Materiais: cadastro, saldo, emprestados, alerta de minimo e entrada de estoque. */
+/** Materiais: cadastro, saldo, reservados, emprestados, alerta de minimo, entrada de estoque e historico. */
 export default function ItemsPanel() {
   const { items, error, create, receive } = useWarehouseItems();
   const empty = { name: '', category: '', kind: 'consumable' as MaterialKind, unit: 'unidade', minStock: '0', location: '', cost: '' };
   const [draft, setDraft] = useState(empty);
   const [entry, setEntry] = useState<Record<string, string>>({});
+  const [history, setHistory] = useState<WarehouseItem | null>(null);
   useErrorToast(error, 'Erro ao carregar os materiais.');
   const run = async (action: () => Promise<void>, success: string) => {
     try {
@@ -58,6 +60,7 @@ export default function ItemsPanel() {
               {item.category ? ` · ${item.category}` : ''} · {materialKindLabels[item.kind]} · {formatMoney(item.unit_cost_cents)}/{item.unit}
               {item.location ? ` · ${item.location}` : ''} ·{' '}
               <span className={item.below_minimum ? 'font-semibold text-red-600' : ''}>{item.available} disponível(is) (mín. {item.min_stock})</span>
+              {item.reserved ? ` · ${item.reserved} reservado(s) para retirada` : ''}
               {item.on_loan ? ` · ${item.on_loan} emprestado(s)` : ''}
             </span>
             <span className="flex items-center gap-2">
@@ -66,10 +69,12 @@ export default function ItemsPanel() {
                 await receive(item.id, { quantity: Number(entry[item.id]), unit_cost_cents: null, origin: 'purchase', funding_source_id: null, received_on: todayIso() });
                 setEntry({ ...entry, [item.id]: '' });
               }, 'Entrada registrada.')} aria-label={`Lançar entrada de ${item.name}`} className={secondaryButtonCls}>Entrada</button>
+              <button type="button" onClick={() => setHistory(item)} aria-label={`Histórico de ${item.name}`} className={secondaryButtonCls}>Histórico</button>
             </span>
           </li>
         ))}
       </ul>
+      {history && <ItemHistoryModal item={history} onClose={() => setHistory(null)} />}
     </section>
   );
 }

@@ -55,15 +55,21 @@ class WarehouseCatalogService:
     def balances(self, item_ids: list[UUID]) -> dict[UUID, int]:
         return {item_id: available(r, d, b) for item_id, (r, d, b, _) in self.items.movements(item_ids).items()}
 
+    def free_for_approval(self, item_ids: list[UUID], excluding_request_id: UUID | None = None) -> dict[UUID, int]:
+        """Saldo menos o que outras requisicoes aprovadas ainda vao retirar."""
+        balances, reserved = self.balances(item_ids), self.items.reserved(item_ids, excluding_request_id)
+        return {item_id: balances[item_id] - reserved[item_id] for item_id in item_ids}
+
     def _out(self, items: list[WarehouseItem]) -> list[ItemOut]:
         movements = self.items.movements([item.id for item in items])
+        reserved = self.items.reserved([item.id for item in items])
         result = []
         for item in items:
             received, delivered, returned, lost = movements.get(item.id, (0, 0, 0, 0))
             stock = available(received, delivered, returned)
             result.append(ItemOut(
                 id=item.id, name=item.name, category=item.category, kind=item.kind, unit=item.unit, min_stock=item.min_stock,
-                location=item.location, unit_cost_cents=item.unit_cost_cents, is_active=item.is_active, available=stock,
+                location=item.location, unit_cost_cents=item.unit_cost_cents, is_active=item.is_active, available=stock, reserved=reserved.get(item.id, 0),
                 on_loan=max(delivered - returned - lost, 0) if item.kind.value == "durable" else 0, below_minimum=stock < item.min_stock,
             ))
         return result

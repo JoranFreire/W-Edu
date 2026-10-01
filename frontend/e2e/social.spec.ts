@@ -37,7 +37,7 @@ test('financiador, lanche so para presentes, desligamento por faltas e prestacao
   await page.goto(`/teaching/offerings/${offering.id}`);
   await page.getByRole('tab', { name: /Benefícios/ }).click();
   await page.getByLabel('Encontro da entrega').selectOption({ index: 1 });
-  await page.getByLabel('Item entregue').selectOption({ label: `${itemName} (estoque 10)` });
+  await page.getByLabel('Item entregue').selectOption({ label: `${itemName} (disponível 10)` });
   await page.getByRole('button', { name: 'Registrar entrega' }).click();
   await expectToast(page, '1 entrega(s) registrada(s); estoque restante: 9.');
   await expect(page.getByText(`${itemName} × 1 · ${present.name}`)).toBeVisible();

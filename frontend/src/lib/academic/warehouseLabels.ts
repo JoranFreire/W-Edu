@@ -1,4 +1,4 @@
-import type { MaterialKind, RequestStatus } from '@/types/warehouse';
+import type { ItemMovement, MaterialKind, MaterialRequest, RequestStatus } from '@/types/warehouse';
 
 export const materialKindLabels: Record<MaterialKind, string> = {
   consumable: 'Consumo',
@@ -22,3 +22,17 @@ export const requestStatusCls: Record<RequestStatus, string> = {
   closed: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300',
   cancelled: 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300',
 };
+
+export const movementLabels: Record<ItemMovement['kind'], string> = {
+  entry: 'Entrada',
+  delivery: 'Retirada',
+  return: 'Devolução',
+  loss: 'Perda/avaria',
+};
+
+/** Como a retirada foi registrada (auditoria). */
+export function deliveryAudit(request: Pick<MaterialRequest, 'delivery_method' | 'delivered_by_name' | 'delivery_note'>): string | null {
+  if (!request.delivery_method) return null;
+  const by = request.delivered_by_name ? ` · entregue por ${request.delivered_by_name}` : '';
+  return request.delivery_method === 'qr' ? `Retirada com QR${by}` : `Retirada sem QR${by}: ${request.delivery_note ?? ''}`;
+}

@@ -7,6 +7,7 @@ from app.core.database import get_db
 from app.dependencies import get_current_guardian
 from app.models.student import Student
 from app.schemas.assessment import ReportCardEntry
+from app.schemas.benefit_vouchers import VoucherOut
 from app.schemas.guardians import DependentChargeOut, DependentNoticeOut, DependentOut
 from app.schemas.secretariat import TranscriptOut
 from app.services.guardians.portal import GuardianPortalService
@@ -32,6 +33,11 @@ def dependent_transcripts(student_id: UUID, db: Session = Depends(get_db), curre
 @router.get("/{student_id}/notices", response_model=list[DependentNoticeOut])
 def dependent_notices(student_id: UUID, db: Session = Depends(get_db), current: Student = Depends(get_current_guardian)):
     return GuardianPortalService(db).notices(current, student_id)
+
+
+@router.get("/{student_id}/vouchers", response_model=list[VoucherOut])
+def dependent_vouchers(student_id: UUID, db: Session = Depends(get_db), current: Student = Depends(get_current_guardian)):
+    return GuardianPortalService(db).vouchers_of(current, student_id)
 
 
 @router.get("/{student_id}/charges", response_model=list[DependentChargeOut])

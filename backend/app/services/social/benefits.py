@@ -1,21 +1,23 @@
 from __future__ import annotations
 from uuid import UUID
 
+from datetime import date
+
 from sqlalchemy.orm import Session
 
 from app.models.social_programs import BenefitItem, BenefitStockEntry
 from app.models.student import Student
-from app.repositories.social import BenefitItemRepository, BenefitStockRepository
+from app.repositories.social import BenefitItemRepository, BenefitStockRepository, BenefitVoucherRepository
 from app.schemas.social_programs import BenefitItemCreate, BenefitItemOut, BenefitItemUpdate, StockEntryCreate
 from app.services.academic.errors import not_found
 from app.services.academic.patch import apply_patch
 from app.services.social.funding import FundingSourceService
 
 
-def item_out(item: BenefitItem, stock: int) -> BenefitItemOut:
+def item_out(item: BenefitItem, stock: int, reserved: int = 0) -> BenefitItemOut:
     return BenefitItemOut(
         id=item.id, name=item.name, kind=item.kind, unit=item.unit, unit_cost_cents=item.unit_cost_cents,
-        requires_attendance=item.requires_attendance, is_active=item.is_active, stock=stock,
+        requires_attendance=item.requires_attendance, is_active=item.is_active, stock=stock, reserved=reserved,
     )
 
 
@@ -25,12 +27,14 @@ class BenefitCatalogService:
     def __init__(self, db: Session):
         self.items = BenefitItemRepository(db)
         self.stock = BenefitStockRepository(db)
+        self.vouchers = BenefitVoucherRepository(db)
         self.funding = FundingSourceService(db)
 
     def list(self) -> list[BenefitItemOut]:
         items = self.items.list()
-        balances = self.items.balances([item.id for item in items])
-        return [item_out(item, balances.get(item.id, 0)) for item in items]
+        ids = [item.id for item in items]
+        balances, reserved = self.items.balances(ids), self.vouchers.reserved(ids, date.today())
+        return [item_out(item, balances.get(item.id, 0), reserved.get(item.id, 0)) for item in items]
 
     def get_or_404(self, item_id: UUID) -> BenefitItem:
         item = self.items.get_by_id(item_id)
@@ -45,7 +49,7 @@ class BenefitCatalogService:
         item = self.get_or_404(item_id)
         apply_patch(item, data)
         saved = self.items.save(item)
-        return item_out(saved, self.items.balances([saved.id])[saved.id])
+        return self._out(saved)
 
     def entries(self, item_id: UUID) -> list[BenefitStockEntry]:
         self.get_or_404(item_id)
@@ -58,4 +62,7 @@ class BenefitCatalogService:
         payload = data.model_dump()
         payload["unit_cost_cents"] = item.unit_cost_cents if data.unit_cost_cents is None else data.unit_cost_cents
         self.stock.save(BenefitStockEntry(item_id=item.id, created_by_id=user.id, **payload))
-        return item_out(item, self.items.balances([item.id])[item.id])
+        return self._out(item)
+
+    def _out(self, item: BenefitItem) -> BenefitItemOut:
+        return item_out(item, self.items.balances([item.id])[item.id], self.vouchers.reserved([item.id], date.today())[item.id])

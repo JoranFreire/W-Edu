@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { requestStatusCls, requestStatusLabels } from '@/lib/academic/warehouseLabels';
+import { deliveryAudit, requestStatusCls, requestStatusLabels } from '@/lib/academic/warehouseLabels';
 import { formatIsoDate } from '@/lib/dates';
 import type { MaterialRequest } from '@/types/warehouse';
 
@@ -35,6 +35,7 @@ export default function RequestCard({ request, showRequester = false, children }
           </li>
         ))}
       </ul>
+      {deliveryAudit(request) && <p className="text-xs text-gray-500 dark:text-gray-400">{deliveryAudit(request)}</p>}
       {children}
     </li>
   );
