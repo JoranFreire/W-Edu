@@ -154,3 +154,5 @@ class FundingReportOut(BaseModel):
     stock_received_cents: int
     benefits_cost_cents: int
     budget_balance_cents: int | None
+    minimum_wage_cents: int
+    minimum_wage_source: str

@@ -17,6 +17,7 @@ if "DATABASE_URL" not in os.environ:
     DB_PATH = Path(tempfile.gettempdir()) / f"wedu_social_check_{os.getpid()}.sqlite3"
     os.environ["DATABASE_URL"] = f"sqlite:///{DB_PATH}"
 os.environ["NOTIFICATION_WORKER_ENABLED"] = "false"
+os.environ["MINIMUM_WAGE_API_URL"] = ""  # sem rede: vale a tabela local (vazia aqui, entao o valor de reserva)
 os.environ.setdefault("DOCUMENTS_STORAGE_DIR", tempfile.mkdtemp(prefix="wedu_admissions_"))
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -34,6 +35,7 @@ from app.core.database import Base, SessionLocal, engine
 from app.core.security import hash_password
 from app.models.institution import Institution, InstitutionMembership, InstitutionType
 from app.models.notification import NotificationEvent, NotificationEventType
+from app.models.reference_values import MinimumWageValue
 from app.models.schedule import ClassEnrollment, ClassEnrollmentStatus
 from app.models.student import Student, UserRole
 from main import app
@@ -214,6 +216,9 @@ async def check_report(c: Checker, h: dict, ctx: dict) -> None:
     c.expect(profile["age"]["até 17"] == 1 and profile["age"]["60 ou mais"] == 1, f"age: {profile['age']}")
     usage = {b["item_name"]: (b["quantity"], b["cost_cents"]) for b in report["benefits"]}
     c.expect(usage == {"Kit de material": (1, 3000), "Lanche": (3, 1500)}, f"usage: {usage}")
+    c.expect(report["minimum_wage_source"] == "fallback" and report["minimum_wage_cents"] == 162100, f"fallback wage: {report}")
+    informed = await c.call("GET", f"/social/funding-sources/{ctx['funding']}/report", 200, "informed wage", sec, params={"minimum_wage_cents": 100000})
+    c.expect(informed["minimum_wage_source"] == "informed" and informed["profile"]["income_per_capita"]["1/4 a 1/2 SM"] == 4, f"informed: {informed['profile']}")
     c.expect(report["benefits_cost_cents"] == 4500 and report["budget_balance_cents"] == 95500 and report["stock_received_cents"] == 5000, f"money: {report}")
     response = await c.client.get(f"/social/funding-sources/{ctx['funding']}/report.csv", headers=sec)
     c.expect(response.status_code == 200 and "Cozinha 2027;5;4;3;0;1;0;25,0" in response.text, f"csv: {response.text[:300]}")
@@ -222,6 +227,27 @@ async def check_report(c: Checker, h: dict, ctx: dict) -> None:
     readmitted = await c.call("POST", f"/retention/enrollments/{ctx['a4_enrollment']}/readmit", 200, "readmit a4", sec)
     c.expect(readmitted["status"] == "active" and readmitted["dismissed_at"] is None, f"readmitted: {readmitted}")
     await c.call("POST", f"/retention/enrollments/{ctx['a4_enrollment']}/readmit", 409, "readmit twice", sec)
+
+
+def check_minimum_wage(c: Checker) -> None:
+    """Tabela local do salario minimo: grava so mudancas, vale o ultimo valor ate a data e funciona sem a API."""
+    from datetime import date
+    from app.repositories.reference import MinimumWageRepository
+    from app.services.social.minimum_wage import MinimumWageProvider, parse_points
+
+    payload = [{"data": "01/12/2025", "valor": "1518.00"}, {"data": "01/01/2026", "valor": "1621.00"}, {"data": "01/02/2026", "valor": "1621.00"}]
+    points = parse_points(payload)
+    c.expect(points[1] == (date(2026, 1, 1), 162100), f"parse: {points}")
+    with SessionLocal() as db:
+        repo = MinimumWageRepository(db)
+        repo.upsert(points, datetime.now(timezone.utc))
+        repo.upsert(points, datetime.now(timezone.utc))
+        stored = [(row.valid_from, row.cents) for row in db.query(MinimumWageValue).order_by(MinimumWageValue.valid_from)]
+        c.expect(stored == [(date(2025, 12, 1), 151800), (date(2026, 1, 1), 162100)], f"only changes are stored: {stored}")
+        current = MinimumWageProvider(db).current(date(2026, 10, 1))
+        c.expect((current.cents, current.source) == (162100, "bcb"), f"table value without the API: {current}")
+        before = MinimumWageProvider(db).current(date(2020, 1, 1))
+        c.expect(before.source == "fallback", f"no value before the series: {before}")
 
 
 async def run() -> int:
@@ -234,6 +260,7 @@ async def run() -> int:
         items = await check_benefits(c, h, ids, ctx)
         await check_deliveries_and_retention(c, h, ids, ctx, items)
         await check_report(c, h, ctx)
+        check_minimum_wage(c)
 
     if c.failures:
         print("Social programs flow check failed:")

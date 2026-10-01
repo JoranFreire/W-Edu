@@ -78,4 +78,6 @@ export interface FundingReport {
   stock_received_cents: number;
   benefits_cost_cents: number;
   budget_balance_cents: number | null;
+  minimum_wage_cents: number;
+  minimum_wage_source: 'bcb' | 'seed' | 'informed' | 'fallback';
 }

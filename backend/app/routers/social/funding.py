@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from fastapi.responses import Response
 from sqlalchemy.orm import Session
 
@@ -7,7 +7,7 @@ from app.dependencies import get_current_admin_or_coordinator, get_current_secre
 from app.models.student import Student
 from app.schemas.social_programs import FundingReportOut, FundingSourceCreate, FundingSourceOut, FundingSourceUpdate
 from app.services.social.funding import FundingSourceService
-from app.services.social.report import DEFAULT_MINIMUM_WAGE_CENTS, FundingReportService
+from app.services.social.report import FundingReportService
 
 router = APIRouter(prefix="/funding-sources")
 
@@ -29,7 +29,7 @@ def update_funding_source(funding_id: int, data: FundingSourceUpdate, db: Sessio
 
 @router.get("/{funding_id}/report", response_model=FundingReportOut)
 def funding_report(
-    funding_id: int, minimum_wage_cents: int = DEFAULT_MINIMUM_WAGE_CENTS,
+    funding_id: int, minimum_wage_cents: int | None = Query(default=None, ge=1),
     db: Session = Depends(get_db), _: Student = Depends(get_current_secretariat),
 ):
     return FundingReportService(db).report(funding_id, minimum_wage_cents)

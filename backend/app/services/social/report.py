@@ -10,9 +10,9 @@ from app.models.admissions import SeatKind
 from app.repositories.social import BenefitDeliveryRepository, BenefitStockRepository, FundingSourceRepository, SocialIndicatorRepository
 from app.schemas.social_programs import BenefitUsage, FundingReportOut, FundingSourceOut, OfferingIndicators, ProfileOut
 from app.services.social.funding import FundingSourceService
+from app.services.social.minimum_wage import MinimumWage, MinimumWageProvider
 from app.services.social.rules import indicators, profile_counts
 
-DEFAULT_MINIMUM_WAGE_CENTS = 151800
 
 
 class FundingReportService:
@@ -24,9 +24,12 @@ class FundingReportService:
         self.indicators = SocialIndicatorRepository(db)
         self.deliveries = BenefitDeliveryRepository(db)
         self.stock = BenefitStockRepository(db)
+        self.minimum_wage = MinimumWageProvider(db)
 
-    def report(self, funding_id: int, minimum_wage_cents: int = DEFAULT_MINIMUM_WAGE_CENTS) -> FundingReportOut:
+    def report(self, funding_id: int, minimum_wage_cents: int | None = None) -> FundingReportOut:
+        """Faixas de renda pelo salario minimo informado ou, sem ele, o do Banco Central."""
         funding = self.funding.get_or_404(funding_id)
+        wage = MinimumWage(minimum_wage_cents, "informed", None) if minimum_wage_cents else self.minimum_wage.current()
         offerings = self.repo.funded_offerings(funding.id)
         ids = [offering.id for offering in offerings]
         applications = self.indicators.applications(ids)
@@ -45,17 +48,19 @@ class FundingReportService:
         spent = sum(item.cost_cents for item in usage)
         return FundingReportOut(
             funding=FundingSourceOut.model_validate(funding), offerings=rows, totals=totals,
-            profile=ProfileOut(**profile_counts(answers, date.today(), minimum_wage_cents)), benefits=usage,
+            profile=ProfileOut(**profile_counts(answers, date.today(), wage.cents)), benefits=usage,
+            minimum_wage_cents=wage.cents, minimum_wage_source=wage.source,
             stock_received_cents=self.stock.received_cost(funding.id), benefits_cost_cents=spent,
             budget_balance_cents=funding.amount_cents - spent if funding.amount_cents is not None else None,
         )
 
-    def csv(self, funding_id: int, minimum_wage_cents: int = DEFAULT_MINIMUM_WAGE_CENTS) -> str:
+    def csv(self, funding_id: int, minimum_wage_cents: int | None = None) -> str:
         """Planilha (separador ;) com indicadores por turma e beneficios entregues."""
         report = self.report(funding_id, minimum_wage_cents)
         buffer = io.StringIO()
         writer = csv.writer(buffer, delimiter=";")
         writer.writerow(["Financiador", report.funding.name, report.funding.agreement_number or ""])
+        writer.writerow(["Salário mínimo de referência (R$)", f"{report.minimum_wage_cents / 100:.2f}".replace(".", ","), report.minimum_wage_source])
         writer.writerow([])
         writer.writerow(["Turma", "Inscritos", "Matriculados", "Ativos", "Concluintes", "Desligados", "Desistentes", "Evasão (%)"])
         for row in [*report.offerings, report.totals]:
