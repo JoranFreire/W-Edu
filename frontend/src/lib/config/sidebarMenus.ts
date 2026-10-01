@@ -4,7 +4,7 @@ import {
   HomeIcon, BookOpenIcon, ChartBarIcon, MicrophoneIcon, Cog6ToothIcon,
   UsersIcon, AcademicCapIcon, CalendarDaysIcon, ChatBubbleLeftRightIcon,
   BanknotesIcon, Squares2X2Icon, MapIcon, ShieldCheckIcon, DocumentTextIcon,
-  BuildingLibraryIcon, GlobeAltIcon, BellIcon, CreditCardIcon, RectangleStackIcon, PencilSquareIcon, ClipboardDocumentCheckIcon, ChartPieIcon, BriefcaseIcon, DocumentDuplicateIcon, MegaphoneIcon, FolderOpenIcon, DocumentChartBarIcon, UserGroupIcon,
+  BuildingLibraryIcon, GlobeAltIcon, BellIcon, CreditCardIcon, RectangleStackIcon, PencilSquareIcon, ClipboardDocumentCheckIcon, ChartPieIcon, BriefcaseIcon, DocumentDuplicateIcon, MegaphoneIcon, GiftIcon, FolderOpenIcon, DocumentChartBarIcon, UserGroupIcon,
 } from '@heroicons/react/24/outline';
 
 interface MenuItem { name: string; href: string; icon: ComponentType<{ className?: string }> }
@@ -22,6 +22,7 @@ export const studentMenu: MenuItem[] = [
   { name: 'Mensalidades', href: '/payments', icon: BanknotesIcon },
   { name: 'Contratos', href: '/contracts', icon: DocumentDuplicateIcon },
   { name: 'Inscrições', href: '/admissions', icon: MegaphoneIcon },
+  { name: 'Benefícios', href: '/benefits', icon: GiftIcon },
   { name: 'Certificados', href: '/certificates', icon: ShieldCheckIcon },
   { name: 'Sessões de Voz', href: '/sessions', icon: MicrophoneIcon },
   { name: 'Configurações', href: '/settings', icon: Cog6ToothIcon },
@@ -75,7 +76,7 @@ export const instructorMenu: MenuItem[] = [
   { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
   { name: 'Diário de classe', href: '/teaching', icon: PencilSquareIcon },
   { name: 'Orientações', href: '/teaching/advising', icon: BriefcaseIcon },
-  ...studentMenu.filter((item) => !['/dashboard', '/school-agenda', '/registration', '/completion', '/payments', '/contracts', '/admissions'].includes(item.href)),
+  ...studentMenu.filter((item) => !['/dashboard', '/school-agenda', '/registration', '/completion', '/payments', '/contracts', '/admissions', '/benefits'].includes(item.href)),
 ];
 
 export const secretaryMenu: MenuItem[] = [

@@ -9,6 +9,7 @@ from app.models.student import UserRole
 from app.repositories.lesson import LessonRepository
 from app.repositories.schedule import RoomRepository, ScheduledMeetingRepository
 from app.repositories.student import StudentRepository
+from app.services.retention.service import RetentionService
 from app.schemas.schedule import MeetingAttendanceSummary, ScheduledMeetingCreate, ScheduledMeetingUpdate
 from app.schemas.schedule import (
     InstructorAgendaMeetingOut,
@@ -95,6 +96,8 @@ class ScheduledMeetingService:
         meeting.closed_at = datetime.now(timezone.utc)
         meeting = self.repo.update(meeting)
         self._auto_issue_for_meeting(meeting)
+        # Encontro encerrado atualiza as faltas: desliga quem passou do limite da turma.
+        RetentionService(self.repo.db).dismiss_exceeded(meeting.class_offering)
         return meeting
 
     def attendance_summary(self, meeting_id: int) -> MeetingAttendanceSummary:
@@ -290,8 +293,9 @@ class ScheduledMeetingService:
         return value
 
     def _schedule_reminder(self, meeting: ScheduledMeeting, class_name: str, course_name: str, course_id: int) -> None:
-        reminder_at = meeting.starts_at - timedelta(hours=24)
-        if reminder_at <= datetime.now(timezone.utc):
+        now = datetime.now(timezone.utc)
+        reminder_at = self._align_timezone(meeting.starts_at, now) - timedelta(hours=24)
+        if reminder_at <= now:
             return
         self.notification_service.publish(
             event_type=NotificationEventType.meeting_reminder,

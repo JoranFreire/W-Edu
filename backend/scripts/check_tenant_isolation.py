@@ -381,6 +381,22 @@ async def run() -> int:
         r = await client.post(f"/admissions/calls/{call_a}/select", headers=admin_b)
         c.expect(r.status_code == 404, f"B cannot run A selection: {r.status_code}")
 
+        # Programas sociais: financiador, itens e frequencia de A invisiveis para B.
+        r = await client.post("/social/funding-sources", json={"name": "Convenio A", "starts_on": "2027-01-01"}, headers=admin_a)
+        funding_a = r.json().get("id")
+        r = await client.get(f"/social/funding-sources/{funding_a}/report", headers=admin_b)
+        c.expect(r.status_code == 404, f"B cannot read A funding report: {r.status_code}")
+        r = await client.patch(f"/schedule/classes/{class_a}", json={"funding_source_id": funding_a}, headers=admin_b)
+        c.expect(r.status_code == 404, f"B cannot touch A class: {r.status_code}")
+        r = await client.post("/schedule/classes", json={**class_payload, "course_id": course_b, "funding_source_id": funding_a}, headers=admin_b)
+        c.expect(r.status_code == 404, f"B cannot fund own class with A funding: {r.status_code}")
+        r = await client.post("/social/benefit-items", json={"name": "Lanche A"}, headers=admin_a)
+        item_a = r.json().get("id")
+        r = await client.post(f"/social/benefit-items/{item_a}/stock", json={"quantity": 5, "received_on": "2027-01-01"}, headers=admin_b)
+        c.expect(r.status_code == 404, f"B cannot add stock to A item: {r.status_code}")
+        r = await client.get(f"/retention/offerings/{class_a}", headers=admin_b)
+        c.expect(r.status_code == 404, f"B cannot read A retention: {r.status_code}")
+
         # Contratos: modelo e contrato de A invisiveis para B.
         r = await client.post("/contracts/templates", json={"name": "Contrato A", "body": "Contrato de {student_name}."}, headers=admin_a)
         template_a = r.json().get("id")

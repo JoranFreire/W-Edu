@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { BookOpenIcon, CalendarDaysIcon, ChartBarIcon, ClipboardDocumentListIcon, ExclamationTriangleIcon, TrophyIcon } from '@heroicons/react/24/outline';
+import { BookOpenIcon, CalendarDaysIcon, ChartBarIcon, ClipboardDocumentListIcon, ExclamationTriangleIcon, GiftIcon, TrophyIcon, UserMinusIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 import AssessmentPlanPanel from '@/components/teaching/AssessmentPlanPanel';
 import DiaryPanel from '@/components/teaching/DiaryPanel';
@@ -10,6 +10,8 @@ import GradebookTable from '@/components/teaching/GradebookTable';
 import ResultsPanel from '@/components/teaching/ResultsPanel';
 import ClassAgendaPanel from '@/components/schoolLife/ClassAgendaPanel';
 import ClassOccurrencePanel from '@/components/schoolLife/ClassOccurrencePanel';
+import RetentionPanel from '@/components/retention/RetentionPanel';
+import OfferingBenefitsPanel from '@/components/social/OfferingBenefitsPanel';
 import BackButton from '@/components/common/BackButton';
 import Spinner from '@/components/common/Spinner';
 import TabNav, { type TabItem } from '@/components/common/TabNav';
@@ -22,7 +24,7 @@ import { useErrorToast } from '@/lib/hooks/useErrorToast';
 import { useAuthStore } from '@/store/authStore';
 import { isAdminRole } from '@/types/auth';
 
-type TeachingTab = 'gradebook' | 'assessments' | 'diary' | 'results' | 'agenda' | 'occurrences';
+type TeachingTab = 'gradebook' | 'assessments' | 'diary' | 'results' | 'agenda' | 'occurrences' | 'retention' | 'benefits';
 
 const baseTabs: TabItem<TeachingTab>[] = [
   { id: 'gradebook', label: 'Boletim', icon: ChartBarIcon },
@@ -32,6 +34,10 @@ const baseTabs: TabItem<TeachingTab>[] = [
 ];
 const agendaTab: TabItem<TeachingTab> = { id: 'agenda', label: 'Agenda', icon: CalendarDaysIcon };
 const occurrencesTab: TabItem<TeachingTab> = { id: 'occurrences', label: 'Ocorrências', icon: ExclamationTriangleIcon };
+const socialTabs: TabItem<TeachingTab>[] = [
+  { id: 'retention', label: 'Frequência e evasão', icon: UserMinusIcon },
+  { id: 'benefits', label: 'Benefícios', icon: GiftIcon },
+];
 
 export default function TeachingOfferingPage() {
   const router = useRouter();
@@ -56,7 +62,7 @@ export default function TeachingOfferingPage() {
 
   if (!offering) return <Spinner />;
   // A agenda pertence a turma-grupo: so aparece quando a oferta esta ligada a uma.
-  const tabs = [...baseTabs, ...(offering.class_group_id ? [agendaTab] : []), occurrencesTab];
+  const tabs = [...baseTabs, ...(offering.class_group_id ? [agendaTab] : []), occurrencesTab, ...socialTabs];
   const students = gradebook?.rows.map((row) => row.student) ?? [];
   return (
     <div className="space-y-6">
@@ -77,6 +83,8 @@ export default function TeachingOfferingPage() {
         {tab === 'results' && <ResultsPanel offeringId={offeringId} periods={periods} isCoordination={isCoordination} onChanged={reload} />}
         {tab === 'agenda' && offering.class_group_id && <ClassAgendaPanel groupId={offering.class_group_id} offeringId={offeringId} />}
         {tab === 'occurrences' && <ClassOccurrencePanel students={students} classGroupId={offering.class_group_id} />}
+        {tab === 'retention' && <RetentionPanel offeringId={offeringId} canReadmit={isCoordination} />}
+        {tab === 'benefits' && <OfferingBenefitsPanel offeringId={offeringId} />}
       </div>
     </div>
   );

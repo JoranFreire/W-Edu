@@ -105,6 +105,9 @@ class ClassOffering(TenantMixin, Base):
     class_group_id: Mapped[int | None] = mapped_column(ForeignKey("class_groups.id"), nullable=True, index=True)
     # Esquema de notas da oferta; vazio usa o padrao da instituicao (Fase 13).
     grading_scheme_id: Mapped[int | None] = mapped_column(ForeignKey("grading_schemes.id"), nullable=True, index=True)
+    # Programas sociais (Fase 18): quem financia a turma e o limite de faltas que desliga o aluno (vazio: nao desliga).
+    funding_source_id: Mapped[int | None] = mapped_column(ForeignKey("funding_sources.id"), nullable=True, index=True)
+    max_absence_percent: Mapped[float | None] = mapped_column(Float)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     course: Mapped["Course"] = relationship()
@@ -138,6 +141,9 @@ class ClassEnrollment(TenantMixin, Base):
     result: Mapped[ClassEnrollmentResult] = mapped_column(
         SAEnum(ClassEnrollmentResult), default=ClassEnrollmentResult.in_progress, server_default=ClassEnrollmentResult.in_progress.value
     )
+    # Desligamento (ex.: excesso de faltas); a inscricao fica cancelada.
+    dismissed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    dismissal_reason: Mapped[str | None] = mapped_column(String(300))
 
     class_offering: Mapped["ClassOffering"] = relationship(back_populates="enrollments")
     student: Mapped["Student"] = relationship()
