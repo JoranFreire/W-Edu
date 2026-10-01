@@ -11,11 +11,15 @@ Um manual por perfil, organizado por tarefa: "como faço para…". Cada pessoa v
 | Coordenação | Coordenadores pedagógicos e de curso | [coordenacao.md](coordenacao.md) |
 | Administrador | Gestão da instituição | [administrador.md](administrador.md) |
 
+## Por tipo de instituição
+
+Escola, universidade, profissionalizante pago ou gratuito (programas sociais) e corporativo usam conjuntos diferentes de recursos e de nomes. Veja o **[guia por tipo de instituição](tipos-de-instituicao.md)**: nomenclatura, implantação e o que cada perfil faz em cada caso.
+
 ## Antes de começar
 
 - **Acesso**: entre em `/login` com o e-mail e a senha recebidos da instituição. A senha pode ser trocada em **Configurações**.
 - **Mais de uma instituição**: quem atua em mais de uma escola troca de instituição no seletor do topo da tela (ícone de prédio). Tudo o que aparece depois disso é da instituição escolhida.
-- **Nomes da sua escola**: termos como *série*, *semestre*, *módulo*, *disciplina* ou *componente* seguem o tipo de instituição (escola, faculdade, curso livre). Este manual usa "período" e "disciplina"; na sua tela pode aparecer o termo equivalente.
+- **Nomes da sua escola**: termos como *série*, *semestre*, *módulo*, *disciplina* ou *componente* seguem o tipo de instituição. Este manual usa "programa", "período" e "disciplina"; na sua tela pode aparecer o termo equivalente ([tabela de nomes](tipos-de-instituicao.md#nomes-por-tipo)).
 - **Avisos**: o sino no topo mostra quantos avisos novos você tem; o menu **Avisos** traz a lista completa.
 - **Tema claro/escuro**: ícone de lua no topo.
 - **Grade ou lista**: telas com cartões (cursos, certificados, templates) têm, ao lado do título, um botão para alternar entre grade e lista. A escolha fica salva no seu navegador.

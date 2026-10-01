@@ -16,6 +16,8 @@ O administrador configura a instituição, gerencia usuários e permissões, o f
 Em **Usuários**:
 
 - **Usuários**: crie, edite e desative pessoas, definindo o papel básico: Aluno, Professor, Coordenador, Secretaria, Responsável, Gestor de empresa ou Administrador.
+  - **Filtros por perfil** no topo da lista (Alunos, Responsáveis, Professores, Coordenação, Secretaria…), com a quantidade de cada um, e **busca** por nome ou e-mail. O último filtro fica lembrado.
+  - Clique no nome para abrir o **dossiê** da pessoa: dados pessoais; **responsáveis** do aluno, com parentesco, contato e indicação de financeiro, principal e quem pode buscar; **dependentes** do responsável; matrículas, com o atalho **Abrir ficha** para a ficha completa na Secretaria; cursos e certificados; resumo financeiro; ocorrências recentes; e turmas que o professor leciona. Cada responsável e cada dependente abre o próprio dossiê. As seções aparecem conforme as suas permissões (o financeiro, por exemplo, só para quem tem acesso ao financeiro).
 - **Empresas**: organizações vinculadas (o gestor de empresa vê financeiro, documentos, relatórios e usuários só da sua empresa).
 
 ## Perfis de acesso
@@ -75,3 +77,7 @@ Tudo o que a coordenação, a secretaria e os professores fazem também está di
 ## Mais de uma instituição
 
 Se você administra mais de uma instituição, troque no seletor do topo. Dados, usuários e configurações são sempre da instituição selecionada; nada é compartilhado entre elas.
+
+## Conforme o tipo da instituição
+
+Escolha o **tipo** em **Instituição** antes de montar a estrutura acadêmica: ele define os nomes usados em todas as telas. O roteiro de implantação de cada tipo (escola, universidade, profissionalizante pago, curso gratuito/programa social, corporativo e mista) está no [guia por tipo de instituição](tipos-de-instituicao.md).
