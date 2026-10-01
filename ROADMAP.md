@@ -4,7 +4,7 @@
 
 **Fase:** 2 — Voz com Professor IA (em andamento)  
 **Ultima atualizacao:** 2026-10-01  
-**Proximo marco:** Fase 16 — Perfil Universidade. Fase 15 (responsaveis, portal, ocorrencias e agenda escolar) concluida.
+**Proximo marco:** Fase 16 — Perfil Universidade (creditos, TCC, estagio e atividades complementares). Matricula por disciplina concluida.
 
 ## Visao Alvo
 
@@ -296,7 +296,7 @@ Objetivo: estrutura comum a escola, universidade e profissionalizante.
 
 ### Fase 16 — Perfil Universidade
 
-- [ ] Janela de matricula por disciplina com pre-requisitos, choque de horario e vagas.
+- [x] Janela de matricula por disciplina com pre-requisitos, choque de horario e vagas (limite de creditos, lista de espera com promocao automatica e excecao pela secretaria).
 - [ ] Creditos e integralizacao.
 - [ ] TCC, estagio e atividades complementares.
 - [ ] Futuro: ENADE e e-MEC.

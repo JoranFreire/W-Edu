@@ -78,6 +78,8 @@ class ClassOfferingService:
 
     def join(self, class_id: int, student_id: int) -> ClassJoinOut:
         class_offering = self.get_or_404(class_id)
+        if class_offering.subject_id is not None and class_offering.class_group_id is None:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Disciplina: a inscrição é feita pela matrícula por disciplina")
         if existing := self.repo.get_enrollment(class_id, student_id):
             return ClassJoinOut(result="enrolled", enrollment=existing)
         if existing := self.repo.get_waitlist_entry(class_id, student_id):

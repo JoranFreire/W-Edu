@@ -185,7 +185,7 @@ Implementado na Fase 14 (entrega 1), em `/secretariat`: `program_enrollment_even
 
 ### Universidade
 
-- Janela de matricula por disciplina, com validacao de pre-requisitos, choque de horario e vagas.
+- Janela de matricula por disciplina, com validacao de pre-requisitos, choque de horario e vagas. Implementado na Fase 16 (entrega 1), em `/registration`: `registration_windows` (periodo letivo, programa opcional, abertura/fechamento, minimo e maximo de creditos, lista de espera) e `offering_time_slots` (horario semanal da oferta), com TenantMixin e RLS. O catalogo do aluno lista as ofertas abertas do periodo para as disciplinas da sua matriz, com a situacao de cada uma e os impedimentos (pre-requisito pendente, choque de horario, disciplina ja cursada ou aproveitada, limite de creditos, turma lotada); regras puras em `app/services/registration/rules.py`. Turma lotada leva a lista de espera; ao abrir vaga, o primeiro ainda apto e inscrito e recebe `waitlist_promoted`. A secretaria inscreve fora da janela e, com `override`, dispensa as regras. Ofertas de disciplina sem turma-grupo nao aceitam mais a entrada livre (`/schedule/classes/{id}/join`).
 - Creditos, CR/IRA e integralizacao curricular.
 - TCC, estagio e atividades complementares com carga horaria.
 - Futuro: ENADE e integracao com o e-MEC.

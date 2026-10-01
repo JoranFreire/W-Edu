@@ -38,6 +38,10 @@ DEFAULT_TEMPLATES = {
         "Agenda da turma",
         "{kind_label} para {due_on}: {title} ({class_group_name}).",
     ),
+    (NotificationEventType.waitlist_promoted, NotificationChannel.internal): (
+        "Vaga confirmada",
+        "Abriu vaga e você foi matriculado em {offering_name} ({subject_name}).",
+    ),
     (NotificationEventType.meeting_reminder, NotificationChannel.internal): (
         "Lembrete de encontro",
         "Você tem um encontro em {starts_at}: {meeting_title}.",

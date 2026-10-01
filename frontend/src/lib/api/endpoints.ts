@@ -108,6 +108,17 @@ export const endpoints = {
     agendaItem: (itemId: number) => `/school/agenda/${itemId}`,
     myAgenda: '/school/my/agenda',
   },
+  registration: {
+    windows: '/registration/windows',
+    window: (id: number) => `/registration/windows/${id}`,
+    offeringSlots: (offeringId: number) => `/registration/offerings/${offeringId}/time-slots`,
+    slot: (id: number) => `/registration/time-slots/${id}`,
+    myWindows: '/registration/my/windows',
+    myCatalog: (windowId: number) => `/registration/my/windows/${windowId}/catalog`,
+    myOffering: (windowId: number, offeringId: number) => `/registration/my/windows/${windowId}/offerings/${offeringId}`,
+    officeCatalog: (enrollmentId: number, termId: number) => `/registration/program-enrollments/${enrollmentId}/terms/${termId}/catalog`,
+    officeOffering: (enrollmentId: number, offeringId: number) => `/registration/program-enrollments/${enrollmentId}/offerings/${offeringId}`,
+  },
   courses: {
     list: '/courses',
     detail: (id: number) => `/courses/${id}`,

@@ -12,6 +12,7 @@ import InstructorAgendaPanel from '@/components/admin/schedule/InstructorAgendaP
 import LocationsList from '@/components/admin/schedule/LocationsList';
 import MeetingFormModal, { type MeetingSlot } from '@/components/admin/schedule/MeetingFormModal';
 import RoomsList from '@/components/admin/schedule/RoomsList';
+import OfferingTimeSlotsModal from '@/components/registration/OfferingTimeSlotsModal';
 import Modal from '@/components/common/Modal';
 import SectionHeader from '@/components/common/SectionHeader';
 import TabNav, { type TabItem } from '@/components/common/TabNav';
@@ -33,6 +34,7 @@ export default function AdminSchedulePage() {
   const [createModal, setCreateModal] = useState<CreateModal>(null);
   const [meetingClass, setMeetingClass] = useState<ClassOffering | null>(null);
   const [pendingSlot, setPendingSlot] = useState<MeetingSlot | null>(null);
+  const [slotsClass, setSlotsClass] = useState<ClassOffering | null>(null);
 
   const closeCreateModal = () => setCreateModal(null);
   const afterCreate = () => {
@@ -86,7 +88,7 @@ export default function AdminSchedulePage() {
                 onCreateMeeting={setMeetingClass} onLoadMeetings={meetings.loadMeetings} onGenerateCheckin={checkin.generate}
                 onLoadAttendance={meetings.loadAttendance} onLoadAttendanceReport={meetings.loadAttendanceReport}
                 onMarkAttendance={meetings.markAttendance} onSavePracticalAssessment={meetings.savePracticalAssessment}
-                onLoadSummary={meetings.loadSummary} onCloseMeeting={meetings.closeMeeting}
+                onLoadSummary={meetings.loadSummary} onCloseMeeting={meetings.closeMeeting} onEditSlots={setSlotsClass}
               />
             </>
           )}
@@ -141,6 +143,9 @@ export default function AdminSchedulePage() {
           onSubmit={meetings.createMeeting}
           onClose={closeMeetingModal}
         />
+      )}
+      {slotsClass && (
+        <OfferingTimeSlotsModal offeringId={slotsClass.id} offeringName={slotsClass.name} onClose={() => setSlotsClass(null)} />
       )}
       {checkin.token && (
         <CheckinQrModal token={checkin.token} meeting={checkin.meeting} checkinUrl={checkin.url} onCopy={checkin.copyUrl} onClose={checkin.clear} />

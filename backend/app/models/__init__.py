@@ -23,6 +23,7 @@ from app.models.academic_calendar import AcademicTerm, CalendarEvent, GradingPer
 from app.models.academic_groups import ClassGroup, ClassGroupMember, ProgramEnrollment
 from app.models.assessment import AssessmentItem, GradeEntry, GradingScheme, OfferingPeriodClosure, PeriodResult
 from app.models.class_diary import ClassDiaryEntry, DiaryAttendance
+from app.models.course_registration import OfferingTimeSlot, RegistrationWindow
 from app.models.guardians import StudentGuardian
 from app.models.school_life import AgendaItem, StudentOccurrence
 from app.models.secretariat import AcademicDeclaration, CreditTransfer, ProgramEnrollmentEvent, TermRegistration
@@ -70,4 +71,5 @@ __all__ = [
     "AcademicTerm", "GradingPeriod", "CalendarEvent", "ProgramEnrollment", "ClassGroup", "ClassGroupMember",
     "GradingScheme", "AssessmentItem", "GradeEntry", "ClassDiaryEntry", "DiaryAttendance",
     "OfferingPeriodClosure", "PeriodResult", "ProgramEnrollmentEvent", "TermRegistration", "CreditTransfer", "AcademicDeclaration", "StudentGuardian", "StudentOccurrence", "AgendaItem",
+    "RegistrationWindow", "OfferingTimeSlot",
 ]

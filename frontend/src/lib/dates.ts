@@ -14,3 +14,13 @@ export function todayIso(): string {
   const now = new Date();
   return new Date(now.getTime() - now.getTimezoneOffset() * 60_000).toISOString().slice(0, 10);
 }
+
+/** Valor local para `<input type="datetime-local">` a partir de uma data ISO com fuso. */
+export function isoToLocalInput(value: string): string {
+  const date = new Date(value);
+  return new Date(date.getTime() - date.getTimezoneOffset() * 60_000).toISOString().slice(0, 16);
+}
+
+/** Data e hora locais curtas (DD/MM/AAAA HH:MM). */
+export const formatDateTime = (value: string) =>
+  new Date(value).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });

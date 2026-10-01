@@ -4,7 +4,7 @@ import { E2E_PASSWORD, users } from './users';
 /** API usada pelo frontend nos testes (mesma de NEXT_PUBLIC_API_URL). */
 export const API_URL = process.env.E2E_API_URL ?? 'http://localhost:8000';
 
-async function adminHeaders(request: APIRequestContext, institution: string) {
+export async function adminHeaders(request: APIRequestContext, institution: string) {
   const response = await request.post(`${API_URL}/auth/login`, {
     data: { email: users.admin, password: E2E_PASSWORD, institution },
   });

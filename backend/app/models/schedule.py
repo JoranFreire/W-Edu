@@ -109,6 +109,7 @@ class ClassOffering(TenantMixin, Base):
 
     course: Mapped["Course"] = relationship()
     term: Mapped["AcademicTerm | None"] = relationship()
+    subject: Mapped["Subject | None"] = relationship()
     location: Mapped["Location | None"] = relationship(back_populates="class_offerings")
     room: Mapped["Room | None"] = relationship(back_populates="class_offerings")
     instructor: Mapped["Student | None"] = relationship()

@@ -5,7 +5,7 @@ import MeetingRow from './MeetingRow';
 import type { Course } from '@/types/course';
 import type { AttendanceRecord, AttendanceStatus, ClassOffering, MeetingAttendanceReportRow, MeetingAttendanceSummary, Room, ScheduledMeeting } from '@/types/schedule';
 
-export default function ClassOfferingsList({ classes, courses, rooms, meetings, attendance, attendanceReports, summaries, onCreateMeeting, onLoadMeetings, onGenerateCheckin, onLoadAttendance, onLoadAttendanceReport, onMarkAttendance, onSavePracticalAssessment, onLoadSummary, onCloseMeeting, showHeader = true }: {
+export default function ClassOfferingsList({ classes, courses, rooms, meetings, attendance, attendanceReports, summaries, onCreateMeeting, onLoadMeetings, onGenerateCheckin, onLoadAttendance, onLoadAttendanceReport, onMarkAttendance, onSavePracticalAssessment, onLoadSummary, onCloseMeeting, onEditSlots, showHeader = true }: {
   classes: ClassOffering[];
   courses: Course[];
   rooms: Room[];
@@ -22,6 +22,8 @@ export default function ClassOfferingsList({ classes, courses, rooms, meetings, 
   onSavePracticalAssessment: (meeting: ScheduledMeeting, studentId: number, score: number, feedback: string | null) => void;
   onLoadSummary: (meetingId: number) => void;
   onCloseMeeting: (meeting: ScheduledMeeting) => void;
+  /** Horario semanal, so para ofertas de disciplina. */
+  onEditSlots?: (cls: ClassOffering) => void;
   showHeader?: boolean;
 }) {
   return (
@@ -53,6 +55,11 @@ export default function ClassOfferingsList({ classes, courses, rooms, meetings, 
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
+                    {onEditSlots && cls.subject_id && (
+                      <button onClick={() => onEditSlots(cls)} aria-label={`Horários de ${cls.name}`} className="text-xs px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                        Horários
+                      </button>
+                    )}
                     <button onClick={() => onCreateMeeting(cls)} className="text-xs px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                       Criar encontro
                     </button>
