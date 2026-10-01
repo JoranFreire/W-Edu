@@ -18,16 +18,14 @@ import { makeNameLookup } from '@/lib/finance/labels';
 import { useChargeActions } from '@/lib/hooks/admin/useChargeActions';
 import { useFinanceData } from '@/lib/hooks/admin/useFinanceData';
 import { useErrorToast } from '@/lib/hooks/useErrorToast';
-import { useAuthStore } from '@/store/authStore';
-import { isAdminRole } from '@/types/auth';
 import type { Charge } from '@/types/finance';
+import { useCurrentRoles } from '@/lib/hooks/useCurrentRoles';
 
 type FinanceTab = 'plans' | 'subscriptions' | 'charges';
 type CreateModal = 'plan' | 'subscription' | 'charge' | null;
 
 export default function AdminFinancePage() {
-  const { student } = useAuthStore();
-  const isAdmin = isAdminRole(student?.role);
+  const { isAdmin } = useCurrentRoles();
   const finance = useFinanceData();
   const chargeActions = useChargeActions(finance.reload);
   const [activeTab, setActiveTab] = useState<FinanceTab>('plans');

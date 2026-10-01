@@ -9,6 +9,7 @@ from app.repositories.certificate import CertificateRepository
 from app.services.certificates.lookups import get_course_or_404, get_student_or_404
 from app.services.certificates.pdf import CertificatePdfService
 from app.services.certificates.signature import CertificateSigner
+from app.policies.roles import has_any_role
 
 
 class CertificateQueryService:
@@ -43,7 +44,7 @@ class CertificateQueryService:
         certificate = self.repo.get_by_id(certificate_id)
         if not certificate:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Certificado não encontrado")
-        if current.role not in ADMIN_ROLES | {UserRole.coordinator} and certificate.student_id != current.id:
+        if not has_any_role(current, ADMIN_ROLES | {UserRole.coordinator}) and certificate.student_id != current.id:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Acesso restrito ao titular do certificado")
         if certificate.revoked_at is not None:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Certificado revogado")

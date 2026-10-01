@@ -1,11 +1,11 @@
 from uuid import UUID
 
-from app.core.ids import new_id
 from datetime import datetime, timezone
 import enum
 from sqlalchemy import ForeignKey, String, Boolean, DateTime, Enum as SAEnum, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from app.core.ids import new_id
 from app.core.database import Base
 from app.core.tenancy import TenantMixin
 
@@ -75,8 +75,16 @@ class Student(Base):
     subscriptions: Mapped[list["Subscription"]] = relationship(back_populates="student")
     charges: Mapped[list["Charge"]] = relationship(back_populates="student", foreign_keys="Charge.student_id")
 
+    @property
+    def roles(self) -> list[UserRole]:
+        """Papeis na instituicao ativa, o principal primeiro (lidos sob demanda; ver app/policies/roles.py)."""
+        from app.policies.roles import roles_of  # import local: a policy depende deste model
+
+        return sorted(roles_of(self), key=lambda role: (role != self.role, role.value))
+
 
 User = Student
+
 
 
 class StudentProfile(Base):

@@ -1,6 +1,6 @@
 """Catalogo de permissoes e o que cada papel de usuario ja concede por padrao.
 
-Os papeis (`users.role`) continuam existindo e viram perfis padrao: cada um concede o conjunto
+Os papeis da pessoa na instituicao (ela pode acumular varios) viram perfis padrao: cada um concede o conjunto
 abaixo, igual ao comportamento anterior ao RBAC. Perfis personalizados da instituicao somam
 permissoes a qualquer usuario. Plataforma (super admin) e portal do responsavel ficam fora do
 catalogo: dependem da identidade, nao de permissao concedida.

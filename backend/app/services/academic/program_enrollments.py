@@ -6,8 +6,10 @@ from datetime import date
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from app.core.tenancy import bound_institution_id
 from app.models.academic import Curriculum, CurriculumStatus
 from app.models.academic_groups import ProgramEnrollment, ProgramEnrollmentStatus
+from app.models.student import UserRole
 from app.repositories.academic import CurriculumRepository, ProgramEnrollmentRepository
 from app.repositories.student import StudentRepository
 from app.schemas.academic_groups import ProgramEnrollmentCreate
@@ -15,6 +17,7 @@ from app.services.academic.errors import bad_request, conflict, not_found
 from app.services.academic.programs import ProgramService
 from app.services.academic.registration import registration_number, registration_prefix
 from app.services.academic.terms import AcademicTermService
+from app.services.membership import MembershipService
 from app.models.secretariat import EnrollmentEventKind
 from app.services.secretariat.events import EnrollmentEventRecorder
 from app.services.secretariat.lifecycle import EnrollmentLifecycleService
@@ -50,7 +53,8 @@ class ProgramEnrollmentService:
         return enrollment
 
     def create(self, data: ProgramEnrollmentCreate, user_id: UUID | None = None) -> ProgramEnrollment:
-        if not self.students.get_by_id(data.student_id):
+        person = self.students.get_by_id(data.student_id)
+        if not person:
             raise not_found("Aluno não encontrado")
         program = self.programs.get_or_404(data.program_id)
         curriculum = self._curriculum_for(program.id, data.curriculum_id)
@@ -75,6 +79,8 @@ class ProgramEnrollmentService:
             try:
                 with self.db.begin_nested():
                     self.repo.add(enrollment)
+                    # Quem e matriculado num programa passa a ser aluno aqui, mesmo que ja seja professor ou funcionario.
+                    MembershipService(self.db).grant(bound_institution_id(self.db), person, UserRole.student)
                 self.events.record(enrollment, EnrollmentEventKind.enrolled, user_id, term_id=data.entry_term_id)
                 self.repo.commit()
                 return self.get_or_404(enrollment.id)

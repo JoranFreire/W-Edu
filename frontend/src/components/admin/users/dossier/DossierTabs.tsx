@@ -3,7 +3,7 @@
 import { type ReactNode, useState } from 'react';
 import {
   AcademicCapIcon, ArchiveBoxIcon, BanknotesIcon, BookOpenIcon, ExclamationTriangleIcon, GiftIcon, ShieldCheckIcon,
-  Squares2X2Icon, UserGroupIcon,
+  Squares2X2Icon, UserGroupIcon, UsersIcon,
 } from '@heroicons/react/24/outline';
 import TabNav, { type TabItem } from '@/components/common/TabNav';
 import AcademicTab from '@/components/admin/users/dossier/tabs/AcademicTab';
@@ -19,7 +19,7 @@ import { type DossierTab, dossierTabs } from '@/lib/users/dossierTabs';
 import type { UserDossier } from '@/types/userDossier';
 
 const ICONS: Record<DossierTab, TabItem<DossierTab>['icon']> = {
-  summary: Squares2X2Icon, family: UserGroupIcon, academic: AcademicCapIcon, courses: BookOpenIcon, certificates: ShieldCheckIcon,
+  summary: Squares2X2Icon, family: UserGroupIcon, dependents: UsersIcon, academic: AcademicCapIcon, courses: BookOpenIcon, certificates: ShieldCheckIcon,
   benefits: GiftIcon, materials: ArchiveBoxIcon, finance: BanknotesIcon, occurrences: ExclamationTriangleIcon,
 };
 
@@ -29,16 +29,11 @@ export default function DossierTabs({ dossier, permissions }: { dossier: UserDos
   const [chosen, setChosen] = useState<DossierTab>('summary');
   const active = specs.some((spec) => spec.id === chosen) ? chosen : 'summary';
   const tabs: TabItem<DossierTab>[] = specs.map((spec) => ({ ...spec, icon: ICONS[spec.id] }));
-  const isGuardian = dossier.user.role === 'guardian';
 
   const panels: Record<DossierTab, () => ReactNode> = {
     summary: () => <SummaryTab dossier={dossier} />,
-    family: () => (
-      <FamilyTab
-        links={(isGuardian ? dossier.dependents : dossier.guardians) ?? []}
-        emptyText={isGuardian ? 'Nenhum dependente vinculado.' : 'Nenhum responsável vinculado. Vincule pela ficha do aluno na Secretaria.'}
-      />
-    ),
+    family: () => <FamilyTab links={dossier.guardians ?? []} emptyText="Nenhum responsável vinculado. Vincule pela ficha do aluno na Secretaria." />,
+    dependents: () => <FamilyTab links={dossier.dependents ?? []} emptyText="Nenhum dependente vinculado." />,
     academic: () => <AcademicTab dossier={dossier} canOpenRecord={permissions.includes('secretariat.access')} canOpenDiary={permissions.includes('teaching.access')} />,
     courses: () => <CoursesTab courses={dossier.courses} />,
     certificates: () => <CertificatesTab certificates={dossier.certificates} />,

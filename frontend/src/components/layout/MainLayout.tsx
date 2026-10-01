@@ -8,14 +8,16 @@ import { canAccessPath } from '@/lib/auth/permissions';
 import { applyBranding } from '@/lib/institution/branding';
 import { useStoredValue } from '@/lib/hooks/useStoredValue';
 import { useAuthStore } from '@/store/authStore';
+import { useCurrentRoles } from '@/lib/hooks/useCurrentRoles';
 
 export function MainLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const { student, institution, permissions } = useAuthStore();
+  const { institution, permissions } = useAuthStore();
+  const { roles } = useCurrentRoles();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [storedCollapsed, setStoredCollapsed] = useStoredValue('w-edu-sidebar-collapsed');
   const sidebarCollapsed = storedCollapsed === 'true';
-  const hasAccess = canAccessPath(student?.role, pathname, permissions);
+  const hasAccess = canAccessPath(roles, pathname, permissions);
 
   useEffect(() => {
     applyBranding(institution?.branding);

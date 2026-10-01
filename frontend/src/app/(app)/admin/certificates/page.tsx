@@ -12,14 +12,13 @@ import CourseRow from '@/components/courses/CourseRow';
 import { useCertificateCatalog } from '@/lib/hooks/admin/useCertificateCatalog';
 import { useErrorToast } from '@/lib/hooks/useErrorToast';
 import { useViewMode } from '@/lib/hooks/useViewMode';
-import { useAuthStore } from '@/store/authStore';
-import { isAdminRole } from '@/types/auth';
 import type { Course } from '@/types/course';
+import { useCurrentRoles } from '@/lib/hooks/useCurrentRoles';
 
 const CERTIFICATE_HINT = 'Gerencie regras, emissão e validação dos certificados deste curso.';
 
 export default function AdminCertificatesPage() {
-  const { student } = useAuthStore();
+  const { isAdmin } = useCurrentRoles();
   const catalog = useCertificateCatalog();
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [viewMode, setViewMode] = useViewMode('admin-certificates');
@@ -81,7 +80,7 @@ export default function AdminCertificatesPage() {
               <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Configure e acompanhe certificados deste curso.</p>
             </div>
           </div>
-          <CourseCertificationPanel key={selectedCourse.id} courseId={selectedCourse.id} students={catalog.students} canRevoke={isAdminRole(student?.role)} />
+          <CourseCertificationPanel key={selectedCourse.id} courseId={selectedCourse.id} students={catalog.students} canRevoke={isAdmin} />
         </>
       )}
     </div>

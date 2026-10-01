@@ -7,13 +7,12 @@ import Spinner from '@/components/common/Spinner';
 import { programLevelLabels } from '@/lib/academic/labels';
 import { useProgram } from '@/lib/hooks/admin/academic/useProgram';
 import { useErrorToast } from '@/lib/hooks/useErrorToast';
-import { useAuthStore } from '@/store/authStore';
-import { isAdminRole } from '@/types/auth';
+import { useCurrentRoles } from '@/lib/hooks/useCurrentRoles';
 
 export default function AdminProgramPage() {
   const router = useRouter();
   const programId = useParams<{ programId: string }>().programId;
-  const canDelete = isAdminRole(useAuthStore((state) => state.student?.role));
+  const canDelete = useCurrentRoles().isAdmin;
   const { program, error } = useProgram(programId);
   useErrorToast(error, 'Programa não encontrado.');
 

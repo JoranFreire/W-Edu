@@ -18,8 +18,8 @@ import { type NewUserInput, type OrganizationInput, type UserUpdateInput, usePeo
 import { useUserFilters } from '@/lib/hooks/admin/useUserFilters';
 import { useErrorToast } from '@/lib/hooks/useErrorToast';
 import { assignableRoles, canManageUser } from '@/lib/users/rolePolicy';
-import { useAuthStore } from '@/store/authStore';
-import { type Organization, type User, isAdminRole } from '@/types/auth';
+import { useCurrentRoles } from '@/lib/hooks/useCurrentRoles';
+import type { Organization, User } from '@/types/auth';
 
 type PeopleTab = 'users' | 'organizations';
 type Dialog =
@@ -31,8 +31,8 @@ type Dialog =
   | null;
 
 export default function AdminStudentsPage() {
-  const { student } = useAuthStore();
-  const isAdmin = isAdminRole(student?.role);
+  const current = useCurrentRoles();
+  const isAdmin = current.isAdmin;
   const people = usePeople();
   const [activeTab, setActiveTab] = useState<PeopleTab>('users');
   const [dialog, setDialog] = useState<Dialog>(null);
@@ -57,7 +57,7 @@ export default function AdminStudentsPage() {
 
   if (people.loading && people.users.length === 0) return <Spinner />;
 
-  const roles = assignableRoles(student?.role);
+  const roles = assignableRoles(current.roles, current.isSuperAdmin);
   const tabs: TabItem<PeopleTab>[] = [
     { id: 'users', label: 'Usuários', icon: UserGroupIcon, badge: people.users.length },
     { id: 'organizations', label: 'Empresas', icon: BuildingOfficeIcon, badge: people.organizations.length },
@@ -107,7 +107,7 @@ export default function AdminStudentsPage() {
                 filtered={people.users.length > 0}
                 organizations={people.organizations}
                 canDelete={isAdmin}
-                canManageUser={(user) => canManageUser(student?.role, user)}
+                canManageUser={(user) => canManageUser(current.roles, user)}
                 onEdit={(user) => setDialog({ kind: 'editUser', user })}
                 onDelete={(id) => {
                   const user = people.users.find((item) => item.id === id);

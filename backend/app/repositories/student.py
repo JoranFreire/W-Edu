@@ -2,7 +2,7 @@ from uuid import UUID
 
 from sqlalchemy.orm import Session
 
-from app.core.tenancy import UNSCOPED
+from app.core.tenancy import UNSCOPED, bound_institution_id
 from app.models.student import (
     InstructorAvailability,
     InstructorProfile,
@@ -12,6 +12,7 @@ from app.models.student import (
     StudentProfile,
     UserRole,
 )
+from app.repositories.member_roles import MemberRoleRepository
 
 
 class StudentRepository:
@@ -28,13 +29,20 @@ class StudentRepository:
     def list_all(self) -> list[Student]:
         return self.db.query(Student).order_by(Student.created_at.desc()).all()
 
+    def list_with_roles(self, roles: set[UserRole], active_only: bool = False) -> list[Student]:
+        """Pessoas que tem algum dos papeis na instituicao ativa (sem instituicao, vale o papel principal)."""
+        query = self.db.query(Student)
+        institution_id = bound_institution_id(self.db)
+        if institution_id is None:
+            query = query.filter(Student.role.in_(roles))
+        else:
+            query = query.filter(Student.id.in_(MemberRoleRepository(self.db).user_ids_with_role(institution_id, roles)))
+        if active_only:
+            query = query.filter(Student.is_active.is_(True))
+        return query.order_by(Student.name).all()
+
     def list_active_by_roles(self, roles: set[UserRole]) -> list[Student]:
-        return (
-            self.db.query(Student)
-            .filter(Student.role.in_(roles), Student.is_active.is_(True))
-            .order_by(Student.name)
-            .all()
-        )
+        return self.list_with_roles(roles, active_only=True)
 
     def list_by_organization(self, organization_id: UUID) -> list[Student]:
         return (

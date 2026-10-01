@@ -16,13 +16,11 @@ import CourseRow from '@/components/courses/CourseRow';
 import { useCourses } from '@/lib/hooks/admin/useCourses';
 import { useErrorToast } from '@/lib/hooks/useErrorToast';
 import { useViewMode } from '@/lib/hooks/useViewMode';
-import { useAuthStore } from '@/store/authStore';
-import { isAdminRole } from '@/types/auth';
 import type { Course } from '@/types/course';
+import { useCurrentRoles } from '@/lib/hooks/useCurrentRoles';
 
 export default function AdminCoursesPage() {
-  const { student } = useAuthStore();
-  const canDelete = isAdminRole(student?.role);
+  const canDelete = useCurrentRoles().isAdmin;
   const catalog = useCourses();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [editing, setEditing] = useState<{ course?: Course } | null>(null);

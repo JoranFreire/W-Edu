@@ -1,7 +1,7 @@
-import { isAdminRole, type Student } from '@/types/auth';
+import { type UserRole, hasAnyRole, isAdminIn } from '@/types/auth';
 
 /** Espelha `ensure_can_remove`: remove o registro quem o criou ou a coordenacao. */
-export function canRemoveSchoolRecord(user: Student | null, authorId: string | null | undefined): boolean {
-  if (!user) return false;
-  return isAdminRole(user.role) || user.role === 'coordinator' || (authorId != null && authorId === user.id);
+export function canRemoveSchoolRecord(userId: string | undefined, roles: UserRole[], authorId: string | null | undefined): boolean {
+  if (!userId) return false;
+  return isAdminIn(roles) || hasAnyRole(roles, ['coordinator']) || (authorId != null && authorId === userId);
 }

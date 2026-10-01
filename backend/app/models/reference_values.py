@@ -2,12 +2,12 @@
 
 from uuid import UUID
 
-from app.core.ids import new_id
 from datetime import date, datetime, timezone
 
 from sqlalchemy import Date, DateTime, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
 
+from app.core.ids import new_id
 from app.core.database import Base
 
 

@@ -10,6 +10,7 @@ export interface NewUserInput {
   email: string;
   password: string;
   role: UserRole;
+  roles: UserRole[];
   organization_id: string | null;
 }
 
@@ -17,6 +18,7 @@ export interface UserUpdateInput {
   name: string;
   email: string;
   role: UserRole;
+  roles: UserRole[];
   organization_id: string | null;
   is_active: boolean;
 }

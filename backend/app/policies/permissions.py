@@ -1,14 +1,16 @@
-"""Permissao efetiva: a do papel do usuario mais as dos perfis atribuidos na instituicao ativa."""
+"""Permissao efetiva: a de cada papel da pessoa na instituicao ativa mais as dos perfis atribuidos."""
 
 from fastapi import HTTPException, status
 
 from app.models.student import Student
+from app.policies.roles import roles_of
 from app.services.access.catalog import role_permissions
 
 
 def effective_permissions(user: Student) -> frozenset[str]:
-    """`granted_permissions` e carregado na autenticacao; usuarios montados sem ela (testes) usam so o papel."""
-    return role_permissions(user.role) | getattr(user, "granted_permissions", frozenset())
+    """Papeis e `granted_permissions` vem da autenticacao; usuarios montados sem eles (testes) usam so o papel principal."""
+    by_roles = frozenset().union(*(role_permissions(role) for role in roles_of(user)))
+    return by_roles | getattr(user, "granted_permissions", frozenset())
 
 
 def has_permission(user: Student, key: str) -> bool:

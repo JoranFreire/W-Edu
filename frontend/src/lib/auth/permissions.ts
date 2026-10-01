@@ -42,9 +42,14 @@ function grantedByPermission(pathname: string, permissions: string[]) {
   return permissionPaths.some(([path, required]) => matchesPath(pathname, path) && required.some((key) => permissions.includes(key)));
 }
 
-export function canAccessPath(role: UserRole | undefined, pathname: string, permissions: string[] = []) {
-  if (!role) return false;
+/** Rota liberada se algum dos papeis da pessoa (ou uma permissao de perfil de acesso) a libera. */
+export function canAccessPath(roles: UserRole[], pathname: string, permissions: string[] = []) {
+  if (roles.length === 0) return false;
   if (grantedByPermission(pathname, permissions)) return true;
+  return roles.some((role) => roleCanAccess(role, pathname));
+}
+
+function roleCanAccess(role: UserRole, pathname: string) {
   if (matchesPath(pathname, '/platform')) return role === 'super_admin';
   if (matchesPath(pathname, '/guardian')) return role === 'guardian';
   if (matchesPath(pathname, '/teaching')) return isAdminRole(role) || role === 'coordinator' || role === 'instructor';

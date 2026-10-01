@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { Student, AuthTokens, LoginCredentials } from '@/types/auth';
+import type { Student, AuthTokens, LoginCredentials, UserRole } from '@/types/auth';
 import type { MyAccess } from '@/types/access';
 import type { Institution, InstitutionSummary, Membership } from '@/types/institution';
 import api from '@/lib/api/client';
@@ -15,6 +15,8 @@ interface AuthState {
   memberships: Membership[];
   /** Permissoes efetivas na instituicao ativa (papel + perfis de acesso). */
   permissions: string[];
+  /** Papeis na instituicao ativa (vem de /access/me, que depende da instituicao). */
+  roles: UserRole[];
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
@@ -38,6 +40,7 @@ export const useAuthStore = create<AuthState>()(
       institution: null,
       memberships: [],
       permissions: [],
+      roles: [],
       isAuthenticated: false,
       isLoading: false,
       error: null,
@@ -57,14 +60,14 @@ export const useAuthStore = create<AuthState>()(
           get().fetchPermissions();
         } catch (error) {
           const msg = apiErrorMessage(error, 'Falha ao fazer login. Verifique suas credenciais.');
-          set({ student: null, tokens: null, institution: null, memberships: [], permissions: [], isAuthenticated: false, isLoading: false, error: msg });
+          set({ student: null, tokens: null, institution: null, memberships: [], permissions: [], roles: [], isAuthenticated: false, isLoading: false, error: msg });
           throw error;
         }
       },
 
       logout: () => {
         localStorage.removeItem('access_token');
-        set({ student: null, tokens: null, institution: null, memberships: [], permissions: [], isAuthenticated: false, error: null });
+        set({ student: null, tokens: null, institution: null, memberships: [], permissions: [], roles: [], isAuthenticated: false, error: null });
         if (typeof window !== 'undefined') window.location.href = '/login';
       },
 
@@ -94,7 +97,7 @@ export const useAuthStore = create<AuthState>()(
       fetchPermissions: async () => {
         try {
           const { data } = await api.get<MyAccess>(endpoints.access.me);
-          set({ permissions: data.permissions });
+          set({ permissions: data.permissions, roles: data.roles ?? [data.role] });
         } catch {
           // Sem a lista, menus e rotas seguem pelo papel do usuario.
         }
@@ -125,6 +128,7 @@ export const useAuthStore = create<AuthState>()(
         institution: s.institution,
         memberships: s.memberships,
         permissions: s.permissions,
+        roles: s.roles,
         isAuthenticated: s.isAuthenticated,
       }),
       onRehydrateStorage: () => (state) => state?.setHasHydrated(true),

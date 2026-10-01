@@ -13,7 +13,9 @@ from app.policies.permissions import ensure_any_permission, ensure_permission
 from app.repositories.access import AccessRoleRepository
 from app.repositories.student import StudentRepository
 from app.services.institution import InstitutionService
+from app.services.people.roles import UserRoleService
 from app.services.tenant_access import TenantAccessService
+from app.policies.roles import has_any_role, has_role, is_super_admin
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
@@ -44,7 +46,8 @@ def _activate_institution(request: Request, db: Session, student: Student, paylo
     institution = TenantAccessService(db).resolve_for_user(student, requested)
     bind_institution(db, institution.id)
     request.state.institution = institution
-    # Perfis de acesso da instituicao somam permissoes ao papel do usuario (RBAC).
+    # Papeis da pessoa nesta instituicao (pode acumular varios) e perfis de acesso que somam permissoes (RBAC).
+    UserRoleService(db).load(student, institution.id)
     student.granted_permissions = AccessRoleRepository(db).permissions_of(student.id)
 
 
@@ -74,7 +77,7 @@ def get_current_institution(request: Request, _: Student = Depends(get_current_s
 
 
 def get_current_super_admin(current: Student = Depends(get_current_student)) -> Student:
-    if current.role != UserRole.super_admin:
+    if not is_super_admin(current):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Acesso restrito à administração da plataforma")
     return current
 
@@ -136,30 +139,32 @@ def get_current_warehouse_user(current: Student = Depends(get_current_student)) 
 
 def get_current_guardian(current: Student = Depends(get_current_student)) -> Student:
     """Portal do responsavel."""
-    if current.role != UserRole.guardian:
+    if not has_role(current, UserRole.guardian):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Acesso restrito a responsáveis")
     return current
 
 
 def get_current_academic_staff(current: Student = Depends(get_current_student)) -> Student:
-    if current.role not in ADMIN_ROLES | {UserRole.coordinator, UserRole.company_manager}:
+    if not has_any_role(current, ADMIN_ROLES | {UserRole.coordinator, UserRole.company_manager}):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Acesso restrito")
-    if current.role == UserRole.company_manager and current.organization_id is None:
+    if has_role(current, UserRole.company_manager) and current.organization_id is None:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Gestor sem empresa vinculada")
     return current
 
 
 def get_current_admin_or_company_manager(current: Student = Depends(get_current_student)) -> Student:
-    if current.role not in ADMIN_ROLES | {UserRole.company_manager}:
+    if not has_any_role(current, ADMIN_ROLES | {UserRole.company_manager}):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Acesso restrito")
-    if current.role == UserRole.company_manager and current.organization_id is None:
+    if has_role(current, UserRole.company_manager) and current.organization_id is None:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Gestor sem empresa vinculada")
     return current
 
 
-def ensure_super_admin_boundary(current: Student, role: UserRole | None = None, target: Student | None = None) -> None:
-    """Somente super admin atribui o papel super_admin ou altera um super admin."""
-    if current.role == UserRole.super_admin:
+def ensure_super_admin_boundary(current: Student, role: UserRole | None = None, target: Student | None = None,
+                                roles: list[UserRole] | None = None) -> None:
+    """Somente super admin atribui o papel super_admin (como principal ou na lista de papeis) ou altera um super admin."""
+    if is_super_admin(current):
         return
-    if role == UserRole.super_admin or (target is not None and target.role == UserRole.super_admin):
+    requested = {role, *(roles or [])}
+    if UserRole.super_admin in requested or (target is not None and target.role == UserRole.super_admin):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Operação restrita à administração da plataforma")

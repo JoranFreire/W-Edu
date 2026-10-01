@@ -2,10 +2,8 @@
 
 import Link from 'next/link';
 import { ChevronRightIcon, PencilIcon, TrashIcon, UsersIcon } from '@heroicons/react/24/outline';
-import type { Organization, User } from '@/types/auth';
-import { roleLabels } from '@/types/auth';
-
-const roleLabel: Record<string, string> = roleLabels;
+import RoleBadges from '@/components/admin/users/RoleBadges';
+import { type Organization, type User, rolesOf } from '@/types/auth';
 
 /** Lista de usuarios; o nome abre o dossie da pessoa. */
 export default function UsersList({ users, organizations, canDelete, canManageUser, onEdit, onDelete, filtered = false }: {
@@ -55,9 +53,7 @@ export default function UsersList({ users, organizations, canDelete, canManageUs
             </div>
           </Link>
           <div className="flex items-center space-x-3">
-            <span className={`text-xs px-2 py-1 rounded-full font-medium ${['admin', 'institution_admin', 'super_admin'].includes(user.role) ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' : user.role === 'instructor' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'}`}>
-              {roleLabel[user.role]}
-            </span>
+            <RoleBadges roles={rolesOf(user)} />
             <span className={`text-xs px-2 py-1 rounded-full font-medium ${user.is_active ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'}`}>
               {user.is_active ? 'Ativo' : 'Inativo'}
             </span>

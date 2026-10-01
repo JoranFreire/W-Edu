@@ -116,12 +116,22 @@ const permissionMenu: { permissions: string[]; item: MenuItem }[] = [
   { permissions: ['access.manage'], item: { name: 'Perfis de acesso', href: '/admin/access', icon: KeyIcon } },
 ];
 
-export function menuForUser(role: UserRole | undefined, permissions: string[]): MenuItem[] {
-  const base = menuForRole(role);
+/** Menu de quem acumula papeis: o do principal e, em seguida, o que so os outros papeis trazem. */
+function mergedMenu(roles: UserRole[]): MenuItem[] {
+  const merged: MenuItem[] = [];
+  for (const role of roles.length ? roles : [undefined]) {
+    for (const item of menuForRole(role)) {
+      if (!merged.some((entry) => entry.href === item.href)) merged.push(item);
+    }
+  }
+  return merged;
+}
+
+export function menuForUser(roles: UserRole[], permissions: string[]): MenuItem[] {
+  const base = mergedMenu(roles);
   const extra = permissionMenu
     .filter(({ permissions: required, item }) => required.some((key) => permissions.includes(key)) && !base.some((entry) => entry.href === item.href))
     .map(({ item }) => item);
-  if (extra.length === 0) return base;
   // Mantem Configuracoes por ultimo.
   const settings = base.filter((entry) => entry.href === '/settings');
   return [...base.filter((entry) => entry.href !== '/settings'), ...extra, ...settings];

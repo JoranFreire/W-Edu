@@ -12,6 +12,7 @@ from app.models.student import ADMIN_ROLES, Student, UserRole
 from app.repositories.document import DocumentRepository, DocumentVersionRepository
 from app.repositories.student import StudentRepository
 from app.schemas.document import DocumentCreate, DocumentUpdate, DocumentVersionCreate
+from app.policies.roles import has_any_role, has_role
 
 
 class DocumentService:
@@ -40,7 +41,7 @@ class DocumentService:
     ) -> Document:
         self._validate_scope(data, current)
         document = Document(**data.model_dump())
-        if current.role == UserRole.company_manager and document.organization_id is None:
+        if has_role(current, UserRole.company_manager) and document.organization_id is None:
             document.organization_id = current.organization_id
         document.uploaded_by_id = current.id
         document = self.repo.create(document)
@@ -65,7 +66,7 @@ class DocumentService:
         self._validate_scope(merged, current)
         for field, value in payload.items():
             setattr(document, field, value)
-        if current.role == UserRole.company_manager and document.organization_id is None:
+        if has_role(current, UserRole.company_manager) and document.organization_id is None:
             document.organization_id = current.organization_id
         return self.repo.update(document)
 
@@ -151,9 +152,9 @@ class DocumentService:
         return FileResponse(path, filename=version.file_name or path.name, media_type=version.mime_type or "application/octet-stream")
 
     def _can_access(self, current: Student, document: Document) -> bool:
-        if current.role in ADMIN_ROLES:
+        if has_any_role(current, ADMIN_ROLES):
             return True
-        if current.role == UserRole.company_manager:
+        if has_role(current, UserRole.company_manager):
             if current.organization_id is None:
                 return False
             if document.organization_id not in (None, current.organization_id):
@@ -166,9 +167,9 @@ class DocumentService:
         return document.student_id == current.id
 
     def _validate_scope(self, data: DocumentCreate, current: Student) -> None:
-        if current.role in ADMIN_ROLES:
+        if has_any_role(current, ADMIN_ROLES):
             return
-        if current.role == UserRole.company_manager:
+        if has_role(current, UserRole.company_manager):
             if current.organization_id is None:
                 raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Gestor sem empresa vinculada")
             if data.organization_id and data.organization_id != current.organization_id:

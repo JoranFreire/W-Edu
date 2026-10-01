@@ -8,6 +8,19 @@ import { companyManagerMenu, coordinatorMenu, studentMenu, superAdminMenu } from
 import { InboxBell } from './InboxBell';
 import { InstitutionSwitcher } from './InstitutionSwitcher';
 import { useAuthStore } from '@/store/authStore';
+import { useCurrentRoles } from '@/lib/hooks/useCurrentRoles';
+
+const topBarRoleLabels: Record<string, string> = {
+  admin: 'Admin',
+  institution_admin: 'Admin da instituição',
+  super_admin: 'Admin da plataforma',
+  secretary: 'Secretaria',
+  guardian: 'Responsável',
+  coordinator: 'Coordenação',
+  company_manager: 'Gestão empresa',
+  instructor: 'Instrutor',
+  student: 'Aluno',
+};
 
 interface TopBarProps {
   onMenuClick: () => void;
@@ -17,19 +30,9 @@ export function TopBar({ onMenuClick }: TopBarProps) {
   const pathname = usePathname();
   const { theme, toggle } = useTheme();
   const { student, logout } = useAuthStore();
-  const roleLabel = student?.role
-    ? {
-        admin: 'Admin',
-        institution_admin: 'Admin da instituição',
-        super_admin: 'Admin da plataforma',
-        secretary: 'Secretaria',
-        guardian: 'Responsável',
-        coordinator: 'Coordenação',
-        company_manager: 'Gestão empresa',
-        instructor: 'Instrutor',
-        student: 'Aluno',
-      }[student.role] || 'Conta'
-    : 'Conta';
+  const { roles } = useCurrentRoles();
+  // Quem acumula papeis ve todos (ex.: "Instrutor · Aluno").
+  const roleLabel = roles.length ? roles.map((role) => topBarRoleLabels[role] ?? 'Conta').join(' · ') : 'Conta';
   const currentPage = useMemo(() => {
     const menuItems = [...superAdminMenu, ...coordinatorMenu, ...companyManagerMenu, ...studentMenu];
     const matches = menuItems

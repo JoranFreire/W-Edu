@@ -9,6 +9,8 @@ class StudentCreate(BaseModel):
     email: EmailStr
     password: str
     role: UserRole = UserRole.student
+    # Todos os papeis na instituicao (aluno e professor, por exemplo); sem a lista, so `role`.
+    roles: list[UserRole] | None = None
     organization_id: UUID | None = None
 
 
@@ -16,6 +18,7 @@ class StudentUpdate(BaseModel):
     name: str | None = None
     email: EmailStr | None = None
     role: UserRole | None = None
+    roles: list[UserRole] | None = None
     organization_id: UUID | None = None
     is_active: bool | None = None
 
@@ -131,6 +134,8 @@ class StudentOut(BaseModel):
     name: str
     email: str
     role: UserRole
+    # Papeis na instituicao ativa, o principal primeiro.
+    roles: list[UserRole] = []
     organization_id: UUID | None
     is_active: bool
     created_at: datetime

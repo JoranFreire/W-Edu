@@ -9,6 +9,7 @@ from app.models.student import ADMIN_ROLES, Student, UserRole
 from app.schemas.student import StudentCreate, StudentUpdate, StudentOut
 from app.services.institution import InstitutionService
 from app.services.student import StudentService
+from app.policies.roles import has_any_role
 
 router = APIRouter()
 
@@ -42,11 +43,11 @@ def update_student(
     db: Session = Depends(get_db),
     current: Student = Depends(get_current_student),
 ):
-    if current.id != student_id and current.role not in ADMIN_ROLES:
+    if current.id != student_id and not has_any_role(current, ADMIN_ROLES):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Usuário fora do seu escopo")
-    if current.role not in ADMIN_ROLES:
+    if not has_any_role(current, ADMIN_ROLES):
         data = StudentUpdate(name=data.name, email=data.email)
-    ensure_super_admin_boundary(current, data.role, StudentService(db).get_or_404(student_id))
+    ensure_super_admin_boundary(current, data.role, StudentService(db).get_or_404(student_id), roles=data.roles)
     return StudentService(db).update(student_id, data)
 
 
@@ -56,7 +57,7 @@ def delete_student(
     db: Session = Depends(get_db),
     current: Student = Depends(get_current_student),
 ):
-    if current.role not in ADMIN_ROLES:
+    if not has_any_role(current, ADMIN_ROLES):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Acesso restrito a administradores")
     ensure_super_admin_boundary(current, target=StudentService(db).get_or_404(student_id))
     StudentService(db).delete(student_id)

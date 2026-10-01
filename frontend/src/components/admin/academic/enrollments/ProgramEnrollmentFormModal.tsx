@@ -45,6 +45,9 @@ export default function ProgramEnrollmentFormModal({ students, programs, terms, 
             <option value="">Selecione...</option>
             {students.map((student) => <option key={student.id} value={student.id}>{student.name} ({student.email})</option>)}
           </select>
+          <span className="mt-1 block text-xs font-normal text-gray-500 dark:text-gray-400">
+            Pode ser um professor ou funcionário: ao ser matriculado, passa a ter também o papel de aluno.
+          </span>
         </label>
         <label className={labelCls}>{labels.program}
           <select required value={form.program_id} onChange={(e) => set({ program_id: e.target.value })} className={`mt-1 ${inputCls}`}>

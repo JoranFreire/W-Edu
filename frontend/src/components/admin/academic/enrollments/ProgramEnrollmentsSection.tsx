@@ -80,7 +80,7 @@ export default function ProgramEnrollmentsSection() {
         </div>
       )}
       {creating && (
-        <ProgramEnrollmentFormModal students={users.filter((user) => user.role === 'student')} programs={programs} terms={terms}
+        <ProgramEnrollmentFormModal students={users.filter((user) => user.is_active && user.role !== 'super_admin')} programs={programs} terms={terms}
           onSave={handleCreate} onClose={() => setCreating(false)} />
       )}
     </section>

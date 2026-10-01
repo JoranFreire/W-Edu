@@ -2,12 +2,12 @@
 
 from uuid import UUID
 
-from app.core.ids import new_id
 from datetime import datetime, time, timezone
 
 from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Time
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from app.core.ids import new_id
 from app.core.database import Base
 from app.core.tenancy import TenantMixin
 

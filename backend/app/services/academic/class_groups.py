@@ -12,6 +12,7 @@ from app.services.academic.errors import bad_request, conflict, not_found
 from app.services.academic.patch import apply_patch
 from app.services.academic.programs import ProgramService
 from app.services.academic.terms import AcademicTermService
+from app.policies.roles import has_any_role
 
 TEACHER_ROLES = ADMIN_ROLES | {UserRole.instructor, UserRole.coordinator}
 
@@ -92,5 +93,5 @@ class ClassGroupService:
         teacher = self.students.get_by_id(teacher_id)
         if not teacher:
             raise not_found("Professor não encontrado")
-        if teacher.role not in TEACHER_ROLES:
+        if not has_any_role(teacher, TEACHER_ROLES):
             raise bad_request("Professor responsável precisa ser instrutor, coordenador ou administrador")

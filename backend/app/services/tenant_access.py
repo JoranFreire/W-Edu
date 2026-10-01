@@ -5,6 +5,7 @@ from app.core.security import create_access_token
 from app.models.institution import DEFAULT_INSTITUTION_SLUG, Institution, InstitutionStatus
 from app.models.student import Student, UserRole
 from app.repositories.institution import InstitutionRepository, MembershipRepository
+from app.policies.roles import is_super_admin
 
 
 class TenantAccessService:
@@ -26,7 +27,7 @@ class TenantAccessService:
         institution = self.institutions.get_by_ref(ref)
         if not institution:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Instituição não encontrada")
-        if user.role == UserRole.super_admin:
+        if is_super_admin(user):
             return institution
         membership = self.memberships.get(institution.id, user.id)
         if not membership or not membership.is_active:
@@ -36,11 +37,11 @@ class TenantAccessService:
         return institution
 
     def _default_for(self, user: Student) -> Institution:
-        is_super_admin = user.role == UserRole.super_admin
+        platform_admin = is_super_admin(user)
         for membership in self.memberships.list_active_for_user(user.id):
-            if is_super_admin or membership.institution.status == InstitutionStatus.active:
+            if platform_admin or membership.institution.status == InstitutionStatus.active:
                 return membership.institution
-        if is_super_admin:
+        if platform_admin:
             institution = self.institutions.get_by_slug(DEFAULT_INSTITUTION_SLUG) or self.institutions.first()
             if institution:
                 return institution

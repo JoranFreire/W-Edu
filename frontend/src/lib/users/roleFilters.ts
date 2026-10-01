@@ -1,4 +1,4 @@
-import type { User, UserRole } from '@/types/auth';
+import { type User, type UserRole, rolesOf } from '@/types/auth';
 
 export type RoleFilter = 'all' | 'students' | 'guardians' | 'instructors' | 'coordinators' | 'secretaries' | 'admins' | 'managers';
 
@@ -20,7 +20,7 @@ export function isRoleFilter(value: string | null): value is RoleFilter {
 
 export function matchesRoleFilter(user: User, filter: RoleFilter): boolean {
   const roles = roleFilters.find((item) => item.id === filter)?.roles;
-  return !roles || roles.includes(user.role);
+  return !roles || rolesOf(user).some((role) => roles.includes(role));
 }
 
 /** Busca sem acento e sem diferenciar maiusculas, por nome ou e-mail. */

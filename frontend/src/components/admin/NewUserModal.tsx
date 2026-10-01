@@ -1,70 +1,51 @@
 'use client';
 
 import { useState } from 'react';
-import type { Organization, UserRole } from '@/types/auth';
+import RolesField, { type RolesValue } from '@/components/admin/users/RolesField';
+import FormActions from '@/components/common/FormActions';
+import Modal from '@/components/common/Modal';
+import { inputCls, labelCls } from '@/components/common/formStyles';
+import type { NewUserInput } from '@/lib/hooks/admin/usePeople';
+import type { RoleOption } from '@/lib/users/rolePolicy';
+import type { Organization } from '@/types/auth';
 
+/** Cadastro de usuario com um ou mais papeis (aluno e professor, por exemplo). */
 export default function NewUserModal({ organizations, availableRoles, onClose, onSave }: {
   organizations: Organization[];
-  availableRoles: Array<[UserRole, string]>;
+  availableRoles: RoleOption[];
   onClose: () => void;
-  onSave: (data: { name: string; email: string; password: string; role: UserRole; organization_id: string | null }) => Promise<void>;
+  onSave: (data: NewUserInput) => Promise<void>;
 }) {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [role, setRole] = useState<UserRole>('student');
-  const [organizationId, setOrganizationId] = useState('');
+  const [form, setForm] = useState({ name: '', email: '', password: '', organizationId: '' });
+  const [roles, setRoles] = useState<RolesValue>({ roles: ['student'], primary: 'student' });
   const [saving, setSaving] = useState(false);
+  const set = (patch: Partial<typeof form>) => setForm({ ...form, ...patch });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const submit = async (event: React.FormEvent) => {
+    event.preventDefault();
     setSaving(true);
-    await onSave({ name, email, password, role, organization_id: organizationId ? organizationId : null });
+    await onSave({
+      name: form.name, email: form.email, password: form.password,
+      role: roles.primary, roles: roles.roles, organization_id: form.organizationId || null,
+    });
     setSaving(false);
   };
 
-  const inputCls = 'block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500';
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md p-6 space-y-4">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Novo usuário</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nome *</label>
-            <input value={name} onChange={(e) => setName(e.target.value)} required className={inputCls} />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">E-mail *</label>
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className={inputCls} />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Senha *</label>
-            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} className={inputCls} />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Perfil</label>
-              <select value={role} onChange={(e) => setRole(e.target.value as UserRole)} className={inputCls}>
-                {availableRoles.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Empresa</label>
-              <select value={organizationId} onChange={(e) => setOrganizationId(e.target.value)} className={inputCls}>
-                <option value="">Sem empresa</option>
-                {organizations.map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}
-              </select>
-            </div>
-          </div>
-          <div className="flex justify-end space-x-3 pt-2">
-            <button type="button" onClick={onClose} className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white">Cancelar</button>
-            <button type="submit" disabled={saving} className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50">
-              {saving ? 'Criando...' : 'Criar usuário'}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+    <Modal title="Novo usuário" size="lg" onClose={onClose}>
+      <form onSubmit={submit} className="space-y-4">
+        <label className={labelCls}>Nome *<input required value={form.name} onChange={(e) => set({ name: e.target.value })} className={`mt-1 ${inputCls}`} /></label>
+        <label className={labelCls}>E-mail *<input required type="email" value={form.email} onChange={(e) => set({ email: e.target.value })} className={`mt-1 ${inputCls}`} /></label>
+        <label className={labelCls}>Senha *<input required type="password" minLength={6} value={form.password} onChange={(e) => set({ password: e.target.value })} className={`mt-1 ${inputCls}`} /></label>
+        <RolesField options={availableRoles} value={roles} onChange={setRoles} />
+        <label className={labelCls}>Empresa
+          <select value={form.organizationId} onChange={(e) => set({ organizationId: e.target.value })} className={`mt-1 ${inputCls}`}>
+            <option value="">Sem empresa</option>
+            {organizations.map((organization) => <option key={organization.id} value={organization.id}>{organization.name}</option>)}
+          </select>
+        </label>
+        <FormActions saving={saving} disabled={roles.roles.length === 0} onCancel={onClose} submitLabel="Criar usuário" />
+      </form>
+    </Modal>
   );
 }

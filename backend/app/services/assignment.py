@@ -12,6 +12,7 @@ from app.models.student import ADMIN_ROLES, Student, UserRole
 from app.repositories.assignment import AssignmentSubmissionRepository
 from app.schemas.assignment import AssignmentReviewIn
 from app.services.lesson import LessonService
+from app.policies.roles import has_any_role
 
 
 class AssignmentSubmissionService:
@@ -78,7 +79,7 @@ class AssignmentSubmissionService:
         submission = self.repo.get_by_id(submission_id)
         if not submission:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Entrega não encontrada")
-        if current.role not in ADMIN_ROLES | {UserRole.coordinator} and submission.student_id != current.id:
+        if not has_any_role(current, ADMIN_ROLES | {UserRole.coordinator}) and submission.student_id != current.id:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Acesso restrito")
         if not submission.file_path:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Entrega sem arquivo")

@@ -4,7 +4,7 @@ import { useCallback } from 'react';
 import api from '@/lib/api/client';
 import { endpoints } from '@/lib/api/endpoints';
 import { useApiQuery } from '@/lib/hooks/useApiQuery';
-import type { User } from '@/types/auth';
+import { type User, rolesOf } from '@/types/auth';
 import type { Course } from '@/types/course';
 import type { ClassOffering, Location, Room } from '@/types/schedule';
 
@@ -31,6 +31,6 @@ export function useScheduleSetup() {
     return { courses: courses.data, locations: locations.data, rooms: rooms.data, classes: classes.data, users: users.data };
   }, []);
   const { data = empty, loading, error, reload } = useApiQuery(request);
-  const instructors = data.users.filter((user) => user.role === 'instructor' && user.is_active);
+  const instructors = data.users.filter((user) => rolesOf(user).includes('instructor') && user.is_active);
   return { ...data, instructors, loading, error, reload };
 }

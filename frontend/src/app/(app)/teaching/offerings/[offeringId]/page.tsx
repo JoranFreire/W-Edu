@@ -21,8 +21,7 @@ import { useGradebook } from '@/lib/hooks/teaching/useGradebook';
 import { useOfferingPeriods } from '@/lib/hooks/teaching/useOfferingPeriods';
 import { useTeachingOffering } from '@/lib/hooks/teaching/useTeachingOffering';
 import { useErrorToast } from '@/lib/hooks/useErrorToast';
-import { useAuthStore } from '@/store/authStore';
-import { isAdminRole } from '@/types/auth';
+import { useCurrentRoles } from '@/lib/hooks/useCurrentRoles';
 
 type TeachingTab = 'gradebook' | 'assessments' | 'diary' | 'results' | 'agenda' | 'occurrences' | 'retention' | 'benefits';
 
@@ -42,8 +41,8 @@ const socialTabs: TabItem<TeachingTab>[] = [
 export default function TeachingOfferingPage() {
   const router = useRouter();
   const offeringId = useParams<{ offeringId: string }>().offeringId;
-  const role = useAuthStore((state) => state.student?.role);
-  const isCoordination = isAdminRole(role) || role === 'coordinator';
+  const { isAdmin, has } = useCurrentRoles();
+  const isCoordination = isAdmin || has('coordinator');
   const { offering, error, syncGroup } = useTeachingOffering(offeringId);
   const { periods } = useOfferingPeriods(offering?.term_id);
   const { gradebook, reload } = useGradebook(offeringId);

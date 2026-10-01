@@ -19,6 +19,7 @@ from app.schemas.schedule import (
 )
 from app.services.certificates.issuance import CertificateIssuanceService
 from app.services.notifications.events import NotificationEventService
+from app.policies.roles import has_role
 from .class_offering import ClassOfferingService
 
 
@@ -121,7 +122,7 @@ class ScheduledMeetingService:
         duration_minutes: int = 60,
     ) -> InstructorAgendaOut:
         instructor = self.student_repo.get_by_id(instructor_id)
-        if not instructor or instructor.role != UserRole.instructor:
+        if not instructor or not has_role(instructor, UserRole.instructor):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Instrutor não encontrado")
         if not instructor.instructor_profile:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Perfil de instrutor não encontrado")

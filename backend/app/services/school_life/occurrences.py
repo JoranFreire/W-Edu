@@ -14,6 +14,7 @@ from app.schemas.school_life import OccurrenceCreate
 from app.services.academic.errors import not_found
 from app.services.school_life.family_notices import FamilyNoticeService
 from app.services.school_life.students import SchoolStudentLookup
+from app.policies.roles import has_role
 
 
 class OccurrenceService:
@@ -28,7 +29,7 @@ class OccurrenceService:
 
     def list_for_student(self, student_id: UUID, viewer: Student) -> list[StudentOccurrence]:
         self.students.get_or_404(student_id)
-        ensure_can_view_history(viewer, viewer.role == UserRole.instructor and self.scope.teaches_student(viewer.id, student_id))
+        ensure_can_view_history(viewer, has_role(viewer, UserRole.instructor) and self.scope.teaches_student(viewer.id, student_id))
         return self.repo.list_by_student(student_id)
 
     def register(self, data: OccurrenceCreate, reporter: Student) -> StudentOccurrence:

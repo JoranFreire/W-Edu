@@ -30,11 +30,28 @@ export function isAdminRole(role: UserRole | undefined | null): boolean {
   return !!role && ADMIN_ROLES.includes(role);
 }
 
+/** Papeis da pessoa na instituicao ativa (o principal primeiro); sem a lista, so o principal. */
+export function rolesOf(user: { role: UserRole; roles?: UserRole[] } | null | undefined): UserRole[] {
+  if (!user) return [];
+  return user.roles?.length ? user.roles : [user.role];
+}
+
+export function hasAnyRole(roles: UserRole[], wanted: UserRole[]): boolean {
+  return roles.some((role) => wanted.includes(role));
+}
+
+export function isAdminIn(roles: UserRole[]): boolean {
+  return hasAnyRole(roles, ADMIN_ROLES);
+}
+
 export interface Student {
   id: string;
   name: string;
   email: string;
+  /** Papel principal. */
   role: UserRole;
+  /** Todos os papeis na instituicao ativa (aluno e professor, por exemplo), o principal primeiro. */
+  roles?: UserRole[];
   organization_id: string | null;
   is_active: boolean;
   created_at: string;

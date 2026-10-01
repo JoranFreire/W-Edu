@@ -18,6 +18,7 @@ Escola, universidade, profissionalizante pago ou gratuito (programas sociais) e 
 ## Antes de começar
 
 - **Acesso**: entre em `/login` com o e-mail e a senha recebidos da instituição. A senha pode ser trocada em **Configurações**.
+- **Mais de um papel**: a mesma pessoa pode ser, por exemplo, professora e aluna, ou funcionária e responsável. O menu reúne as áreas de todos os papéis; vale ler os manuais de cada um.
 - **Mais de uma instituição**: quem atua em mais de uma escola troca de instituição no seletor do topo da tela (ícone de prédio). Tudo o que aparece depois disso é da instituição escolhida.
 - **Nomes da sua escola**: termos como *série*, *semestre*, *módulo*, *disciplina* ou *componente* seguem o tipo de instituição. Este manual usa "programa", "período" e "disciplina"; na sua tela pode aparecer o termo equivalente ([tabela de nomes](tipos-de-instituicao.md#nomes-por-tipo)).
 - **Avisos**: o sino no topo mostra quantos avisos novos você tem; o menu **Avisos** traz a lista completa.

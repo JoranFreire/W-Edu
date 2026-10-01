@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import api from '@/lib/api/client';
 import type { InstructorAvailability, InstructorProfile, InstructorRating, StudentProfile, User } from '@/types/auth';
-import { roleLabels } from '@/types/auth';
+import { roleLabels, rolesOf } from '@/types/auth';
 import { apiErrorMessage } from '@/lib/api/errors';
 import { dayLabels } from '@/lib/dates';
 
@@ -17,6 +17,7 @@ export default function ProfileModal({ user, onClose, onSaved }: {
   onClose: () => void;
   onSaved: () => void;
 }) {
+  const isInstructor = rolesOf(user).includes('instructor');
   const [studentProfile, setStudentProfile] = useState<Partial<StudentProfile>>({});
   const [instructorProfile, setInstructorProfile] = useState<Partial<InstructorProfile>>({});
   const [loading, setLoading] = useState(true);
@@ -30,7 +31,7 @@ export default function ProfileModal({ user, onClose, onSaved }: {
     const requests: Promise<unknown>[] = [
       api.get<StudentProfile>(`/admin/users/${user.id}/student-profile`).then((r) => setStudentProfile(r.data)),
     ];
-    if (user.role === 'instructor') {
+    if (isInstructor) {
       requests.push(
         api.get<InstructorProfile>(`/admin/users/${user.id}/instructor-profile`).then((r) => setInstructorProfile(r.data)),
         api.get(`/admin/users/${user.id}/availability`).then((r) => setAvailability(r.data)),
@@ -38,7 +39,7 @@ export default function ProfileModal({ user, onClose, onSaved }: {
       );
     }
     Promise.all(requests).finally(() => setLoading(false));
-  }, [user.id, user.role]);
+  }, [user.id, isInstructor]);
 
   const reloadAvailability = async () => {
     const { data } = await api.get<InstructorAvailability[]>(`/admin/users/${user.id}/availability`);
@@ -53,7 +54,7 @@ export default function ProfileModal({ user, onClose, onSaved }: {
         phone: studentProfile.phone || null, document: studentProfile.document || null,
         position: studentProfile.position || null, department: studentProfile.department || null, bio: studentProfile.bio || null,
       });
-      if (user.role === 'instructor') {
+      if (isInstructor) {
         await api.patch(`/admin/users/${user.id}/instructor-profile`, {
           specialties: instructorProfile.specialties || null, bio: instructorProfile.bio || null, rating: instructorProfile.rating || null,
         });
@@ -106,7 +107,7 @@ export default function ProfileModal({ user, onClose, onSaved }: {
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-2xl p-6 space-y-4">
         <div>
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Editar perfil</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400">{user.name} · {roleLabel[user.role]}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{user.name} · {rolesOf(user).map((role) => roleLabel[role]).join(' · ')}</p>
         </div>
         {loading ? <p className="text-sm text-gray-500 dark:text-gray-400">Carregando...</p> : (
           <form onSubmit={save} className="space-y-4">
@@ -118,7 +119,7 @@ export default function ProfileModal({ user, onClose, onSaved }: {
             </div>
             <textarea value={studentProfile.bio ?? ''} onChange={(e) => setStudentProfile((p) => ({ ...p, bio: e.target.value }))} rows={3} placeholder="Bio do aluno/usuário" className={inputCls} />
 
-            {user.role === 'instructor' && (
+            {isInstructor && (
               <div className="border-t border-gray-100 dark:border-gray-700 pt-4 space-y-3">
                 <input value={instructorProfile.specialties ?? ''} onChange={(e) => setInstructorProfile((p) => ({ ...p, specialties: e.target.value }))} placeholder="Especialidades" className={inputCls} />
                 <input value={instructorProfile.rating ?? ''} onChange={(e) => setInstructorProfile((p) => ({ ...p, rating: e.target.value }))} placeholder="Avaliação média" className={inputCls} />

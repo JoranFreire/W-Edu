@@ -25,8 +25,7 @@ import { useEnrollmentFile } from '@/lib/hooks/secretariat/useEnrollmentFile';
 import { useTranscript } from '@/lib/hooks/secretariat/useTranscript';
 import { useErrorToast } from '@/lib/hooks/useErrorToast';
 import { useTerminology } from '@/lib/hooks/useTerminology';
-import { useAuthStore } from '@/store/authStore';
-import { isAdminRole } from '@/types/auth';
+import { useCurrentRoles } from '@/lib/hooks/useCurrentRoles';
 
 type FileTab = 'transcript' | 'registration' | 'integralization' | 'internship' | 'finance' | 'contracts' | 'credits' | 'documents' | 'guardians' | 'occurrences' | 'timeline';
 
@@ -48,10 +47,10 @@ export default function EnrollmentFilePage() {
   const router = useRouter();
   const terms = useTerminology();
   const enrollmentId = useParams<{ enrollmentId: string }>().enrollmentId;
-  const role = useAuthStore((state) => state.student?.role);
-  const canDecide = isAdminRole(role) || role === 'coordinator';
+  const { isAdmin, has } = useCurrentRoles();
+  const canDecide = isAdmin || has('coordinator');
   // Bolsas, descontos e extrato: administracao e secretaria (a coordenacao nao ve o financeiro).
-  const tabs = isAdminRole(role) || role === 'secretary' ? [...baseTabs, financeTab] : baseTabs;
+  const tabs = isAdmin || has('secretary') ? [...baseTabs, financeTab] : baseTabs;
   const { file, error, reload, ...actions } = useEnrollmentFile(enrollmentId);
   const { transcript, reload: reloadTranscript } = useTranscript(enrollmentId);
   const [tab, setTab] = useState<FileTab>('transcript');
@@ -81,7 +80,7 @@ export default function EnrollmentFilePage() {
         {tab === 'registration' && <OfficeRegistrationTab enrollmentId={enrollmentId} editable={enrollment.status === 'active'} />}
         {tab === 'integralization' && <OfficeIntegralizationTab enrollmentId={enrollmentId} />}
         {tab === 'internship' && <OfficeInternshipTab enrollmentId={enrollmentId} editable={enrollment.status === 'active'} />}
-        {tab === 'finance' && <EnrollmentFinanceTab enrollmentId={enrollmentId} canSettle={isAdminRole(role)} />}
+        {tab === 'finance' && <EnrollmentFinanceTab enrollmentId={enrollmentId} canSettle={isAdmin} />}
         {tab === 'contracts' && <EnrollmentContractsTab enrollmentId={enrollmentId} />}
         {tab === 'credits' && (
           <CreditTransfersPanel enrollmentId={enrollmentId} pending={pending} canDecide={canDecide} editable={open} onChanged={reloadTranscript} />

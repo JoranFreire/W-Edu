@@ -8,14 +8,16 @@ import RecentSessionsList from '@/components/dashboard/RecentSessionsList';
 import Spinner from '@/components/common/Spinner';
 import { useStudentDashboard } from '@/lib/hooks/useStudentDashboard';
 import { useAuthStore } from '@/store/authStore';
+import { useCurrentRoles } from '@/lib/hooks/useCurrentRoles';
 
 export default function DashboardPage() {
   const router = useRouter();
   const { student } = useAuthStore();
-  const isGuardian = student?.role === 'guardian';
+  const { roles } = useCurrentRoles();
+  // Quem e so responsavel vai ao portal dos dependentes; quem tambem estuda ou trabalha aqui fica no painel.
+  const isGuardian = roles.length > 0 && roles.every((role) => role === 'guardian');
   const { data, enrolledCourses, loading } = useStudentDashboard(isGuardian ? undefined : student?.id);
 
-  // O responsavel nao tem painel de aluno: vai direto ao portal dos dependentes.
   useEffect(() => {
     if (isGuardian) router.replace('/guardian');
   }, [isGuardian, router]);
