@@ -4,13 +4,13 @@ import { useEffect, useState } from 'react';
 import { ListBulletIcon, PlusIcon, RectangleStackIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 import NotificationEventForm from '@/components/admin/NotificationEventForm';
-import FailEventModal from '@/components/admin/notifications/FailEventModal';
 import NotificationEventsList from '@/components/admin/notifications/NotificationEventsList';
 import NotificationTemplatesSection from '@/components/admin/notifications/NotificationTemplatesSection';
 import Modal from '@/components/common/Modal';
 import SectionHeader from '@/components/common/SectionHeader';
 import Spinner from '@/components/common/Spinner';
 import TabNav, { type TabItem } from '@/components/common/TabNav';
+import { apiErrorMessage } from '@/lib/api/errors';
 import { useNotifications } from '@/lib/hooks/admin/useNotifications';
 import { useErrorToast } from '@/lib/hooks/useErrorToast';
 import type { NotificationEvent } from '@/types/notification';
@@ -21,7 +21,6 @@ export default function AdminNotificationsPage() {
   const notifications = useNotifications();
   const [activeTab, setActiveTab] = useState<CommunicationTab>('events');
   const [eventModalOpen, setEventModalOpen] = useState(false);
-  const [failingEvent, setFailingEvent] = useState<NotificationEvent | null>(null);
 
   useErrorToast(notifications.error, 'Erro ao carregar comunicação.');
   useEffect(() => {
@@ -35,16 +34,11 @@ export default function AdminNotificationsPage() {
     } catch { toast.error('Erro ao processar eventos pendentes.'); }
   };
 
-  const markSent = async (event: NotificationEvent) => {
-    try { await notifications.markSent(event.id); } catch { toast.error('Erro ao marcar como enviado.'); }
-  };
-
-  const markFailed = async (reason: string) => {
-    if (!failingEvent) return;
+  const retryEvent = async (event: NotificationEvent) => {
     try {
-      await notifications.markFailed(failingEvent.id, reason);
-      setFailingEvent(null);
-    } catch { toast.error('Erro ao marcar como falho.'); }
+      await notifications.retryEvent(event.id);
+      toast.success('Evento devolvido à fila de envio.');
+    } catch (error) { toast.error(apiErrorMessage(error, 'Erro ao reenviar o evento.')); }
   };
 
   if (notifications.loading && notifications.templates.length === 0 && notifications.events.length === 0) return <Spinner />;
@@ -58,7 +52,7 @@ export default function AdminNotificationsPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Comunicação</h1>
-        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Eventos, templates e fila pronta para W-Omni.</p>
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Avisos enviados pela plataforma e os modelos das mensagens.</p>
       </div>
 
       <div className="space-y-5">
@@ -68,21 +62,21 @@ export default function AdminNotificationsPage() {
           {activeTab === 'events' && (
             <>
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <SectionHeader title="Eventos recentes" description="Fila de eventos para canais internos e externos." />
+                <SectionHeader title="Eventos recentes" description="O envio é automático; acompanhe a situação e reenvie o que falhou." />
                 <div className="flex flex-wrap gap-2">
                   <button onClick={processDue} className="inline-flex items-center justify-center rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 dark:border-gray-600 dark:text-gray-300">
-                    Processar pendentes
+                    Enviar pendentes agora
                   </button>
                   <button onClick={() => setEventModalOpen(true)} className="inline-flex items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700">
                     <PlusIcon className="h-4 w-4" /><span>Novo evento</span>
                   </button>
                 </div>
               </div>
-              <NotificationEventsList events={notifications.events} onMarkSent={markSent} onMarkFailed={setFailingEvent} />
+              <NotificationEventsList events={notifications.events} onRetry={retryEvent} />
             </>
           )}
           {activeTab === 'templates' && (
-            <NotificationTemplatesSection templates={notifications.templates} />
+            <NotificationTemplatesSection templates={notifications.templates} onSave={notifications.saveTemplate} />
           )}
         </div>
       </div>
@@ -92,7 +86,6 @@ export default function AdminNotificationsPage() {
           <NotificationEventForm variant="plain" onCancel={() => setEventModalOpen(false)} onCreated={() => { setEventModalOpen(false); notifications.reload(); }} />
         </Modal>
       )}
-      {failingEvent && <FailEventModal onConfirm={markFailed} onClose={() => setFailingEvent(null)} />}
     </div>
   );
 }

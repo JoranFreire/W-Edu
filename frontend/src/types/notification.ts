@@ -28,6 +28,14 @@ export interface NotificationTemplate {
   updated_at: string;
 }
 
+export interface NotificationTemplateInput {
+  key: string;
+  channel: NotificationChannel;
+  title_template: string;
+  body_template: string;
+  is_active: boolean;
+}
+
 export interface NotificationEvent {
   id: number;
   event_type: NotificationEventType;

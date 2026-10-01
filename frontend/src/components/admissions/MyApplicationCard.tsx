@@ -17,7 +17,10 @@ export default function MyApplicationCard({ application, requiredDocuments, onUp
   onUpload: (kind: string, file: File) => Promise<void>;
   onAct: (action: 'withdraw' | 'confirm' | 'decline') => Promise<void>;
 }) {
-  const [kind, setKind] = useState(requiredDocuments[0] ?? 'Comprovante');
+  const [chosenKind, setKind] = useState<string | null>(null);
+  // Os comprovantes do edital podem chegar depois do cartao: o tipo vale so se estiver entre as opcoes.
+  const kindOptions = [...requiredDocuments, 'Outro'];
+  const kind = chosenKind && kindOptions.includes(chosenKind) ? chosenKind : kindOptions[0];
   const [file, setFile] = useState<File | null>(null);
   const run = async (action: () => Promise<void>, success: string) => {
     try {
@@ -65,7 +68,7 @@ export default function MyApplicationCard({ application, requiredDocuments, onUp
       {ACCEPTS_DOCUMENTS.includes(status) && (
         <form onSubmit={(event) => { event.preventDefault(); if (file) run(() => onUpload(kind, file), 'Comprovante enviado.'); }} className="flex flex-wrap items-center gap-2">
           <select aria-label="Tipo de comprovante" value={kind} onChange={(e) => setKind(e.target.value)} className={`${inputCls} w-48`}>
-            {[...requiredDocuments, 'Outro'].map((option) => <option key={option} value={option}>{option}</option>)}
+            {kindOptions.map((option) => <option key={option} value={option}>{option}</option>)}
           </select>
           <input type="file" accept=".pdf,.jpg,.jpeg,.png" aria-label="Arquivo do comprovante" onChange={(e) => setFile(e.target.files?.[0] ?? null)} className="text-sm" />
           <button disabled={!file} className={secondaryButtonCls}>Enviar comprovante</button>
