@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.models.notification import NotificationEventType
 from app.models.schedule import ClassEnrollment, ClassOffering, WaitlistEntry
+from app.models.social_programs import FundingSource
 from app.models.student import UserRole
 from app.repositories.course import CourseRepository
 from app.repositories.schedule import ClassOfferingRepository, LocationRepository, RoomRepository
@@ -10,6 +11,9 @@ from app.repositories.student import StudentRepository
 from app.schemas.schedule import ClassJoinOut, ClassOfferingCreate, ClassOfferingUpdate
 from app.services.notifications.events import NotificationEventService
 from app.services.schedule_pkg.academic_links import AcademicLinks, OfferingAcademicLinks
+
+
+CLEARABLE = {"funding_source_id", "max_absence_percent"}
 
 
 class ClassOfferingService:
@@ -24,6 +28,7 @@ class ClassOfferingService:
 
     def create(self, data: ClassOfferingCreate) -> ClassOffering:
         self._validate_refs(data.course_id, data.location_id, data.room_id, data.instructor_id)
+        self._validate_funding(data.funding_source_id)
         self._validate_dates(data.starts_at, data.ends_at)
         links = self.academic_links.resolve(
             AcademicLinks(data.term_id, data.subject_id, data.class_group_id, data.grading_scheme_id)
@@ -56,6 +61,9 @@ class ClassOfferingService:
     def update(self, class_id: int, data: ClassOfferingUpdate) -> ClassOffering:
         class_offering = self.get_or_404(class_id)
         payload = data.model_dump(exclude_none=True)
+        # Financiador e limite de faltas podem ser removidos enviando null.
+        for field in CLEARABLE & data.model_fields_set:
+            payload.setdefault(field, None)
         self._validate_refs(
             payload.get("course_id", class_offering.course_id),
             payload.get("location_id", class_offering.location_id),
@@ -63,6 +71,7 @@ class ClassOfferingService:
             payload.get("instructor_id", class_offering.instructor_id),
         )
         self._validate_dates(payload.get("starts_at", class_offering.starts_at), payload.get("ends_at", class_offering.ends_at))
+        self._validate_funding(payload.get("funding_source_id"))
         links = self.academic_links.resolve(
             AcademicLinks(
                 payload.get("term_id", class_offering.term_id),
@@ -115,6 +124,10 @@ class ClassOfferingService:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Instrutor não encontrado")
         if instructor and instructor.role != UserRole.instructor:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Usuário selecionado não é instrutor")
+
+    def _validate_funding(self, funding_source_id: int | None) -> None:
+        if funding_source_id is not None and not self.repo.db.get(FundingSource, funding_source_id):
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Financiador não encontrado")
 
     def _validate_dates(self, starts_at, ends_at) -> None:
         if ends_at <= starts_at:

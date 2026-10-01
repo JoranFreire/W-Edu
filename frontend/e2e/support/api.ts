@@ -144,3 +144,26 @@ export async function createFreeOffering(request: APIRequestContext, name: strin
   const offering: { id: number } = await response.json();
   return offering;
 }
+
+/** O aluno entra na turma (curso livre) com a propria conta. */
+export async function joinOffering(request: APIRequestContext, offeringId: number, studentEmail: string, institution = 'escola-alfa') {
+  const response = await request.post(`${API_URL}/schedule/classes/${offeringId}/join`, { headers: await tokenHeaders(request, studentEmail, institution) });
+  if (!response.ok()) throw new Error(`join: ${response.status()} ${await response.text()}`);
+}
+
+/** Encontro da turma com a presenca dos alunos informados, ja encerrado (os demais ficam com falta). */
+export async function createClosedMeeting(request: APIRequestContext, offeringId: number, title: string, presentIds: number[], institution = 'escola-alfa') {
+  const admin = await adminHeaders(request, institution);
+  const start = Date.now() + 2 * 86_400_000;
+  const meeting = await request.post(`${API_URL}/schedule/meetings`, {
+    headers: admin,
+    data: { class_offering_id: offeringId, title, starts_at: new Date(start).toISOString(), ends_at: new Date(start + 7_200_000).toISOString() },
+  });
+  if (!meeting.ok()) throw new Error(`meeting: ${meeting.status()} ${await meeting.text()}`);
+  const { id }: { id: number } = await meeting.json();
+  for (const studentId of presentIds) {
+    await request.post(`${API_URL}/schedule/meetings/${id}/attendance`, { headers: admin, data: { student_id: studentId } });
+  }
+  await request.post(`${API_URL}/schedule/meetings/${id}/close`, { headers: admin });
+  return { id };
+}

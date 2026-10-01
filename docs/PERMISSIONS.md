@@ -208,6 +208,20 @@ O limite de alunos do plano vale no cadastro de usuarios com papel aluno (409 ao
 | Inscrever-se, enviar comprovantes, cancelar, confirmar ou desistir da vaga | Nao | Propria inscricao | Propria | Propria | Propria |
 | Editais, situacao, inscricoes, analise, comprovantes, selecao e prazos | Nao | Nao | Sim | Sim | Sim |
 
+## Programas sociais e evasao (`/social`, `/retention`)
+
+| Recurso | Student | Instructor | Coordinator | Secretary | Admin |
+| --- | --- | --- | --- | --- | --- |
+| Cadastrar e alterar financiadores | Nao | Nao | Sim | Nao | Sim |
+| Listar financiadores e ver/baixar a prestacao de contas | Nao | Nao | Sim | Sim | Sim |
+| Itens de beneficio e entradas de estoque | Nao | Ver itens | Sim | Sim | Sim |
+| Entregar beneficios e ver entregas da turma | Nao | Turmas que ministra | Sim | Sim | Sim |
+| Ver frequencia e risco de evasao da turma | Nao | Turmas que ministra | Sim | Sim | Sim |
+| Reavaliar desligamentos e readmitir aluno | Nao | Nao | Sim | Sim | Sim |
+| Proprios beneficios recebidos | Sim | Sim | Sim | Sim | Sim |
+
+Escopo do instrutor em `app/policies/retention_access.py`.
+
 ## Caixa de avisos (`/notifications/me`)
 
 | Recurso | Todos os papeis |

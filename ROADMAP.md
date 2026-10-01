@@ -4,7 +4,7 @@
 
 **Fase:** 2 — Voz com Professor IA (em andamento)  
 **Ultima atualizacao:** 2026-10-01  
-**Proximo marco:** Fase 18 — evasao, financiador, prestacao de contas e beneficios do programa social. Processo seletivo concluido.
+**Proximo marco:** itens futuros (BNCC/Educacenso, ENADE/e-MEC, SISTEC) e pendencias das fases 2, 6, 8, 9, 10 e 13. Fases 15 a 18 concluidas.
 
 ## Visao Alvo
 
@@ -317,9 +317,9 @@ Objetivo: estrutura comum a escola, universidade e profissionalizante.
 - [x] Edital com vagas, reserva de vagas, requisitos (idade, escolaridade, renda por pessoa, municipio) e comprovantes.
 - [x] Selecao por ordem de inscricao, sorteio auditavel (semente publicada) ou analise de perfil com nota.
 - [x] Convocacao com prazo de confirmacao, matricula na turma, desistencia e chamadas sucessivas; resultado publico por protocolo.
-- [ ] Controle de evasao: desligamento por excesso de faltas e alerta de risco.
-- [ ] Financiador da turma (convenio, prefeitura, Sistema S, emenda) e relatorios de prestacao de contas.
-- [ ] Beneficios do programa (lanche, material, uniforme, transporte, auxilio): estoque, entregas por aluno e custo por financiador.
+- [x] Controle de evasao: desligamento por excesso de faltas (sobre os encontros previstos, ao encerrar cada encontro), alerta de risco e readmissao.
+- [x] Financiador da turma (convenio, governo, Sistema S, emenda, doacao) e prestacao de contas (indicadores, perfil do publico, beneficios, saldo e planilha CSV).
+- [x] Beneficios do programa (lanche, material, uniforme, transporte, auxilio): estoque, entregas por aluno (lanche so para presentes) e custo por financiador.
 - [ ] Futuro: exportacao SISTEC.
 
 ---

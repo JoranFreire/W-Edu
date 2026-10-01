@@ -69,6 +69,8 @@ class ClassOfferingCreate(BaseModel):
     subject_id: int | None = None
     class_group_id: int | None = None
     grading_scheme_id: int | None = None
+    funding_source_id: int | None = None
+    max_absence_percent: float | None = Field(default=None, gt=0, le=100)
 
 
 class ClassOfferingUpdate(BaseModel):
@@ -85,6 +87,8 @@ class ClassOfferingUpdate(BaseModel):
     subject_id: int | None = None
     class_group_id: int | None = None
     grading_scheme_id: int | None = None
+    funding_source_id: int | None = None
+    max_absence_percent: float | None = Field(default=None, gt=0, le=100)
 
 
 class ClassOfferingOut(BaseModel):
@@ -102,6 +106,8 @@ class ClassOfferingOut(BaseModel):
     subject_id: int | None
     class_group_id: int | None
     grading_scheme_id: int | None
+    funding_source_id: int | None = None
+    max_absence_percent: float | None = None
     created_at: datetime
 
     model_config = {"from_attributes": True}

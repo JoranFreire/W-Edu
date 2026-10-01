@@ -50,6 +50,10 @@ DEFAULT_TEMPLATES = {
         "Você foi convocado",
         "Inscrição {protocol} em {call_title}: confirme sua vaga até {confirm_until}.",
     ),
+    (NotificationEventType.absence_dismissal, NotificationChannel.internal): (
+        "Desligamento por faltas",
+        "Sua inscrição em {class_name} foi encerrada: {absence_percent}% de faltas, acima do limite de {limit}%. Procure a secretaria.",
+    ),
     (NotificationEventType.meeting_reminder, NotificationChannel.internal): (
         "Lembrete de encontro",
         "Você tem um encontro em {starts_at}: {meeting_title}.",

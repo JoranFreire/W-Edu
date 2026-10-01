@@ -37,6 +37,8 @@ export interface ClassOffering {
   subject_id: number | null;
   class_group_id: number | null;
   grading_scheme_id: number | null;
+  funding_source_id?: number | null;
+  max_absence_percent?: number | null;
   created_at: string;
 }
 
