@@ -58,6 +58,9 @@ void main() {
     expect(lista.map((b) => b.id), ['3', '1', '2']);
     expect(lista.first.paraRetirar, isTrue);
     expect(lista.first.conteudoQr, 'wedu-beneficio:COD3');
+    expect(lista.first.tipo, TipoBeneficio.lanche);
+    expect(TipoBeneficio.de('uniform'), TipoBeneficio.uniforme);
+    expect(TipoBeneficio.de(null), TipoBeneficio.outro);
     expect(lista.last.situacao(), SituacaoBeneficio.vencido);
     expect(lista[1].situacao(), SituacaoBeneficio.retirado);
   });

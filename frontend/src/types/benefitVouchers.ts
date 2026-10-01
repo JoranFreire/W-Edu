@@ -22,7 +22,7 @@ export interface BenefitVoucher {
   redeemed_at: string | null;
 }
 
-export interface MeetingVoucherResult {
+export interface VoucherBatchResult {
   released: number;
   available_stock: number;
 }

@@ -25,8 +25,10 @@ class QrBeneficioView extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
       child: Column(
         children: [
-          Text('${beneficio.item} × ${beneficio.quantidade}', style: tema.textTheme.titleLarge, textAlign: TextAlign.center),
-          if (beneficio.turma.isNotEmpty) Text(beneficio.turma, style: tema.textTheme.bodyMedium),
+          Icon(beneficio.tipo.icone, size: 32, color: tema.colorScheme.primary),
+          const SizedBox(height: 4),
+          Text('${beneficio.item} × ${beneficio.quantidade} ${beneficio.unidade}', style: tema.textTheme.titleLarge, textAlign: TextAlign.center),
+          Text([beneficio.tipo.nome, if (beneficio.turma.isNotEmpty) beneficio.turma].join(' · '), style: tema.textTheme.bodyMedium),
           const SizedBox(height: 16),
           Container(
             padding: const EdgeInsets.all(16),

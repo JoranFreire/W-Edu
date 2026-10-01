@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.dependencies import get_current_benefit_validator, get_current_school_staff, get_current_student
 from app.models.student import Student
-from app.schemas.benefit_vouchers import IndividualVoucherInput, MeetingVoucherInput, MeetingVoucherOut, RedeemInput, VoucherOut
+from app.schemas.benefit_vouchers import IndividualVoucherInput, VoucherBatchInput, VoucherBatchOut, RedeemInput, VoucherOut
 from app.services.social.student_vouchers import StudentVoucherService
 from app.services.social.voucher_redemption import VoucherRedemptionService
 from app.services.social.voucher_release import VoucherReleaseService
@@ -14,9 +14,14 @@ from app.services.social.voucher_release import VoucherReleaseService
 router = APIRouter()
 
 
-@router.post("/meetings/{meeting_id}/vouchers", response_model=MeetingVoucherOut)
-def release_in_meeting(meeting_id: UUID, data: MeetingVoucherInput, db: Session = Depends(get_db), current: Student = Depends(get_current_school_staff)):
+@router.post("/meetings/{meeting_id}/vouchers", response_model=VoucherBatchOut)
+def release_in_meeting(meeting_id: UUID, data: VoucherBatchInput, db: Session = Depends(get_db), current: Student = Depends(get_current_school_staff)):
     return VoucherReleaseService(db).release_in_meeting(meeting_id, data, current)
+
+
+@router.post("/offerings/{offering_id}/vouchers", response_model=VoucherBatchOut)
+def release_to_offering(offering_id: UUID, data: VoucherBatchInput, db: Session = Depends(get_db), current: Student = Depends(get_current_school_staff)):
+    return VoucherReleaseService(db).release_to_offering(offering_id, data, current)
 
 
 @router.post("/vouchers", response_model=VoucherOut, status_code=201)

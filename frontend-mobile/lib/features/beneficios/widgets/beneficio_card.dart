@@ -27,6 +27,8 @@ class BeneficioCard extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           child: Row(
             children: [
+              Icon(beneficio.tipo.icone, color: tema.colorScheme.primary),
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -34,6 +36,7 @@ class BeneficioCard extends StatelessWidget {
                     AppBadge(situacao.nome, cor: situacao.cor),
                     const SizedBox(height: 8),
                     Text('${beneficio.item} × ${beneficio.quantidade}', style: tema.textTheme.titleSmall),
+                    Text(beneficio.tipo.nome, style: tema.textTheme.bodySmall),
                     const SizedBox(height: 4),
                     Text(quando, style: tema.textTheme.labelSmall?.copyWith(color: tema.colorScheme.onSurfaceVariant)),
                   ],

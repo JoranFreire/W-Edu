@@ -158,7 +158,7 @@ void main() {
   testWidgets('aluno abre o QR do benefício liberado, mesmo sem rede', (tester) async {
     tokens.atual = 't-1';
     await cache.salvar('sessao', EntradaCache(null, {'usuario': usuarioJson(), 'instituicao': instituicaoJson()}));
-    await cache.salvar('i-1_u-1/beneficios', EntradaCache(1, [beneficioJson('1', validoAte: '2099-12-31'), beneficioJson('2', status: 'redeemed', item: 'Kit')]));
+    await cache.salvar('i-1_u-1/beneficios', EntradaCache(1, [beneficioJson('1', validoAte: '2099-12-31'), beneficioJson('2', status: 'redeemed', item: 'Kit', tipo: 'material')]));
     for (final rota in ['GET users/me', 'GET institutions/current', 'GET sync/versions', 'GET notifications/me/summary', 'GET school/my/agenda', 'GET social/my/vouchers']) {
       servidor.on(rota, (req) => throw semRede(req));
     }
@@ -168,6 +168,7 @@ void main() {
     await tester.tap(find.text('Benefícios'));
     await tester.pumpAndSettle();
     expect(find.text('Retirado'), findsOneWidget);
+    expect(find.text('Material'), findsOneWidget);
     await tester.tap(find.text('Mostrar QR'));
     await tester.pumpAndSettle();
     expect(find.byType(QrImageView), findsOneWidget);

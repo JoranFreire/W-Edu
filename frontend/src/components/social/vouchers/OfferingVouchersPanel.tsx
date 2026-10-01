@@ -6,30 +6,31 @@ import Spinner from '@/components/common/Spinner';
 import { dangerIconButtonCls, sectionCls } from '@/components/common/formStyles';
 import { apiErrorMessage } from '@/lib/api/errors';
 import { formatIsoDate } from '@/lib/dates';
-import { useOfferingVouchers, type MeetingVoucherDraft } from '@/lib/hooks/social/useOfferingVouchers';
+import { useOfferingVouchers, type VoucherDraft } from '@/lib/hooks/social/useOfferingVouchers';
 import { useErrorToast } from '@/lib/hooks/useErrorToast';
 import type { ScheduledMeeting } from '@/types/schedule';
 import type { BenefitItem } from '@/types/socialPrograms';
-import MeetingVoucherForm from './MeetingVoucherForm';
+import VoucherReleaseForm from './VoucherReleaseForm';
 import VoucherStatusBadge from './VoucherStatusBadge';
 
 interface Props {
   offeringId: string;
   meetings: ScheduledMeeting[];
   items: BenefitItem[];
+  students: { id: string; name: string }[];
   /** O estoque disponivel muda: o painel de entregas recarrega os itens. */
   onChange: () => void;
 }
 
-/** Liberacao para retirada com QR (cantina, kits): o aluno mostra o QR e quem valida confirma a entrega. */
-export default function OfferingVouchersPanel({ offeringId, meetings, items, onChange }: Props) {
+/** Liberacao para retirada com QR (lanche, material, uniforme, transporte...): o aluno mostra o QR e quem valida confirma a entrega. */
+export default function OfferingVouchersPanel({ offeringId, meetings, items, students, onChange }: Props) {
   const { vouchers, error, release, cancel } = useOfferingVouchers(offeringId, onChange);
   useErrorToast(error, 'Erro ao carregar os benefícios liberados.');
 
-  const submit = async (draft: MeetingVoucherDraft) => {
+  const submit = async (draft: VoucherDraft) => {
     try {
-      const result = await release(draft);
-      toast.success(`${result.released} benefício(s) liberado(s); disponível no estoque: ${result.available_stock}.`);
+      const released = await release(draft);
+      toast.success(`${released} benefício(s) liberado(s) com QR.`);
     } catch (err) {
       toast.error(apiErrorMessage(err, 'Não foi possível liberar o benefício.'));
     }
@@ -47,9 +48,9 @@ export default function OfferingVouchersPanel({ offeringId, meetings, items, onC
     <section className={`${sectionCls} space-y-4`}>
       <div>
         <h2 className="text-base font-semibold text-gray-900 dark:text-white">Liberar para retirada com QR</h2>
-        <p className="text-sm text-gray-500 dark:text-gray-400">O aluno recebe o QR no app; a entrega é registrada quando o QR é validado. O estoque fica reservado até lá (ou até vencer).</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400">Lanche, material, uniforme, transporte… O aluno recebe o QR no app; a entrega é registrada quando o QR é validado. O estoque fica reservado até lá (ou até vencer).</p>
       </div>
-      <MeetingVoucherForm meetings={meetings} items={items} onSubmit={submit} />
+      <VoucherReleaseForm meetings={meetings} items={items} students={students} onSubmit={submit} />
       {!vouchers ? <Spinner /> : vouchers.length === 0 ? <p className="text-sm text-gray-500 dark:text-gray-400">Nenhum benefício liberado.</p> : (
         <ul className="divide-y divide-gray-100 text-sm dark:divide-gray-700">
           {vouchers.map((voucher) => (

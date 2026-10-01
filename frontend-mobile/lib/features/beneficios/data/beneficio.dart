@@ -17,7 +17,24 @@ enum SituacaoBeneficio {
   static SituacaoBeneficio de(String valor) => values.firstWhere((s) => s.valor == valor, orElse: () => cancelado);
 }
 
-/// Benefício liberado para retirada com QR (lanche, kit, vale-transporte...).
+/// O que é o benefício (mesmos tipos do catálogo do backend).
+enum TipoBeneficio {
+  lanche('snack', 'Lanche', Icons.lunch_dining_rounded),
+  material('material', 'Material', Icons.backpack_rounded),
+  uniforme('uniform', 'Uniforme', Icons.checkroom_rounded),
+  transporte('transport', 'Transporte', Icons.directions_bus_rounded),
+  auxilio('stipend', 'Auxílio financeiro', Icons.payments_rounded),
+  outro('other', 'Outro', Icons.redeem_rounded);
+
+  const TipoBeneficio(this.valor, this.nome, this.icone);
+  final String valor;
+  final String nome;
+  final IconData icone;
+
+  static TipoBeneficio de(String? valor) => values.firstWhere((t) => t.valor == valor, orElse: () => outro);
+}
+
+/// Benefício liberado para retirada com QR (lanche, kit de material, uniforme, vale-transporte...).
 class Beneficio {
   const Beneficio({
     required this.id,
@@ -25,6 +42,7 @@ class Beneficio {
     required this.conteudoQr,
     required this.situacaoNoServidor,
     required this.item,
+    required this.tipo,
     required this.quantidade,
     required this.unidade,
     required this.turma,
@@ -38,6 +56,7 @@ class Beneficio {
   final String conteudoQr;
   final SituacaoBeneficio situacaoNoServidor;
   final String item;
+  final TipoBeneficio tipo;
   final int quantidade;
   final String unidade;
   final String turma;
@@ -70,6 +89,7 @@ class Beneficio {
       conteudoQr: json['qr_payload'] as String,
       situacaoNoServidor: SituacaoBeneficio.de(json['status'] as String),
       item: json['item_name'] as String,
+      tipo: TipoBeneficio.de(json['item_kind'] as String?),
       quantidade: json['quantity'] as int,
       unidade: json['unit'] as String? ?? 'unidade',
       turma: json['class_offering_name'] as String? ?? '',

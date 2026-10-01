@@ -20,7 +20,7 @@ Diário de classe, orientações, agenda das turmas e requisição de materiais.
 | **Agenda** | Publicar tarefas, provas, eventos e avisos para a turma |
 | **Ocorrências** | Registrar ocorrências de alunos e ver o histórico deles |
 | **Frequência e evasão** | Acompanhar faltas e risco de desligamento (cursos com limite de faltas) |
-| **Benefícios** | Registrar a entrega de lanche/material aos presentes ou **liberar com QR** para retirada (programas sociais) |
+| **Benefícios** | Registrar a entrega de lanche/material aos presentes ou **liberar com QR** para retirada: lanche por encontro, material/uniforme/transporte para a turma toda ou para um aluno (programas sociais) |
 
 ### Lançar notas
 

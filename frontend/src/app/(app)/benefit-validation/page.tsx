@@ -8,7 +8,7 @@ import VoucherCheckCard from '@/components/social/vouchers/VoucherCheckCard';
 import { useVoucherValidation } from '@/lib/hooks/social/useVoucherValidation';
 import { useAuthStore } from '@/store/authStore';
 
-/** Retirada de beneficio: le o QR do aluno (ou o codigo digitado), confere e confirma a entrega. */
+/** Retirada de beneficio (lanche, material, uniforme, transporte...): le o QR do aluno (ou o codigo digitado), confere e confirma a entrega. */
 export default function BenefitValidationPage() {
   const allowed = useAuthStore((state) => state.permissions.includes('benefits.redeem'));
   const { step, submitting, check, confirm, restart } = useVoucherValidation();

@@ -241,7 +241,7 @@ O limite de alunos do plano vale no cadastro de usuarios com papel aluno (409 ao
 | Listar financiadores e ver/baixar a prestacao de contas | Nao | Nao | Sim | Sim | Sim |
 | Itens de beneficio e entradas de estoque | Nao | Ver itens | Sim | Sim | Sim |
 | Entregar beneficios e ver entregas da turma | Nao | Turmas que ministra | Sim | Sim | Sim |
-| Liberar beneficio com QR, ver e cancelar os liberados da turma | Nao | Turmas que ministra | Sim | Sim | Sim |
+| Liberar beneficio com QR (encontro, turma toda ou aluno), ver e cancelar os liberados da turma | Nao | Turmas que ministra | Sim | Sim | Sim |
 | Conferir e validar o QR na retirada (`benefits.redeem`) | Nao | Sim | Sim | Sim | Sim |
 | Ver frequencia e risco de evasao da turma | Nao | Turmas que ministra | Sim | Sim | Sim |
 | Reavaliar desligamentos e readmitir aluno | Nao | Nao | Sim | Sim | Sim |

@@ -10,7 +10,9 @@ from app.schemas.academic_groups import PersonSummary
 VoucherState = Literal["released", "redeemed", "cancelled", "expired"]
 
 
-class MeetingVoucherInput(BaseModel):
+class VoucherBatchInput(BaseModel):
+    """Liberacao em lote: no encontro (presentes, se o item exigir) ou para a turma toda (kit, uniforme, transporte)."""
+
     item_id: UUID
     quantity: int = Field(default=1, ge=1, le=100)
     valid_until: date | None = None
@@ -24,7 +26,7 @@ class IndividualVoucherInput(BaseModel):
     valid_until: date | None = None
 
 
-class MeetingVoucherOut(BaseModel):
+class VoucherBatchOut(BaseModel):
     released: int
     available_stock: int
 

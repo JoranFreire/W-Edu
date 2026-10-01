@@ -202,8 +202,28 @@ async def check_redeem(c: Checker, h: dict, ids: dict, ctx: dict, vouchers: dict
     # Vencido nao reserva mais: o kit volta a ficar disponivel.
     await c.call("POST", "/social/vouchers", 201, "kit released again after expiry", prof,
                  json={"item_id": ctx["kit"], "student_id": ids["a2"], "class_offering_id": ctx["offering"]})
+    await check_whole_class(c, h, ctx)
     versions = (await c.call("GET", "/sync/versions", 200, "versions", h["a1"]))["versions"]
     c.expect(versions.get("benefits", 0) > 0, f"benefits area version: {versions}")
+
+
+async def check_whole_class(c: Checker, h: dict, ctx: dict) -> None:
+    """Material, uniforme, transporte: liberado para a turma toda, sem encontro."""
+    admin, prof = h["admin"], h["prof"]
+    uniform = await c.call("POST", "/social/benefit-items", 201, "uniform", admin, json={"name": "Camiseta", "kind": "uniform", "unit": "peça"})
+    await c.call("POST", f"/social/benefit-items/{uniform['id']}/stock", 201, "uniform stock", admin, json={"quantity": 5, "received_on": "2027-02-20"})
+    base = f"/social/offerings/{ctx['offering']}/vouchers"
+    await c.call("POST", base, 403, "other instructor", h["outro"], json={"item_id": uniform["id"]})
+    refused = await c.call("POST", base, 400, "snack only by meeting", prof, json={"item_id": ctx["snack"]})
+    c.expect("por encontro" in refused.get("detail", ""), f"snack refusal: {refused}")
+    released = await c.call("POST", base, 200, "uniform for the whole class", prof, json={"item_id": uniform["id"]})
+    c.expect(released == {"released": 3, "available_stock": 2}, f"whole class: {released}")
+    again = await c.call("POST", base, 200, "no double release", prof, json={"item_id": uniform["id"]})
+    c.expect(again["released"] == 0, f"idempotent whole class: {again}")
+    mine = await c.call("GET", "/social/my/vouchers", 200, "a3 vouchers", h["a3"])
+    c.expect([(v["item_name"], v["item_kind"], v["unit"]) for v in mine] == [("Camiseta", "uniform", "peça")], f"absent student gets the uniform: {mine}")
+    redeemed = await c.call("POST", "/social/vouchers/redeem", 200, "redeem uniform", h["cantina"], json={"code": mine[0]["qr_payload"]})
+    c.expect(redeemed.get("status") == "redeemed", f"uniform redeemed: {redeemed}")
 
 
 async def run() -> int:

@@ -1,5 +1,6 @@
 import { CheckCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { primaryButtonCls, secondaryButtonCls, sectionCls } from '@/components/common/formStyles';
+import { benefitKindLabels } from '@/lib/academic/socialLabels';
 import { formatIsoDate } from '@/lib/dates';
 import type { BenefitVoucher } from '@/types/benefitVouchers';
 import VoucherStatusBadge from './VoucherStatusBadge';
@@ -29,7 +30,7 @@ export default function VoucherCheckCard({ voucher, confirmed, submitting, onCon
       )}
       <dl className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
         <div><dt className="text-gray-500 dark:text-gray-400">Aluno</dt><dd className="text-lg font-semibold text-gray-900 dark:text-white">{voucher.student.name}</dd></div>
-        <div><dt className="text-gray-500 dark:text-gray-400">Benefício</dt><dd className="text-lg font-semibold text-gray-900 dark:text-white">{voucher.item_name} × {voucher.quantity} {voucher.unit}</dd></div>
+        <div><dt className="text-gray-500 dark:text-gray-400">Benefício</dt><dd className="text-lg font-semibold text-gray-900 dark:text-white">{voucher.item_name} × {voucher.quantity} {voucher.unit}</dd><dd className="text-xs text-gray-500 dark:text-gray-400">{benefitKindLabels[voucher.item_kind]}</dd></div>
         <div><dt className="text-gray-500 dark:text-gray-400">Turma</dt><dd className="text-gray-900 dark:text-white">{voucher.class_offering_name}</dd></div>
         <div>
           <dt className="text-gray-500 dark:text-gray-400">Situação</dt>

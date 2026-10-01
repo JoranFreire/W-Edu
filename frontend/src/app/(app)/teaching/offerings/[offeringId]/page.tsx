@@ -83,7 +83,7 @@ export default function TeachingOfferingPage() {
         {tab === 'agenda' && offering.class_group_id && <ClassAgendaPanel groupId={offering.class_group_id} offeringId={offeringId} />}
         {tab === 'occurrences' && <ClassOccurrencePanel students={students} classGroupId={offering.class_group_id} />}
         {tab === 'retention' && <RetentionPanel offeringId={offeringId} canReadmit={isCoordination} />}
-        {tab === 'benefits' && <OfferingBenefitsPanel offeringId={offeringId} />}
+        {tab === 'benefits' && <OfferingBenefitsPanel offeringId={offeringId} students={students} />}
       </div>
     </div>
   );

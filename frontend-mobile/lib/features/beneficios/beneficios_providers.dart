@@ -14,7 +14,7 @@ abstract final class ChavesBeneficios {
   static String doDependente(String alunoId) => 'beneficios_dependente_$alunoId';
 }
 
-/// Benefícios do aluno logado, em cache: o QR abre mesmo sem rede (fila da cantina).
+/// Benefícios do aluno logado, em cache: o QR abre mesmo sem rede (na fila do lanche, na entrega do kit...).
 final meusBeneficiosProvider = StreamProvider<List<Beneficio>>((ref) => observarArea(
       ref,
       dono: ref.watch(donoDoCacheProvider),

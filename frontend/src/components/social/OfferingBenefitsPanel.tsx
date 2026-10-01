@@ -12,7 +12,7 @@ import OfferingVouchersPanel from './vouchers/OfferingVouchersPanel';
 import { useErrorToast } from '@/lib/hooks/useErrorToast';
 
 /** Entrega de beneficios no encontro (lanche so para quem esteve presente) e historico de entregas da turma. */
-export default function OfferingBenefitsPanel({ offeringId }: { offeringId: string }) {
+export default function OfferingBenefitsPanel({ offeringId, students }: { offeringId: string; students: { id: string; name: string }[] }) {
   const { benefits, error, deliver, reload } = useOfferingBenefits(offeringId);
   const [draft, setDraft] = useState({ meetingId: '', itemId: '', quantity: '1' });
   useErrorToast(error, 'Erro ao carregar os benefícios.');
@@ -57,7 +57,7 @@ export default function OfferingBenefitsPanel({ offeringId }: { offeringId: stri
           </ul>
         )}
       </section>
-      <OfferingVouchersPanel offeringId={offeringId} meetings={benefits.meetings} items={benefits.items} onChange={reload} />
+      <OfferingVouchersPanel offeringId={offeringId} meetings={benefits.meetings} items={benefits.items} students={students} onChange={reload} />
     </div>
   );
 }
