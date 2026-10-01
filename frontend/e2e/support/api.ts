@@ -127,3 +127,20 @@ export async function registerOccurrence(request: APIRequestContext, studentId: 
   });
   if (!response.ok()) throw new Error(`registerOccurrence: ${response.status()} ${await response.text()}`);
 }
+
+/** Turma aberta do curso Matemática, sem alunos (para editais de cursos gratuitos). */
+export async function createFreeOffering(request: APIRequestContext, name: string, institution = 'escola-alfa') {
+  const admin = await adminHeaders(request, institution);
+  const courses: { id: number; name: string }[] = await (await request.get(`${API_URL}/courses`, { headers: admin })).json();
+  const now = Date.now();
+  const response = await request.post(`${API_URL}/schedule/classes`, {
+    headers: admin,
+    data: {
+      course_id: courses.find((item) => item.name === 'Matemática')?.id, name, capacity: 20, status: 'open',
+      starts_at: new Date(now + 7 * 86_400_000).toISOString(), ends_at: new Date(now + 60 * 86_400_000).toISOString(),
+    },
+  });
+  if (!response.ok()) throw new Error(`createFreeOffering: ${response.status()} ${await response.text()}`);
+  const offering: { id: number } = await response.json();
+  return offering;
+}

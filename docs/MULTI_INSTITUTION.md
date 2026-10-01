@@ -196,6 +196,10 @@ Implementado na Fase 14 (entrega 1), em `/secretariat`: `program_enrollment_even
 - Programas tecnicos com matriz, estagio supervisionado e carga horaria minima. Atendido pelos requisitos de conclusao da Fase 16: carga horaria total e horas de estagio obrigatorio do programa, com diario de estagio validado pelo orientador.
 - Futuro: integracao com o SISTEC.
 
+### Cursos gratuitos e programas sociais (Fase 18)
+
+- Processo seletivo (entrega 1), em `/admissions`: `admission_calls` (edital da turma: vagas e reserva, periodo, prazo de confirmacao, requisitos, comprovantes e forma de selecao), `admission_applications` (questionario socioeconomico, aptidao calculada na inscricao, analise da secretaria, classificacao, tipo de vaga e convocacao) e `application_documents` (comprovantes conferidos pela secretaria), com TenantMixin e RLS. Regras puras em `app/services/admissions/rules.py`: requisitos (idade no fim das inscricoes), classificacao por ordem de inscricao, nota (empate pela inscricao) ou sorteio reproduzivel pela semente publicada, e distribuicao das vagas (a reserva vai primeiro a quem concorre a ela e a reserva que sobra vira ampla concorrencia). A convocacao (`admission_called`) da prazo para confirmar; confirmar matricula na turma; desistencia ou prazo vencido chama o proximo da lista. O catalogo e o resultado (so protocolo, sem nomes) sao publicos por instituicao (`get_public_institution`: header, subdominio ou `?institution=`), em `/inscricoes`.
+
 ---
 
 ## 7. Financeiro Educacional

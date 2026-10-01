@@ -200,6 +200,14 @@ O guard `get_current_finance_staff` cobre administracao e secretaria; a consulta
 
 O limite de alunos do plano vale no cadastro de usuarios com papel aluno (409 ao atingir).
 
+## Processo seletivo (`/admissions`)
+
+| Recurso | Publico | Candidato (qualquer usuario) | Coordinator | Secretary | Admin |
+| --- | --- | --- | --- | --- | --- |
+| Catalogo de editais, edital e resultado por protocolo | Sim | Sim | Sim | Sim | Sim |
+| Inscrever-se, enviar comprovantes, cancelar, confirmar ou desistir da vaga | Nao | Propria inscricao | Propria | Propria | Propria |
+| Editais, situacao, inscricoes, analise, comprovantes, selecao e prazos | Nao | Nao | Sim | Sim | Sim |
+
 ## Caixa de avisos (`/notifications/me`)
 
 | Recurso | Todos os papeis |
