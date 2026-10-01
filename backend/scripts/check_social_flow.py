@@ -17,7 +17,7 @@ if "DATABASE_URL" not in os.environ:
     DB_PATH = Path(tempfile.gettempdir()) / f"wedu_social_check_{os.getpid()}.sqlite3"
     os.environ["DATABASE_URL"] = f"sqlite:///{DB_PATH}"
 os.environ["NOTIFICATION_WORKER_ENABLED"] = "false"
-os.environ["MINIMUM_WAGE_API_URL"] = ""  # sem rede: o relatorio usa o valor de reserva
+os.environ["MINIMUM_WAGE_API_URL"] = ""  # sem rede: vale a tabela local (vazia aqui, entao o valor de reserva)
 os.environ.setdefault("DOCUMENTS_STORAGE_DIR", tempfile.mkdtemp(prefix="wedu_admissions_"))
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -35,6 +35,7 @@ from app.core.database import Base, SessionLocal, engine
 from app.core.security import hash_password
 from app.models.institution import Institution, InstitutionMembership, InstitutionType
 from app.models.notification import NotificationEvent, NotificationEventType
+from app.models.reference_values import MinimumWageValue
 from app.models.schedule import ClassEnrollment, ClassEnrollmentStatus
 from app.models.student import Student, UserRole
 from main import app
@@ -229,14 +230,24 @@ async def check_report(c: Checker, h: dict, ctx: dict) -> None:
 
 
 def check_minimum_wage(c: Checker) -> None:
-    """Leitura da serie do Banco Central: vale o ultimo valor ate a data (a serie traz meses futuros)."""
+    """Tabela local do salario minimo: grava so mudancas, vale o ultimo valor ate a data e funciona sem a API."""
     from datetime import date
-    from app.services.social.minimum_wage import parse_sgs
+    from app.repositories.reference import MinimumWageRepository
+    from app.services.social.minimum_wage import MinimumWageProvider, parse_points
 
-    payload = [{"data": "01/01/2026", "valor": "1621.00"}, {"data": "01/12/2025", "valor": "1518.00"}, {"data": "01/01/2027", "valor": "1700.00"}]
-    current = parse_sgs(payload, date(2026, 10, 1))
-    c.expect(current is not None and current.cents == 162100 and current.valid_from == date(2026, 1, 1), f"parse: {current}")
-    c.expect(parse_sgs(payload, date(2025, 1, 1)) is None, "nothing before the first point")
+    payload = [{"data": "01/12/2025", "valor": "1518.00"}, {"data": "01/01/2026", "valor": "1621.00"}, {"data": "01/02/2026", "valor": "1621.00"}]
+    points = parse_points(payload)
+    c.expect(points[1] == (date(2026, 1, 1), 162100), f"parse: {points}")
+    with SessionLocal() as db:
+        repo = MinimumWageRepository(db)
+        repo.upsert(points, datetime.now(timezone.utc))
+        repo.upsert(points, datetime.now(timezone.utc))
+        stored = [(row.valid_from, row.cents) for row in db.query(MinimumWageValue).order_by(MinimumWageValue.valid_from)]
+        c.expect(stored == [(date(2025, 12, 1), 151800), (date(2026, 1, 1), 162100)], f"only changes are stored: {stored}")
+        current = MinimumWageProvider(db).current(date(2026, 10, 1))
+        c.expect((current.cents, current.source) == (162100, "bcb"), f"table value without the API: {current}")
+        before = MinimumWageProvider(db).current(date(2020, 1, 1))
+        c.expect(before.source == "fallback", f"no value before the series: {before}")
 
 
 async def run() -> int:

@@ -5,8 +5,9 @@ import type { FundingReport } from '@/types/socialPrograms';
 
 const wageSources: Record<FundingReport['minimum_wage_source'], string> = {
   bcb: 'Banco Central',
+  seed: 'tabela local, aguardando sincronizar com o Banco Central',
   informed: 'valor informado',
-  fallback: 'valor de reserva; Banco Central indisponível',
+  fallback: 'valor de reserva da configuração',
 };
 
 function Distribution({ title, values, labels }: { title: string; values: Record<string, number>; labels?: Record<string, string> }) {

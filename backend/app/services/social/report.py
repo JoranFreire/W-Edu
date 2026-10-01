@@ -24,7 +24,7 @@ class FundingReportService:
         self.indicators = SocialIndicatorRepository(db)
         self.deliveries = BenefitDeliveryRepository(db)
         self.stock = BenefitStockRepository(db)
-        self.minimum_wage = MinimumWageProvider()
+        self.minimum_wage = MinimumWageProvider(db)
 
     def report(self, funding_id: int, minimum_wage_cents: int | None = None) -> FundingReportOut:
         """Faixas de renda pelo salario minimo informado ou, sem ele, o do Banco Central."""
