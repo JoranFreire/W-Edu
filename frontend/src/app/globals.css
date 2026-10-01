@@ -20,6 +20,19 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+/* Select de uma linha com a mesma altura do input: sem a aparencia nativa (que ignora o padding
+   vertical), a altura vem do padding e da linha, como no campo de texto; a seta vira imagem.
+   Fora de @layer para que o espaco da seta prevaleca sobre utilitarios px-*. */
+select:not([multiple]):not([size]) {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 0.5rem center;
+  background-repeat: no-repeat;
+  background-size: 1.25em 1.25em;
+  padding-right: 2.25rem;
+  print-color-adjust: exact;
+}
+
 button:not(:disabled),
 [role="button"] {
   cursor: pointer;
