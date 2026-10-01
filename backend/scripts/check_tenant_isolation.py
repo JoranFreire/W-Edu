@@ -329,6 +329,14 @@ async def run() -> int:
         declaration_a = r.json()
         r = await client.get(f"/secretariat/declarations/{declaration_a.get('id')}/pdf", headers=admin_b)
         c.expect(r.status_code == 404, f"B cannot download A declaration: {r.status_code}")
+        r = await client.post(
+            f"/guardians/students/{aluno_a_id}/links",
+            json={"name": "Mãe", "email": "mae-a@example.com", "password": PASSWORD, "is_financial": True},
+            headers=admin_b,
+        )
+        c.expect(r.status_code == 404, f"B cannot link guardian to A student: {r.status_code}")
+        r = await client.get(f"/guardians/students/{aluno_a_id}/links", headers=admin_b)
+        c.expect(r.status_code == 404, f"B cannot list A guardians: {r.status_code}")
         r = await client.get(f"/secretariat/declarations/validate/{declaration_a.get('validation_code')}")
         c.expect(r.json().get("valid") is True and r.json().get("institution_name") == "Escola A", f"public validation names the issuer: {r.text}")
 

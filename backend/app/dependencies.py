@@ -90,6 +90,13 @@ def get_current_secretariat(current: Student = Depends(get_current_student)) -> 
     return current
 
 
+def get_current_guardian(current: Student = Depends(get_current_student)) -> Student:
+    """Portal do responsavel."""
+    if current.role != UserRole.guardian:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Acesso restrito a responsáveis")
+    return current
+
+
 def get_current_academic_staff(current: Student = Depends(get_current_student)) -> Student:
     if current.role not in ADMIN_ROLES | {UserRole.coordinator, UserRole.company_manager}:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Acesso restrito")

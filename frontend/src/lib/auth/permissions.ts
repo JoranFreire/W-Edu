@@ -27,6 +27,7 @@ function matchesPath(pathname: string, allowedPath: string) {
 export function canAccessPath(role: UserRole | undefined, pathname: string) {
   if (!role) return false;
   if (matchesPath(pathname, '/platform')) return role === 'super_admin';
+  if (matchesPath(pathname, '/guardian')) return role === 'guardian';
   if (matchesPath(pathname, '/teaching')) return isAdminRole(role) || role === 'coordinator' || role === 'instructor';
   if (!pathname.startsWith('/admin')) return true;
   if (isAdminRole(role)) return true;

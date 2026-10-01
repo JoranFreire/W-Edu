@@ -12,7 +12,7 @@ Este documento registra a regra operacional por papel. A nomenclatura `User` e `
 - `institution_admin`: administrador da instituicao.
 - `super_admin`: administrador da plataforma; acessa qualquer instituicao e gere instituicoes em `/platform`.
 - `secretary`: secretaria academica (matriculas, movimentacoes, aproveitamento e historico).
-- `guardian`: reservado para a fase de escola basica; ainda sem permissoes especificas.
+- `guardian`: responsavel pelo aluno; acessa apenas o portal (`/guardians/me/...`) dos alunos vinculados a ele.
 
 ## Instituicoes (multi-tenant)
 
@@ -117,6 +117,16 @@ Etapa encerrada na instituicao, etapa fechada na turma ou periodo letivo encerra
 | Validar declaracao por codigo (`/secretariat/declarations/validate/{code}`) | Publico | Publico | Publico | Publico | Publico |
 
 Toda movimentacao fica registrada em `program_enrollment_events` (quem, quando, justificativa), inclusive mudancas feitas pela rota `/academic/program-enrollments/{id}/status`.
+
+## Responsaveis (`/guardians`)
+
+| Recurso | Student | Guardian | Coordinator | Secretary | Admin |
+| --- | --- | --- | --- | --- | --- |
+| Vincular, editar e desvincular responsaveis do aluno | Nao | Nao | Sim | Sim | Sim |
+| Ver dependentes, boletim, historico e comunicados | Nao | Dependentes vinculados | Nao | Nao | Nao |
+| Ver cobrancas do dependente | Nao | So o responsavel financeiro | Nao | Nao | Nao |
+
+A conta do responsavel e unica na plataforma: vincular um e-mail ja cadastrado como responsavel (em outra instituicao ou para irmaos) reaproveita a conta e cria o vinculo com a instituicao ativa.
 
 ## Agenda e Presencial
 
