@@ -2,23 +2,19 @@
 
 import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { PencilSquareIcon } from '@heroicons/react/24/outline';
 import ProfileModal from '@/components/admin/ProfileModal';
-import AcademicSection from '@/components/admin/users/dossier/AcademicSection';
-import ContactSection from '@/components/admin/users/dossier/ContactSection';
 import DossierHeader from '@/components/admin/users/dossier/DossierHeader';
-import FamilySection from '@/components/admin/users/dossier/FamilySection';
-import FinanceSection from '@/components/admin/users/dossier/FinanceSection';
-import LearningSection from '@/components/admin/users/dossier/LearningSection';
-import OccurrencesSection from '@/components/admin/users/dossier/OccurrencesSection';
-import TeachingSection from '@/components/admin/users/dossier/TeachingSection';
+import DossierTabs from '@/components/admin/users/dossier/DossierTabs';
 import BackButton from '@/components/common/BackButton';
+import { secondaryButtonCls } from '@/components/common/formStyles';
 import Spinner from '@/components/common/Spinner';
 import { useUserDossier } from '@/lib/hooks/admin/useUserDossier';
 import { useErrorToast } from '@/lib/hooks/useErrorToast';
 import { canManageUser } from '@/lib/users/rolePolicy';
 import { useAuthStore } from '@/store/authStore';
 
-/** Dossie da pessoa: dados, familia, matriculas, cursos, financeiro, ocorrencias e turmas, conforme as permissoes. */
+/** Dossie da pessoa: um cartao com o cabecalho e as abas (resumo, familia, academico, cursos, financeiro...). */
 export default function UserDossierPage() {
   const { userId } = useParams<{ userId: string }>();
   const router = useRouter();
@@ -28,35 +24,22 @@ export default function UserDossierPage() {
   useErrorToast(error, 'Erro ao carregar o dossiê.');
 
   if (loading && !dossier) return <Spinner />;
-  if (!dossier) {
-    return <p className="text-sm text-gray-500 dark:text-gray-400">Dossiê indisponível.</p>;
-  }
+  if (!dossier) return <p className="text-sm text-gray-500 dark:text-gray-400">Dossiê indisponível.</p>;
 
   const { user } = dossier;
-  const canEdit = canManageUser(student?.role, user);
+  const actions = canManageUser(student?.role, user) ? (
+    <button type="button" onClick={() => setEditingContact(true)} className={secondaryButtonCls}>
+      <PencilSquareIcon className="h-4 w-4" /><span>Editar dados de contato</span>
+    </button>
+  ) : undefined;
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto max-w-6xl space-y-5">
       <BackButton label="Voltar para usuários" onClick={() => router.push('/admin/users')} />
-      <DossierHeader user={user} organizationName={dossier.organization_name} onEditContact={canEdit ? () => setEditingContact(true) : undefined} />
-
-      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
-        <ContactSection contact={dossier.contact} />
-        {dossier.guardians && user.role === 'student' && (
-          <FamilySection title="Responsáveis" links={dossier.guardians} emptyText="Nenhum responsável vinculado. Vincule pela ficha do aluno na Secretaria." />
-        )}
-        {dossier.dependents && <FamilySection title="Dependentes" links={dossier.dependents} emptyText="Nenhum dependente vinculado." />}
-        {dossier.program_enrollments && (dossier.program_enrollments.length > 0 || user.role === 'student') && (
-          <AcademicSection enrollments={dossier.program_enrollments} canOpenRecord={permissions.includes('secretariat.access')} />
-        )}
-        {dossier.teaching && <TeachingSection offerings={dossier.teaching} canOpenDiary={permissions.includes('teaching.access')} />}
-        {dossier.finance && (dossier.finance.open_count > 0 || ['student', 'guardian'].includes(user.role)) && <FinanceSection finance={dossier.finance} />}
-        {dossier.occurrences && user.role === 'student' && <OccurrencesSection occurrences={dossier.occurrences} />}
-        {(dossier.courses.length > 0 || dossier.certificates.length > 0 || user.role === 'student') && (
-          <LearningSection courses={dossier.courses} certificates={dossier.certificates} />
-        )}
+      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
+        <DossierHeader user={user} actions={actions} />
+        <DossierTabs key={user.id} dossier={dossier} permissions={permissions} />
       </div>
-
       {editingContact && <ProfileModal user={user} onClose={() => setEditingContact(false)} onSaved={() => { setEditingContact(false); reload(); }} />}
     </div>
   );

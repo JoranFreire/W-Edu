@@ -22,16 +22,29 @@ test('usuarios: filtro por perfil e dossie do aluno com o responsavel', async ({
   await page.getByRole('link', { name: `Dossiê de ${aluno.name}`, exact: true }).click();
 
   await expect(page.getByRole('heading', { name: aluno.name, level: 1 })).toBeVisible();
-  const family = page.getByRole('region', { name: 'Responsáveis' });
-  await expect(family.getByRole('link', { name: guardianName })).toBeVisible();
-  await expect(family.getByText('Financeiro')).toBeVisible();
-  await expect(page.getByRole('region', { name: 'Matrículas' }).getByRole('link', { name: /Abrir ficha/ })).toBeVisible();
-  await expect(page.getByRole('region', { name: /Ocorrências/ }).getByText(`Febre ${suffix}`)).toBeVisible();
+  const tabs = page.getByRole('tablist', { name: 'Dossiê' });
+  const panel = page.getByRole('tabpanel');
+  await expect(page.getByRole('complementary', { name: 'Ficha' })).toBeVisible();
+
+  await tabs.getByRole('tab', { name: /Responsáveis/ }).click();
+  await expect(panel.getByRole('link', { name: guardianName })).toBeVisible();
+  await expect(panel.getByText('Financeiro')).toBeVisible();
+
+  await tabs.getByRole('tab', { name: /Acadêmico/ }).click();
+  await expect(panel.getByRole('link', { name: /Abrir ficha/ })).toBeVisible();
+
+  await tabs.getByRole('tab', { name: /Ocorrências/ }).click();
+  await expect(panel.getByText(`Febre ${suffix}`)).toBeVisible();
+
+  await tabs.getByRole('tab', { name: /Cursos/ }).click();
+  await expect(panel.getByText('Nenhum curso.')).toBeVisible();
 
   // O responsavel abre o proprio dossie, com o aluno como dependente.
-  await family.getByRole('link', { name: guardianName }).click();
+  await tabs.getByRole('tab', { name: /Responsáveis/ }).click();
+  await panel.getByRole('link', { name: guardianName }).click();
   await expect(page.getByRole('heading', { name: guardianName, level: 1 })).toBeVisible();
-  await expect(page.getByRole('region', { name: 'Dependentes' }).getByRole('link', { name: aluno.name, exact: true })).toBeVisible();
+  await page.getByRole('tablist', { name: 'Dossiê' }).getByRole('tab', { name: /Dependentes/ }).click();
+  await expect(page.getByRole('tabpanel').getByRole('link', { name: aluno.name, exact: true })).toBeVisible();
 
   // Volta para a lista no ultimo filtro escolhido.
   await page.getByRole('button', { name: 'Voltar para usuários' }).click();

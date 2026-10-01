@@ -2,6 +2,7 @@ import type { ProgramEnrollmentStatus } from '@/types/academicGroups';
 import type { User } from '@/types/auth';
 import type { GuardianRelationship } from '@/types/guardians';
 import type { OccurrenceKind, OccurrenceSeverity } from '@/types/schoolLife';
+import type { RequestStatus } from '@/types/warehouse';
 
 export interface DossierContact {
   phone: string | null;
@@ -38,12 +39,63 @@ export interface UserDossier {
   guardians: DossierGuardianLink[] | null;
   dependents: DossierGuardianLink[] | null;
   program_enrollments: DossierProgramEnrollment[] | null;
-  courses: { course_id: number; course_name: string; enrolled_at: string }[];
+  courses: DossierCourse[];
   certificates: { id: number; course_name: string; validation_code: string; issued_at: string; revoked: boolean }[];
-  finance: { open_count: number; overdue_count: number; open_cents: number; next_due_at: string | null } | null;
+  finance: DossierFinance | null;
   occurrences: {
     total: number;
     recent: { id: number; kind: OccurrenceKind; severity: OccurrenceSeverity; description: string; occurred_on: string }[];
   } | null;
+  benefits: DossierBenefit[] | null;
+  materials: DossierMaterialRequest[] | null;
   teaching: { id: number; name: string; course_name: string; term_name: string | null }[] | null;
+}
+
+export interface DossierCourse {
+  course_id: number;
+  course_name: string;
+  total_lessons: number;
+  done_lessons: number;
+  progress_percent: number;
+  completed: boolean;
+  last_activity_at: string | null;
+}
+
+export interface DossierCharge {
+  id: number;
+  description: string | null;
+  amount_cents: number;
+  status: 'pending' | 'paid' | 'failed' | 'cancelled' | 'refunded';
+  due_at: string | null;
+  paid_at: string | null;
+  installment_number: number | null;
+  /** A pessoa e quem paga (responsavel financeiro), nao o aluno da cobranca. */
+  as_payer: boolean;
+}
+
+export interface DossierFinance {
+  open_count: number;
+  overdue_count: number;
+  open_cents: number;
+  next_due_at: string | null;
+  charges: DossierCharge[];
+}
+
+export interface DossierBenefit {
+  id: number;
+  item_name: string;
+  unit: string;
+  quantity: number;
+  delivered_on: string;
+  offering_name: string;
+}
+
+export interface DossierMaterialRequest {
+  id: number;
+  purpose: string;
+  needed_on: string;
+  status: RequestStatus;
+  offering_name: string | null;
+  return_due_on: string | null;
+  lines: { item_name: string; unit: string; requested: number; approved: number | null; delivered: number; returned: number }[];
 }

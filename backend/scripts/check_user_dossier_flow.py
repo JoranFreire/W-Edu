@@ -1,5 +1,5 @@
 """Exercise the user dossier: student with guardians, program enrollment, courses, finance and occurrences; guardian with
-dependents; sections hidden without permission (coordinator without finance, company manager); scope and tenant isolation.
+dependents; completed courses, benefits received, materials received and statement; sections hidden without permission (coordinator without finance, company manager); scope and tenant isolation.
 
 Uses a temporary SQLite database by default (set DATABASE_URL to use PostgreSQL).
 """
@@ -41,7 +41,12 @@ from app.models.enrollment import Enrollment
 from app.models.finance import Charge
 from app.models.guardians import GuardianRelationship, StudentGuardian
 from app.models.school_life import StudentOccurrence
+from app.models.lesson import Lesson
+from app.models.progress import Progress, ProgressStatus
+from app.models.schedule import ClassOffering
+from app.models.social_programs import BenefitDelivery, BenefitItem
 from app.models.student import Organization, StudentProfile
+from app.models.warehouse import MaterialRequest, MaterialRequestLine, RequestStatus, WarehouseItem
 from app.models.student import Student, UserRole
 from main import app
 
@@ -102,10 +107,27 @@ def seed() -> dict[str, int]:
         db.flush()
         db.add(ProgramEnrollment(student_id=ids["ana"], program_id=program.id, curriculum_id=curriculum.id, registration_number="2026-0001"))
         course = Course(name="Robótica")
-        db.add(course)
+        other = Course(name="Pintura")
+        db.add_all([course, other])
         db.flush()
-        db.add(Enrollment(student_id=ids["ana"], course_id=course.id))
+        lessons = [Lesson(course_id=course.id, title=f"Aula {n}", order=n) for n in (1, 2)] + [Lesson(course_id=other.id, title="Aula 1", order=1)]
+        db.add_all(lessons)
+        db.add_all([Enrollment(student_id=ids["ana"], course_id=course.id), Enrollment(student_id=ids["ana"], course_id=other.id)])
+        db.flush()
+        db.add_all([Progress(student_id=ids["ana"], lesson_id=lesson.id, status=ProgressStatus.done) for lesson in lessons[:2]])
         now = datetime.now(timezone.utc)
+        offering = ClassOffering(course_id=course.id, name="Turma Robótica", starts_at=now, ends_at=now + timedelta(days=30),
+                                 capacity=20, instructor_id=ids["prof"])
+        snack = BenefitItem(name="Lanche", unit="unidade")
+        tool = WarehouseItem(name="Kit de tintas", unit="caixa")
+        db.add_all([offering, snack, tool])
+        db.flush()
+        db.add(BenefitDelivery(item_id=snack.id, student_id=ids["ana"], class_offering_id=offering.id, quantity=1, delivered_on=now.date()))
+        request = MaterialRequest(requester_id=ids["prof"], class_offering_id=offering.id, purpose="Aula de pintura",
+                                  needed_on=now.date(), status=RequestStatus.delivered)
+        db.add(request)
+        db.flush()
+        db.add(MaterialRequestLine(request_id=request.id, item_id=tool.id, quantity_requested=3, quantity_approved=2, quantity_delivered=2))
         db.add_all([
             Charge(student_id=ids["ana"], payer_id=ids["mae"], amount_cents=45000, due_at=now - timedelta(days=5)),
             Charge(student_id=ids["ana"], payer_id=ids["mae"], amount_cents=45000, due_at=now + timedelta(days=25)),
@@ -144,7 +166,12 @@ async def check_admin_view(c: Checker, h: dict, ids: dict) -> None:
     c.expect(dossier.get("dependents") is None, "student has no dependents section")
     enrollments = dossier.get("program_enrollments") or []
     c.expect(len(enrollments) == 1 and enrollments[0]["registration_number"] == "2026-0001", f"enrollments: {enrollments}")
-    c.expect([course["course_name"] for course in dossier.get("courses", [])] == ["Robótica"], f"courses: {dossier.get('courses')}")
+    courses = {course["course_name"]: course for course in dossier.get("courses", [])}
+    c.expect(courses.get("Robótica", {}).get("completed") is True and courses["Robótica"]["progress_percent"] == 100, f"completed course: {courses}")
+    c.expect(courses.get("Pintura", {}).get("completed") is False, f"course in progress: {courses}")
+    benefits = dossier.get("benefits") or []
+    c.expect(len(benefits) == 1 and benefits[0]["item_name"] == "Lanche" and benefits[0]["offering_name"] == "Turma Robótica", f"benefits: {benefits}")
+    c.expect(len((dossier.get("finance") or {}).get("charges", [])) == 2, "finance statement lists charges")
     finance = dossier.get("finance") or {}
     c.expect(finance.get("open_count") == 2 and finance.get("overdue_count") == 1 and finance.get("open_cents") == 90000
              and finance.get("next_due_at"), f"finance: {finance}")
@@ -158,19 +185,23 @@ async def check_admin_view(c: Checker, h: dict, ids: dict) -> None:
     c.expect((guardian.get("finance") or {}).get("open_count") == 2, f"guardian pays the charges: {guardian.get('finance')}")
 
     teacher = await c.call("GET", f"/admin/users/{ids['prof']}/dossier", 200, "teacher dossier", h["admin-a"])
-    c.expect(teacher.get("teaching") == [], f"teacher teaching section: {teacher.get('teaching')}")
+    c.expect([offering["name"] for offering in teacher.get("teaching") or []] == ["Turma Robótica"], f"teacher teaching: {teacher.get('teaching')}")
+    materials = teacher.get("materials") or []
+    c.expect(len(materials) == 1 and materials[0]["lines"][0]["item_name"] == "Kit de tintas" and materials[0]["lines"][0]["delivered"] == 2,
+             f"materials received: {materials}")
 
 
 async def check_permissions(c: Checker, h: dict, ids: dict) -> None:
     coord = await c.call("GET", f"/admin/users/{ids['ana']}/dossier", 200, "coordinator dossier", h["coord"])
     c.expect(coord.get("guardians") is not None and coord.get("program_enrollments") is not None, "coordinator sees family and academic")
     c.expect(coord.get("finance") is None, f"coordinator has no finance.access: {coord.get('finance')}")
+    c.expect(coord.get("materials") is not None, "coordinator sees warehouse reports")
     await c.call("GET", f"/admin/users/{ids['mae']}/dossier", 200, "coordinator can view guardian", h["coord"])
 
     await c.call("GET", f"/admin/users/{ids['ana']}/dossier", 403, "manager outside company", h["gestor"])
     own = await c.call("GET", f"/admin/users/{ids['gestor']}/dossier", 200, "manager own company", h["gestor"])
     c.expect(own.get("organization_name") == "Parceira", f"organization name: {own.get('organization_name')}")
-    c.expect(own.get("guardians") is None and own.get("finance") is None and own.get("occurrences") is None, f"manager sections: {own}")
+    c.expect(all(own.get(key) is None for key in ("guardians", "finance", "occurrences", "benefits", "materials")), f"manager sections: {own}")
 
     await c.call("GET", f"/admin/users/{ids['ana']}/dossier", 403, "instructor cannot open dossier", h["prof"])
     await c.call("GET", f"/admin/users/{ids['ana']}/dossier", 404, "other institution", h["admin-b"])

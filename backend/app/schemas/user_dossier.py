@@ -3,8 +3,10 @@ from datetime import date, datetime
 from pydantic import BaseModel
 
 from app.models.academic_groups import ProgramEnrollmentStatus
+from app.models.finance import ChargeStatus
 from app.models.guardians import GuardianRelationship
 from app.models.school_life import OccurrenceKind, OccurrenceSeverity
+from app.models.warehouse import RequestStatus
 from app.schemas.student import StudentOut
 
 
@@ -46,7 +48,11 @@ class DossierProgramEnrollment(BaseModel):
 class DossierCourse(BaseModel):
     course_id: int
     course_name: str
-    enrolled_at: datetime
+    total_lessons: int
+    done_lessons: int
+    progress_percent: int
+    completed: bool
+    last_activity_at: datetime | None = None
 
 
 class DossierCertificate(BaseModel):
@@ -57,11 +63,51 @@ class DossierCertificate(BaseModel):
     revoked: bool
 
 
+class DossierCharge(BaseModel):
+    id: int
+    description: str | None = None
+    amount_cents: int
+    status: ChargeStatus
+    due_at: datetime | None = None
+    paid_at: datetime | None = None
+    installment_number: int | None = None
+    as_payer: bool
+
+
 class DossierFinance(BaseModel):
     open_count: int
     overdue_count: int
     open_cents: int
     next_due_at: datetime | None = None
+    charges: list[DossierCharge]
+
+
+class DossierBenefit(BaseModel):
+    id: int
+    item_name: str
+    unit: str
+    quantity: int
+    delivered_on: date
+    offering_name: str
+
+
+class DossierMaterialLine(BaseModel):
+    item_name: str
+    unit: str
+    requested: int
+    approved: int | None = None
+    delivered: int
+    returned: int
+
+
+class DossierMaterialRequest(BaseModel):
+    id: int
+    purpose: str
+    needed_on: date
+    status: RequestStatus
+    offering_name: str | None = None
+    return_due_on: date | None = None
+    lines: list[DossierMaterialLine]
 
 
 class DossierOccurrence(BaseModel):
@@ -96,4 +142,6 @@ class UserDossier(BaseModel):
     certificates: list[DossierCertificate]
     finance: DossierFinance | None = None
     occurrences: DossierOccurrences | None = None
+    benefits: list[DossierBenefit] | None = None
+    materials: list[DossierMaterialRequest] | None = None
     teaching: list[DossierOffering] | None = None

@@ -1,9 +1,11 @@
 from sqlalchemy import or_
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from app.models.academic_groups import ProgramEnrollment
-from app.models.finance import Charge, ChargeStatus
+from app.models.finance import Charge
 from app.models.schedule import ClassOffering
+from app.models.social_programs import BenefitDelivery
+from app.models.warehouse import MaterialRequest, MaterialRequestLine
 
 
 class DossierRepository:
@@ -20,12 +22,12 @@ class DossierRepository:
             .all()
         )
 
-    def open_charges_of(self, user_id: int) -> list[Charge]:
-        """Cobrancas pendentes em que a pessoa e o aluno ou quem paga (responsavel financeiro)."""
+    def charges_of(self, user_id: int) -> list[Charge]:
+        """Cobrancas em que a pessoa e o aluno ou quem paga (responsavel financeiro), mais recentes primeiro."""
         return (
             self.db.query(Charge)
             .filter(or_(Charge.student_id == user_id, Charge.payer_id == user_id))
-            .filter(Charge.status == ChargeStatus.pending)
+            .order_by(Charge.due_at.desc().nullslast(), Charge.id.desc())
             .all()
         )
 
@@ -34,5 +36,26 @@ class DossierRepository:
             self.db.query(ClassOffering)
             .filter(ClassOffering.instructor_id == user_id)
             .order_by(ClassOffering.id.desc())
+            .all()
+        )
+
+    def benefits_of(self, user_id: int) -> list[tuple[BenefitDelivery, str]]:
+        """Entregas de beneficios ao aluno, com o nome da turma."""
+        return (
+            self.db.query(BenefitDelivery, ClassOffering.name)
+            .join(ClassOffering, ClassOffering.id == BenefitDelivery.class_offering_id)
+            .options(selectinload(BenefitDelivery.item))
+            .filter(BenefitDelivery.student_id == user_id)
+            .order_by(BenefitDelivery.delivered_on.desc(), BenefitDelivery.id.desc())
+            .all()
+        )
+
+    def material_requests_of(self, user_id: int) -> list[MaterialRequest]:
+        return (
+            self.db.query(MaterialRequest)
+            .options(selectinload(MaterialRequest.lines).selectinload(MaterialRequestLine.item),
+                     selectinload(MaterialRequest.class_offering))
+            .filter(MaterialRequest.requester_id == user_id)
+            .order_by(MaterialRequest.needed_on.desc(), MaterialRequest.id.desc())
             .all()
         )
