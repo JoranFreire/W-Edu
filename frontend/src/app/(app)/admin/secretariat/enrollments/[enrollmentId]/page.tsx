@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { AcademicCapIcon, ArrowsRightLeftIcon, ClipboardDocumentCheckIcon, ClockIcon, DocumentTextIcon, ExclamationTriangleIcon, UserGroupIcon } from '@heroicons/react/24/outline';
+import { AcademicCapIcon, ArrowsRightLeftIcon, BriefcaseIcon, ChartPieIcon, ClipboardDocumentCheckIcon, ClockIcon, DocumentTextIcon, ExclamationTriangleIcon, UserGroupIcon } from '@heroicons/react/24/outline';
 import ConclusionPanel from '@/components/secretariat/ConclusionPanel';
 import CreditTransfersPanel from '@/components/secretariat/CreditTransfersPanel';
 import DeclarationsPanel from '@/components/secretariat/DeclarationsPanel';
@@ -10,6 +10,8 @@ import GuardiansPanel from '@/components/secretariat/GuardiansPanel';
 import EnrollmentTimeline from '@/components/secretariat/EnrollmentTimeline';
 import MovementActions from '@/components/secretariat/MovementActions';
 import TranscriptTable from '@/components/secretariat/TranscriptTable';
+import OfficeIntegralizationTab from '@/components/completion/OfficeIntegralizationTab';
+import OfficeInternshipTab from '@/components/completion/OfficeInternshipTab';
 import OfficeRegistrationTab from '@/components/registration/OfficeRegistrationTab';
 import OccurrencesPanel from '@/components/schoolLife/OccurrencesPanel';
 import BackButton from '@/components/common/BackButton';
@@ -24,11 +26,13 @@ import { useTerminology } from '@/lib/hooks/useTerminology';
 import { useAuthStore } from '@/store/authStore';
 import { isAdminRole } from '@/types/auth';
 
-type FileTab = 'transcript' | 'registration' | 'credits' | 'documents' | 'guardians' | 'occurrences' | 'timeline';
+type FileTab = 'transcript' | 'registration' | 'integralization' | 'internship' | 'credits' | 'documents' | 'guardians' | 'occurrences' | 'timeline';
 
 const tabs: TabItem<FileTab>[] = [
   { id: 'transcript', label: 'Histórico escolar', icon: AcademicCapIcon },
   { id: 'registration', label: 'Disciplinas', icon: ClipboardDocumentCheckIcon },
+  { id: 'integralization', label: 'Integralização', icon: ChartPieIcon },
+  { id: 'internship', label: 'Estágio e TCC', icon: BriefcaseIcon },
   { id: 'credits', label: 'Aproveitamento', icon: ArrowsRightLeftIcon },
   { id: 'documents', label: 'Documentos e conclusão', icon: DocumentTextIcon },
   { id: 'guardians', label: 'Responsáveis', icon: UserGroupIcon },
@@ -69,6 +73,8 @@ export default function EnrollmentFilePage() {
           <section className={sectionCls}>{transcript ? <TranscriptTable transcript={transcript} termLabel={terms.term} /> : <Spinner variant="panel" />}</section>
         )}
         {tab === 'registration' && <OfficeRegistrationTab enrollmentId={enrollmentId} editable={enrollment.status === 'active'} />}
+        {tab === 'integralization' && <OfficeIntegralizationTab enrollmentId={enrollmentId} />}
+        {tab === 'internship' && <OfficeInternshipTab enrollmentId={enrollmentId} editable={enrollment.status === 'active'} />}
         {tab === 'credits' && (
           <CreditTransfersPanel enrollmentId={enrollmentId} pending={pending} canDecide={canDecide} editable={open} onChanged={reloadTranscript} />
         )}

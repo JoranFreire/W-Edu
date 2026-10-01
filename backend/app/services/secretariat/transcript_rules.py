@@ -89,4 +89,6 @@ def summarize(rows: list[TranscriptRow]) -> TranscriptSummary:
         integralization=round(100 * mandatory_done / mandatory_hours, 1) if mandatory_hours else 100.0,
         completed_components=len(done),
         total_components=len(rows),
+        credits_done=sum(row.credits or 0 for row in done),
+        mandatory_credits=sum(row.credits or 0 for row in mandatory),
     )

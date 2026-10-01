@@ -29,6 +29,9 @@ export default function ProgramFormModal({ program, units, onSave, onClose }: {
     duration_terms: fromOptionalInt(program?.duration_terms),
     total_hours: fromOptionalInt(program?.total_hours),
     total_credits: fromOptionalInt(program?.total_credits),
+    complementary_hours: fromOptionalInt(program?.complementary_hours),
+    internship_hours: fromOptionalInt(program?.internship_hours),
+    requires_final_project: program?.requires_final_project ?? false,
     status: program?.status ?? ('draft' as ProgramStatus),
   });
   const { saving, run } = useSubmitting();
@@ -42,6 +45,8 @@ export default function ProgramFormModal({ program, units, onSave, onClose }: {
       duration_terms: toOptionalInt(form.duration_terms),
       total_hours: toOptionalInt(form.total_hours),
       total_credits: toOptionalInt(form.total_credits),
+      complementary_hours: toOptionalInt(form.complementary_hours),
+      internship_hours: toOptionalInt(form.internship_hours),
     };
     run(() => onSave(input)).catch((error) => toast.error(apiErrorMessage(error, 'Erro ao salvar programa.')));
   };
@@ -77,6 +82,16 @@ export default function ProgramFormModal({ program, units, onSave, onClose }: {
         </label>
         <label className={labelCls}>Créditos totais
           <input type="number" min={0} value={form.total_credits} onChange={(e) => set({ total_credits: e.target.value })} className={`mt-1 ${inputCls}`} />
+        </label>
+        <label className={labelCls}>Atividades complementares (h)
+          <input type="number" min={0} value={form.complementary_hours} onChange={(e) => set({ complementary_hours: e.target.value })} className={`mt-1 ${inputCls}`} />
+        </label>
+        <label className={labelCls}>Estágio obrigatório (h)
+          <input type="number" min={0} value={form.internship_hours} onChange={(e) => set({ internship_hours: e.target.value })} className={`mt-1 ${inputCls}`} />
+        </label>
+        <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 sm:col-span-2">
+          <input type="checkbox" checked={form.requires_final_project} onChange={(e) => set({ requires_final_project: e.target.checked })} />
+          Exige trabalho de conclusão (TCC)
         </label>
         <label className={labelCls}>Situação
           <select value={form.status} onChange={(e) => set({ status: e.target.value as ProgramStatus })} className={`mt-1 ${inputCls}`}>

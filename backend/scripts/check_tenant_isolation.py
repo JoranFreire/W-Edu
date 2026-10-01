@@ -364,6 +364,22 @@ async def run() -> int:
         c.expect(r.status_code == 404, f"B cannot publish on A agenda: {r.status_code}")
         r = await client.get(f"/school/class-groups/{group_a}/agenda", headers=admin_b)
         c.expect(r.status_code == 404, f"B cannot read A agenda: {r.status_code}")
+        # Requisitos de conclusao: estagio, TCC e integralizacao de A invisiveis para B.
+        r = await client.post(f"/completion/enrollments/{enrollment_a}/internships", json={"company_name": "X", "starts_on": "2027-03-01"}, headers=admin_b)
+        c.expect(r.status_code == 404, f"B cannot register internship for A: {r.status_code}")
+        r = await client.post(f"/completion/enrollments/{enrollment_a}/internships", json={"company_name": "Empresa A", "starts_on": "2027-03-01"}, headers=admin_a)
+        internship_a = r.json().get("id")
+        r = await client.patch(f"/completion/internships/{internship_a}", json={"status": "cancelled"}, headers=admin_b)
+        c.expect(r.status_code == 404, f"B cannot update A internship: {r.status_code}")
+        r = await client.get(f"/completion/internships/{internship_a}/logs", headers=admin_b)
+        c.expect(r.status_code == 404, f"B cannot read A internship logs: {r.status_code}")
+        r = await client.put(f"/completion/enrollments/{enrollment_a}/final-project", json={"title": "Invasor"}, headers=admin_b)
+        c.expect(r.status_code == 404, f"B cannot register A final project: {r.status_code}")
+        r = await client.get(f"/completion/enrollments/{enrollment_a}/integralization", headers=admin_b)
+        c.expect(r.status_code == 404, f"B cannot read A integralization: {r.status_code}")
+        r = await client.get("/completion/advising", headers=admin_b)
+        c.expect(r.json() == {"internships": [], "final_projects": []}, f"B advising shows no A records: {r.json()}")
+
         # Matricula por disciplina: janela e catalogo de A invisiveis para B.
         window = {"term_id": term_a, "name": "Janela", "opens_at": "2027-01-01T00:00:00Z", "closes_at": "2027-01-10T00:00:00Z"}
         r = await client.post("/registration/windows", json=window, headers=admin_b)

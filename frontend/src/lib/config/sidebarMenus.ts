@@ -4,7 +4,7 @@ import {
   HomeIcon, BookOpenIcon, ChartBarIcon, MicrophoneIcon, Cog6ToothIcon,
   UsersIcon, AcademicCapIcon, CalendarDaysIcon, ChatBubbleLeftRightIcon,
   BanknotesIcon, Squares2X2Icon, MapIcon, ShieldCheckIcon, DocumentTextIcon,
-  BuildingLibraryIcon, GlobeAltIcon, BellIcon, RectangleStackIcon, PencilSquareIcon, ClipboardDocumentCheckIcon, FolderOpenIcon, DocumentChartBarIcon, UserGroupIcon,
+  BuildingLibraryIcon, GlobeAltIcon, BellIcon, RectangleStackIcon, PencilSquareIcon, ClipboardDocumentCheckIcon, ChartPieIcon, BriefcaseIcon, FolderOpenIcon, DocumentChartBarIcon, UserGroupIcon,
 } from '@heroicons/react/24/outline';
 
 interface MenuItem { name: string; href: string; icon: ComponentType<{ className?: string }> }
@@ -18,6 +18,7 @@ export const studentMenu: MenuItem[] = [
   { name: 'Agenda escolar', href: '/school-agenda', icon: CalendarDaysIcon },
   { name: 'Avisos', href: '/notifications', icon: BellIcon },
   { name: 'Histórico escolar', href: '/transcript', icon: DocumentChartBarIcon },
+  { name: 'Integralização', href: '/completion', icon: ChartPieIcon },
   { name: 'Certificados', href: '/certificates', icon: ShieldCheckIcon },
   { name: 'Sessões de Voz', href: '/sessions', icon: MicrophoneIcon },
   { name: 'Configurações', href: '/settings', icon: Cog6ToothIcon },
@@ -27,6 +28,7 @@ export const adminMenu: MenuItem[] = [
   { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
   { name: 'Acadêmico', href: '/admin/academic', icon: RectangleStackIcon },
   { name: 'Diário de classe', href: '/teaching', icon: PencilSquareIcon },
+  { name: 'Orientações', href: '/teaching/advising', icon: BriefcaseIcon },
   { name: 'Secretaria', href: '/admin/secretariat', icon: FolderOpenIcon },
   { name: 'Cursos', href: '/admin/courses', icon: AcademicCapIcon },
   { name: 'Trilhas', href: '/admin/learning-paths', icon: MapIcon },
@@ -52,6 +54,7 @@ export const coordinatorMenu: MenuItem[] = [
   { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
   { name: 'Acadêmico', href: '/admin/academic', icon: RectangleStackIcon },
   { name: 'Diário de classe', href: '/teaching', icon: PencilSquareIcon },
+  { name: 'Orientações', href: '/teaching/advising', icon: BriefcaseIcon },
   { name: 'Secretaria', href: '/admin/secretariat', icon: FolderOpenIcon },
   { name: 'Cursos', href: '/admin/courses', icon: AcademicCapIcon },
   { name: 'Trilhas', href: '/admin/learning-paths', icon: MapIcon },
@@ -67,7 +70,8 @@ export const coordinatorMenu: MenuItem[] = [
 export const instructorMenu: MenuItem[] = [
   { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
   { name: 'Diário de classe', href: '/teaching', icon: PencilSquareIcon },
-  ...studentMenu.filter((item) => !['/dashboard', '/school-agenda', '/registration'].includes(item.href)),
+  { name: 'Orientações', href: '/teaching/advising', icon: BriefcaseIcon },
+  ...studentMenu.filter((item) => !['/dashboard', '/school-agenda', '/registration', '/completion'].includes(item.href)),
 ];
 
 export const secretaryMenu: MenuItem[] = [

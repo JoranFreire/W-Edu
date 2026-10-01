@@ -1,14 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 import { BellIcon } from '@heroicons/react/24/outline';
 import { useUnreadCount } from '@/lib/hooks/inbox/useUnreadCount';
 
-/** Atalho para a caixa de avisos com a contagem de nao lidos (recontada a cada navegacao). */
+/** Atalho para a caixa de avisos com a contagem de nao lidos (o TopBar remonta a cada navegacao para recontar). */
 export function InboxBell() {
-  const pathname = usePathname();
-  const unread = useUnreadCount(pathname);
+  const unread = useUnreadCount();
   const label = unread > 0 ? `Avisos (${unread} não lido${unread > 1 ? 's' : ''})` : 'Avisos';
   return (
     <Link

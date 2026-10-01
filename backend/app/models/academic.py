@@ -3,7 +3,7 @@
 from datetime import date, datetime, timezone
 import enum
 
-from sqlalchemy import Boolean, Date, DateTime, Enum as SAEnum, ForeignKey, Integer, String, Text, UniqueConstraint
+from sqlalchemy import Boolean, Date, DateTime, Enum as SAEnum, ForeignKey, Integer, String, Text, UniqueConstraint, false as sql_false
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
@@ -76,6 +76,10 @@ class Program(TenantMixin, Base):
     duration_terms: Mapped[int | None] = mapped_column(Integer)
     total_hours: Mapped[int | None] = mapped_column(Integer)
     total_credits: Mapped[int | None] = mapped_column(Integer)
+    # Requisitos de conclusao alem das disciplinas (Fase 16).
+    complementary_hours: Mapped[int | None] = mapped_column(Integer)
+    internship_hours: Mapped[int | None] = mapped_column(Integer)
+    requires_final_project: Mapped[bool] = mapped_column(Boolean, default=False, server_default=sql_false())
     status: Mapped[ProgramStatus] = mapped_column(SAEnum(ProgramStatus), default=ProgramStatus.draft)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 

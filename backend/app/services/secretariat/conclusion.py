@@ -7,31 +7,29 @@ from sqlalchemy.orm import Session
 from app.models.academic_groups import ProgramEnrollment, ProgramEnrollmentStatus
 from app.schemas.secretariat import ConclusionCheckOut
 from app.services.academic.errors import bad_request, conflict
+from app.services.completion.integralization import IntegralizationService
+from app.services.completion.requirements import describe_missing
 from app.services.secretariat.lifecycle import EnrollmentLifecycleService
 from app.services.secretariat.transcript import TranscriptService
 
 
 class ConclusionService:
-    """Conclusao do programa: exige a carga obrigatoria cumprida (e a carga total do programa, se definida)."""
+    """Conclusao do programa: exige todos os requisitos de integralizacao (disciplinas, creditos, atividades, estagio e TCC)."""
 
     def __init__(self, db: Session):
         self.lifecycle = EnrollmentLifecycleService(db)
         self.transcripts = TranscriptService(db)
+        self.integralization = IntegralizationService(db)
 
     def check(self, enrollment_id: int) -> ConclusionCheckOut:
         enrollment = self.lifecycle.get_or_404(enrollment_id)
-        summary = self.transcripts.for_enrollment(enrollment_id).summary
-        required = enrollment.program.total_hours
-        missing = []
-        if enrollment.status != ProgramEnrollmentStatus.active:
-            missing.append("A matrícula precisa estar ativa")
-        if summary.integralization < 100:
-            missing.append(f"Carga obrigatória cumprida: {summary.integralization:g}%")
-        if required is not None and summary.hours_done < required:
-            missing.append(f"Carga horária total: {summary.hours_done}h de {required}h")
+        summary = self.transcripts.build(enrollment).summary
+        requirements = self.integralization.build(enrollment).requirements
+        missing = [] if enrollment.status == ProgramEnrollmentStatus.active else ["A matrícula precisa estar ativa"]
+        missing += [describe_missing(requirement) for requirement in requirements if not requirement.met]
         return ConclusionCheckOut(
             eligible=not missing, status=enrollment.status.value, integralization=summary.integralization,
-            hours_done=summary.hours_done, required_hours=required, missing=missing,
+            hours_done=summary.hours_done, required_hours=enrollment.program.total_hours, missing=missing,
         )
 
     def conclude(self, enrollment_id: int, concluded_on: date, ceremony_on: date | None, user_id: int) -> ProgramEnrollment:

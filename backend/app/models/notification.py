@@ -33,6 +33,7 @@ class NotificationEventType(str, enum.Enum):
     occurrence_registered = "occurrence_registered"
     agenda_published = "agenda_published"
     waitlist_promoted = "waitlist_promoted"
+    activity_reviewed = "activity_reviewed"
 
 
 class NotificationTemplate(TenantMixin, Base):

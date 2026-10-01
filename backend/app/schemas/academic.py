@@ -41,6 +41,9 @@ class ProgramCreate(BaseModel):
     duration_terms: int | None = Field(default=None, ge=1)
     total_hours: int | None = Field(default=None, ge=0)
     total_credits: int | None = Field(default=None, ge=0)
+    complementary_hours: int | None = Field(default=None, ge=0)
+    internship_hours: int | None = Field(default=None, ge=0)
+    requires_final_project: bool = False
     status: ProgramStatus = ProgramStatus.draft
 
 
@@ -53,6 +56,9 @@ class ProgramUpdate(BaseModel):
     duration_terms: int | None = Field(default=None, ge=1)
     total_hours: int | None = Field(default=None, ge=0)
     total_credits: int | None = Field(default=None, ge=0)
+    complementary_hours: int | None = Field(default=None, ge=0)
+    internship_hours: int | None = Field(default=None, ge=0)
+    requires_final_project: bool | None = None
     status: ProgramStatus | None = None
 
 
@@ -66,6 +72,9 @@ class ProgramOut(BaseModel):
     duration_terms: int | None
     total_hours: int | None
     total_credits: int | None
+    complementary_hours: int | None
+    internship_hours: int | None
+    requires_final_project: bool
     status: ProgramStatus
 
     model_config = {"from_attributes": True}

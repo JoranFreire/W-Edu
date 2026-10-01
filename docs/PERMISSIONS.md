@@ -155,6 +155,21 @@ Cada registro de ocorrencia, publicacao na agenda e resultado final publicado ge
 | Ver janelas abertas, catalogo, inscrever e cancelar | Janela aberta do proprio programa | Nao | Nao | Nao | Nao |
 | Catalogo do aluno e inscricao fora da janela (com excecao opcional) | Nao | Nao | Sim | Sim | Sim |
 
+## Requisitos de conclusao (`/completion`)
+
+| Recurso | Student | Instructor | Coordinator | Secretary | Admin |
+| --- | --- | --- | --- | --- | --- |
+| Ver integralizacao de qualquer matricula | Nao | Nao | Sim | Sim | Sim |
+| Ver a propria integralizacao, atividades, estagios e TCC | Sim | Sim | Sim | Sim | Sim |
+| Declarar e retirar atividade complementar | Matricula propria e ativa | Nao | Nao | Nao | Nao |
+| Aprovar ou recusar atividade complementar | Nao | Nao | Sim | Sim | Sim |
+| Cadastrar e encerrar estagio; cadastrar TCC | Nao | Nao | Sim | Sim | Sim |
+| Listar orientadores (docentes e coordenadores) | Nao | Nao | Sim | Sim | Sim |
+| Lancar e remover horas de estagio | Estagio proprio em andamento | Nao | Nao | Nao | Nao |
+| Ver diario de horas do estagio | Proprio | Se orientador | Sim | Sim | Sim |
+| Validar horas de estagio e registrar entrega/defesa do TCC | Nao | Se orientador | Sim | Nao | Sim |
+| Orientacoes em andamento (`/completion/advising`) | Nao | As proprias | Todas | Nao | Todas |
+
 ## Caixa de avisos (`/notifications/me`)
 
 | Recurso | Todos os papeis |
