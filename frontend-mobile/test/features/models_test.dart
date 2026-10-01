@@ -4,6 +4,7 @@ import 'package:wedu_mobile/features/agenda/data/item_agenda.dart';
 import 'package:wedu_mobile/features/auth/data/instituicao.dart';
 import 'package:wedu_mobile/features/auth/data/usuario.dart';
 import 'package:wedu_mobile/features/avisos/data/aviso.dart';
+import 'package:wedu_mobile/features/beneficios/data/beneficio.dart';
 import 'package:wedu_mobile/features/boletim/data/boletim.dart';
 import 'package:wedu_mobile/features/dependentes/data/dependente.dart';
 
@@ -46,5 +47,18 @@ void main() {
     final dependente = Dependente.fromJson(dependenteJson());
     expect(dependente.alunoId, 's-1');
     expect(nomesDoParentesco[dependente.parentesco], 'Mãe');
+  });
+
+  test('benefícios: para retirar primeiro e validade vale também offline', () {
+    final lista = Beneficio.lista([
+      beneficioJson('1', status: 'redeemed'),
+      beneficioJson('2', validoAte: '2020-01-01'),
+      beneficioJson('3', validoAte: '2099-12-31', item: 'Kit'),
+    ]);
+    expect(lista.map((b) => b.id), ['3', '1', '2']);
+    expect(lista.first.paraRetirar, isTrue);
+    expect(lista.first.conteudoQr, 'wedu-beneficio:COD3');
+    expect(lista.last.situacao(), SituacaoBeneficio.vencido);
+    expect(lista[1].situacao(), SituacaoBeneficio.retirado);
   });
 }

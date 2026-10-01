@@ -9,6 +9,7 @@ import '../../agenda/agenda_providers.dart';
 import '../../auth/auth_providers.dart';
 import '../../auth/data/usuario.dart';
 import '../../avisos/avisos_providers.dart';
+import '../../beneficios/beneficios_providers.dart';
 import '../../dependentes/dependentes_providers.dart';
 import '../widgets/resumo_card.dart';
 
@@ -53,6 +54,7 @@ class InicioScreen extends ConsumerWidget {
                 },
                 onTap: () => context.go(Rotas.agenda),
               ),
+              ..._beneficios(context, ref),
             ],
             if (usuario.ehResponsavel) ...[
               const SizedBox(height: 12),
@@ -78,8 +80,25 @@ class InicioScreen extends ConsumerWidget {
     await [
       ref.atualizarDaApi(avisosNaoLidosProvider, ChavesAvisos.resumo),
       if (usuario.ehAluno) ref.atualizarDaApi(minhaAgendaProvider, ChavesAgenda.minha),
+      if (usuario.ehAluno) ref.atualizarDaApi(meusBeneficiosProvider, ChavesBeneficios.meus),
       if (usuario.ehResponsavel) ref.atualizarDaApi(dependentesProvider, ChavesDependentes.lista),
     ].map((atualizacao) => atualizacao.then<void>((_) {}, onError: (_) {})).wait;
+  }
+
+  /// Só aparece se a instituição já liberou algum benefício ao aluno.
+  List<Widget> _beneficios(BuildContext context, WidgetRef ref) {
+    final beneficios = ref.watch(meusBeneficiosProvider).value ?? const [];
+    if (beneficios.isEmpty) return const [];
+    final paraRetirar = beneficios.where((b) => b.paraRetirar).length;
+    return [
+      const SizedBox(height: 12),
+      ResumoCard(
+        icone: Icons.redeem_rounded,
+        titulo: 'Benefícios',
+        valor: paraRetirar == 0 ? 'Nada para retirar' : '$paraRetirar para retirar',
+        onTap: () => context.go(Rotas.beneficios),
+      ),
+    ];
   }
 
   /// O primeiro item de hoje em diante.

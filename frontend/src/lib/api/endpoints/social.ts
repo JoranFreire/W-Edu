@@ -12,6 +12,13 @@ export const socialEndpoints = {
     deliveries: '/social/deliveries',
     offeringDeliveries: (offeringId: string) => `/social/offerings/${offeringId}/deliveries`,
     myBenefits: '/social/my/benefits',
+    meetingVouchers: (meetingId: string) => `/social/meetings/${meetingId}/vouchers`,
+    vouchers: '/social/vouchers',
+    offeringVouchers: (offeringId: string) => `/social/offerings/${offeringId}/vouchers`,
+    cancelVoucher: (voucherId: string) => `/social/vouchers/${voucherId}/cancel`,
+    lookupVoucher: '/social/vouchers/lookup',
+    redeemVoucher: '/social/vouchers/redeem',
+    myVouchers: '/social/my/vouchers',
   },
   retention: {
     offering: (offeringId: string) => `/retention/offerings/${offeringId}`,

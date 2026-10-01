@@ -1,9 +1,9 @@
-"""Rotas dos programas sociais (/social): financiadores, beneficios, entregas e prestacao de contas."""
+"""Rotas dos programas sociais (/social): financiadores, beneficios, entregas, QR de retirada e prestacao de contas."""
 
 from fastapi import APIRouter
 
-from app.routers.social import benefits, deliveries, funding
+from app.routers.social import benefits, deliveries, funding, vouchers
 
 router = APIRouter()
-for area in (funding, benefits, deliveries):
+for area in (funding, benefits, deliveries, vouchers):
     router.include_router(area.router)

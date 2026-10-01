@@ -14,7 +14,7 @@ Vale para todo código tocado, novo ou antigo. Ao alterar um arquivo que mistura
 - Autorização por permissão (RBAC): guards em `app/dependencies.py` exigem uma chave do catálogo (`app/services/access/catalog.py`); o papel do usuário concede um conjunto padrão e perfis de acesso da instituição somam permissões. Recurso novo ganha permissão no catálogo, não um novo teste de papel.
 - Áreas grandes viram pacote com um módulo por responsabilidade (ex.: `app/services/certificates/`, `app/services/notifications/`, `app/services/academic/`, `app/services/assessment/`, `app/services/secretariat/`, `app/services/registration/`, `app/services/completion/`, `app/services/tuition/`, `app/services/contracts/`, `app/services/saas/`, `app/services/admissions/`, `app/services/retention/`, `app/services/social/`, `app/services/access/`, `app/services/warehouse/`, `app/routers/admin/`).
 - Infraestrutura transversal em `app/core/` com um módulo por preocupação (ex.: `tenancy.py` filtra leitura; `tenant_integrity.py` valida gravação).
-- Cache dos apps (versão por área): `data_versions` guarda, por instituição, a versão de cada área (`notifications`, `agenda`, `report_card`, `dependents`) e `GET /sync/versions` a devolve. A versão sobe sozinha a cada gravação nas tabelas registradas em `app/services/sync/areas.py` (`track(model, area)`, listener em `app/core/change_tracking.py`). Tela nova do app com cache: registre as tabelas que a alimentam na área (ou crie uma).
+- Cache dos apps (versão por área): `data_versions` guarda, por instituição, a versão de cada área (`notifications`, `agenda`, `report_card`, `dependents`, `benefits`) e `GET /sync/versions` a devolve. A versão sobe sozinha a cada gravação nas tabelas registradas em `app/services/sync/areas.py` (`track(model, area)`, listener em `app/core/change_tracking.py`). Tela nova do app com cache: registre as tabelas que a alimentam na área (ou crie uma).
 - Ids: UUID versão 7 gerado pela aplicação (`app/core/ids.py`: `new_id`, crescente no tempo; `parse_id` para texto). Colunas de id e chaves estrangeiras são `Mapped[UUID]` (tipo `IdType`, que aceita o id em texto). Nunca trate id como número: nada de `int(id)`, sentinela `[-1]` em `IN` (lista vazia já funciona) nem aritmética para ordenar.
 
 **Frontend**
@@ -72,6 +72,7 @@ python scripts/check_user_dossier_flow.py
 python scripts/check_multi_roles_flow.py
 python scripts/check_public_site_flow.py
 python scripts/check_sync_flow.py
+python scripts/check_benefit_vouchers_flow.py
 python scripts/check_rls.py                     # Postgres com superusuario em DATABASE_URL; cria role/banco proprios
 alembic upgrade head && alembic check           # migration alinhada aos models
 ```

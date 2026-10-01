@@ -4,7 +4,7 @@ import {
   HomeIcon, BookOpenIcon, ChartBarIcon, MicrophoneIcon, Cog6ToothIcon,
   UsersIcon, AcademicCapIcon, CalendarDaysIcon, ChatBubbleLeftRightIcon,
   BanknotesIcon, Squares2X2Icon, MapIcon, ShieldCheckIcon, DocumentTextIcon,
-  BuildingLibraryIcon, GlobeAltIcon, BellIcon, CreditCardIcon, RectangleStackIcon, PencilSquareIcon, ClipboardDocumentCheckIcon, ChartPieIcon, BriefcaseIcon, ArchiveBoxIcon, BuildingStorefrontIcon, KeyIcon, DocumentDuplicateIcon, InboxArrowDownIcon, MegaphoneIcon, GiftIcon, FolderOpenIcon, DocumentChartBarIcon, UserGroupIcon,
+  BuildingLibraryIcon, GlobeAltIcon, BellIcon, CreditCardIcon, RectangleStackIcon, PencilSquareIcon, ClipboardDocumentCheckIcon, ChartPieIcon, BriefcaseIcon, ArchiveBoxIcon, BuildingStorefrontIcon, KeyIcon, DocumentDuplicateIcon, InboxArrowDownIcon, MegaphoneIcon, GiftIcon, FolderOpenIcon, DocumentChartBarIcon, UserGroupIcon, QrCodeIcon,
 } from '@heroicons/react/24/outline';
 
 interface MenuItem { name: string; href: string; icon: ComponentType<{ className?: string }> }
@@ -114,6 +114,7 @@ const permissionMenu: { permissions: string[]; item: MenuItem }[] = [
   { permissions: ['academic.manage'], item: { name: 'Acadêmico', href: '/admin/academic', icon: RectangleStackIcon } },
   { permissions: ['warehouse.request'], item: { name: 'Requisições de material', href: '/warehouse', icon: ArchiveBoxIcon } },
   { permissions: ['warehouse.manage', 'warehouse.reports'], item: { name: 'Almoxarifado', href: '/admin/warehouse', icon: BuildingStorefrontIcon } },
+  { permissions: ['benefits.redeem'], item: { name: 'Validar benefícios', href: '/benefit-validation', icon: QrCodeIcon } },
   { permissions: ['access.manage'], item: { name: 'Perfis de acesso', href: '/admin/access', icon: KeyIcon } },
 ];
 

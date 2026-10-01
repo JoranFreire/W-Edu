@@ -30,7 +30,7 @@ from app.models.contracts import ContractTemplate, EnrollmentContract
 from app.models.saas import InstitutionSubscription, PlatformInvoice, SaasPlan
 from app.models.sales import LeadStatus, SalesLead
 from app.models.admissions import AdmissionApplication, AdmissionCall, ApplicationDocument
-from app.models.social_programs import BenefitDelivery, BenefitItem, BenefitStockEntry, FundingSource
+from app.models.social_programs import BenefitDelivery, BenefitItem, BenefitStockEntry, BenefitVoucher, FundingSource
 from app.models.reference_values import MinimumWageValue
 from app.models.access import AccessRole, AccessRoleAssignment
 from app.models.warehouse import MaterialRequest, MaterialRequestLine, WarehouseEntry, WarehouseItem
@@ -88,7 +88,7 @@ __all__ = [
     "TuitionPlan", "StudentDiscount", "ContractTemplate", "EnrollmentContract",
     "SaasPlan", "SalesLead", "LeadStatus", "InstitutionSubscription", "PlatformInvoice",
     "AdmissionCall", "AdmissionApplication", "ApplicationDocument",
-    "FundingSource", "BenefitItem", "BenefitStockEntry", "BenefitDelivery", "MinimumWageValue",
+    "FundingSource", "BenefitItem", "BenefitStockEntry", "BenefitDelivery", "BenefitVoucher", "MinimumWageValue",
     "AccessRole", "AccessRoleAssignment",
     "WarehouseItem", "WarehouseEntry", "MaterialRequest", "MaterialRequestLine",
 ]

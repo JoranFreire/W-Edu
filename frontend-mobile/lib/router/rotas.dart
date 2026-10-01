@@ -12,6 +12,7 @@ class Rotas {
   static const boletim = '/boletim';
   static const dependentes = '/dependentes';
   static const perfil = '/perfil';
+  static const beneficios = '/beneficios';
 
   static String dependente(String alunoId) => '$dependentes/$alunoId';
 }
@@ -61,6 +62,9 @@ String? redirecionar(AsyncValue<Usuario?> auth, String local) {
   final usuario = auth.value;
   if (usuario == null) return local == Rotas.login ? null : Rotas.login;
   if (naEntrada) return Rotas.inicio;
+
+  // Benefícios do próprio aluno (o responsável os vê em cada dependente).
+  if (local == Rotas.beneficios && !usuario.ehAluno) return Rotas.inicio;
 
   // Aba de um papel que a pessoa não tem (ex.: link antigo depois de trocar de papel).
   final aba = Aba.doCaminho(local);

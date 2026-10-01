@@ -64,6 +64,8 @@ class BenefitItemOut(BaseModel):
     requires_attendance: bool
     is_active: bool
     stock: int
+    # Liberado em QR e ainda nao retirado: o disponivel para novas entregas e stock - reserved.
+    reserved: int = 0
 
 
 class StockEntryCreate(BaseModel):

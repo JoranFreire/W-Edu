@@ -137,3 +137,22 @@ Map<String, dynamic> dependenteJson() => {
       'is_financial': true,
       'can_pick_up': true,
     };
+
+Map<String, dynamic> beneficioJson(String id, {String status = 'released', String? validoAte, String item = 'Lanche'}) => {
+      'id': id,
+      'code': 'COD$id',
+      'qr_payload': 'wedu-beneficio:COD$id',
+      'status': status,
+      'item_id': 'it-1',
+      'item_name': item,
+      'item_kind': 'snack',
+      'unit': 'unidade',
+      'quantity': 1,
+      'student': {'id': 'u-1', 'name': 'Ana Souza', 'email': 'ana@escola.example.com'},
+      'class_offering_id': 'o-1',
+      'class_offering_name': 'Turma A',
+      'scheduled_meeting_id': null,
+      'valid_until': validoAte,
+      'released_at': '2026-10-01T10:00:00Z',
+      'redeemed_at': status == 'redeemed' ? '2026-10-01T12:00:00Z' : null,
+    };

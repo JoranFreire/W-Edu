@@ -1,6 +1,6 @@
 # W-Edu — App mobile
 
-App Flutter para alunos e responsáveis: início, avisos, agenda, boletim e dependentes.
+App Flutter para alunos e responsáveis: início, avisos, agenda, boletim, dependentes e benefícios liberados (QR para a retirada, disponível offline).
 As abas seguem os papéis da pessoa na instituição (quem é aluno e responsável vê as duas coisas).
 
 Stack: Riverpod 3 + go_router + dio + flutter_secure_storage, organizado por feature.
@@ -16,7 +16,7 @@ lib/
 
 ## Cache e uso offline
 
-As telas pessoais (avisos, agenda, boletim, dependentes) e a sessão ficam salvas em disco, como o catálogo do
+As telas pessoais (avisos, agenda, boletim, dependentes, benefícios) e a sessão ficam salvas em disco, como o catálogo do
 WS-ServicePortal. Ao abrir, o app mostra o que está salvo na hora e consulta `GET /sync/versions`: só baixa de novo
 a área cuja versão mudou (a versão sobe sozinha no backend a cada gravação nas tabelas da área). Sem rede, fica com o
 que está salvo. Puxar para atualizar ignora a versão e baixa direto; voltar para o app confere as versões de novo; sair

@@ -10,6 +10,7 @@ export const familyEndpoints = {
     occurrences: (studentId: string) => `/guardians/me/dependents/${studentId}/occurrences`,
     acknowledge: (studentId: string, occurrenceId: string) => `/guardians/me/dependents/${studentId}/occurrences/${occurrenceId}/acknowledge`,
     agenda: (studentId: string) => `/guardians/me/dependents/${studentId}/agenda`,
+    vouchers: (studentId: string) => `/guardians/me/dependents/${studentId}/vouchers`,
   },
   school: {
     occurrences: '/school/occurrences',

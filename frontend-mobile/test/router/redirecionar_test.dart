@@ -41,4 +41,9 @@ void main() {
     expect(redirecionar(AsyncData(responsavel), Rotas.dependente('s-1')), isNull);
     expect(redirecionar(AsyncData(aluno), Rotas.dependentes), Rotas.inicio);
   });
+
+  test('benefícios próprios só para quem é aluno', () {
+    expect(redirecionar(AsyncData(_usuario(['student'])), Rotas.beneficios), isNull);
+    expect(redirecionar(AsyncData(_usuario(['guardian'])), Rotas.beneficios), Rotas.inicio);
+  });
 }

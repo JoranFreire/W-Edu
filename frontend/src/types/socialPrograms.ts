@@ -27,6 +27,8 @@ export interface BenefitItem {
   requires_attendance: boolean;
   is_active: boolean;
   stock: number;
+  /** Liberado em QR e ainda nao retirado; disponivel = stock - reserved. */
+  reserved: number;
 }
 
 export type BenefitItemInput = Pick<BenefitItem, 'name' | 'kind' | 'unit' | 'unit_cost_cents' | 'requires_attendance'>;

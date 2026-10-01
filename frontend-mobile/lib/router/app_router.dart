@@ -6,6 +6,7 @@ import '../features/agenda/screens/agenda_screen.dart';
 import '../features/auth/auth_providers.dart';
 import '../features/auth/screens/carregando_screen.dart';
 import '../features/auth/screens/login_screen.dart';
+import '../features/beneficios/screens/beneficios_screen.dart';
 import '../features/avisos/screens/avisos_screen.dart';
 import '../features/boletim/screens/boletim_screen.dart';
 import '../features/dependentes/screens/dependente_screen.dart';
@@ -34,7 +35,11 @@ final routerProvider = Provider<GoRouter>((ref) {
       StatefulShellRoute.indexedStack(
         builder: (_, _, shell) => ShellScreen(shell: shell),
         branches: [
-          _aba(GoRoute(path: Rotas.inicio, builder: (_, _) => const InicioScreen())),
+          _aba(GoRoute(
+            path: Rotas.inicio,
+            builder: (_, _) => const InicioScreen(),
+            routes: [GoRoute(path: Rotas.beneficios.substring(1), builder: (_, _) => const BeneficiosScreen())],
+          )),
           _aba(GoRoute(path: Rotas.avisos, builder: (_, _) => const AvisosScreen())),
           _aba(GoRoute(path: Rotas.agenda, builder: (_, _) => const AgendaScreen())),
           _aba(GoRoute(path: Rotas.boletim, builder: (_, _) => const BoletimScreen())),

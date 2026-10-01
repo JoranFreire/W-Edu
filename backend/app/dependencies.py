@@ -117,6 +117,11 @@ def get_current_school_staff(current: Student = Depends(get_current_student)) ->
     return ensure_permission(current, "school_life.access", "Acesso restrito à equipe escolar")
 
 
+def get_current_benefit_validator(current: Student = Depends(get_current_student)) -> Student:
+    """Permissao `benefits.redeem`: quem le o QR do beneficio e confirma a retirada."""
+    return ensure_permission(current, "benefits.redeem", "Sem permissão para validar benefícios")
+
+
 def get_current_finance_staff(current: Student = Depends(get_current_student)) -> Student:
     """Permissao `finance.access`: financeiro educacional."""
     return ensure_permission(current, "finance.access", "Acesso restrito ao financeiro")

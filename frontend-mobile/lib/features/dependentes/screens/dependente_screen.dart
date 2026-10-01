@@ -5,10 +5,12 @@ import '../../../core/cache/observar_area.dart';
 import '../../agenda/agenda_providers.dart';
 import '../../agenda/widgets/agenda_lista.dart';
 import '../../boletim/boletim_providers.dart';
+import '../../beneficios/beneficios_providers.dart';
+import '../../beneficios/widgets/beneficios_lista.dart';
 import '../../boletim/widgets/boletim_lista.dart';
 import '../dependentes_providers.dart';
 
-/// Um dependente: boletim e agenda da turma dele.
+/// Um dependente: boletim, agenda da turma e benefícios (com o QR para a retirada).
 class DependenteScreen extends ConsumerWidget {
   const DependenteScreen({super.key, required this.alunoId});
 
@@ -19,11 +21,11 @@ class DependenteScreen extends ConsumerWidget {
     final dependentes = ref.watch(dependentesProvider).value ?? const [];
     final nome = dependentes.where((d) => d.alunoId == alunoId).map((d) => d.nome).firstOrNull ?? 'Dependente';
     return DefaultTabController(
-      length: 2,
+      length: 3,
       child: Scaffold(
         appBar: AppBar(
           title: Text(nome),
-          bottom: const TabBar(tabs: [Tab(text: 'Boletim'), Tab(text: 'Agenda')]),
+          bottom: const TabBar(tabs: [Tab(text: 'Boletim'), Tab(text: 'Agenda'), Tab(text: 'Benefícios')]),
         ),
         body: TabBarView(
           children: [
@@ -34,6 +36,10 @@ class DependenteScreen extends ConsumerWidget {
             AgendaLista(
               valor: ref.watch(agendaDoDependenteProvider(alunoId)),
               onRecarregar: () => ref.atualizarDaApi(agendaDoDependenteProvider(alunoId), ChavesAgenda.doDependente(alunoId)),
+            ),
+            BeneficiosLista(
+              valor: ref.watch(beneficiosDoDependenteProvider(alunoId)),
+              onRecarregar: () => ref.atualizarDaApi(beneficiosDoDependenteProvider(alunoId), ChavesBeneficios.doDependente(alunoId)),
             ),
           ],
         ),
