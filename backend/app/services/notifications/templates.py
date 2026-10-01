@@ -31,14 +31,27 @@ class NotificationTemplateService:
         return self.repo.update(template)
 
     def get_for(self, key: str, channel: NotificationChannel) -> NotificationTemplate:
-        """Template do canal; sem ele, cai no template interno do mesmo evento."""
+        """Template ativo do canal; sem ele, o interno ativo do evento; por fim, o texto padrao da plataforma."""
         self.ensure_defaults()
-        template = self.repo.get_by_key_and_channel(key, channel)
+        template = self._active(key, channel)
         if not template and channel != NotificationChannel.internal:
-            template = self.repo.get_by_key_and_channel(key, NotificationChannel.internal)
+            template = self._active(key, NotificationChannel.internal)
+        template = template or self._platform_default(key)
         if not template:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Template não encontrado")
         return template
+
+    def _active(self, key: str, channel: NotificationChannel) -> NotificationTemplate | None:
+        template = self.repo.get_by_key_and_channel(key, channel)
+        return template if template and template.is_active else None
+
+    @staticmethod
+    def _platform_default(key: str) -> NotificationTemplate | None:
+        """Texto padrao (nao persistido) usado quando a instituicao desativa os templates do evento."""
+        for (event_type, channel), (title_template, body_template) in DEFAULT_TEMPLATES.items():
+            if event_type.value == key and channel == NotificationChannel.internal:
+                return NotificationTemplate(key=key, channel=channel, title_template=title_template, body_template=body_template)
+        return None
 
     def ensure_defaults(self) -> None:
         existing = {(template.key, template.channel) for template in self.repo.list_all()}

@@ -62,6 +62,7 @@ EXPECTED: list[ExpectedRoute] = [
     ("POST", "/schedule/meetings/{meeting_id}/practical-assessments", "get_current_admin_or_coordinator"),
     ("GET", "/schedule/meetings/{meeting_id}/attendance-report", "get_current_admin_or_coordinator"),
     ("POST", "/notifications/events/process-due", "get_current_admin_or_coordinator"),
+    ("POST", "/notifications/events/{event_id}/retry", "get_current_admin_or_coordinator"),
     ("GET", "/finance/subscriptions", "get_current_admin_or_company_manager"),
     ("POST", "/finance/charges/{charge_id}/gateway/asaas", "get_current_admin"),
     ("GET", "/analytics/overview", "get_current_admin_or_company_manager"),

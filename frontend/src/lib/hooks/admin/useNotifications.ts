@@ -4,7 +4,7 @@ import { useCallback } from 'react';
 import api from '@/lib/api/client';
 import { endpoints } from '@/lib/api/endpoints';
 import { useApiQuery } from '@/lib/hooks/useApiQuery';
-import type { NotificationEvent, NotificationTemplate } from '@/types/notification';
+import type { NotificationEvent, NotificationTemplate, NotificationTemplateInput } from '@/types/notification';
 
 interface NotificationsData {
   templates: NotificationTemplate[];
@@ -34,14 +34,17 @@ export function useNotifications() {
     reload();
     return processed.length;
   };
-  const markSent = async (id: number) => {
-    await api.post(endpoints.notifications.eventSent(id));
+  const retryEvent = async (id: number) => {
+    await api.post(endpoints.notifications.eventRetry(id));
     reload();
   };
-  const markFailed = async (id: number, reason: string) => {
-    await api.post(endpoints.notifications.eventFailed(id), null, { params: { error_message: reason } });
+  /** Cria o template ou, quando ja existe (`isNew` falso), altera titulo, mensagem e situacao. */
+  const saveTemplate = async (input: NotificationTemplateInput, isNew: boolean) => {
+    const { key, channel, title_template, body_template, is_active } = input;
+    if (isNew) await api.post(endpoints.notifications.templates, { key, channel, title_template, body_template });
+    else await api.patch(endpoints.notifications.template(key, channel), { title_template, body_template, is_active });
     reload();
   };
 
-  return { ...data, loading, error, reload, processDue, markSent, markFailed };
+  return { ...data, loading, error, reload, processDue, retryEvent, saveTemplate };
 }

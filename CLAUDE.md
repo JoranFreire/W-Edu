@@ -56,6 +56,7 @@ python scripts/check_admissions_flow.py
 python scripts/check_social_flow.py
 python scripts/check_access_flow.py
 python scripts/check_warehouse_flow.py
+python scripts/check_notifications_flow.py
 python scripts/check_rls.py                     # Postgres com superusuario em DATABASE_URL; cria role/banco proprios
 alembic upgrade head && alembic check           # migration alinhada aos models
 ```

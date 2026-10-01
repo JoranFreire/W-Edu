@@ -50,19 +50,9 @@ def create_event(data: NotificationEventCreate, db: Session = Depends(get_db), _
     return NotificationEventService(db).create(data)
 
 
-@router.post("/events/{event_id}/mark-sent", response_model=NotificationEventOut)
-def mark_sent(event_id: int, db: Session = Depends(get_db), _: Student = Depends(get_current_admin_or_coordinator)):
-    return NotificationEventService(db).mark_sent(event_id)
-
-
-@router.post("/events/{event_id}/mark-failed", response_model=NotificationEventOut)
-def mark_failed(
-    event_id: int,
-    error_message: str,
-    db: Session = Depends(get_db),
-    _: Student = Depends(get_current_admin_or_coordinator),
-):
-    return NotificationEventService(db).mark_failed(event_id, error_message)
+@router.post("/events/{event_id}/retry", response_model=NotificationEventOut)
+def retry_event(event_id: int, db: Session = Depends(get_db), _: Student = Depends(get_current_admin_or_coordinator)):
+    return NotificationEventService(db).retry(event_id)
 
 
 @router.post("/events/process-due", response_model=list[NotificationEventOut])

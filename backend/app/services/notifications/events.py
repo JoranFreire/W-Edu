@@ -72,17 +72,13 @@ class NotificationEventService:
             scheduled_for=data.scheduled_for,
         )
 
-    def mark_sent(self, event_id: int) -> NotificationEvent:
+    def retry(self, event_id: int) -> NotificationEvent:
+        """Devolve um evento que falhou para a fila; o worker tenta entregar de novo."""
         event = self._get_or_404(event_id)
-        event.status = NotificationStatus.sent
-        event.sent_at = datetime.now(timezone.utc)
+        if event.status != NotificationStatus.failed:
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Só eventos com falha podem ser reenviados")
+        event.status = NotificationStatus.pending
         event.error_message = None
-        return self.repo.update(event)
-
-    def mark_failed(self, event_id: int, error_message: str) -> NotificationEvent:
-        event = self._get_or_404(event_id)
-        event.status = NotificationStatus.failed
-        event.error_message = error_message
         return self.repo.update(event)
 
     def _get_or_404(self, event_id: int) -> NotificationEvent:

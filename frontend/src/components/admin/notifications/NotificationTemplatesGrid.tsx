@@ -1,4 +1,6 @@
+import { PencilIcon } from '@heroicons/react/24/outline';
 import CollectionView from '@/components/common/CollectionView';
+import { iconButtonCls } from '@/components/common/formStyles';
 import type { ViewMode } from '@/lib/hooks/useViewMode';
 import { notificationChannelLabels, notificationEventLabel } from '@/lib/notifications/labels';
 import type { NotificationTemplate } from '@/types/notification';
@@ -22,7 +24,19 @@ function TemplateKey({ value }: { value: string }) {
   return <code className="text-[11px] text-gray-400 dark:text-gray-500">{value}</code>;
 }
 
-export default function NotificationTemplatesGrid({ templates, mode }: { templates: NotificationTemplate[]; mode: ViewMode }) {
+function EditButton({ template, onEdit }: { template: NotificationTemplate; onEdit: (template: NotificationTemplate) => void }) {
+  return (
+    <button type="button" onClick={() => onEdit(template)} aria-label={`Editar template ${notificationEventLabel(template.key)} (${notificationChannelLabels[template.channel]})`} className={iconButtonCls}>
+      <PencilIcon className="h-4 w-4" />
+    </button>
+  );
+}
+
+export default function NotificationTemplatesGrid({ templates, mode, onEdit }: {
+  templates: NotificationTemplate[];
+  mode: ViewMode;
+  onEdit: (template: NotificationTemplate) => void;
+}) {
   if (templates.length === 0) {
     return <div className="rounded-xl border border-gray-200 bg-white p-5 text-sm text-gray-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400">Nenhum template cadastrado.</div>;
   }
@@ -36,7 +50,10 @@ export default function NotificationTemplatesGrid({ templates, mode }: { templat
         <div className="rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
           <div className="flex items-start justify-between gap-2">
             <h3 className="text-sm font-semibold text-gray-900 dark:text-white">{notificationEventLabel(template.key)}</h3>
-            <span className="shrink-0 text-xs text-gray-500 dark:text-gray-400">{notificationChannelLabels[template.channel]}</span>
+            <div className="flex shrink-0 items-center gap-1">
+              <span className="text-xs text-gray-500 dark:text-gray-400">{notificationChannelLabels[template.channel]}</span>
+              <EditButton template={template} onEdit={onEdit} />
+            </div>
           </div>
           <SentTitle template={template} className="mt-2 text-xs text-gray-500 dark:text-gray-400" />
           <div className="mt-3 flex items-center justify-between gap-2">
@@ -55,6 +72,7 @@ export default function NotificationTemplatesGrid({ templates, mode }: { templat
             <TemplateKey value={template.key} />
             <span className="text-xs text-gray-500 dark:text-gray-400">{notificationChannelLabels[template.channel]}</span>
             <ActiveBadge active={template.is_active} />
+            <EditButton template={template} onEdit={onEdit} />
           </div>
         </div>
       )}
