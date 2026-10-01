@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { AcademicCapIcon, ArrowsRightLeftIcon, BanknotesIcon, BriefcaseIcon, ChartPieIcon, ClipboardDocumentCheckIcon, ClockIcon, DocumentTextIcon, ExclamationTriangleIcon, UserGroupIcon } from '@heroicons/react/24/outline';
+import { AcademicCapIcon, ArrowsRightLeftIcon, BanknotesIcon, BriefcaseIcon, ChartPieIcon, ClipboardDocumentCheckIcon, ClockIcon, DocumentDuplicateIcon, DocumentTextIcon, ExclamationTriangleIcon, UserGroupIcon } from '@heroicons/react/24/outline';
 import ConclusionPanel from '@/components/secretariat/ConclusionPanel';
 import CreditTransfersPanel from '@/components/secretariat/CreditTransfersPanel';
 import DeclarationsPanel from '@/components/secretariat/DeclarationsPanel';
@@ -11,6 +11,7 @@ import EnrollmentTimeline from '@/components/secretariat/EnrollmentTimeline';
 import MovementActions from '@/components/secretariat/MovementActions';
 import TranscriptTable from '@/components/secretariat/TranscriptTable';
 import OfficeIntegralizationTab from '@/components/completion/OfficeIntegralizationTab';
+import EnrollmentContractsTab from '@/components/contracts/EnrollmentContractsTab';
 import OfficeInternshipTab from '@/components/completion/OfficeInternshipTab';
 import OfficeRegistrationTab from '@/components/registration/OfficeRegistrationTab';
 import EnrollmentFinanceTab from '@/components/tuition/EnrollmentFinanceTab';
@@ -27,7 +28,7 @@ import { useTerminology } from '@/lib/hooks/useTerminology';
 import { useAuthStore } from '@/store/authStore';
 import { isAdminRole } from '@/types/auth';
 
-type FileTab = 'transcript' | 'registration' | 'integralization' | 'internship' | 'finance' | 'credits' | 'documents' | 'guardians' | 'occurrences' | 'timeline';
+type FileTab = 'transcript' | 'registration' | 'integralization' | 'internship' | 'finance' | 'contracts' | 'credits' | 'documents' | 'guardians' | 'occurrences' | 'timeline';
 
 const baseTabs: TabItem<FileTab>[] = [
   { id: 'transcript', label: 'Histórico escolar', icon: AcademicCapIcon },
@@ -36,6 +37,7 @@ const baseTabs: TabItem<FileTab>[] = [
   { id: 'internship', label: 'Estágio e TCC', icon: BriefcaseIcon },
   { id: 'credits', label: 'Aproveitamento', icon: ArrowsRightLeftIcon },
   { id: 'documents', label: 'Documentos e conclusão', icon: DocumentTextIcon },
+  { id: 'contracts', label: 'Contratos', icon: DocumentDuplicateIcon },
   { id: 'guardians', label: 'Responsáveis', icon: UserGroupIcon },
   { id: 'occurrences', label: 'Ocorrências', icon: ExclamationTriangleIcon },
   { id: 'timeline', label: 'Movimentações', icon: ClockIcon },
@@ -80,6 +82,7 @@ export default function EnrollmentFilePage() {
         {tab === 'integralization' && <OfficeIntegralizationTab enrollmentId={enrollmentId} />}
         {tab === 'internship' && <OfficeInternshipTab enrollmentId={enrollmentId} editable={enrollment.status === 'active'} />}
         {tab === 'finance' && <EnrollmentFinanceTab enrollmentId={enrollmentId} canSettle={isAdminRole(role)} />}
+        {tab === 'contracts' && <EnrollmentContractsTab enrollmentId={enrollmentId} />}
         {tab === 'credits' && (
           <CreditTransfersPanel enrollmentId={enrollmentId} pending={pending} canDecide={canDecide} editable={open} onChanged={reloadTranscript} />
         )}

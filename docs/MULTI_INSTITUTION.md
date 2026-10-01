@@ -193,7 +193,7 @@ Implementado na Fase 14 (entrega 1), em `/secretariat`: `program_enrollment_even
 ### Profissionalizante
 
 - Continua usando cursos, trilhas, turmas e certificados atuais.
-- Programas tecnicos com matriz, estagio supervisionado e carga horaria minima.
+- Programas tecnicos com matriz, estagio supervisionado e carga horaria minima. Atendido pelos requisitos de conclusao da Fase 16: carga horaria total e horas de estagio obrigatorio do programa, com diario de estagio validado pelo orientador.
 - Futuro: integracao com o SISTEC.
 
 ---
@@ -201,10 +201,10 @@ Implementado na Fase 14 (entrega 1), em `/secretariat`: `program_enrollment_even
 ## 7. Financeiro Educacional
 
 - Mensalidade por programa, turma-grupo ou credito cursado. Implementado na Fase 17 (entrega 1), em `/tuition`: `tuition_plans` (periodo letivo, base programa/turma-grupo/credito, valor, parcelas e primeiro vencimento) gera as parcelas em `charges` (agora com matricula, plano, numero da parcela, pagador, valor bruto, descontos, multa, juros e valor pago; unicas por matricula/plano/parcela, entao gerar de novo so cria as que faltam). Por credito, o valor usa os creditos inscritos no periodo.
-- Contrato de matricula e rematricula gerado no GED.
+- Contrato de matricula e rematricula gerado no GED. Implementado na Fase 17 (entrega 2), em `/contracts`: `contract_templates` (texto com campos como `{student_name}`, `{payer_name}` e `{term_name}`) e `enrollment_contracts` (texto congelado na emissao, codigo de validacao, aceite com assinatura de integridade sobre codigo, texto, quem aceitou e quando), com TenantMixin e RLS. Cada emissao, aceite ou cancelamento grava nova versao em PDF (texto paginado, `render_paged_pdf`) no documento do aluno no GED, que fica marcado como assinado. Aceitam o proprio aluno ou o responsavel financeiro; `/validate-contract` confere o codigo e detecta texto alterado.
 - Bolsas, descontos (irmaos, pontualidade, convenio) e multa/juros. Implementado na Fase 17 (entrega 1): `student_discounts` (bolsa, irmaos, convenio, pontualidade ou outro; percentual ou valor fixo; vigencia), aplicados na geracao; a pontualidade so vale pagando ate o vencimento. Multa e juros de mora (padrao 2% e 1% ao mes, pro rata die) ficam em `institutions.settings["finance"]`; regras puras em `app/services/tuition/rules.py`. A baixa calcula o valor pago na data.
 - Responsavel financeiro distinto do aluno. Implementado na Fase 17 (entrega 1): o vinculo de responsavel marcado como financeiro vira o pagador (`charges.payer_id`) das parcelas geradas; aluno e pagador veem o extrato em `/tuition/my/charges`.
-- Planos SaaS por instituicao, cobrados pelo `super_admin`.
+- Planos SaaS por instituicao, cobrados pelo `super_admin`. Implementado na Fase 17 (entrega 2), em `/saas`: tabelas globais `saas_plans` (preco mensal e limite opcional de alunos ativos), `institution_subscriptions` (uma por instituicao; teste, ativa, em atraso ou cancelada) e `platform_invoices` (uma por assinatura e periodo; no teste o valor e zero). O cadastro de aluno respeita o limite do plano (`app/services/saas/seats.py`); o admin da instituicao ve plano, uso e faturas em `/saas/current`.
 
 ---
 

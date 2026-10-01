@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { CalendarDaysIcon, ClipboardDocumentCheckIcon } from '@heroicons/react/24/outline';
+import { CalendarDaysIcon, ClipboardDocumentCheckIcon, DocumentDuplicateIcon } from '@heroicons/react/24/outline';
 import { secondaryButtonCls } from '@/components/common/formStyles';
 import SecretariatEnrollmentsList from '@/components/secretariat/SecretariatEnrollmentsList';
 
@@ -16,6 +16,9 @@ export default function SecretariatPage() {
         <div className="flex flex-wrap gap-2">
           <Link href="/admin/secretariat/registration" className={secondaryButtonCls}>
             <ClipboardDocumentCheckIcon className="h-4 w-4" /> Janelas de matrícula
+          </Link>
+          <Link href="/admin/secretariat/contracts" className={secondaryButtonCls}>
+            <DocumentDuplicateIcon className="h-4 w-4" /> Modelos de contrato
           </Link>
           <Link href="/admin/secretariat/agenda" className={secondaryButtonCls}>
             <CalendarDaysIcon className="h-4 w-4" /> Agenda das turmas

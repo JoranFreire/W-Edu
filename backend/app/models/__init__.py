@@ -26,6 +26,8 @@ from app.models.class_diary import ClassDiaryEntry, DiaryAttendance
 from app.models.course_registration import OfferingTimeSlot, RegistrationWindow
 from app.models.completion import ComplementaryActivity, FinalProject, Internship, InternshipLog
 from app.models.tuition import StudentDiscount, TuitionPlan
+from app.models.contracts import ContractTemplate, EnrollmentContract
+from app.models.saas import InstitutionSubscription, PlatformInvoice, SaasPlan
 from app.models.guardians import StudentGuardian
 from app.models.school_life import AgendaItem, StudentOccurrence
 from app.models.secretariat import AcademicDeclaration, CreditTransfer, ProgramEnrollmentEvent, TermRegistration
@@ -74,5 +76,6 @@ __all__ = [
     "GradingScheme", "AssessmentItem", "GradeEntry", "ClassDiaryEntry", "DiaryAttendance",
     "OfferingPeriodClosure", "PeriodResult", "ProgramEnrollmentEvent", "TermRegistration", "CreditTransfer", "AcademicDeclaration", "StudentGuardian", "StudentOccurrence", "AgendaItem",
     "RegistrationWindow", "OfferingTimeSlot", "ComplementaryActivity", "Internship", "InternshipLog", "FinalProject",
-    "TuitionPlan", "StudentDiscount",
+    "TuitionPlan", "StudentDiscount", "ContractTemplate", "EnrollmentContract",
+    "SaasPlan", "InstitutionSubscription", "PlatformInvoice",
 ]

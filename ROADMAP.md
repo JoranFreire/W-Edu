@@ -4,7 +4,7 @@
 
 **Fase:** 2 — Voz com Professor IA (em andamento)  
 **Ultima atualizacao:** 2026-10-01  
-**Proximo marco:** Fase 17 — contratos no GED e planos SaaS por instituicao. Mensalidades, bolsas, descontos, multa/juros e responsavel financeiro concluidos.
+**Proximo marco:** itens futuros (BNCC/Educacenso, ENADE/e-MEC, SISTEC) e pendencias das fases 2, 6, 8, 9, 10 e 13. Fases 15, 16 e 17 concluidas.
 
 ## Visao Alvo
 
@@ -303,12 +303,12 @@ Objetivo: estrutura comum a escola, universidade e profissionalizante.
 
 ### Fase 17 — Perfil Profissionalizante e Financeiro Educacional
 
-- [ ] Programas tecnicos com estagio supervisionado e carga horaria minima.
+- [x] Programas tecnicos com estagio supervisionado e carga horaria minima (nivel tecnico do programa com carga total e horas de estagio obrigatorio exigidas na conclusao; diario de estagio validado pelo orientador, Fase 16).
 - [x] Mensalidade por programa, turma-grupo ou credito (planos por periodo letivo com geracao idempotente das parcelas).
-- [ ] Contratos de matricula/rematricula no GED.
+- [x] Contratos de matricula/rematricula no GED (modelos com campos, PDF versionado no GED, aceite eletronico do aluno ou do responsavel financeiro e validacao publica).
 - [x] Bolsas, descontos, multa e juros (bolsa, irmaos, convenio e pontualidade com vigencia; multa e juros pro rata configuraveis por instituicao).
 - [x] Responsavel financeiro distinto do aluno (pagador da parcela e extrato proprio em Mensalidades).
-- [ ] Planos SaaS por instituicao.
+- [x] Planos SaaS por instituicao (catalogo, assinatura com periodo de teste, faturas mensais e limite de alunos ativos).
 - [ ] Futuro: SISTEC.
 
 ---

@@ -40,3 +40,6 @@ backend/loadtest/seed.json
 # Playwright
 test-results/
 playwright-report/
+
+# Arquivos gerados em tempo de execucao (GED, certificados, trabalhos, videos)
+backend/storage/

@@ -4,7 +4,7 @@ import {
   HomeIcon, BookOpenIcon, ChartBarIcon, MicrophoneIcon, Cog6ToothIcon,
   UsersIcon, AcademicCapIcon, CalendarDaysIcon, ChatBubbleLeftRightIcon,
   BanknotesIcon, Squares2X2Icon, MapIcon, ShieldCheckIcon, DocumentTextIcon,
-  BuildingLibraryIcon, GlobeAltIcon, BellIcon, RectangleStackIcon, PencilSquareIcon, ClipboardDocumentCheckIcon, ChartPieIcon, BriefcaseIcon, FolderOpenIcon, DocumentChartBarIcon, UserGroupIcon,
+  BuildingLibraryIcon, GlobeAltIcon, BellIcon, CreditCardIcon, RectangleStackIcon, PencilSquareIcon, ClipboardDocumentCheckIcon, ChartPieIcon, BriefcaseIcon, DocumentDuplicateIcon, FolderOpenIcon, DocumentChartBarIcon, UserGroupIcon,
 } from '@heroicons/react/24/outline';
 
 interface MenuItem { name: string; href: string; icon: ComponentType<{ className?: string }> }
@@ -20,6 +20,7 @@ export const studentMenu: MenuItem[] = [
   { name: 'Histórico escolar', href: '/transcript', icon: DocumentChartBarIcon },
   { name: 'Integralização', href: '/completion', icon: ChartPieIcon },
   { name: 'Mensalidades', href: '/payments', icon: BanknotesIcon },
+  { name: 'Contratos', href: '/contracts', icon: DocumentDuplicateIcon },
   { name: 'Certificados', href: '/certificates', icon: ShieldCheckIcon },
   { name: 'Sessões de Voz', href: '/sessions', icon: MicrophoneIcon },
   { name: 'Configurações', href: '/settings', icon: Cog6ToothIcon },
@@ -48,6 +49,7 @@ export const adminMenu: MenuItem[] = [
 
 export const superAdminMenu: MenuItem[] = [
   { name: 'Plataforma', href: '/platform/institutions', icon: GlobeAltIcon },
+  { name: 'Planos SaaS', href: '/platform/plans', icon: CreditCardIcon },
   ...adminMenu,
 ];
 
@@ -72,7 +74,7 @@ export const instructorMenu: MenuItem[] = [
   { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
   { name: 'Diário de classe', href: '/teaching', icon: PencilSquareIcon },
   { name: 'Orientações', href: '/teaching/advising', icon: BriefcaseIcon },
-  ...studentMenu.filter((item) => !['/dashboard', '/school-agenda', '/registration', '/completion', '/payments'].includes(item.href)),
+  ...studentMenu.filter((item) => !['/dashboard', '/school-agenda', '/registration', '/completion', '/payments', '/contracts'].includes(item.href)),
 ];
 
 export const secretaryMenu: MenuItem[] = [
@@ -86,6 +88,7 @@ export const secretaryMenu: MenuItem[] = [
 export const guardianMenu: MenuItem[] = [
   { name: 'Meus dependentes', href: '/guardian', icon: UserGroupIcon },
   { name: 'Mensalidades', href: '/payments', icon: BanknotesIcon },
+  { name: 'Contratos', href: '/contracts', icon: DocumentDuplicateIcon },
   { name: 'Avisos', href: '/notifications', icon: BellIcon },
   { name: 'Configurações', href: '/settings', icon: Cog6ToothIcon },
 ];
