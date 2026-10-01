@@ -96,6 +96,17 @@ export const endpoints = {
     reportCard: (studentId: number) => `/guardians/me/dependents/${studentId}/report-card`,
     notices: (studentId: number) => `/guardians/me/dependents/${studentId}/notices`,
     charges: (studentId: number) => `/guardians/me/dependents/${studentId}/charges`,
+    occurrences: (studentId: number) => `/guardians/me/dependents/${studentId}/occurrences`,
+    acknowledge: (studentId: number, occurrenceId: number) => `/guardians/me/dependents/${studentId}/occurrences/${occurrenceId}/acknowledge`,
+    agenda: (studentId: number) => `/guardians/me/dependents/${studentId}/agenda`,
+  },
+  school: {
+    occurrences: '/school/occurrences',
+    occurrence: (occurrenceId: number) => `/school/occurrences/${occurrenceId}`,
+    studentOccurrences: (studentId: number) => `/school/students/${studentId}/occurrences`,
+    groupAgenda: (groupId: number) => `/school/class-groups/${groupId}/agenda`,
+    agendaItem: (itemId: number) => `/school/agenda/${itemId}`,
+    myAgenda: '/school/my/agenda',
   },
   courses: {
     list: '/courses',
