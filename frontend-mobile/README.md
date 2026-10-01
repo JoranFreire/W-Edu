@@ -14,6 +14,14 @@ lib/
   router/     rotas, abas por papel e redirect de autenticação
 ```
 
+## Cache e uso offline
+
+As telas pessoais (avisos, agenda, boletim, dependentes) e a sessão ficam salvas em disco, como o catálogo do
+WS-ServicePortal. Ao abrir, o app mostra o que está salvo na hora e consulta `GET /sync/versions`: só baixa de novo
+a área cuja versão mudou (a versão sobe sozinha no backend a cada gravação nas tabelas da área). Sem rede, fica com o
+que está salvo. Puxar para atualizar ignora a versão e baixa direto; voltar para o app confere as versões de novo; sair
+da conta apaga o cache.
+
 ## Rodar
 
 Com a API no ar (ex.: `docker compose up -d` na raiz e `docker compose --profile demo run --rm seed`):

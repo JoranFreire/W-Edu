@@ -57,6 +57,9 @@ class DisciplinaBoletim {
   /// Fração de presença (0 a 1).
   final double? frequencia;
 
+  static List<DisciplinaBoletim> lista(Object? json) =>
+      [for (final item in json as List<dynamic>) DisciplinaBoletim.fromJson(item as Map<String, dynamic>)];
+
   factory DisciplinaBoletim.fromJson(Map<String, dynamic> json) => DisciplinaBoletim(
         id: json['class_offering_id'] as String,
         nome: json['offering_name'] as String,

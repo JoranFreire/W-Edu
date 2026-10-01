@@ -36,6 +36,11 @@ class ItemAgenda {
   final String? descricao;
   final String? disciplina;
 
+  /// Lista da API (ou do cache), em ordem de data.
+  static List<ItemAgenda> lista(Object? json) =>
+      [for (final item in json as List<dynamic>) ItemAgenda.fromJson(item as Map<String, dynamic>)]
+        ..sort((a, b) => a.data.compareTo(b.data));
+
   factory ItemAgenda.fromJson(Map<String, dynamic> json) => ItemAgenda(
         id: json['id'] as String,
         tipo: TipoAgenda.de(json['kind'] as String),

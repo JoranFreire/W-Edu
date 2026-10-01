@@ -1,14 +1,10 @@
 import 'package:dio/dio.dart';
 
-import 'dependente.dart';
-
+/// Dependentes de quem está logado (JSON da API; `Dependente.lista` lê).
 class DependentesRepository {
   DependentesRepository(this._dio);
 
   final Dio _dio;
 
-  Future<List<Dependente>> listar() async {
-    final resposta = await _dio.get<List<dynamic>>('guardians/me/dependents');
-    return resposta.data!.map((item) => Dependente.fromJson(item as Map<String, dynamic>)).toList();
-  }
+  Future<Object?> listar() async => (await _dio.get<List<dynamic>>('guardians/me/dependents')).data;
 }

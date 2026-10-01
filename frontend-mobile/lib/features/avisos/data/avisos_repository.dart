@@ -1,22 +1,15 @@
 import 'package:dio/dio.dart';
 
-import 'aviso.dart';
-
-/// Caixa de avisos de quem está logado (`/notifications/me`).
+/// Caixa de avisos de quem está logado (`/notifications/me`). As leituras
+/// devolvem o JSON da API, que o cache guarda como veio.
 class AvisosRepository {
   AvisosRepository(this._dio);
 
   final Dio _dio;
 
-  Future<List<Aviso>> listar() async {
-    final resposta = await _dio.get<List<dynamic>>('notifications/me');
-    return resposta.data!.map((item) => Aviso.fromJson(item as Map<String, dynamic>)).toList();
-  }
+  Future<Object?> listar() async => (await _dio.get<List<dynamic>>('notifications/me')).data;
 
-  Future<int> naoLidos() async {
-    final resposta = await _dio.get<Map<String, dynamic>>('notifications/me/summary');
-    return resposta.data!['unread'] as int;
-  }
+  Future<Object?> resumo() async => (await _dio.get<Map<String, dynamic>>('notifications/me/summary')).data;
 
   Future<void> marcarLido(String id) => _dio.post<void>('notifications/me/$id/read');
 

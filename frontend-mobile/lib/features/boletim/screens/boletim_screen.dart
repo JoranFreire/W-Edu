@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/cache/observar_area.dart';
 import '../boletim_providers.dart';
 import '../widgets/boletim_lista.dart';
 
@@ -13,7 +14,7 @@ class BoletimScreen extends ConsumerWidget {
       appBar: AppBar(title: const Text('Boletim')),
       body: BoletimLista(
         valor: ref.watch(meuBoletimProvider),
-        onRecarregar: () => ref.refresh(meuBoletimProvider.future),
+        onRecarregar: () => ref.atualizarDaApi(meuBoletimProvider, ChavesBoletim.meu),
       ),
     );
   }

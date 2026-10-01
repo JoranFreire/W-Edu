@@ -30,6 +30,9 @@ class Usuario {
 
   String get primeiroNome => nome.split(' ').first;
 
+  /// Separa o cache de cada conta (e instituição) no mesmo aparelho.
+  String get chaveDoCache => '${instituicao.id}_$id';
+
   factory Usuario.fromJson(Map<String, dynamic> json, Instituicao instituicao) {
     final papel = json['role'] as String;
     final papeis = (json['roles'] as List<dynamic>? ?? const []).cast<String>();

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/cache/observar_area.dart';
 import '../agenda_providers.dart';
 import '../widgets/agenda_lista.dart';
 
@@ -14,7 +15,7 @@ class AgendaScreen extends ConsumerWidget {
       appBar: AppBar(title: const Text('Agenda escolar')),
       body: AgendaLista(
         valor: ref.watch(minhaAgendaProvider),
-        onRecarregar: () => ref.refresh(minhaAgendaProvider.future),
+        onRecarregar: () => ref.atualizarDaApi(minhaAgendaProvider, ChavesAgenda.minha),
       ),
     );
   }

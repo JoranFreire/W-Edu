@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:wedu_mobile/app.dart';
+import 'package:wedu_mobile/core/cache/cache_local.dart';
+import 'package:wedu_mobile/core/cache/cache_providers.dart';
 import 'package:wedu_mobile/core/network/network_providers.dart';
 
 import 'helpers/fakes.dart';
@@ -10,13 +12,16 @@ import 'helpers/fakes.dart';
 void main() {
   late ServidorFalso servidor;
   late TokenStoreEmMemoria tokens;
+  late CacheEmMemoria cache;
 
   setUpAll(() => initializeDateFormatting('pt_BR'));
 
   setUp(() {
     servidor = ServidorFalso();
     tokens = TokenStoreEmMemoria();
+    cache = CacheEmMemoria();
     servidor
+      ..on('GET sync/versions', (_) => (200, versoesJson()))
       ..on('GET institutions/current', (_) => (200, instituicaoJson()))
       ..on('GET notifications/me/summary', (_) => (200, {'unread': 3, 'total': 5}))
       ..on('GET notifications/me', (_) => (200, [avisoJson('a1')]))
@@ -31,6 +36,7 @@ void main() {
       overrides: [
         tokenStoreProvider.overrideWithValue(tokens),
         httpAdapterProvider.overrideWithValue(servidor),
+        cacheLocalProvider.overrideWithValue(cache),
       ],
       child: const WEduApp(),
     ));
@@ -87,5 +93,63 @@ void main() {
 
     expect(find.text('Entrar'), findsOneWidget);
     expect(tokens.atual, isNull);
+  });
+
+  testWidgets('sem rede, abre com a sessão e as telas salvas', (tester) async {
+    tokens.atual = 't-1';
+    final dono = 'i-1_u-1';
+    await cache.salvar('sessao', EntradaCache(null, {'usuario': usuarioJson(), 'instituicao': instituicaoJson()}));
+    await cache.salvar('$dono/avisos_resumo', const EntradaCache(1, {'unread': 2, 'total': 2}));
+    await cache.salvar('$dono/agenda', EntradaCache(1, [agendaJson('ag1')]));
+    for (final rota in ['GET users/me', 'GET institutions/current', 'GET sync/versions', 'GET notifications/me/summary', 'GET school/my/agenda']) {
+      servidor.on(rota, (req) => throw semRede(req));
+    }
+    await abrirApp(tester);
+
+    expect(find.text('Olá, Ana!'), findsOneWidget);
+    expect(find.text('2 sem ler'), findsOneWidget);
+    expect(find.textContaining('Prova bimestral'), findsOneWidget);
+  });
+
+  testWidgets('versão igual à salva não baixa a tela de novo', (tester) async {
+    tokens.atual = 't-1';
+    servidor.on('GET users/me', (_) => (200, usuarioJson()));
+    await cache.salvar('i-1_u-1/agenda', EntradaCache(1, [agendaJson('ag1')]));
+    await abrirApp(tester);
+
+    expect(find.textContaining('Prova bimestral'), findsOneWidget);
+    expect(servidor.contar('GET school/my/agenda'), 0);
+    expect(servidor.contar('GET notifications/me/summary'), 1);
+  });
+
+  testWidgets('sair apaga o cache da conta', (tester) async {
+    tokens.atual = 't-1';
+    servidor.on('GET users/me', (_) => (200, usuarioJson()));
+    await abrirApp(tester);
+    expect(cache.entradas, isNotEmpty);
+
+    await tester.tap(find.descendant(of: find.byType(NavigationBar), matching: find.text('Perfil')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Sair'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Sair').last);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Entrar'), findsOneWidget);
+    expect(cache.entradas, isEmpty);
+    expect(tokens.atual, isNull);
+  });
+
+  testWidgets('sessão salva com token recusado volta ao login e apaga o cache', (tester) async {
+    tokens.atual = 'vencido';
+    await cache.salvar('sessao', EntradaCache(null, {'usuario': usuarioJson(), 'instituicao': instituicaoJson()}));
+    for (final rota in ['GET users/me', 'GET sync/versions', 'GET notifications/me/summary', 'GET school/my/agenda']) {
+      servidor.on(rota, (_) => (401, {'detail': 'Token inválido'}));
+    }
+    await abrirApp(tester);
+
+    expect(find.text('Entrar'), findsOneWidget);
+    expect(tokens.atual, isNull);
+    expect(cache.entradas, isEmpty);
   });
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/cache/observar_area.dart';
 import '../../agenda/agenda_providers.dart';
 import '../../agenda/widgets/agenda_lista.dart';
 import '../../boletim/boletim_providers.dart';
@@ -28,11 +29,11 @@ class DependenteScreen extends ConsumerWidget {
           children: [
             BoletimLista(
               valor: ref.watch(boletimDoDependenteProvider(alunoId)),
-              onRecarregar: () => ref.refresh(boletimDoDependenteProvider(alunoId).future),
+              onRecarregar: () => ref.atualizarDaApi(boletimDoDependenteProvider(alunoId), ChavesBoletim.doDependente(alunoId)),
             ),
             AgendaLista(
               valor: ref.watch(agendaDoDependenteProvider(alunoId)),
-              onRecarregar: () => ref.refresh(agendaDoDependenteProvider(alunoId).future),
+              onRecarregar: () => ref.atualizarDaApi(agendaDoDependenteProvider(alunoId), ChavesAgenda.doDependente(alunoId)),
             ),
           ],
         ),

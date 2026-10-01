@@ -1,13 +1,33 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/cache/areas.dart';
+import '../../core/cache/observar_area.dart';
 import '../../core/network/network_providers.dart';
+import '../auth/auth_providers.dart';
 import 'data/boletim.dart';
 import 'data/boletim_repository.dart';
 
 final boletimRepositoryProvider = Provider<BoletimRepository>((ref) => BoletimRepository(ref.watch(dioProvider)));
 
-final meuBoletimProvider = FutureProvider<List<DisciplinaBoletim>>((ref) => ref.watch(boletimRepositoryProvider).meu());
+abstract final class ChavesBoletim {
+  static const meu = 'boletim';
+  static String doDependente(String alunoId) => 'boletim_dependente_$alunoId';
+}
 
-final boletimDoDependenteProvider = FutureProvider.family<List<DisciplinaBoletim>, String>(
-  (ref, alunoId) => ref.watch(boletimRepositoryProvider).doDependente(alunoId),
-);
+final meuBoletimProvider = StreamProvider<List<DisciplinaBoletim>>((ref) => observarArea(
+      ref,
+      dono: ref.watch(donoDoCacheProvider),
+      chave: ChavesBoletim.meu,
+      area: Areas.boletim,
+      baixar: ref.watch(boletimRepositoryProvider).meu,
+      ler: DisciplinaBoletim.lista,
+    ));
+
+final boletimDoDependenteProvider = StreamProvider.family<List<DisciplinaBoletim>, String>((ref, alunoId) => observarArea(
+      ref,
+      dono: ref.watch(donoDoCacheProvider),
+      chave: ChavesBoletim.doDependente(alunoId),
+      area: Areas.boletim,
+      baixar: () => ref.read(boletimRepositoryProvider).doDependente(alunoId),
+      ler: DisciplinaBoletim.lista,
+    ));

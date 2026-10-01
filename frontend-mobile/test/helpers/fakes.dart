@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
+import 'package:wedu_mobile/core/cache/cache_local.dart';
 import 'package:wedu_mobile/core/network/token_store.dart';
 
 /// Resposta programada: recebe a requisição e devolve (status, corpo JSON).
@@ -50,6 +51,27 @@ class TokenStoreEmMemoria implements TokenStore {
   @override
   Future<void> limpar() async => atual = null;
 }
+
+/// Cache em memória, com o mesmo contrato do arquivo (guarda o JSON, não o objeto).
+class CacheEmMemoria implements CacheLocal {
+  final Map<String, String> entradas = {};
+
+  @override
+  Future<EntradaCache?> ler(String chave) async {
+    final texto = entradas[chave];
+    return texto == null ? null : EntradaCache.fromJson(jsonDecode(texto));
+  }
+
+  @override
+  Future<void> salvar(String chave, EntradaCache entrada) async => entradas[chave] = jsonEncode(entrada.toJson());
+
+  @override
+  Future<void> limpar() async => entradas.clear();
+}
+
+Map<String, dynamic> versoesJson({int avisos = 1, int agenda = 1, int boletim = 1, int dependentes = 1}) => {
+      'versions': {'notifications': avisos, 'agenda': agenda, 'report_card': boletim, 'dependents': dependentes},
+    };
 
 Map<String, dynamic> usuarioJson({String role = 'student', List<String>? roles}) => {
       'id': 'u-1',
