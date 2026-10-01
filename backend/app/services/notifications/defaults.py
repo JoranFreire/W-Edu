@@ -46,6 +46,10 @@ DEFAULT_TEMPLATES = {
         "Atividade complementar avaliada",
         "{title}: {status_label} ({hours} h).",
     ),
+    (NotificationEventType.admission_called, NotificationChannel.internal): (
+        "Você foi convocado",
+        "Inscrição {protocol} em {call_title}: confirme sua vaga até {confirm_until}.",
+    ),
     (NotificationEventType.meeting_reminder, NotificationChannel.internal): (
         "Lembrete de encontro",
         "Você tem um encontro em {starts_at}: {meeting_title}.",

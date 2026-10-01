@@ -9,6 +9,7 @@ from app.core.tenant_host import slug_from_host
 from app.models.institution import Institution
 from app.models.student import ADMIN_ROLES, Student, UserRole
 from app.repositories.student import StudentRepository
+from app.services.institution import InstitutionService
 from app.services.tenant_access import TenantAccessService
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
@@ -39,6 +40,14 @@ def _activate_institution(request: Request, db: Session, student: Student, paylo
     institution = TenantAccessService(db).resolve_for_user(student, requested)
     bind_institution(db, institution.id)
     request.state.institution = institution
+
+
+def get_public_institution(request: Request, db: Session = Depends(get_db)) -> Institution:
+    """Rotas publicas por instituicao (catalogo de editais): header, subdominio ou `?institution=`; filtra a sessao."""
+    ref = requested_institution_ref(request) or request.query_params.get("institution")
+    institution = InstitutionService(db).get_public(ref)
+    bind_institution(db, institution.id)
+    return institution
 
 
 def get_current_student(

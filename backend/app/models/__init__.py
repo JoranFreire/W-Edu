@@ -28,6 +28,7 @@ from app.models.completion import ComplementaryActivity, FinalProject, Internshi
 from app.models.tuition import StudentDiscount, TuitionPlan
 from app.models.contracts import ContractTemplate, EnrollmentContract
 from app.models.saas import InstitutionSubscription, PlatformInvoice, SaasPlan
+from app.models.admissions import AdmissionApplication, AdmissionCall, ApplicationDocument
 from app.models.guardians import StudentGuardian
 from app.models.school_life import AgendaItem, StudentOccurrence
 from app.models.secretariat import AcademicDeclaration, CreditTransfer, ProgramEnrollmentEvent, TermRegistration
@@ -78,4 +79,5 @@ __all__ = [
     "RegistrationWindow", "OfferingTimeSlot", "ComplementaryActivity", "Internship", "InternshipLog", "FinalProject",
     "TuitionPlan", "StudentDiscount", "ContractTemplate", "EnrollmentContract",
     "SaasPlan", "InstitutionSubscription", "PlatformInvoice",
+    "AdmissionCall", "AdmissionApplication", "ApplicationDocument",
 ]

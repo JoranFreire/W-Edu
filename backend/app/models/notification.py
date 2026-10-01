@@ -34,6 +34,7 @@ class NotificationEventType(str, enum.Enum):
     agenda_published = "agenda_published"
     waitlist_promoted = "waitlist_promoted"
     activity_reviewed = "activity_reviewed"
+    admission_called = "admission_called"
 
 
 class NotificationTemplate(TenantMixin, Base):

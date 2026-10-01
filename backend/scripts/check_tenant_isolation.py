@@ -365,6 +365,22 @@ async def run() -> int:
         c.expect(r.status_code == 404, f"B cannot publish on A agenda: {r.status_code}")
         r = await client.get(f"/school/class-groups/{group_a}/agenda", headers=admin_b)
         c.expect(r.status_code == 404, f"B cannot read A agenda: {r.status_code}")
+        # Processo seletivo: edital de A invisivel para B, inclusive no catalogo publico de B.
+        call = {"class_offering_id": class_a, "title": "Edital A", "seats": 1, "opens_at": "2020-01-01T00:00:00Z", "closes_at": "2099-01-01T00:00:00Z"}
+        r = await client.post("/admissions/calls", json=call, headers=admin_b)
+        c.expect(r.status_code == 404, f"B cannot open call on A class: {r.status_code}")
+        r = await client.post("/admissions/calls", json=call, headers=admin_a)
+        call_a = r.json().get("id")
+        r = await client.post(f"/admissions/calls/{call_a}/status", json={"status": "open"}, headers=admin_a)
+        r = await client.get("/admissions/public/calls", headers={"X-Institution": "faculdade-b"})
+        c.expect(r.json() == [], f"B public catalog hides A calls: {r.json()}")
+        r = await client.get("/admissions/public/calls", headers={"X-Institution": "escola-a"})
+        c.expect([x["title"] for x in r.json()] == ["Edital A"], f"A public catalog: {r.json()}")
+        r = await client.get(f"/admissions/public/calls/{call_a}", headers={"X-Institution": "faculdade-b"})
+        c.expect(r.status_code == 404, f"A call not reachable through B: {r.status_code}")
+        r = await client.post(f"/admissions/calls/{call_a}/select", headers=admin_b)
+        c.expect(r.status_code == 404, f"B cannot run A selection: {r.status_code}")
+
         # Contratos: modelo e contrato de A invisiveis para B.
         r = await client.post("/contracts/templates", json={"name": "Contrato A", "body": "Contrato de {student_name}."}, headers=admin_a)
         template_a = r.json().get("id")

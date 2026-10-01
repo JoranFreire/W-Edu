@@ -54,6 +54,27 @@ def store_generated_document(document_id: int, version_number: int, filename: st
     return str(target_path), len(content)
 
 
+ADMISSION_DOCUMENT_TYPES = {".pdf", ".jpg", ".jpeg", ".png"}
+ADMISSION_DOCUMENT_MAX_BYTES = 10 * 1024 * 1024
+
+
+def store_admission_document(application_id: int, upload: UploadFile) -> tuple[str, str, int]:
+    """Comprovante do candidato (PDF ou imagem, ate 10 MB) em documents/admissions/<inscricao>."""
+    safe_name = _sanitize_filename(upload.filename or "comprovante")
+    if Path(safe_name).suffix.lower() not in ADMISSION_DOCUMENT_TYPES:
+        raise ValueError("Envie PDF, JPG ou PNG")
+    base_dir = documents_storage_dir() / "admissions" / str(application_id)
+    base_dir.mkdir(parents=True, exist_ok=True)
+    target_path = base_dir / f"{uuid.uuid4().hex}_{safe_name}"
+    with target_path.open("wb") as handle:
+        shutil.copyfileobj(upload.file, handle)
+    size = target_path.stat().st_size
+    if size > ADMISSION_DOCUMENT_MAX_BYTES:
+        target_path.unlink()
+        raise ValueError("Arquivo maior que 10 MB")
+    return str(target_path), safe_name, size
+
+
 def store_assignment_file(submission_id: int, upload: UploadFile) -> tuple[str, str, int]:
     base_dir = assignments_storage_dir() / str(submission_id)
     base_dir.mkdir(parents=True, exist_ok=True)
