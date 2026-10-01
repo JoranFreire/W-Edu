@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { ArrowRightCircleIcon } from '@heroicons/react/24/outline';
 import { type Institution, type InstitutionStatus, institutionStatusLabels, institutionTypeLabels } from '@/types/institution';
 
@@ -37,7 +38,10 @@ export default function InstitutionsTable({ institutions, activeSlug, onStatusCh
               </select>
             </td>
             <td className="px-4 py-3 text-gray-700 dark:text-gray-300">{new Date(institution.created_at).toLocaleDateString('pt-BR')}</td>
-            <td className="px-4 py-3 text-right">
+            <td className="space-x-4 px-4 py-3 text-right">
+              <Link href={`/platform/institutions/${institution.id}/plan`} aria-label={`Plano de ${institution.name}`} className="text-sm font-medium text-indigo-600 hover:text-indigo-700">
+                Plano
+              </Link>
               {activeSlug === institution.slug ? (
                 <span className="text-xs font-medium text-indigo-600">Ativa agora</span>
               ) : (

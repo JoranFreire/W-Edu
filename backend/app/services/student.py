@@ -16,6 +16,7 @@ from app.models.student import (
 from app.repositories.student import OrganizationRepository, ProfileRepository, StudentRepository
 from app.repositories.student import InstructorAvailabilityRepository, InstructorRatingRepository
 from app.services.membership import MembershipService
+from app.services.saas.seats import StudentSeatPolicy
 from app.schemas.student import (
     InstructorProfileUpdate,
     InstructorAvailabilityCreate,
@@ -46,6 +47,8 @@ class StudentService:
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="E-mail já cadastrado")
         if data.organization_id and not self.org_repo.get_by_id(data.organization_id):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Empresa não encontrada")
+        if data.role == UserRole.student:
+            StudentSeatPolicy(self.db).ensure_available(institution_id)
         student = Student(
             name=data.name,
             email=data.email,

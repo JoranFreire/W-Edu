@@ -2,6 +2,7 @@
 
 import CampusesSection from '@/components/admin/institution/CampusesSection';
 import InstitutionSettingsForm from '@/components/admin/institution/InstitutionSettingsForm';
+import CurrentPlanSection from '@/components/saas/CurrentPlanSection';
 import Spinner from '@/components/common/Spinner';
 import { useCurrentInstitution } from '@/lib/hooks/admin/useCurrentInstitution';
 import { useErrorToast } from '@/lib/hooks/useErrorToast';
@@ -20,6 +21,7 @@ export default function InstitutionSettingsPage() {
       </div>
       <InstitutionSettingsForm key={institution.id} institution={institution} onSave={save} />
       <CampusesSection />
+      <CurrentPlanSection />
     </div>
   );
 }

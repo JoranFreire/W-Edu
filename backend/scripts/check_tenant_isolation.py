@@ -16,6 +16,7 @@ if "DATABASE_URL" not in os.environ:
     DB_PATH = Path(tempfile.gettempdir()) / f"wedu_tenant_check_{os.getpid()}.sqlite3"
     os.environ["DATABASE_URL"] = f"sqlite:///{DB_PATH}"
 os.environ["NOTIFICATION_WORKER_ENABLED"] = "false"
+os.environ.setdefault("DOCUMENTS_STORAGE_DIR", tempfile.mkdtemp(prefix="wedu_isolation_documents_"))
 os.environ["TENANT_BASE_DOMAIN"] = "wedu.test"
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -364,6 +365,20 @@ async def run() -> int:
         c.expect(r.status_code == 404, f"B cannot publish on A agenda: {r.status_code}")
         r = await client.get(f"/school/class-groups/{group_a}/agenda", headers=admin_b)
         c.expect(r.status_code == 404, f"B cannot read A agenda: {r.status_code}")
+        # Contratos: modelo e contrato de A invisiveis para B.
+        r = await client.post("/contracts/templates", json={"name": "Contrato A", "body": "Contrato de {student_name}."}, headers=admin_a)
+        template_a = r.json().get("id")
+        r = await client.post(f"/contracts/enrollments/{enrollment_a}", json={"template_id": template_a}, headers=admin_b)
+        c.expect(r.status_code == 404, f"B cannot issue contract for A: {r.status_code}")
+        r = await client.post(f"/contracts/enrollments/{enrollment_a}", json={"template_id": template_a}, headers=admin_a)
+        contract_a = r.json().get("id")
+        r = await client.get(f"/contracts/{contract_a}/pdf", headers=admin_b)
+        c.expect(r.status_code == 404, f"B cannot download A contract: {r.status_code}")
+        r = await client.post(f"/contracts/{contract_a}/cancel", headers=admin_b)
+        c.expect(r.status_code == 404, f"B cannot cancel A contract: {r.status_code}")
+        r = await client.get("/contracts/templates", headers=admin_b)
+        c.expect(r.json() == [], f"B lists no A templates: {r.json()}")
+
         # Mensalidades: plano, descontos e extrato de A invisiveis para B.
         plan = {"name": "Mensalidade", "term_id": term_a, "program_id": program_a, "amount_cents": 1000, "first_due_on": "2027-02-10"}
         r = await client.post("/tuition/plans", json=plan, headers=admin_b)

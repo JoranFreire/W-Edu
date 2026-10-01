@@ -183,6 +183,23 @@ Cada registro de ocorrencia, publicacao na agenda e resultado final publicado ge
 
 O guard `get_current_finance_staff` cobre administracao e secretaria; a consulta de uma cobranca pelo aluno ou pagador fica em `app/policies/tuition_access.py`.
 
+## Contratos (`/contracts`)
+
+| Recurso | Student | Guardian | Coordinator | Secretary | Admin |
+| --- | --- | --- | --- | --- | --- |
+| Modelos de contrato; emitir, listar, baixar e cancelar contratos da matricula | Nao | Nao | Sim | Sim | Sim |
+| Ver, baixar e aceitar o contrato | O proprio | Se responsavel financeiro do aluno | Nao | Nao | Nao |
+| Validar contrato pelo codigo (`/contracts/validate/{code}`) | Publico | Publico | Publico | Publico | Publico |
+
+## Planos SaaS (`/saas`)
+
+| Recurso | Super admin | Admin da instituicao | Demais |
+| --- | --- | --- | --- |
+| Catalogo de planos, assinatura da instituicao, faturas e baixa | Sim | Nao | Nao |
+| Plano, uso de alunos e faturas da instituicao ativa (`/saas/current`) | Sim | Sim | Nao |
+
+O limite de alunos do plano vale no cadastro de usuarios com papel aluno (409 ao atingir).
+
 ## Caixa de avisos (`/notifications/me`)
 
 | Recurso | Todos os papeis |
