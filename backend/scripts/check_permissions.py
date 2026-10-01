@@ -181,6 +181,10 @@ EXPECTED: list[ExpectedRoute] = [
     ("POST", "/school/class-groups/{group_id}/agenda", "get_current_school_staff"),
     ("DELETE", "/school/agenda/{item_id}", "get_current_school_staff"),
     ("GET", "/school/my/agenda", "get_current_student"),
+    ("GET", "/notifications/me", "get_current_student"),
+    ("GET", "/notifications/me/summary", "get_current_student"),
+    ("POST", "/notifications/me/read-all", "get_current_student"),
+    ("POST", "/notifications/me/{event_id}/read", "get_current_student"),
 ]
 
 

@@ -4,7 +4,7 @@ import {
   HomeIcon, BookOpenIcon, ChartBarIcon, MicrophoneIcon, Cog6ToothIcon,
   UsersIcon, AcademicCapIcon, CalendarDaysIcon, ChatBubbleLeftRightIcon,
   BanknotesIcon, Squares2X2Icon, MapIcon, ShieldCheckIcon, DocumentTextIcon,
-  BuildingLibraryIcon, GlobeAltIcon, RectangleStackIcon, PencilSquareIcon, FolderOpenIcon, DocumentChartBarIcon, UserGroupIcon,
+  BuildingLibraryIcon, GlobeAltIcon, BellIcon, RectangleStackIcon, PencilSquareIcon, FolderOpenIcon, DocumentChartBarIcon, UserGroupIcon,
 } from '@heroicons/react/24/outline';
 
 interface MenuItem { name: string; href: string; icon: ComponentType<{ className?: string }> }
@@ -15,6 +15,7 @@ export const studentMenu: MenuItem[] = [
   { name: 'Progresso', href: '/progress', icon: ChartBarIcon },
   { name: 'Boletim', href: '/report-card', icon: ChartBarIcon },
   { name: 'Agenda escolar', href: '/school-agenda', icon: CalendarDaysIcon },
+  { name: 'Avisos', href: '/notifications', icon: BellIcon },
   { name: 'Histórico escolar', href: '/transcript', icon: DocumentChartBarIcon },
   { name: 'Certificados', href: '/certificates', icon: ShieldCheckIcon },
   { name: 'Sessões de Voz', href: '/sessions', icon: MicrophoneIcon },
@@ -71,11 +72,14 @@ export const instructorMenu: MenuItem[] = [
 export const secretaryMenu: MenuItem[] = [
   { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
   { name: 'Secretaria', href: '/admin/secretariat', icon: FolderOpenIcon },
+  { name: 'Agenda das turmas', href: '/admin/secretariat/agenda', icon: CalendarDaysIcon },
+  { name: 'Avisos', href: '/notifications', icon: BellIcon },
   { name: 'Configurações', href: '/settings', icon: Cog6ToothIcon },
 ];
 
 export const guardianMenu: MenuItem[] = [
   { name: 'Meus dependentes', href: '/guardian', icon: UserGroupIcon },
+  { name: 'Avisos', href: '/notifications', icon: BellIcon },
   { name: 'Configurações', href: '/settings', icon: Cog6ToothIcon },
 ];
 

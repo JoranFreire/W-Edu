@@ -110,3 +110,20 @@ export async function createClassGroupOffering(request: APIRequestContext, name:
   const { id: offeringId }: { id: number } = await offering.json();
   return { groupId, offeringId };
 }
+
+/** Inscreve na oferta os alunos da turma-grupo (o diario lista os inscritos). */
+export async function syncGroupEnrollments(request: APIRequestContext, offeringId: number, institution = 'escola-alfa') {
+  const response = await request.post(`${API_URL}/assessment/offerings/${offeringId}/sync-group-enrollments`, {
+    headers: await adminHeaders(request, institution),
+  });
+  if (!response.ok()) throw new Error(`syncGroup: ${response.status()} ${await response.text()}`);
+}
+
+/** Ocorrencia registrada pela secretaria (admin), fora da tela em teste. */
+export async function registerOccurrence(request: APIRequestContext, studentId: number, description: string, institution = 'escola-alfa') {
+  const response = await request.post(`${API_URL}/school/occurrences`, {
+    headers: await adminHeaders(request, institution),
+    data: { student_id: studentId, kind: 'health', description },
+  });
+  if (!response.ok()) throw new Error(`registerOccurrence: ${response.status()} ${await response.text()}`);
+}

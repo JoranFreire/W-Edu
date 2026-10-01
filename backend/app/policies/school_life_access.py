@@ -18,6 +18,13 @@ def ensure_can_publish_agenda(user: Student, group: ClassGroup, teaches_group: b
     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Você não leciona nesta turma")
 
 
+def ensure_can_view_history(user: Student, teaches_student: bool) -> None:
+    """Coordenacao e secretaria veem o historico de qualquer aluno; o instrutor, so de quem ele ensina."""
+    if user.role in OFFICE or (user.role == UserRole.instructor and teaches_student):
+        return
+    raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Você não leciona para este aluno")
+
+
 def ensure_can_remove(user: Student, author_id: int | None) -> None:
     """Remove o registro quem o criou ou a coordenacao."""
     if user.role in COORDINATION or (author_id is not None and author_id == user.id):

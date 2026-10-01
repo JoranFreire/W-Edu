@@ -28,7 +28,7 @@ DEFAULT_TEMPLATES = {
     ),
     (NotificationEventType.grades_published, NotificationChannel.internal): (
         "Boletim disponível",
-        "O resultado final de {class_name} foi publicado: {result_label}.",
+        "O resultado final de {student_name} em {class_name} foi publicado: {result_label}.",
     ),
     (NotificationEventType.occurrence_registered, NotificationChannel.internal): (
         "Nova ocorrência",

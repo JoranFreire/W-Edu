@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { Bars3Icon, SunIcon, MoonIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline';
 import { useTheme } from '@/components/providers/ThemeProvider';
 import { companyManagerMenu, coordinatorMenu, studentMenu, superAdminMenu } from '@/lib/config/sidebarMenus';
+import { InboxBell } from './InboxBell';
 import { InstitutionSwitcher } from './InstitutionSwitcher';
 import { useAuthStore } from '@/store/authStore';
 
@@ -58,6 +59,8 @@ export function TopBar({ onMenuClick }: TopBarProps) {
 
       <div className="flex items-center space-x-3">
         <InstitutionSwitcher />
+
+        <InboxBell />
 
         <button
           onClick={toggle}

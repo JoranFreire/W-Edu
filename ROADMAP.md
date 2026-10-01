@@ -3,7 +3,7 @@
 ## Status Atual
 
 **Fase:** 2 — Voz com Professor IA (em andamento)  
-**Ultima atualizacao:** 2026-09-30  
+**Ultima atualizacao:** 2026-10-01  
 **Proximo marco:** Fase 16 — Perfil Universidade. Fase 15 (responsaveis, portal, ocorrencias e agenda escolar) concluida.
 
 ## Visao Alvo
@@ -291,6 +291,7 @@ Objetivo: estrutura comum a escola, universidade e profissionalizante.
 - [x] Responsaveis e vinculo aluno/responsavel (financeiro, retirada).
 - [x] Portal do responsavel: boletim, frequencia, comunicados, financeiro.
 - [x] Ocorrencias e agenda escolar (ciencia do responsavel no portal; comunicado a familia a cada registro).
+- [x] Caixa de avisos de cada usuario (o responsavel recebe os comunicados na propria conta), agenda na turma-grupo do admin e na tela da secretaria, historico de ocorrencias no diario do professor.
 - [ ] Futuro: BNCC e exportacao Educacenso.
 
 ### Fase 16 — Perfil Universidade

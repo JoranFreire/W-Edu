@@ -20,6 +20,17 @@ class GuardianLinkRepository(Repository[StudentGuardian]):
     def list_by_guardian(self, guardian_id: int) -> list[StudentGuardian]:
         return self.db.query(StudentGuardian).filter(StudentGuardian.guardian_id == guardian_id).order_by(StudentGuardian.id).all()
 
+    def guardian_ids_of(self, student_ids: list[int]) -> list[int]:
+        if not student_ids:
+            return []
+        rows = (
+            self.db.query(StudentGuardian.guardian_id)
+            .filter(StudentGuardian.student_id.in_(student_ids))
+            .order_by(StudentGuardian.id)
+            .all()
+        )
+        return [row.guardian_id for row in rows]
+
     def get(self, student_id: int, guardian_id: int) -> StudentGuardian | None:
         return (
             self.db.query(StudentGuardian)

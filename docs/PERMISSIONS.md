@@ -132,7 +132,8 @@ A conta do responsavel e unica na plataforma: vincular um e-mail ja cadastrado c
 
 | Recurso | Student | Guardian | Instructor | Coordinator | Secretary | Admin |
 | --- | --- | --- | --- | --- | --- | --- |
-| Registrar ocorrencia e ver ocorrencias do aluno | Nao | Nao | Sim | Sim | Sim | Sim |
+| Registrar ocorrencia | Nao | Nao | Sim | Sim | Sim | Sim |
+| Ver o historico de ocorrencias do aluno | Nao | Nao | Alunos das ofertas que ministra e das turmas-grupo que rege ou em que leciona | Sim | Sim | Sim |
 | Remover ocorrencia | Nao | Nao | So as que registrou | Sim | So as que registrou | Sim |
 | Ver e dar ciencia de ocorrencias do dependente | Nao | Dependentes vinculados | Nao | Nao | Nao | Nao |
 | Ver agenda da turma-grupo | Nao | Nao | Sim | Sim | Sim | Sim |
@@ -141,6 +142,17 @@ A conta do responsavel e unica na plataforma: vincular um e-mail ja cadastrado c
 | Agenda das proprias turmas (`/school/my/agenda`) | Sim | Do dependente, no portal | Sim | Sim | Sim | Sim |
 
 O guard `get_current_school_staff` cobre a equipe escolar; o escopo por turma e por autor fica em `app/policies/school_life_access.py`.
+
+Cada registro de ocorrencia, publicacao na agenda e resultado final publicado gera um aviso para o aluno e um para cada responsavel vinculado (sem repetir o responsavel de irmaos da mesma turma).
+
+## Caixa de avisos (`/notifications/me`)
+
+| Recurso | Todos os papeis |
+| --- | --- |
+| Listar os proprios avisos (todos ou nao lidos) e a contagem de nao lidos | Sim |
+| Marcar um aviso ou todos como lidos | So os enderecados a si |
+
+A caixa lista os eventos internos ja entregues ao usuario na instituicao ativa; aviso de outro usuario responde 404.
 
 ## Agenda e Presencial
 

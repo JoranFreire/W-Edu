@@ -8,7 +8,9 @@ export type NotificationEventType =
   | 'attendance_recorded'
   | 'content_published'
   | 'certificate_issued'
-  | 'grades_published';
+  | 'grades_published'
+  | 'occurrence_registered'
+  | 'agenda_published';
 
 export interface NotificationTemplate {
   id: number;
@@ -40,3 +42,17 @@ export interface NotificationEvent {
   created_at: string;
 }
 
+/** Aviso na caixa do usuario (comunicados internos enderecados a ele). */
+export interface InboxNotice {
+  id: number;
+  event_type: NotificationEventType;
+  title: string;
+  body: string;
+  payload: Record<string, string>;
+  read_at: string | null;
+  created_at: string;
+}
+
+export interface InboxSummary {
+  unread: number;
+}
