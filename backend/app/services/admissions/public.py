@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from sqlalchemy.orm import Session
 
@@ -22,13 +23,13 @@ class PublicAdmissionsService:
         counts = self.applications.count_by_call([call.id for call in calls])
         return [to_out(call, counts.get(call.id, 0)) for call in calls]
 
-    def detail(self, call_id: int) -> AdmissionCallOut:
+    def detail(self, call_id: UUID) -> AdmissionCallOut:
         call = self.calls.get_or_404(call_id)
         if call.status == AdmissionCallStatus.draft:
             raise not_found("Edital não encontrado")
         return self.calls.detail(call_id)
 
-    def result(self, call_id: int) -> AdmissionResultOut:
+    def result(self, call_id: UUID) -> AdmissionResultOut:
         call = self.calls.get_or_404(call_id)
         if call.status != AdmissionCallStatus.selected:
             raise not_found("Resultado ainda não publicado")

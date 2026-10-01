@@ -12,7 +12,7 @@ interface ClassGroupData {
 }
 
 /** Uma turma-grupo e seus alunos, com alocacao e remocao. */
-export function useClassGroup(groupId: number) {
+export function useClassGroup(groupId: string) {
   const request = useCallback(async (): Promise<ClassGroupData> => {
     const [group, members] = await Promise.all([
       api.get<ClassGroup>(endpoints.academic.classGroup(groupId)),
@@ -22,11 +22,11 @@ export function useClassGroup(groupId: number) {
   }, [groupId]);
   const { data, loading, error, reload } = useApiQuery(request);
 
-  const addMember = async (enrollmentId: number) => {
+  const addMember = async (enrollmentId: string) => {
     await api.post(endpoints.academic.classGroupMembers(groupId), { program_enrollment_id: enrollmentId });
     reload();
   };
-  const removeMember = async (enrollmentId: number) => {
+  const removeMember = async (enrollmentId: string) => {
     await api.delete(endpoints.academic.classGroupMember(groupId, enrollmentId));
     reload();
   };

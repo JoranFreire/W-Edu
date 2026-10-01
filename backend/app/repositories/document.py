@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from sqlalchemy.orm import Session
 
 from app.models.document import Document, DocumentVersion
@@ -7,7 +9,7 @@ class DocumentRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def get_by_id(self, document_id: int) -> Document | None:
+    def get_by_id(self, document_id: UUID) -> Document | None:
         return self.db.get(Document, document_id)
 
     def list_all(self) -> list[Document]:
@@ -29,10 +31,10 @@ class DocumentVersionRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def get_by_id(self, version_id: int) -> DocumentVersion | None:
+    def get_by_id(self, version_id: UUID) -> DocumentVersion | None:
         return self.db.get(DocumentVersion, version_id)
 
-    def list_by_document(self, document_id: int) -> list[DocumentVersion]:
+    def list_by_document(self, document_id: UUID) -> list[DocumentVersion]:
         return (
             self.db.query(DocumentVersion)
             .filter(DocumentVersion.document_id == document_id)
@@ -40,7 +42,7 @@ class DocumentVersionRepository:
             .all()
         )
 
-    def get_latest_by_document(self, document_id: int) -> DocumentVersion | None:
+    def get_latest_by_document(self, document_id: UUID) -> DocumentVersion | None:
         return (
             self.db.query(DocumentVersion)
             .filter(DocumentVersion.document_id == document_id)

@@ -1,3 +1,6 @@
+from uuid import UUID
+
+from app.core.ids import new_id
 from datetime import datetime, timezone
 import enum
 
@@ -58,8 +61,8 @@ class PracticalAssessmentStatus(str, enum.Enum):
 class Location(TenantMixin, Base):
     __tablename__ = "locations"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    campus_id: Mapped[int | None] = mapped_column(ForeignKey("campuses.id"), nullable=True, index=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
+    campus_id: Mapped[UUID | None] = mapped_column(ForeignKey("campuses.id"), nullable=True, index=True)
     name: Mapped[str] = mapped_column(String(200))
     address: Mapped[str | None] = mapped_column(Text)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
@@ -73,8 +76,8 @@ class Location(TenantMixin, Base):
 class Room(TenantMixin, Base):
     __tablename__ = "rooms"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    location_id: Mapped[int] = mapped_column(ForeignKey("locations.id"), index=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
+    location_id: Mapped[UUID] = mapped_column(ForeignKey("locations.id"), index=True)
     name: Mapped[str] = mapped_column(String(200))
     capacity: Mapped[int] = mapped_column(Integer)
     resources: Mapped[str | None] = mapped_column(Text)
@@ -89,24 +92,24 @@ class Room(TenantMixin, Base):
 class ClassOffering(TenantMixin, Base):
     __tablename__ = "class_offerings"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    course_id: Mapped[int] = mapped_column(ForeignKey("courses.id"), index=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
+    course_id: Mapped[UUID] = mapped_column(ForeignKey("courses.id"), index=True)
     name: Mapped[str] = mapped_column(String(200))
     starts_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     ends_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     capacity: Mapped[int] = mapped_column(Integer)
     status: Mapped[ClassStatus] = mapped_column(SAEnum(ClassStatus), default=ClassStatus.draft)
-    location_id: Mapped[int | None] = mapped_column(ForeignKey("locations.id"), nullable=True, index=True)
-    room_id: Mapped[int | None] = mapped_column(ForeignKey("rooms.id"), nullable=True, index=True)
-    instructor_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True, index=True)
+    location_id: Mapped[UUID | None] = mapped_column(ForeignKey("locations.id"), nullable=True, index=True)
+    room_id: Mapped[UUID | None] = mapped_column(ForeignKey("rooms.id"), nullable=True, index=True)
+    instructor_id: Mapped[UUID | None] = mapped_column(ForeignKey("users.id"), nullable=True, index=True)
     # Vinculos academicos opcionais (Fase 12): oferta de disciplina num periodo e turma-grupo.
-    term_id: Mapped[int | None] = mapped_column(ForeignKey("academic_terms.id"), nullable=True, index=True)
-    subject_id: Mapped[int | None] = mapped_column(ForeignKey("subjects.id"), nullable=True, index=True)
-    class_group_id: Mapped[int | None] = mapped_column(ForeignKey("class_groups.id"), nullable=True, index=True)
+    term_id: Mapped[UUID | None] = mapped_column(ForeignKey("academic_terms.id"), nullable=True, index=True)
+    subject_id: Mapped[UUID | None] = mapped_column(ForeignKey("subjects.id"), nullable=True, index=True)
+    class_group_id: Mapped[UUID | None] = mapped_column(ForeignKey("class_groups.id"), nullable=True, index=True)
     # Esquema de notas da oferta; vazio usa o padrao da instituicao (Fase 13).
-    grading_scheme_id: Mapped[int | None] = mapped_column(ForeignKey("grading_schemes.id"), nullable=True, index=True)
+    grading_scheme_id: Mapped[UUID | None] = mapped_column(ForeignKey("grading_schemes.id"), nullable=True, index=True)
     # Programas sociais (Fase 18): quem financia a turma e o limite de faltas que desliga o aluno (vazio: nao desliga).
-    funding_source_id: Mapped[int | None] = mapped_column(ForeignKey("funding_sources.id"), nullable=True, index=True)
+    funding_source_id: Mapped[UUID | None] = mapped_column(ForeignKey("funding_sources.id"), nullable=True, index=True)
     max_absence_percent: Mapped[float | None] = mapped_column(Float)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
@@ -126,9 +129,9 @@ class ClassEnrollment(TenantMixin, Base):
     __tablename__ = "class_enrollments"
     __table_args__ = (UniqueConstraint("class_offering_id", "student_id"),)
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    class_offering_id: Mapped[int] = mapped_column(ForeignKey("class_offerings.id"), index=True)
-    student_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
+    class_offering_id: Mapped[UUID] = mapped_column(ForeignKey("class_offerings.id"), index=True)
+    student_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"), index=True)
     status: Mapped[ClassEnrollmentStatus] = mapped_column(
         SAEnum(ClassEnrollmentStatus),
         default=ClassEnrollmentStatus.active,
@@ -153,9 +156,9 @@ class WaitlistEntry(TenantMixin, Base):
     __tablename__ = "waitlist_entries"
     __table_args__ = (UniqueConstraint("class_offering_id", "student_id"),)
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    class_offering_id: Mapped[int] = mapped_column(ForeignKey("class_offerings.id"), index=True)
-    student_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
+    class_offering_id: Mapped[UUID] = mapped_column(ForeignKey("class_offerings.id"), index=True)
+    student_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"), index=True)
     position: Mapped[int] = mapped_column(Integer)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
@@ -166,10 +169,10 @@ class WaitlistEntry(TenantMixin, Base):
 class ScheduledMeeting(TenantMixin, Base):
     __tablename__ = "scheduled_meetings"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    class_offering_id: Mapped[int] = mapped_column(ForeignKey("class_offerings.id"), index=True)
-    lesson_id: Mapped[int | None] = mapped_column(ForeignKey("lessons.id"), nullable=True, index=True)
-    room_id: Mapped[int | None] = mapped_column(ForeignKey("rooms.id"), nullable=True, index=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
+    class_offering_id: Mapped[UUID] = mapped_column(ForeignKey("class_offerings.id"), index=True)
+    lesson_id: Mapped[UUID | None] = mapped_column(ForeignKey("lessons.id"), nullable=True, index=True)
+    room_id: Mapped[UUID | None] = mapped_column(ForeignKey("rooms.id"), nullable=True, index=True)
     title: Mapped[str] = mapped_column(String(200))
     starts_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     ends_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
@@ -191,10 +194,10 @@ class AttendanceRecord(TenantMixin, Base):
     __tablename__ = "attendance_records"
     __table_args__ = (UniqueConstraint("scheduled_meeting_id", "student_id"),)
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    scheduled_meeting_id: Mapped[int] = mapped_column(ForeignKey("scheduled_meetings.id"), index=True)
-    class_offering_id: Mapped[int] = mapped_column(ForeignKey("class_offerings.id"), index=True)
-    student_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
+    scheduled_meeting_id: Mapped[UUID] = mapped_column(ForeignKey("scheduled_meetings.id"), index=True)
+    class_offering_id: Mapped[UUID] = mapped_column(ForeignKey("class_offerings.id"), index=True)
+    student_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"), index=True)
     status: Mapped[AttendanceStatus] = mapped_column(SAEnum(AttendanceStatus), default=AttendanceStatus.present)
     method: Mapped[AttendanceMethod] = mapped_column(SAEnum(AttendanceMethod), default=AttendanceMethod.manual)
     recorded_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
@@ -208,8 +211,8 @@ class AttendanceRecord(TenantMixin, Base):
 class CheckinToken(TenantMixin, Base):
     __tablename__ = "checkin_tokens"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    scheduled_meeting_id: Mapped[int] = mapped_column(ForeignKey("scheduled_meetings.id"), index=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
+    scheduled_meeting_id: Mapped[UUID] = mapped_column(ForeignKey("scheduled_meetings.id"), index=True)
     token: Mapped[str] = mapped_column(String(120), unique=True, index=True)
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
@@ -222,10 +225,10 @@ class PracticalAssessmentRecord(TenantMixin, Base):
     __tablename__ = "practical_assessment_records"
     __table_args__ = (UniqueConstraint("scheduled_meeting_id", "student_id"),)
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    scheduled_meeting_id: Mapped[int] = mapped_column(ForeignKey("scheduled_meetings.id"), index=True)
-    class_offering_id: Mapped[int] = mapped_column(ForeignKey("class_offerings.id"), index=True)
-    student_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
+    scheduled_meeting_id: Mapped[UUID] = mapped_column(ForeignKey("scheduled_meetings.id"), index=True)
+    class_offering_id: Mapped[UUID] = mapped_column(ForeignKey("class_offerings.id"), index=True)
+    student_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"), index=True)
     score: Mapped[int] = mapped_column(Integer)
     status: Mapped[PracticalAssessmentStatus] = mapped_column(
         SAEnum(PracticalAssessmentStatus),
@@ -233,7 +236,7 @@ class PracticalAssessmentRecord(TenantMixin, Base):
     )
     feedback: Mapped[str | None] = mapped_column(Text)
     recorded_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
-    recorded_by_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True, index=True)
+    recorded_by_id: Mapped[UUID | None] = mapped_column(ForeignKey("users.id"), nullable=True, index=True)
 
     meeting: Mapped["ScheduledMeeting"] = relationship(back_populates="practical_assessments")
     class_offering: Mapped["ClassOffering"] = relationship()

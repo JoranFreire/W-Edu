@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from sqlalchemy.orm import Session
 
@@ -37,7 +38,7 @@ class AccessRoleService:
         role = self.repo.save(AccessRole(name=data.name, description=data.description, permissions=permissions))
         return to_out(role)
 
-    def update(self, role_id: int, data: AccessRoleInput, actor: Student) -> AccessRoleOut:
+    def update(self, role_id: UUID, data: AccessRoleInput, actor: Student) -> AccessRoleOut:
         role = self._get_or_404(role_id)
         if data.name != role.name and self.repo.get_by_name(data.name):
             raise conflict("Já existe perfil com este nome")
@@ -46,12 +47,12 @@ class AccessRoleService:
         role.name, role.description, role.permissions = data.name, data.description, self._grantable(data.permissions, actor)
         return to_out(self.repo.save(role))
 
-    def delete(self, role_id: int, actor: Student) -> None:
+    def delete(self, role_id: UUID, actor: Student) -> None:
         role = self._get_or_404(role_id)
         self._grantable(role.permissions or [], actor)
         self.repo.delete(role)
 
-    def assign(self, role_id: int, user_id: int, actor: Student) -> AccessRoleOut:
+    def assign(self, role_id: UUID, user_id: UUID, actor: Student) -> AccessRoleOut:
         role = self._get_or_404(role_id)
         self._grantable(role.permissions or [], actor)
         user = self.users.get_by_id(user_id)
@@ -63,7 +64,7 @@ class AccessRoleService:
         self.repo.db.refresh(role)
         return to_out(role)
 
-    def unassign(self, role_id: int, user_id: int, actor: Student) -> AccessRoleOut:
+    def unassign(self, role_id: UUID, user_id: UUID, actor: Student) -> AccessRoleOut:
         role = self._get_or_404(role_id)
         self._grantable(role.permissions or [], actor)
         assignment = self.repo.assignment(role.id, user_id)
@@ -83,7 +84,7 @@ class AccessRoleService:
             raise conflict(f"Você não pode conceder permissões que não tem: {', '.join(sorted(missing))}")
         return sorted(set(permissions))
 
-    def _get_or_404(self, role_id: int) -> AccessRole:
+    def _get_or_404(self, role_id: UUID) -> AccessRole:
         role = self.repo.get_by_id(role_id)
         if not role:
             raise not_found("Perfil não encontrado")

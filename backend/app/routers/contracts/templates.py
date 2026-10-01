@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -21,5 +23,5 @@ def create_template(data: ContractTemplateCreate, db: Session = Depends(get_db),
 
 
 @router.patch("/{template_id}", response_model=ContractTemplateOut)
-def update_template(template_id: int, data: ContractTemplateUpdate, db: Session = Depends(get_db), _: Student = Depends(get_current_secretariat)):
+def update_template(template_id: UUID, data: ContractTemplateUpdate, db: Session = Depends(get_db), _: Student = Depends(get_current_secretariat)):
     return ContractTemplateService(db).update(template_id, data)

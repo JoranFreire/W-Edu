@@ -18,16 +18,16 @@ export function useAcademicTerms() {
   const request = useCallback(() => api.get<AcademicTerm[]>(endpoints.academic.terms).then((response) => response.data), []);
   const { data = [], loading, error, reload } = useApiQuery(request);
 
-  const save = async (id: number | null, input: AcademicTermInput) => {
+  const save = async (id: string | null, input: AcademicTermInput) => {
     if (id) await api.patch(endpoints.academic.term(id), input);
     else await api.post(endpoints.academic.terms, input);
     reload();
   };
-  const changeStatus = async (id: number, status: TermStatus) => {
+  const changeStatus = async (id: string, status: TermStatus) => {
     await api.post(endpoints.academic.termStatus(id), { status });
     reload();
   };
-  const remove = async (id: number) => {
+  const remove = async (id: string) => {
     await api.delete(endpoints.academic.term(id));
     reload();
   };

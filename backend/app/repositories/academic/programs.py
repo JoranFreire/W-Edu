@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from app.models.academic import Curriculum, Program, ProgramLevel, ProgramStatus
 from app.repositories.academic._base import Repository
@@ -9,7 +10,7 @@ class ProgramRepository(Repository[Program]):
 
     def list(
         self,
-        unit_id: int | None = None,
+        unit_id: UUID | None = None,
         level: ProgramLevel | None = None,
         status: ProgramStatus | None = None,
     ) -> list[Program]:
@@ -25,5 +26,5 @@ class ProgramRepository(Repository[Program]):
     def get_by_code(self, code: str) -> Program | None:
         return self.db.query(Program).filter(Program.code == code).first()
 
-    def has_curricula(self, program_id: int) -> bool:
+    def has_curricula(self, program_id: UUID) -> bool:
         return self.db.query(Curriculum.id).filter(Curriculum.program_id == program_id).first() is not None

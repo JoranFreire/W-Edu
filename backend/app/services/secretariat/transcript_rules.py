@@ -1,5 +1,6 @@
 """Historico escolar, CR e integralizacao (funcoes puras)."""
 
+from uuid import UUID
 from dataclasses import dataclass
 
 from app.models.academic import ComponentKind
@@ -9,7 +10,7 @@ from app.schemas.secretariat import TranscriptRow, TranscriptSummary
 
 @dataclass(frozen=True)
 class Component:
-    subject_id: int
+    subject_id: UUID
     code: str
     name: str
     term_number: int
@@ -22,7 +23,7 @@ class Component:
 class Attempt:
     """Cursada de uma disciplina da matriz (ou equivalente), em ordem cronologica."""
 
-    subject_id: int
+    subject_id: UUID
     grade: float | None
     result: ClassEnrollmentResult
     taken_in: str | None
@@ -30,7 +31,7 @@ class Attempt:
 
 @dataclass(frozen=True)
 class Credit:
-    subject_id: int
+    subject_id: UUID
     grade: float | None
     source: str
 
@@ -52,7 +53,7 @@ def _status(attempts: list[Attempt], credit: Credit | None) -> tuple[str, float 
 
 
 def build_rows(components: list[Component], attempts: list[Attempt], credits: list[Credit]) -> list[TranscriptRow]:
-    by_subject: dict[int, list[Attempt]] = {}
+    by_subject: dict[UUID, list[Attempt]] = {}
     for attempt in attempts:
         by_subject.setdefault(attempt.subject_id, []).append(attempt)
     credit_by_subject = {credit.subject_id: credit for credit in credits}

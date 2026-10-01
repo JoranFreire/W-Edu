@@ -1,9 +1,10 @@
+from uuid import UUID
 from datetime import datetime
 from pydantic import BaseModel
 
 
 class SessionCreate(BaseModel):
-    lesson_id: int
+    lesson_id: UUID
 
 
 class SessionVoiceUpdate(BaseModel):
@@ -13,9 +14,9 @@ class SessionVoiceUpdate(BaseModel):
 
 
 class SessionOut(BaseModel):
-    id: int
-    student_id: int
-    lesson_id: int
+    id: UUID
+    student_id: UUID
+    lesson_id: UUID
     bevox_session_id: str | None
     transcript: str | None
     started_at: datetime
@@ -25,12 +26,12 @@ class SessionOut(BaseModel):
 
 
 class VoiceSessionContextOut(BaseModel):
-    course_id: int
+    course_id: UUID
     course_name: str
-    lesson_id: int
+    lesson_id: UUID
     lesson_title: str
     lesson_content: str | None = None
-    module_id: int | None = None
+    module_id: UUID | None = None
     module_title: str | None = None
 
 
@@ -45,11 +46,11 @@ class VoiceSessionStartOut(BaseModel):
 
 
 class SessionHistoryOut(BaseModel):
-    id: int
-    student_id: int
-    lesson_id: int
+    id: UUID
+    student_id: UUID
+    lesson_id: UUID
     lesson_title: str
-    course_id: int
+    course_id: UUID
     course_name: str
     bevox_session_id: str | None
     transcript: str | None

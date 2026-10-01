@@ -14,7 +14,7 @@ export function useMyMaterialRequests() {
     await api.post(endpoints.warehouse.requests, input);
     reload();
   };
-  const cancel = async (requestId: number) => {
+  const cancel = async (requestId: string) => {
     await api.post(endpoints.warehouse.cancel(requestId));
     reload();
   };

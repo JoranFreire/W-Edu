@@ -24,16 +24,16 @@ export default function TuitionPlanFormModal({ terms, programs, onSave, onClose 
   const [form, setForm] = useState({
     name: '', basis: 'program' as TuitionBasis, termId: '', programId: '', groupId: '', amount: '', installments: '12', firstDueOn: '',
   });
-  const { groups } = useClassGroups(form.termId ? Number(form.termId) : undefined);
+  const { groups } = useClassGroups(form.termId ? form.termId : undefined);
   const { saving, run } = useSubmitting();
   const set = (patch: Partial<typeof form>) => setForm({ ...form, ...patch });
 
   const submit = (event: React.FormEvent) => {
     event.preventDefault();
     const input: TuitionPlanInput = {
-      name: form.name, basis: form.basis, term_id: Number(form.termId),
-      program_id: form.basis !== 'class_group' && form.programId ? Number(form.programId) : null,
-      class_group_id: form.basis === 'class_group' && form.groupId ? Number(form.groupId) : null,
+      name: form.name, basis: form.basis, term_id: form.termId,
+      program_id: form.basis !== 'class_group' && form.programId ? form.programId : null,
+      class_group_id: form.basis === 'class_group' && form.groupId ? form.groupId : null,
       amount_cents: reaisToCents(form.amount), installments: Number(form.installments), first_due_on: form.firstDueOn,
     };
     run(() => onSave(input)).catch((error) => toast.error(apiErrorMessage(error, 'Erro ao salvar o plano.')));

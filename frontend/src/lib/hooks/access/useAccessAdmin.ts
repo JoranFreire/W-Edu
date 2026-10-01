@@ -34,10 +34,10 @@ export function useAccessAdmin() {
   return {
     data,
     error,
-    save: (id: number | null, input: AccessRoleInput) =>
+    save: (id: string | null, input: AccessRoleInput) =>
       run(() => (id ? api.put(endpoints.access.role(id), input) : api.post(endpoints.access.roles, input))),
-    remove: (id: number) => run(() => api.delete(endpoints.access.role(id))),
-    assign: (id: number, userId: number) => run(() => api.post(endpoints.access.roleMembers(id), { user_id: userId })),
-    unassign: (id: number, userId: number) => run(() => api.delete(endpoints.access.roleMember(id, userId))),
+    remove: (id: string) => run(() => api.delete(endpoints.access.role(id))),
+    assign: (id: string, userId: string) => run(() => api.post(endpoints.access.roleMembers(id), { user_id: userId })),
+    unassign: (id: string, userId: string) => run(() => api.delete(endpoints.access.roleMember(id, userId))),
   };
 }

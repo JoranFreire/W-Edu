@@ -1,11 +1,12 @@
+from uuid import UUID
 from datetime import datetime
 from pydantic import BaseModel
 from app.models.lesson import LessonType
 
 
 class LessonCreate(BaseModel):
-    course_id: int
-    module_id: int | None = None
+    course_id: UUID
+    module_id: UUID | None = None
     title: str
     content: str | None = None
     order: int = 0
@@ -14,7 +15,7 @@ class LessonCreate(BaseModel):
 
 
 class LessonUpdate(BaseModel):
-    module_id: int | None = None
+    module_id: UUID | None = None
     title: str | None = None
     content: str | None = None
     order: int | None = None
@@ -23,9 +24,9 @@ class LessonUpdate(BaseModel):
 
 
 class LessonOut(BaseModel):
-    id: int
-    course_id: int
-    module_id: int | None
+    id: UUID
+    course_id: UUID
+    module_id: UUID | None
     title: str
     content: str | None
     order: int

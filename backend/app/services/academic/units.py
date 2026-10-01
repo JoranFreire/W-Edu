@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from sqlalchemy.orm import Session
 
@@ -17,7 +18,7 @@ class AcademicUnitService:
     def list(self) -> list[AcademicUnit]:
         return self.repo.list_all()
 
-    def get_or_404(self, unit_id: int) -> AcademicUnit:
+    def get_or_404(self, unit_id: UUID) -> AcademicUnit:
         unit = self.repo.get_by_id(unit_id)
         if not unit:
             raise not_found("Unidade acadêmica não encontrada")
@@ -28,14 +29,14 @@ class AcademicUnitService:
             self.get_or_404(data.parent_id)
         return self.repo.save(AcademicUnit(**data.model_dump()))
 
-    def update(self, unit_id: int, data: AcademicUnitUpdate) -> AcademicUnit:
+    def update(self, unit_id: UUID, data: AcademicUnitUpdate) -> AcademicUnit:
         unit = self.get_or_404(unit_id)
         if data.parent_id is not None:
             self._ensure_valid_parent(unit_id, data.parent_id)
         apply_patch(unit, data, clearable=frozenset({"parent_id"}))
         return self.repo.save(unit)
 
-    def delete(self, unit_id: int) -> None:
+    def delete(self, unit_id: UUID) -> None:
         unit = self.get_or_404(unit_id)
         if self.repo.has_children(unit_id):
             raise conflict("Unidade possui subunidades")
@@ -43,7 +44,7 @@ class AcademicUnitService:
             raise conflict("Unidade possui programas vinculados")
         self.repo.delete(unit)
 
-    def _ensure_valid_parent(self, unit_id: int, parent_id: int) -> None:
+    def _ensure_valid_parent(self, unit_id: UUID, parent_id: UUID) -> None:
         self.get_or_404(parent_id)
         # Aresta filho -> pai: o novo pai nao pode descender da propria unidade.
         edges = [(child, parent) for child, parent in self.repo.parent_map().items() if parent is not None]

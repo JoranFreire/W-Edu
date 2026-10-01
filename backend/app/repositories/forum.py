@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from sqlalchemy.orm import Session, selectinload
 
 from app.models.forum import ForumPost, ForumThread
@@ -7,7 +9,7 @@ class ForumRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def get_thread(self, thread_id: int) -> ForumThread | None:
+    def get_thread(self, thread_id: UUID) -> ForumThread | None:
         return (
             self.db.query(ForumThread)
             .options(
@@ -18,7 +20,7 @@ class ForumRepository:
             .first()
         )
 
-    def list_threads_by_course(self, course_id: int) -> list[ForumThread]:
+    def list_threads_by_course(self, course_id: UUID) -> list[ForumThread]:
         return (
             self.db.query(ForumThread)
             .options(

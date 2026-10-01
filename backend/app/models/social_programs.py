@@ -1,5 +1,8 @@
 """Programas sociais: financiadores das turmas e beneficios entregues aos alunos (lanche, material, transporte...)."""
 
+from uuid import UUID
+
+from app.core.ids import new_id
 from datetime import date, datetime, timezone
 import enum
 
@@ -43,7 +46,7 @@ class FundingSource(TenantMixin, Base):
 
     __tablename__ = "funding_sources"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
     name: Mapped[str] = mapped_column(String(200))
     kind: Mapped[FundingKind] = mapped_column(SAEnum(FundingKind), default=FundingKind.agreement)
     agreement_number: Mapped[str | None] = mapped_column(String(80))
@@ -60,7 +63,7 @@ class BenefitItem(TenantMixin, Base):
 
     __tablename__ = "benefit_items"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
     name: Mapped[str] = mapped_column(String(200))
     kind: Mapped[BenefitKind] = mapped_column(SAEnum(BenefitKind), default=BenefitKind.other)
     unit: Mapped[str] = mapped_column(String(40), default="unidade")
@@ -75,15 +78,15 @@ class BenefitStockEntry(TenantMixin, Base):
 
     __tablename__ = "benefit_stock_entries"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    item_id: Mapped[int] = mapped_column(ForeignKey("benefit_items.id"), index=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
+    item_id: Mapped[UUID] = mapped_column(ForeignKey("benefit_items.id"), index=True)
     quantity: Mapped[int] = mapped_column(Integer)
     unit_cost_cents: Mapped[int] = mapped_column(Integer, default=0)
     origin: Mapped[StockOrigin] = mapped_column(SAEnum(StockOrigin), default=StockOrigin.purchase)
-    funding_source_id: Mapped[int | None] = mapped_column(ForeignKey("funding_sources.id"), index=True)
+    funding_source_id: Mapped[UUID | None] = mapped_column(ForeignKey("funding_sources.id"), index=True)
     received_on: Mapped[date] = mapped_column(Date)
     notes: Mapped[str | None] = mapped_column(Text)
-    created_by_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"))
+    created_by_id: Mapped[UUID | None] = mapped_column(ForeignKey("users.id"))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
     item: Mapped["BenefitItem"] = relationship()
@@ -94,15 +97,15 @@ class BenefitDelivery(TenantMixin, Base):
 
     __tablename__ = "benefit_deliveries"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    item_id: Mapped[int] = mapped_column(ForeignKey("benefit_items.id"), index=True)
-    student_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
-    class_offering_id: Mapped[int] = mapped_column(ForeignKey("class_offerings.id"), index=True)
-    scheduled_meeting_id: Mapped[int | None] = mapped_column(ForeignKey("scheduled_meetings.id"), index=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
+    item_id: Mapped[UUID] = mapped_column(ForeignKey("benefit_items.id"), index=True)
+    student_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"), index=True)
+    class_offering_id: Mapped[UUID] = mapped_column(ForeignKey("class_offerings.id"), index=True)
+    scheduled_meeting_id: Mapped[UUID | None] = mapped_column(ForeignKey("scheduled_meetings.id"), index=True)
     quantity: Mapped[int] = mapped_column(Integer, default=1)
     unit_cost_cents: Mapped[int] = mapped_column(Integer, default=0)
     delivered_on: Mapped[date] = mapped_column(Date)
-    delivered_by_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"))
+    delivered_by_id: Mapped[UUID | None] = mapped_column(ForeignKey("users.id"))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
     item: Mapped["BenefitItem"] = relationship()

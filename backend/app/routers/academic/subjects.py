@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -26,13 +28,13 @@ def create_subject(data: SubjectCreate, db: Session = Depends(get_db), _: Studen
 
 
 @router.get("/{subject_id}", response_model=SubjectOut)
-def get_subject(subject_id: int, db: Session = Depends(get_db), _: Student = Depends(get_current_student)):
+def get_subject(subject_id: UUID, db: Session = Depends(get_db), _: Student = Depends(get_current_student)):
     return SubjectService(db).get_or_404(subject_id)
 
 
 @router.patch("/{subject_id}", response_model=SubjectOut)
 def update_subject(
-    subject_id: int,
+    subject_id: UUID,
     data: SubjectUpdate,
     db: Session = Depends(get_db),
     _: Student = Depends(get_current_admin_or_coordinator),
@@ -41,5 +43,5 @@ def update_subject(
 
 
 @router.delete("/{subject_id}", status_code=204)
-def delete_subject(subject_id: int, db: Session = Depends(get_db), _: Student = Depends(get_current_admin)):
+def delete_subject(subject_id: UUID, db: Session = Depends(get_db), _: Student = Depends(get_current_admin)):
     SubjectService(db).delete(subject_id)

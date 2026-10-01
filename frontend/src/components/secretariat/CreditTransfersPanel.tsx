@@ -12,7 +12,7 @@ import CreditTransferForm from './CreditTransferForm';
 
 /** Aproveitamento de estudos: a secretaria registra, a coordenacao defere ou indefere. */
 export default function CreditTransfersPanel({ enrollmentId, pending, canDecide, editable, onChanged }: {
-  enrollmentId: number;
+  enrollmentId: string;
   pending: Pick<TranscriptRow, 'subject_id' | 'code' | 'name'>[];
   canDecide: boolean;
   editable: boolean;
@@ -26,7 +26,7 @@ export default function CreditTransfersPanel({ enrollmentId, pending, canDecide,
     onChanged();
   };
 
-  const handleDecision = async (id: number, approved: boolean) => {
+  const handleDecision = async (id: string, approved: boolean) => {
     const note = window.prompt(approved ? 'Observação do deferimento (opcional)' : 'Motivo do indeferimento') ?? null;
     try {
       await decide(id, approved, note);

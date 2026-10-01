@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from sqlalchemy.orm import Session
 
@@ -24,7 +25,7 @@ class WarehouseCatalogService:
         items = [item for item in self.items.list() if item.is_active or not only_active]
         return self._out(items)
 
-    def get_or_404(self, item_id: int) -> WarehouseItem:
+    def get_or_404(self, item_id: UUID) -> WarehouseItem:
         item = self.items.get_by_id(item_id)
         if not item:
             raise not_found("Material não encontrado")
@@ -33,16 +34,16 @@ class WarehouseCatalogService:
     def create(self, data: ItemCreate) -> ItemOut:
         return self._out([self.items.save(WarehouseItem(**data.model_dump()))])[0]
 
-    def update(self, item_id: int, data: ItemUpdate) -> ItemOut:
+    def update(self, item_id: UUID, data: ItemUpdate) -> ItemOut:
         item = self.get_or_404(item_id)
         apply_patch(item, data, clearable=frozenset({"category", "location"}))
         return self._out([self.items.save(item)])[0]
 
-    def entries_of(self, item_id: int) -> list[WarehouseEntry]:
+    def entries_of(self, item_id: UUID) -> list[WarehouseEntry]:
         self.get_or_404(item_id)
         return self.entries.list_by_item(item_id)
 
-    def receive(self, item_id: int, data: EntryCreate, user: Student) -> ItemOut:
+    def receive(self, item_id: UUID, data: EntryCreate, user: Student) -> ItemOut:
         item = self.get_or_404(item_id)
         if data.funding_source_id is not None:
             self.funding.get_or_404(data.funding_source_id)
@@ -51,7 +52,7 @@ class WarehouseCatalogService:
         self.entries.save(WarehouseEntry(item_id=item.id, created_by_id=user.id, **payload))
         return self._out([item])[0]
 
-    def balances(self, item_ids: list[int]) -> dict[int, int]:
+    def balances(self, item_ids: list[UUID]) -> dict[UUID, int]:
         return {item_id: available(r, d, b) for item_id, (r, d, b, _) in self.items.movements(item_ids).items()}
 
     def _out(self, items: list[WarehouseItem]) -> list[ItemOut]:

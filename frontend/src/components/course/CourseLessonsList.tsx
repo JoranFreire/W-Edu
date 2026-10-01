@@ -19,7 +19,7 @@ const statusBadge = (status?: Progress['status']) => {
 };
 
 export default function CourseLessonsList({ lessons, progress }: { lessons: Lesson[]; progress: Progress[] }) {
-  const getProgress = (lessonId: number) => progress.find((p) => p.lesson_id === lessonId);
+  const getProgress = (lessonId: string) => progress.find((p) => p.lesson_id === lessonId);
 
   if (lessons.length === 0) return <p className="text-gray-500 dark:text-gray-400">Nenhuma aula cadastrada.</p>;
 

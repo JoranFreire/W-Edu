@@ -19,7 +19,7 @@ export default function RoomForm({ locations, onCreated, onCancel, variant = 'ca
     const toast = (await import('react-hot-toast')).default;
     try {
       await api.post(endpoints.schedule.rooms, {
-        location_id: Number(form.location_id), name: form.name, capacity: form.capacity, resources: form.resources || null,
+        location_id: form.location_id, name: form.name, capacity: form.capacity, resources: form.resources || null,
       });
       setForm({ location_id: '', name: '', capacity: 20, resources: '' });
       toast.success('Sala criada.');

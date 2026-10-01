@@ -14,7 +14,7 @@ export default function UsersList({ users, organizations, canDelete, canManageUs
   canDelete: boolean;
   canManageUser: (user: User) => boolean;
   onEdit: (user: User) => void;
-  onDelete: (id: number) => void;
+  onDelete: (id: string) => void;
   /** Lista vazia por causa do filtro (e nao por falta de cadastro). */
   filtered?: boolean;
 }) {

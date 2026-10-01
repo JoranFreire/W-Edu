@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from datetime import date
 
@@ -36,19 +37,19 @@ class ProgramEnrollmentService:
 
     def list(
         self,
-        program_id: int | None = None,
+        program_id: UUID | None = None,
         status: ProgramEnrollmentStatus | None = None,
-        student_id: int | None = None,
+        student_id: UUID | None = None,
     ) -> list[ProgramEnrollment]:
         return self.repo.list(program_id=program_id, status=status, student_id=student_id)
 
-    def get_or_404(self, enrollment_id: int) -> ProgramEnrollment:
+    def get_or_404(self, enrollment_id: UUID) -> ProgramEnrollment:
         enrollment = self.repo.get_by_id(enrollment_id)
         if not enrollment:
             raise not_found("Matrícula não encontrada")
         return enrollment
 
-    def create(self, data: ProgramEnrollmentCreate, user_id: int | None = None) -> ProgramEnrollment:
+    def create(self, data: ProgramEnrollmentCreate, user_id: UUID | None = None) -> ProgramEnrollment:
         if not self.students.get_by_id(data.student_id):
             raise not_found("Aluno não encontrado")
         program = self.programs.get_or_404(data.program_id)
@@ -83,12 +84,12 @@ class ProgramEnrollmentService:
                     raise conflict("Número de matrícula já utilizado")
         raise conflict("Não foi possível gerar o número de matrícula; tente novamente")
 
-    def change_status(self, enrollment_id: int, target: ProgramEnrollmentStatus, user_id: int | None = None) -> ProgramEnrollment:
+    def change_status(self, enrollment_id: UUID, target: ProgramEnrollmentStatus, user_id: UUID | None = None) -> ProgramEnrollment:
         """Mudanca direta de situacao; a secretaria registra a movimentacao."""
         self.lifecycle.transition(enrollment_id, target, user_id)
         return self.get_or_404(enrollment_id)
 
-    def _curriculum_for(self, program_id: int, curriculum_id: int | None) -> Curriculum:
+    def _curriculum_for(self, program_id: UUID, curriculum_id: UUID | None) -> Curriculum:
         if curriculum_id is None:
             active = self.curricula.list_active(program_id)
             if not active:

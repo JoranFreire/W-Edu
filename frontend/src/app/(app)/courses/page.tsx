@@ -23,7 +23,7 @@ export default function CoursesPage() {
   const [viewMode, setViewMode] = useViewMode('courses');
   useErrorToast(catalog.error, 'Erro ao carregar cursos.');
 
-  const enroll = async (courseId: number) => {
+  const enroll = async (courseId: string) => {
     try {
       await catalog.enroll(courseId);
       toast.success('Matriculado com sucesso!');

@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
@@ -13,7 +14,7 @@ class TeachingScopeRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def teaches_student(self, instructor_id: int, student_id: int) -> bool:
+    def teaches_student(self, instructor_id: UUID, student_id: UUID) -> bool:
         in_offering = (
             self.db.query(ClassEnrollment.id)
             .join(ClassOffering, ClassOffering.id == ClassEnrollment.class_offering_id)

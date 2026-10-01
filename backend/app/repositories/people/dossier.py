@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from sqlalchemy import or_
 from sqlalchemy.orm import Session, selectinload
 
@@ -14,7 +16,7 @@ class DossierRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def program_enrollments_of(self, user_id: int) -> list[ProgramEnrollment]:
+    def program_enrollments_of(self, user_id: UUID) -> list[ProgramEnrollment]:
         return (
             self.db.query(ProgramEnrollment)
             .filter(ProgramEnrollment.student_id == user_id)
@@ -22,7 +24,7 @@ class DossierRepository:
             .all()
         )
 
-    def charges_of(self, user_id: int) -> list[Charge]:
+    def charges_of(self, user_id: UUID) -> list[Charge]:
         """Cobrancas em que a pessoa e o aluno ou quem paga (responsavel financeiro), mais recentes primeiro."""
         return (
             self.db.query(Charge)
@@ -31,7 +33,7 @@ class DossierRepository:
             .all()
         )
 
-    def offerings_taught_by(self, user_id: int) -> list[ClassOffering]:
+    def offerings_taught_by(self, user_id: UUID) -> list[ClassOffering]:
         return (
             self.db.query(ClassOffering)
             .filter(ClassOffering.instructor_id == user_id)
@@ -39,7 +41,7 @@ class DossierRepository:
             .all()
         )
 
-    def benefits_of(self, user_id: int) -> list[tuple[BenefitDelivery, str]]:
+    def benefits_of(self, user_id: UUID) -> list[tuple[BenefitDelivery, str]]:
         """Entregas de beneficios ao aluno, com o nome da turma."""
         return (
             self.db.query(BenefitDelivery, ClassOffering.name)
@@ -50,7 +52,7 @@ class DossierRepository:
             .all()
         )
 
-    def material_requests_of(self, user_id: int) -> list[MaterialRequest]:
+    def material_requests_of(self, user_id: UUID) -> list[MaterialRequest]:
         return (
             self.db.query(MaterialRequest)
             .options(selectinload(MaterialRequest.lines).selectinload(MaterialRequestLine.item),

@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from sqlalchemy.orm import Session
 from datetime import datetime
 from sqlalchemy import or_
@@ -45,7 +47,7 @@ class NotificationEventRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def get_by_id(self, event_id: int) -> NotificationEvent | None:
+    def get_by_id(self, event_id: UUID) -> NotificationEvent | None:
         return self.db.get(NotificationEvent, event_id)
 
     def list_all(self, limit: int = 100) -> list[NotificationEvent]:
@@ -79,26 +81,26 @@ class NotificationInboxRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def _delivered_to(self, recipient_id: int):
+    def _delivered_to(self, recipient_id: UUID):
         return self.db.query(NotificationEvent).filter(
             NotificationEvent.recipient_student_id == recipient_id,
             NotificationEvent.channel == NotificationChannel.internal,
             NotificationEvent.status == NotificationStatus.sent,
         )
 
-    def list_for(self, recipient_id: int, unread_only: bool = False, limit: int = 50) -> list[NotificationEvent]:
+    def list_for(self, recipient_id: UUID, unread_only: bool = False, limit: int = 50) -> list[NotificationEvent]:
         query = self._delivered_to(recipient_id)
         if unread_only:
             query = query.filter(NotificationEvent.read_at.is_(None))
         return query.order_by(NotificationEvent.id.desc()).limit(limit).all()
 
-    def get_for(self, recipient_id: int, event_id: int) -> NotificationEvent | None:
+    def get_for(self, recipient_id: UUID, event_id: UUID) -> NotificationEvent | None:
         return self._delivered_to(recipient_id).filter(NotificationEvent.id == event_id).first()
 
-    def unread_count(self, recipient_id: int) -> int:
+    def unread_count(self, recipient_id: UUID) -> int:
         return self._delivered_to(recipient_id).filter(NotificationEvent.read_at.is_(None)).count()
 
-    def mark_all_read(self, recipient_id: int, read_at: datetime) -> None:
+    def mark_all_read(self, recipient_id: UUID, read_at: datetime) -> None:
         self._delivered_to(recipient_id).filter(NotificationEvent.read_at.is_(None)).update(
             {NotificationEvent.read_at: read_at}, synchronize_session=False
         )

@@ -1,14 +1,14 @@
 export interface QuizQuestion {
-  id: number;
-  quiz_id: number;
+  id: string;
+  quiz_id: string;
   question: string;
   options: string[];
   order: number;
 }
 
 export interface Quiz {
-  id: number;
-  lesson_id: number;
+  id: string;
+  lesson_id: string;
   passing_score: number;
   max_attempts: number;
   created_at: string;
@@ -16,9 +16,9 @@ export interface Quiz {
 }
 
 export interface QuizAttempt {
-  id: number;
-  quiz_id: number;
-  student_id: number;
+  id: string;
+  quiz_id: string;
+  student_id: string;
   score: number;
   passed: boolean;
   answers: Record<string, number>;

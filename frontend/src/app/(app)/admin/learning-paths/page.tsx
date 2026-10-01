@@ -20,13 +20,13 @@ export default function AdminLearningPathsPage() {
   const canDelete = isAdminRole(student?.role);
   const paths = useLearningPaths();
   const [editing, setEditing] = useState<{ path?: LearningPath } | null>(null);
-  const [addingToPathId, setAddingToPathId] = useState<number | null>(null);
+  const [addingToPathId, setAddingToPathId] = useState<string | null>(null);
   const [pathToDelete, setPathToDelete] = useState<LearningPath | null>(null);
-  const [courseToRemove, setCourseToRemove] = useState<{ pathId: number; courseId: number } | null>(null);
+  const [courseToRemove, setCourseToRemove] = useState<{ pathId: string; courseId: string } | null>(null);
 
   useErrorToast(paths.error, 'Erro ao carregar trilhas.');
 
-  const availableCourses = (pathId: number) => {
+  const availableCourses = (pathId: string) => {
     const linkedIds = new Set((paths.pathCourses[pathId] ?? []).map((item) => item.course_id));
     return paths.courses.filter((course) => !linkedIds.has(course.id));
   };
@@ -48,12 +48,12 @@ export default function AdminLearningPathsPage() {
     } catch { toast.error('Erro ao excluir trilha.'); }
   };
 
-  const openAddCourse = (pathId: number) => {
+  const openAddCourse = (pathId: string) => {
     if (!availableCourses(pathId).length) { toast.error('Não há cursos disponíveis para adicionar.'); return; }
     setAddingToPathId(pathId);
   };
 
-  const addCourse = async (courseId: number) => {
+  const addCourse = async (courseId: string) => {
     if (!addingToPathId) return;
     try {
       await paths.addCourse(addingToPathId, courseId);

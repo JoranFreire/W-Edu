@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from sqlalchemy.orm import Session
 
@@ -15,11 +16,11 @@ class SubjectEquivalenceService:
         self.repo = SubjectEquivalenceRepository(db)
         self.subjects = SubjectService(db)
 
-    def list(self, subject_id: int) -> list[Subject]:
+    def list(self, subject_id: UUID) -> list[Subject]:
         self.subjects.get_or_404(subject_id)
         return self.repo.list_equivalents(subject_id)
 
-    def add(self, subject_id: int, other_id: int) -> Subject:
+    def add(self, subject_id: UUID, other_id: UUID) -> Subject:
         if subject_id == other_id:
             raise bad_request("Disciplina não pode ser equivalente a ela mesma")
         self.subjects.get_or_404(subject_id)
@@ -30,7 +31,7 @@ class SubjectEquivalenceService:
         self.repo.save(SubjectEquivalence(subject_id=low, equivalent_subject_id=high))
         return other
 
-    def remove(self, subject_id: int, other_id: int) -> None:
+    def remove(self, subject_id: UUID, other_id: UUID) -> None:
         link = self.repo.get_link(subject_id, other_id)
         if not link:
             raise not_found("Equivalência não encontrada")

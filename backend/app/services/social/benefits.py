@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from sqlalchemy.orm import Session
 
@@ -31,7 +32,7 @@ class BenefitCatalogService:
         balances = self.items.balances([item.id for item in items])
         return [item_out(item, balances.get(item.id, 0)) for item in items]
 
-    def get_or_404(self, item_id: int) -> BenefitItem:
+    def get_or_404(self, item_id: UUID) -> BenefitItem:
         item = self.items.get_by_id(item_id)
         if not item:
             raise not_found("Item não encontrado")
@@ -40,17 +41,17 @@ class BenefitCatalogService:
     def create(self, data: BenefitItemCreate) -> BenefitItemOut:
         return item_out(self.items.save(BenefitItem(**data.model_dump())), 0)
 
-    def update(self, item_id: int, data: BenefitItemUpdate) -> BenefitItemOut:
+    def update(self, item_id: UUID, data: BenefitItemUpdate) -> BenefitItemOut:
         item = self.get_or_404(item_id)
         apply_patch(item, data)
         saved = self.items.save(item)
         return item_out(saved, self.items.balances([saved.id])[saved.id])
 
-    def entries(self, item_id: int) -> list[BenefitStockEntry]:
+    def entries(self, item_id: UUID) -> list[BenefitStockEntry]:
         self.get_or_404(item_id)
         return self.stock.list_by_item(item_id)
 
-    def receive(self, item_id: int, data: StockEntryCreate, user: Student) -> BenefitItemOut:
+    def receive(self, item_id: UUID, data: StockEntryCreate, user: Student) -> BenefitItemOut:
         item = self.get_or_404(item_id)
         if data.funding_source_id is not None:
             self.funding.get_or_404(data.funding_source_id)

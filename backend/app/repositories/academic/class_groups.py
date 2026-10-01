@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from sqlalchemy import func
 from sqlalchemy.orm import joinedload
@@ -11,7 +12,7 @@ from app.repositories.academic._base import Repository
 class ClassGroupRepository(Repository[ClassGroup]):
     model = ClassGroup
 
-    def list(self, term_id: int | None = None, program_id: int | None = None) -> list[ClassGroup]:
+    def list(self, term_id: UUID | None = None, program_id: UUID | None = None) -> list[ClassGroup]:
         query = self.db.query(ClassGroup)
         if term_id is not None:
             query = query.filter(ClassGroup.term_id == term_id)
@@ -19,10 +20,10 @@ class ClassGroupRepository(Repository[ClassGroup]):
             query = query.filter(ClassGroup.program_id == program_id)
         return query.order_by(ClassGroup.name).all()
 
-    def get_by_name(self, term_id: int, name: str) -> ClassGroup | None:
+    def get_by_name(self, term_id: UUID, name: str) -> ClassGroup | None:
         return self.db.query(ClassGroup).filter(ClassGroup.term_id == term_id, ClassGroup.name == name).first()
 
-    def member_counts(self, group_ids: list[int]) -> dict[int, int]:
+    def member_counts(self, group_ids: list[UUID]) -> dict[UUID, int]:
         if not group_ids:
             return {}
         rows = (
@@ -33,10 +34,10 @@ class ClassGroupRepository(Repository[ClassGroup]):
         )
         return dict(rows)
 
-    def has_offerings(self, group_id: int) -> bool:
+    def has_offerings(self, group_id: UUID) -> bool:
         return self.db.query(ClassOffering.id).filter(ClassOffering.class_group_id == group_id).first() is not None
 
-    def taught_by(self, group_id: int, instructor_id: int) -> bool:
+    def taught_by(self, group_id: UUID, instructor_id: UUID) -> bool:
         """O instrutor ministra alguma oferta ligada a turma-grupo."""
         return (
             self.db.query(ClassOffering.id)
@@ -49,7 +50,7 @@ class ClassGroupRepository(Repository[ClassGroup]):
 class ClassGroupMemberRepository(Repository[ClassGroupMember]):
     model = ClassGroupMember
 
-    def list_by_group(self, group_id: int) -> list[ClassGroupMember]:
+    def list_by_group(self, group_id: UUID) -> list[ClassGroupMember]:
         return (
             self.db.query(ClassGroupMember)
             .options(joinedload(ClassGroupMember.program_enrollment).joinedload(ProgramEnrollment.student))
@@ -59,17 +60,17 @@ class ClassGroupMemberRepository(Repository[ClassGroupMember]):
             .all()
         )
 
-    def count(self, group_id: int) -> int:
+    def count(self, group_id: UUID) -> int:
         return self.db.query(ClassGroupMember.id).filter(ClassGroupMember.class_group_id == group_id).count()
 
-    def get(self, group_id: int, enrollment_id: int) -> ClassGroupMember | None:
+    def get(self, group_id: UUID, enrollment_id: UUID) -> ClassGroupMember | None:
         return (
             self.db.query(ClassGroupMember)
             .filter(ClassGroupMember.class_group_id == group_id, ClassGroupMember.program_enrollment_id == enrollment_id)
             .first()
         )
 
-    def group_in_term(self, enrollment_id: int, term_id: int) -> ClassGroup | None:
+    def group_in_term(self, enrollment_id: UUID, term_id: UUID) -> ClassGroup | None:
         """Turma-grupo em que a matricula ja esta alocada no periodo."""
         return (
             self.db.query(ClassGroup)
@@ -78,7 +79,7 @@ class ClassGroupMemberRepository(Repository[ClassGroupMember]):
             .first()
         )
 
-    def groups_of_student(self, student_id: int) -> list[ClassGroup]:
+    def groups_of_student(self, student_id: UUID) -> list[ClassGroup]:
         """Turmas-grupo em que o aluno esta alocado (por qualquer matricula no curso)."""
         return (
             self.db.query(ClassGroup)
@@ -89,7 +90,7 @@ class ClassGroupMemberRepository(Repository[ClassGroupMember]):
             .all()
         )
 
-    def student_ids(self, group_id: int) -> list[int]:
+    def student_ids(self, group_id: UUID) -> list[UUID]:
         rows = (
             self.db.query(ProgramEnrollment.student_id)
             .join(ClassGroupMember, ClassGroupMember.program_enrollment_id == ProgramEnrollment.id)

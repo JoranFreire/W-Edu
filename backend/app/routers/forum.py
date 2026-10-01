@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -12,7 +14,7 @@ router = APIRouter()
 
 @router.get("/courses/{course_id}/threads", response_model=list[ForumThreadOut])
 def list_threads(
-    course_id: int,
+    course_id: UUID,
     db: Session = Depends(get_db),
     current: Student = Depends(get_current_student),
 ):
@@ -21,7 +23,7 @@ def list_threads(
 
 @router.post("/courses/{course_id}/threads", response_model=ForumThreadOut, status_code=201)
 def create_thread(
-    course_id: int,
+    course_id: UUID,
     data: ForumThreadCreate,
     db: Session = Depends(get_db),
     current: Student = Depends(get_current_student),
@@ -30,13 +32,13 @@ def create_thread(
 
 
 @router.get("/threads/{thread_id}", response_model=ForumThreadOut)
-def get_thread(thread_id: int, db: Session = Depends(get_db), current: Student = Depends(get_current_student)):
+def get_thread(thread_id: UUID, db: Session = Depends(get_db), current: Student = Depends(get_current_student)):
     return ForumService(db).get_thread(thread_id, current)
 
 
 @router.post("/threads/{thread_id}/posts", response_model=ForumThreadOut, status_code=201)
 def create_post(
-    thread_id: int,
+    thread_id: UUID,
     data: ForumPostCreate,
     db: Session = Depends(get_db),
     current: Student = Depends(get_current_student),

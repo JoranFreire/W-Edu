@@ -4,6 +4,7 @@ Bloqueia quando a etapa foi encerrada na instituicao, fechada na turma, o period
 letivo foi encerrado ou a turma foi finalizada.
 """
 
+from uuid import UUID
 from collections.abc import Collection
 from datetime import date
 
@@ -17,7 +18,7 @@ def is_offering_finalized(offering: ClassOffering) -> bool:
     return offering.status == ClassStatus.completed
 
 
-def is_period_locked(period: GradingPeriod | None, closed_in_offering: Collection[int] = ()) -> bool:
+def is_period_locked(period: GradingPeriod | None, closed_in_offering: Collection[UUID] = ()) -> bool:
     if period is None:
         return False
     return (
@@ -27,7 +28,7 @@ def is_period_locked(period: GradingPeriod | None, closed_in_offering: Collectio
     )
 
 
-def is_date_locked(term: AcademicTerm | None, day: date, closed_in_offering: Collection[int] = ()) -> bool:
+def is_date_locked(term: AcademicTerm | None, day: date, closed_in_offering: Collection[UUID] = ()) -> bool:
     """Data do diario cai em periodo encerrado ou em etapa encerrada/fechada na turma."""
     if term is None:
         return False

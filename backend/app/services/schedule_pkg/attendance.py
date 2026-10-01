@@ -1,3 +1,4 @@
+from uuid import UUID
 from datetime import datetime, timedelta, timezone
 import secrets
 
@@ -25,17 +26,17 @@ class AttendanceRecordService:
         self.certificate_service = CertificateIssuanceService(db)
         self.notification_service = NotificationEventService(db)
 
-    def generate_checkin_token(self, meeting_id: int, valid_minutes: int) -> CheckinToken:
+    def generate_checkin_token(self, meeting_id: UUID, valid_minutes: int) -> CheckinToken:
         self.meeting_service.get_or_404(meeting_id)
         token = secrets.token_urlsafe(32)
         expires_at = datetime.now(timezone.utc) + timedelta(minutes=valid_minutes)
         return self.token_repo.create(CheckinToken(scheduled_meeting_id=meeting_id, token=token, expires_at=expires_at))
 
-    def list_tokens(self, meeting_id: int) -> list[CheckinToken]:
+    def list_tokens(self, meeting_id: UUID) -> list[CheckinToken]:
         self.meeting_service.get_or_404(meeting_id)
         return self.token_repo.list_by_meeting(meeting_id)
 
-    def check_in_with_token(self, token: str, student_id: int) -> AttendanceRecord:
+    def check_in_with_token(self, token: str, student_id: UUID) -> AttendanceRecord:
         checkin_token = self.token_repo.get_by_token(token)
         now = datetime.now(timezone.utc)
         if not checkin_token or not checkin_token.is_active:
@@ -49,17 +50,17 @@ class AttendanceRecordService:
         status_value = AttendanceStatus.late if now > meeting.starts_at + timedelta(minutes=15) else AttendanceStatus.present
         return self._upsert_record(meeting, student_id, status_value, AttendanceMethod.qr_code, None)
 
-    def create_manual_record(self, meeting_id: int, student_id: int, status_value, method, notes: str | None) -> AttendanceRecord:
+    def create_manual_record(self, meeting_id: UUID, student_id: UUID, status_value, method, notes: str | None) -> AttendanceRecord:
         meeting = self.meeting_service.get_or_404(meeting_id)
         if not self.student_repo.get_by_id(student_id):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Aluno não encontrado")
         return self._upsert_record(meeting, student_id, status_value, method, notes)
 
-    def list_by_meeting(self, meeting_id: int) -> list[AttendanceRecord]:
+    def list_by_meeting(self, meeting_id: UUID) -> list[AttendanceRecord]:
         self.meeting_service.get_or_404(meeting_id)
         return self.record_repo.list_by_meeting(meeting_id)
 
-    def attendance_report(self, meeting_id: int) -> list[MeetingAttendanceReportRow]:
+    def attendance_report(self, meeting_id: UUID) -> list[MeetingAttendanceReportRow]:
         meeting = self.meeting_service.get_or_404(meeting_id)
         enrollments = self.meeting_service.repo.list_active_enrollments(meeting.class_offering_id)
         records = {
@@ -92,7 +93,7 @@ class AttendanceRecordService:
             )
         return rows
 
-    def upsert_practical_assessment(self, meeting_id: int, data: PracticalAssessmentRecordCreate, recorded_by_id: int | None) -> PracticalAssessmentRecord:
+    def upsert_practical_assessment(self, meeting_id: UUID, data: PracticalAssessmentRecordCreate, recorded_by_id: UUID | None) -> PracticalAssessmentRecord:
         meeting = self.meeting_service.get_or_404(meeting_id)
         if not self.student_repo.get_by_id(data.student_id):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Aluno não encontrado")
@@ -123,7 +124,7 @@ class AttendanceRecordService:
         self.certificate_service.auto_issue(course_id, data.student_id)
         return record
 
-    def _upsert_record(self, meeting, student_id: int, status_value: AttendanceStatus, method: AttendanceMethod, notes: str | None) -> AttendanceRecord:
+    def _upsert_record(self, meeting, student_id: UUID, status_value: AttendanceStatus, method: AttendanceMethod, notes: str | None) -> AttendanceRecord:
         existing = self.record_repo.get_by_meeting_and_student(meeting.id, student_id)
         if existing:
             existing.status = status_value

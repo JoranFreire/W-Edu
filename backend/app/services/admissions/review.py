@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from sqlalchemy.orm import Session
 
@@ -19,11 +20,11 @@ class ApplicationReviewService:
         self.repo = AdmissionApplicationRepository(db)
         self.calls = AdmissionCallService(db)
 
-    def list(self, call_id: int) -> list[ApplicationOut]:
+    def list(self, call_id: UUID) -> list[ApplicationOut]:
         self.calls.get_or_404(call_id)
         return [application_out(application) for application in self.repo.list_by_call(call_id)]
 
-    def review(self, application_id: int, data: ApplicationReview) -> ApplicationOut:
+    def review(self, application_id: UUID, data: ApplicationReview) -> ApplicationOut:
         application = self.repo.get_by_id(application_id)
         if not application:
             raise not_found("Inscrição não encontrada")

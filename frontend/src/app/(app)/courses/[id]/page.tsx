@@ -25,17 +25,17 @@ export default function CourseDetailPage() {
 
   useEffect(() => {
     Promise.all([
-      api.get<Course>(endpoints.courses.detail(Number(id))),
-      api.get<Lesson[]>(endpoints.courses.lessons(Number(id))),
+      api.get<Course>(endpoints.courses.detail(id)),
+      api.get<Lesson[]>(endpoints.courses.lessons(id)),
       api.get<Progress[]>(endpoints.progress.me),
-      api.get<ForumThread[]>(endpoints.forum.courseThreads(Number(id))),
+      api.get<ForumThread[]>(endpoints.forum.courseThreads(id)),
       api.get<ChatConversation[]>(endpoints.chat.conversations),
     ]).then(([c, l, p, f, chats]) => {
       setCourse(c.data);
       setLessons(l.data);
       setProgress(p.data);
       setThreads(f.data);
-      setConversation(chats.data.find((chat) => chat.course_id === Number(id)) ?? null);
+      setConversation(chats.data.find((chat) => chat.course_id === id) ?? null);
     }).catch(() => toast.error('Erro ao carregar curso.')).finally(() => setLoading(false));
   }, [id]);
 
@@ -70,8 +70,8 @@ export default function CourseDetailPage() {
         <CourseLessonsList lessons={lessons} progress={progress} />
       </div>
 
-      <CourseForumSection courseId={Number(id)} initialThreads={threads} />
-      <CourseChatSection courseId={Number(id)} courseName={course.name} initialConversation={conversation} />
+      <CourseForumSection courseId={id} initialThreads={threads} />
+      <CourseChatSection courseId={id} courseName={course.name} initialConversation={conversation} />
     </div>
   );
 }

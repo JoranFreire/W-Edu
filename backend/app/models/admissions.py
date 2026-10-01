@@ -1,5 +1,8 @@
 """Processo seletivo de cursos gratuitos: edital, inscricoes, comprovantes e convocacoes."""
 
+from uuid import UUID
+
+from app.core.ids import new_id
 from datetime import date, datetime, timezone
 import enum
 
@@ -66,8 +69,8 @@ class AdmissionCall(TenantMixin, Base):
 
     __tablename__ = "admission_calls"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    class_offering_id: Mapped[int] = mapped_column(ForeignKey("class_offerings.id"), index=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
+    class_offering_id: Mapped[UUID] = mapped_column(ForeignKey("class_offerings.id"), index=True)
     title: Mapped[str] = mapped_column(String(200))
     description: Mapped[str | None] = mapped_column(Text)
     method: Mapped[SelectionMethod] = mapped_column(SAEnum(SelectionMethod), default=SelectionMethod.first_come)
@@ -98,9 +101,9 @@ class AdmissionApplication(TenantMixin, Base):
     __tablename__ = "admission_applications"
     __table_args__ = (UniqueConstraint("call_id", "applicant_id"),)
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    call_id: Mapped[int] = mapped_column(ForeignKey("admission_calls.id", ondelete="CASCADE"), index=True)
-    applicant_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
+    call_id: Mapped[UUID] = mapped_column(ForeignKey("admission_calls.id", ondelete="CASCADE"), index=True)
+    applicant_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"), index=True)
     protocol: Mapped[str] = mapped_column(String(20), index=True)
     # Questionario socioeconomico.
     birth_date: Mapped[date] = mapped_column(Date)
@@ -133,15 +136,15 @@ class ApplicationDocument(TenantMixin, Base):
 
     __tablename__ = "application_documents"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    application_id: Mapped[int] = mapped_column(ForeignKey("admission_applications.id", ondelete="CASCADE"), index=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
+    application_id: Mapped[UUID] = mapped_column(ForeignKey("admission_applications.id", ondelete="CASCADE"), index=True)
     kind: Mapped[str] = mapped_column(String(120))
     file_name: Mapped[str] = mapped_column(String(255))
     mime_type: Mapped[str | None] = mapped_column(String(120))
     storage_path: Mapped[str] = mapped_column(String(500))
     review: Mapped[DocumentReview] = mapped_column(SAEnum(DocumentReview), default=DocumentReview.pending)
     review_note: Mapped[str | None] = mapped_column(Text)
-    reviewed_by_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"))
+    reviewed_by_id: Mapped[UUID | None] = mapped_column(ForeignKey("users.id"))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
     application: Mapped["AdmissionApplication"] = relationship(back_populates="documents")

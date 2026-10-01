@@ -7,12 +7,12 @@ import { useApiQuery } from '@/lib/hooks/useApiQuery';
 import type { OfferingResults } from '@/types/assessment';
 
 export interface RecoveryInput {
-  class_enrollment_id: number;
+  class_enrollment_id: string;
   score: number | null;
 }
 
 /** Fechamento de etapas, resultado final, recuperacao e finalizacao da turma. */
-export function useOfferingResults(offeringId: number) {
+export function useOfferingResults(offeringId: string) {
   const request = useCallback(
     () => api.get<OfferingResults>(endpoints.assessment.results(offeringId)).then((response) => response.data),
     [offeringId],
@@ -28,8 +28,8 @@ export function useOfferingResults(offeringId: number) {
     results: data,
     loading,
     error,
-    closePeriod: (periodId: number) => run(() => api.post(endpoints.assessment.closePeriod(offeringId, periodId))),
-    reopenPeriod: (periodId: number) => run(() => api.delete(endpoints.assessment.closePeriod(offeringId, periodId))),
+    closePeriod: (periodId: string) => run(() => api.post(endpoints.assessment.closePeriod(offeringId, periodId))),
+    reopenPeriod: (periodId: string) => run(() => api.delete(endpoints.assessment.closePeriod(offeringId, periodId))),
     compute: () => run(() => api.post(endpoints.assessment.computeResults(offeringId))),
     saveRecovery: (values: RecoveryInput[]) => run(() => api.put(endpoints.assessment.recovery(offeringId), values)),
     finalize: () => run(() => api.post(endpoints.assessment.finalize(offeringId))),

@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from sqlalchemy.orm import Session
 
@@ -20,7 +21,7 @@ class SubjectService:
     def list(self, search: str | None = None, active: bool | None = None) -> list[Subject]:
         return self.repo.list(search=search, active=active)
 
-    def get_or_404(self, subject_id: int) -> Subject:
+    def get_or_404(self, subject_id: UUID) -> Subject:
         subject = self.repo.get_by_id(subject_id)
         if not subject:
             raise not_found("Disciplina não encontrada")
@@ -32,7 +33,7 @@ class SubjectService:
         self._ensure_unique_code(data.code)
         return self.repo.save(Subject(**data.model_dump()))
 
-    def update(self, subject_id: int, data: SubjectUpdate) -> Subject:
+    def update(self, subject_id: UUID, data: SubjectUpdate) -> Subject:
         subject = self.get_or_404(subject_id)
         if data.course_id is not None:
             self.courses.get_or_404(data.course_id)
@@ -41,7 +42,7 @@ class SubjectService:
         apply_patch(subject, data, clearable=CLEARABLE)
         return self.repo.save(subject)
 
-    def delete(self, subject_id: int) -> None:
+    def delete(self, subject_id: UUID) -> None:
         subject = self.get_or_404(subject_id)
         if self.repo.is_in_curriculum(subject_id):
             raise conflict("Disciplina faz parte de uma matriz curricular; desative-a em vez de excluir")

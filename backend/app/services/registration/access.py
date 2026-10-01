@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from datetime import datetime, timezone
 
@@ -33,7 +34,7 @@ class StudentWindowAccess:
                 ))
         return result
 
-    def resolve(self, student: Student, window_id: int) -> tuple[RegistrationWindow, ProgramEnrollment]:
+    def resolve(self, student: Student, window_id: UUID) -> tuple[RegistrationWindow, ProgramEnrollment]:
         window = self.windows.get_or_404(window_id)
         enrollment = self._matching(window, self._active(student))
         if not enrollment:

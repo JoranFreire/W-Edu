@@ -1,3 +1,6 @@
+from uuid import UUID
+
+from app.core.ids import new_id
 from datetime import datetime, timezone
 import enum
 
@@ -18,10 +21,10 @@ class AssignmentSubmission(TenantMixin, Base):
     __tablename__ = "assignment_submissions"
     __table_args__ = (UniqueConstraint("lesson_id", "student_id"),)
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    lesson_id: Mapped[int] = mapped_column(ForeignKey("lessons.id"), index=True)
-    course_id: Mapped[int] = mapped_column(ForeignKey("courses.id"), index=True)
-    student_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
+    lesson_id: Mapped[UUID] = mapped_column(ForeignKey("lessons.id"), index=True)
+    course_id: Mapped[UUID] = mapped_column(ForeignKey("courses.id"), index=True)
+    student_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"), index=True)
     text: Mapped[str | None] = mapped_column(Text)
     file_path: Mapped[str | None] = mapped_column(String(500))
     file_name: Mapped[str | None] = mapped_column(String(255))
@@ -34,7 +37,7 @@ class AssignmentSubmission(TenantMixin, Base):
     feedback: Mapped[str | None] = mapped_column(Text)
     submitted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     reviewed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
-    reviewed_by_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True, index=True)
+    reviewed_by_id: Mapped[UUID | None] = mapped_column(ForeignKey("users.id"), nullable=True, index=True)
 
     lesson: Mapped["Lesson"] = relationship()
     student: Mapped["Student"] = relationship(foreign_keys=[student_id])

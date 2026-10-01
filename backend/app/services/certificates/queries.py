@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -18,11 +20,11 @@ class CertificateQueryService:
         self.signer = CertificateSigner(db)
         self.pdf = CertificatePdfService(db)
 
-    def list_by_student(self, student_id: int) -> list[Certificate]:
+    def list_by_student(self, student_id: UUID) -> list[Certificate]:
         get_student_or_404(self.db, student_id)
         return self.repo.list_by_student(student_id)
 
-    def list_by_course(self, course_id: int) -> list[Certificate]:
+    def list_by_course(self, course_id: UUID) -> list[Certificate]:
         get_course_or_404(self.db, course_id)
         return self.repo.list_by_course(course_id)
 
@@ -37,7 +39,7 @@ class CertificateQueryService:
             return False, certificate, "Assinatura digital inválida"
         return True, certificate, "Certificado válido"
 
-    def get_for_download(self, certificate_id: int, current: Student) -> Certificate:
+    def get_for_download(self, certificate_id: UUID, current: Student) -> Certificate:
         certificate = self.repo.get_by_id(certificate_id)
         if not certificate:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Certificado não encontrado")

@@ -1,3 +1,4 @@
+from uuid import UUID
 from datetime import date
 
 from pydantic import BaseModel, Field, model_validator
@@ -33,7 +34,7 @@ class TermStatusChange(BaseModel):
 
 
 class AcademicTermOut(BaseModel):
-    id: int
+    id: UUID
     name: str
     kind: TermKind
     starts_on: date
@@ -63,8 +64,8 @@ class GradingPeriodStatusChange(BaseModel):
 
 
 class GradingPeriodOut(BaseModel):
-    id: int
-    term_id: int
+    id: UUID
+    term_id: UUID
     name: str
     order: int
     starts_on: date
@@ -80,7 +81,7 @@ class CalendarEventCreate(_DateRange):
     title: str = Field(min_length=1, max_length=200)
     starts_on: date
     ends_on: date | None = None
-    term_id: int | None = None
+    term_id: UUID | None = None
 
 
 class CalendarEventUpdate(_DateRange):
@@ -91,8 +92,8 @@ class CalendarEventUpdate(_DateRange):
 
 
 class CalendarEventOut(BaseModel):
-    id: int
-    term_id: int | None
+    id: UUID
+    term_id: UUID | None
     kind: CalendarEventKind
     title: str
     starts_on: date

@@ -1,3 +1,6 @@
+from uuid import UUID
+
+from app.core.ids import new_id
 from datetime import datetime, timezone
 from sqlalchemy import ForeignKey, DateTime, Text, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -9,9 +12,9 @@ from app.core.tenancy import TenantMixin
 class Session(TenantMixin, Base):
     __tablename__ = "sessions"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    student_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
-    lesson_id: Mapped[int] = mapped_column(ForeignKey("lessons.id"), index=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
+    student_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"), index=True)
+    lesson_id: Mapped[UUID] = mapped_column(ForeignKey("lessons.id"), index=True)
     # ID da sessão no BeVox
     bevox_session_id: Mapped[str | None] = mapped_column(String(100), index=True)
     transcript: Mapped[str | None] = mapped_column(Text)

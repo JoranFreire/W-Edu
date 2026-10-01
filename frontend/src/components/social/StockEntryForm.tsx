@@ -19,7 +19,7 @@ export default function StockEntryForm({ item, fundingSources, onSubmit }: {
     try {
       await onSubmit({
         quantity: Number(draft.quantity), unit_cost_cents: null, origin: draft.origin,
-        funding_source_id: draft.fundingId ? Number(draft.fundingId) : null, received_on: todayIso(),
+        funding_source_id: draft.fundingId ? draft.fundingId : null, received_on: todayIso(),
       });
       setDraft({ ...draft, quantity: '' });
       toast.success('Estoque atualizado.');

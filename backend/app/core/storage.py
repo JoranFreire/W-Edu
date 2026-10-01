@@ -2,6 +2,7 @@ from pathlib import Path
 import re
 import shutil
 import uuid
+from uuid import UUID
 
 from fastapi import UploadFile
 
@@ -33,7 +34,7 @@ def _sanitize_filename(filename: str) -> str:
     return f"{safe_stem}{suffix}"
 
 
-def store_uploaded_document(document_id: int, version_number: int, upload: UploadFile) -> tuple[str, int]:
+def store_uploaded_document(document_id: UUID, version_number: int, upload: UploadFile) -> tuple[str, int]:
     base_dir = documents_storage_dir() / str(document_id)
     base_dir.mkdir(parents=True, exist_ok=True)
     safe_name = _sanitize_filename(upload.filename or "document")
@@ -45,7 +46,7 @@ def store_uploaded_document(document_id: int, version_number: int, upload: Uploa
     return str(target_path), size
 
 
-def store_generated_document(document_id: int, version_number: int, filename: str, content: bytes) -> tuple[str, int]:
+def store_generated_document(document_id: UUID, version_number: int, filename: str, content: bytes) -> tuple[str, int]:
     """Grava no GED um arquivo gerado pelo sistema (ex.: PDF de contrato)."""
     base_dir = documents_storage_dir() / str(document_id)
     base_dir.mkdir(parents=True, exist_ok=True)
@@ -58,7 +59,7 @@ ADMISSION_DOCUMENT_TYPES = {".pdf", ".jpg", ".jpeg", ".png"}
 ADMISSION_DOCUMENT_MAX_BYTES = 10 * 1024 * 1024
 
 
-def store_admission_document(application_id: int, upload: UploadFile) -> tuple[str, str, int]:
+def store_admission_document(application_id: UUID, upload: UploadFile) -> tuple[str, str, int]:
     """Comprovante do candidato (PDF ou imagem, ate 10 MB) em documents/admissions/<inscricao>."""
     safe_name = _sanitize_filename(upload.filename or "comprovante")
     if Path(safe_name).suffix.lower() not in ADMISSION_DOCUMENT_TYPES:
@@ -75,7 +76,7 @@ def store_admission_document(application_id: int, upload: UploadFile) -> tuple[s
     return str(target_path), safe_name, size
 
 
-def store_assignment_file(submission_id: int, upload: UploadFile) -> tuple[str, str, int]:
+def store_assignment_file(submission_id: UUID, upload: UploadFile) -> tuple[str, str, int]:
     base_dir = assignments_storage_dir() / str(submission_id)
     base_dir.mkdir(parents=True, exist_ok=True)
     safe_name = _sanitize_filename(upload.filename or "submission")

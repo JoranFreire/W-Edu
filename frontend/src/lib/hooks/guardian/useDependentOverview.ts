@@ -14,7 +14,7 @@ interface DependentOverview {
 }
 
 /** Boletim, comunicados e (para o responsavel financeiro) cobrancas de um dependente. */
-export function useDependentOverview(studentId: number, isFinancial: boolean) {
+export function useDependentOverview(studentId: string, isFinancial: boolean) {
   const request = useCallback(async (): Promise<DependentOverview> => {
     const [reportCard, notices, charges] = await Promise.all([
       api.get<ReportCardEntry[]>(endpoints.guardians.reportCard(studentId)),

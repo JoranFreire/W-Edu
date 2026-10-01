@@ -16,7 +16,7 @@ import type { NewAccount } from '@/lib/hooks/admissions/useApplicationSubmit';
 
 function CallDetail() {
   const router = useRouter();
-  const callId = Number(useParams<{ callId: string }>().callId);
+  const callId = useParams<{ callId: string }>().callId;
   const institution = useSearchParams().get('institution');
   const { call, error } = usePublicCall(callId, institution);
   const { isAuthenticated, submit } = useApplicationSubmit(institution);

@@ -36,7 +36,7 @@ export default function MeetingFormModal({ classOffering, rooms, slot, onSubmit,
     try {
       await onSubmit({
         class_offering_id: classOffering.id,
-        room_id: form.room_id ? Number(form.room_id) : null,
+        room_id: form.room_id ? form.room_id : null,
         title: form.title,
         starts_at: toApiDateTime(form.starts_at),
         ends_at: toApiDateTime(form.ends_at),

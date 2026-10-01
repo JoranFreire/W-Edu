@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from app.models.admissions import AdmissionApplication, ApplicationDocument, ApplicationStatus
 from app.repositories.academic._base import Repository
@@ -7,7 +8,7 @@ from app.repositories.academic._base import Repository
 class AdmissionApplicationRepository(Repository[AdmissionApplication]):
     model = AdmissionApplication
 
-    def list_by_call(self, call_id: int) -> list[AdmissionApplication]:
+    def list_by_call(self, call_id: UUID) -> list[AdmissionApplication]:
         return (
             self.db.query(AdmissionApplication)
             .filter(AdmissionApplication.call_id == call_id)
@@ -15,7 +16,7 @@ class AdmissionApplicationRepository(Repository[AdmissionApplication]):
             .all()
         )
 
-    def list_by_applicant(self, applicant_id: int) -> list[AdmissionApplication]:
+    def list_by_applicant(self, applicant_id: UUID) -> list[AdmissionApplication]:
         return (
             self.db.query(AdmissionApplication)
             .filter(AdmissionApplication.applicant_id == applicant_id)
@@ -23,14 +24,14 @@ class AdmissionApplicationRepository(Repository[AdmissionApplication]):
             .all()
         )
 
-    def get_for(self, call_id: int, applicant_id: int) -> AdmissionApplication | None:
+    def get_for(self, call_id: UUID, applicant_id: UUID) -> AdmissionApplication | None:
         return (
             self.db.query(AdmissionApplication)
             .filter(AdmissionApplication.call_id == call_id, AdmissionApplication.applicant_id == applicant_id)
             .first()
         )
 
-    def with_status(self, call_id: int, statuses: tuple[ApplicationStatus, ...]) -> list[AdmissionApplication]:
+    def with_status(self, call_id: UUID, statuses: tuple[ApplicationStatus, ...]) -> list[AdmissionApplication]:
         return (
             self.db.query(AdmissionApplication)
             .filter(AdmissionApplication.call_id == call_id, AdmissionApplication.status.in_(statuses))
@@ -38,11 +39,11 @@ class AdmissionApplicationRepository(Repository[AdmissionApplication]):
             .all()
         )
 
-    def count_by_call(self, call_ids: list[int]) -> dict[int, int]:
+    def count_by_call(self, call_ids: list[UUID]) -> dict[UUID, int]:
         if not call_ids:
             return {}
         rows = self.db.query(AdmissionApplication.call_id).filter(AdmissionApplication.call_id.in_(call_ids)).all()
-        counts: dict[int, int] = {}
+        counts: dict[UUID, int] = {}
         for (call_id,) in rows:
             counts[call_id] = counts.get(call_id, 0) + 1
         return counts

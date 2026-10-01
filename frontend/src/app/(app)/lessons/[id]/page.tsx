@@ -16,7 +16,7 @@ import Spinner from '@/components/common/Spinner';
 
 export default function LessonPage() {
   const { id } = useParams<{ id: string }>();
-  const lessonId = Number(id);
+  const lessonId = id;
   const {
     lesson, setProgress, session, setSession,
     quiz, lastAttempt, setLastAttempt,

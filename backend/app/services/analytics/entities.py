@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -27,7 +29,7 @@ class EntityAnalyticsService(AnalyticsBase):
             query = query.join(Enrollment, Enrollment.course_id == Course.id).join(Student, Student.id == Enrollment.student_id).filter(Student.organization_id == organization_id).distinct()
         return [self.course(course.id, current) for course in query.all()]
 
-    def course(self, course_id: int, current: Student | None = None) -> CourseAnalyticsOut:
+    def course(self, course_id: UUID, current: Student | None = None) -> CourseAnalyticsOut:
         course = self.db.get(Course, course_id)
         if not course:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Curso não encontrado")
@@ -39,8 +41,8 @@ class EntityAnalyticsService(AnalyticsBase):
         if org_id is not None:
             enroll_q = enroll_q.join(Student, Student.id == Enrollment.student_id).filter(Student.organization_id == org_id)
         class_ids = self._class_ids_for_course(course_id, org_id)
-        meeting_ids = [row[0] for row in self.db.query(ScheduledMeeting.id).filter(ScheduledMeeting.class_offering_id.in_(class_ids or [-1])).all()]
-        closed_meetings = self.db.query(ScheduledMeeting).filter(ScheduledMeeting.class_offering_id.in_(class_ids or [-1]), ScheduledMeeting.is_closed.is_(True)).count()
+        meeting_ids = [row[0] for row in self.db.query(ScheduledMeeting.id).filter(ScheduledMeeting.class_offering_id.in_(class_ids)).all()]
+        closed_meetings = self.db.query(ScheduledMeeting).filter(ScheduledMeeting.class_offering_id.in_(class_ids), ScheduledMeeting.is_closed.is_(True)).count()
         cert_q = self.db.query(Certificate).filter(Certificate.course_id == course_id, Certificate.revoked_at.is_(None))
         if org_id is not None:
             cert_q = cert_q.join(Student, Student.id == Certificate.student_id).filter(Student.organization_id == org_id)
@@ -60,7 +62,7 @@ class EntityAnalyticsService(AnalyticsBase):
     def student_me(self, current: Student) -> StudentAnalyticsOut:
         return self.student(current.id)
 
-    def student(self, student_id: int, current: Student | None = None) -> StudentAnalyticsOut:
+    def student(self, student_id: UUID, current: Student | None = None) -> StudentAnalyticsOut:
         student = self.db.get(Student, student_id)
         if not student:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuário não encontrado")
@@ -79,7 +81,7 @@ class EntityAnalyticsService(AnalyticsBase):
             active_subscriptions=self.db.query(Subscription).filter(Subscription.student_id == student_id, Subscription.status == SubscriptionStatus.active).count(),
         )
 
-    def class_(self, class_id: int, current: Student | None = None) -> ClassAnalyticsOut:
+    def class_(self, class_id: UUID, current: Student | None = None) -> ClassAnalyticsOut:
         class_offering = self.db.get(ClassOffering, class_id)
         if not class_offering:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Turma não encontrada")
@@ -114,28 +116,28 @@ class EntityAnalyticsService(AnalyticsBase):
             waitlist_count=waitlist_q.count(), certificates_issued=cert_q.count(),
         )
 
-    def _attendance_rate_for_student(self, student_id: int) -> int:
+    def _attendance_rate_for_student(self, student_id: UUID) -> int:
         total = self.db.query(AttendanceRecord).filter(AttendanceRecord.student_id == student_id).count()
         if total == 0:
             return 0
         attended = self.db.query(AttendanceRecord).filter(AttendanceRecord.student_id == student_id, AttendanceRecord.status.in_([AttendanceStatus.present, AttendanceStatus.late])).count()
         return self._rate(attended, total)
 
-    def _progress_rate_for_student(self, student_id: int) -> int:
+    def _progress_rate_for_student(self, student_id: UUID) -> int:
         total = self.db.query(Progress).filter(Progress.student_id == student_id).count()
         if total == 0:
             return 0
         done = self.db.query(Progress).filter(Progress.student_id == student_id, Progress.status == ProgressStatus.done).count()
         return self._rate(done, total)
 
-    def _quiz_rate_for_student(self, student_id: int) -> int:
+    def _quiz_rate_for_student(self, student_id: UUID) -> int:
         attempts = self.db.query(QuizAttempt).filter(QuizAttempt.student_id == student_id).count()
         if attempts == 0:
             return 0
         passed = self.db.query(QuizAttempt).filter(QuizAttempt.student_id == student_id, QuizAttempt.passed.is_(True)).count()
         return self._rate(passed, attempts)
 
-    def _completion_rate_for_course(self, course_id: int, organization_id: int | None = None) -> int:
+    def _completion_rate_for_course(self, course_id: UUID, organization_id: UUID | None = None) -> int:
         tq = self.db.query(Enrollment).filter(Enrollment.course_id == course_id)
         cq = self.db.query(Certificate).filter(Certificate.course_id == course_id, Certificate.revoked_at.is_(None))
         if organization_id is not None:
@@ -143,14 +145,14 @@ class EntityAnalyticsService(AnalyticsBase):
             cq = cq.join(Student, Student.id == Certificate.student_id).filter(Student.organization_id == organization_id)
         return self._rate(cq.count(), tq.count())
 
-    def _sum_course_charges(self, course_id: int, status_value: ChargeStatus, organization_id: int | None = None) -> int:
+    def _sum_course_charges(self, course_id: UUID, status_value: ChargeStatus, organization_id: UUID | None = None) -> int:
         q = self.db.query(func.coalesce(func.sum(Charge.amount_cents), 0)).filter(Charge.course_id == course_id, Charge.status == status_value)
         if organization_id is not None:
             q = q.filter(Charge.organization_id == organization_id)
         return q.scalar() or 0
 
-    def _course_has_organization(self, course_id: int, organization_id: int) -> bool:
+    def _course_has_organization(self, course_id: UUID, organization_id: UUID) -> bool:
         return self.db.query(Enrollment).join(Student, Student.id == Enrollment.student_id).filter(Enrollment.course_id == course_id, Student.organization_id == organization_id).first() is not None
 
-    def _class_has_organization(self, class_id: int, organization_id: int) -> bool:
+    def _class_has_organization(self, class_id: UUID, organization_id: UUID) -> bool:
         return self.db.query(ClassEnrollment).join(Student, Student.id == ClassEnrollment.student_id).filter(ClassEnrollment.class_offering_id == class_id, Student.organization_id == organization_id).first() is not None

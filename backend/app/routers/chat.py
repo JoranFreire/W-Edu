@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -26,7 +28,7 @@ def create_conversation(
 
 @router.get("/conversations/{conversation_id}", response_model=ChatConversationOut)
 def get_conversation(
-    conversation_id: int,
+    conversation_id: UUID,
     db: Session = Depends(get_db),
     current: Student = Depends(get_current_student),
 ):
@@ -35,7 +37,7 @@ def get_conversation(
 
 @router.post("/conversations/{conversation_id}/messages", response_model=ChatConversationOut, status_code=201)
 def create_message(
-    conversation_id: int,
+    conversation_id: UUID,
     data: ChatMessageCreate,
     db: Session = Depends(get_db),
     current: Student = Depends(get_current_student),

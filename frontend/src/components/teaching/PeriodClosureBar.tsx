@@ -5,7 +5,7 @@ import type { GradingPeriod } from '@/types/academicCalendar';
 /** Etapas da turma: fechar (consolida medias e faltas) ou reabrir (coordenacao). */
 export default function PeriodClosureBar({ periods, closedIds, finalized, canReopen, onClose, onReopen }: {
   periods: GradingPeriod[];
-  closedIds: number[];
+  closedIds: string[];
   finalized: boolean;
   canReopen: boolean;
   onClose: (period: GradingPeriod) => void;

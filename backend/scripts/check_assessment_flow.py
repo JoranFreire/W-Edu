@@ -27,6 +27,7 @@ import httpx
 import starlette.concurrency
 import starlette.routing
 
+from scripts.check_support import MISSING_ID, ApiClient  # noqa: E402
 import app.models  # noqa: F401
 from app.core.database import Base, SessionLocal, engine
 from app.core.security import hash_password
@@ -78,7 +79,7 @@ def seed() -> tuple[int, dict[str, int]]:
             db.add(user)
             db.flush()
             db.add(InstitutionMembership(institution_id=institution.id, user_id=user.id, role=role))
-            ids[name] = user.id
+            ids[name] = str(user.id)
         institution_id = institution.id
         db.commit()
     return institution_id, ids
@@ -164,7 +165,7 @@ async def setup_structure(c: Checker, h: dict[str, dict], ids: dict[str, int]) -
         "starts_at": "2027-02-01T07:00:00Z", "ends_at": "2027-12-15T12:00:00Z",
         "class_group_id": group["id"], "subject_id": subject["id"],
     })
-    await c.call("PATCH", f"/schedule/classes/{offering['id']}", 404, "unknown grading scheme", coord, json={"grading_scheme_id": 9999})
+    await c.call("PATCH", f"/schedule/classes/{offering['id']}", 404, "unknown grading scheme", coord, json={"grading_scheme_id": MISSING_ID})
     synced = await c.call("POST", f"/assessment/offerings/{offering['id']}/sync-group-enrollments", 200, "sync group", coord)
     c.expect(synced.get("created") == 2, f"group members enrolled in offering: {synced}")
     again = await c.call("POST", f"/assessment/offerings/{offering['id']}/sync-group-enrollments", 200, "sync again", coord)
@@ -199,7 +200,7 @@ async def check_grades(c: Checker, h: dict[str, dict], ctx: dict, quiz_id: int) 
     await c.call("PUT", f"/assessment/items/{trabalho['id']}/grades", 400, "score above max", prof,
                  json=[{"class_enrollment_id": enrollment["Ana"], "score": 6}])
     await c.call("PUT", f"/assessment/items/{trabalho['id']}/grades", 400, "enrollment from elsewhere", prof,
-                 json=[{"class_enrollment_id": 9999, "score": 1}])
+                 json=[{"class_enrollment_id": MISSING_ID, "score": 1}])
     await c.call("PATCH", f"/assessment/items/{trabalho['id']}", 400, "max below existing scores", prof, json={"max_score": 3})
 
     imported = await c.call("POST", f"/assessment/items/{quiz['id']}/import-quiz", 200, "import quiz", prof)
@@ -334,7 +335,7 @@ async def check_results(c: Checker, h: dict[str, dict], ctx: dict, grades: dict[
 async def run() -> int:
     institution_id, ids = seed()
     transport = httpx.ASGITransport(app=app)
-    async with httpx.AsyncClient(transport=transport, base_url="http://testserver") as client:
+    async with ApiClient(transport=transport, base_url="http://testserver") as client:
         c = Checker(client)
         h = {name: await c.login(name) for name, _ in USERS}
         ctx = await setup_structure(c, h, ids)

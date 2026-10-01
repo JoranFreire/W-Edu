@@ -4,7 +4,7 @@ export type GradingPeriodStatus = 'open' | 'closed';
 export type CalendarEventKind = 'school_day' | 'holiday' | 'recess' | 'exam' | 'event';
 
 export interface AcademicTerm {
-  id: number;
+  id: string;
   name: string;
   kind: TermKind;
   starts_on: string;
@@ -13,8 +13,8 @@ export interface AcademicTerm {
 }
 
 export interface GradingPeriod {
-  id: number;
-  term_id: number;
+  id: string;
+  term_id: string;
   name: string;
   order: number;
   starts_on: string;
@@ -24,8 +24,8 @@ export interface GradingPeriod {
 }
 
 export interface CalendarEvent {
-  id: number;
-  term_id: number | null;
+  id: string;
+  term_id: string | null;
   kind: CalendarEventKind;
   title: string;
   starts_on: string;

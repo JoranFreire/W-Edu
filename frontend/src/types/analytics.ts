@@ -17,7 +17,7 @@ export interface AnalyticsOverview {
 }
 
 export interface CourseAnalytics {
-  course_id: number;
+  course_id: string;
   course_name: string;
   modality: string;
   enrollments: number;
@@ -33,7 +33,7 @@ export interface CourseAnalytics {
 }
 
 export interface StudentAnalytics {
-  student_id: number;
+  student_id: string;
   student_name: string;
   enrollments: number;
   completed_courses: number;
@@ -46,9 +46,9 @@ export interface StudentAnalytics {
 }
 
 export interface ClassAnalytics {
-  class_offering_id: number;
+  class_offering_id: string;
   class_name: string;
-  course_id: number;
+  course_id: string;
   course_name: string;
   total_enrolled: number;
   meetings: number;
@@ -63,8 +63,8 @@ export interface ClassAnalytics {
 
 export interface CompletionReportRow {
   scope_type: 'course' | 'class';
-  scope_id: number;
-  course_id: number;
+  scope_id: string;
+  course_id: string;
   course_name: string;
   class_name: string | null;
   enrolled: number;
@@ -73,9 +73,9 @@ export interface CompletionReportRow {
 }
 
 export interface AttendanceReportRow {
-  class_offering_id: number;
+  class_offering_id: string;
   class_name: string;
-  course_id: number;
+  course_id: string;
   course_name: string;
   meetings: number;
   closed_meetings: number;
@@ -86,7 +86,7 @@ export interface AttendanceReportRow {
 }
 
 export interface EngagementReportRow {
-  course_id: number;
+  course_id: string;
   course_name: string;
   progress_records: number;
   completed_progress_records: number;
@@ -97,9 +97,9 @@ export interface EngagementReportRow {
 }
 
 export interface ClassPerformanceReportRow {
-  class_offering_id: number;
+  class_offering_id: string;
   class_name: string;
-  course_id: number;
+  course_id: string;
   course_name: string;
   enrolled: number;
   completion_rate: number;
@@ -108,7 +108,7 @@ export interface ClassPerformanceReportRow {
 }
 
 export interface RoiReportRow {
-  organization_id: number | null;
+  organization_id: string | null;
   organization_name: string;
   students: number;
   paid_charges_cents: number;

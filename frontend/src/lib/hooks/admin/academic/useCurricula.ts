@@ -12,7 +12,7 @@ export interface CurriculumInput {
 }
 
 /** Versoes da matriz curricular de um programa e seu ciclo de vida. */
-export function useCurricula(programId: number) {
+export function useCurricula(programId: string) {
   const request = useCallback(
     () => api.get<Curriculum[]>(endpoints.academic.programCurricula(programId)).then((response) => response.data),
     [programId],
@@ -24,20 +24,20 @@ export function useCurricula(programId: number) {
     reload();
     return created;
   };
-  const newVersion = async (sourceId: number, input: CurriculumInput) => {
+  const newVersion = async (sourceId: string, input: CurriculumInput) => {
     const { data: created } = await api.post<Curriculum>(endpoints.academic.curriculumVersions(sourceId), input);
     reload();
     return created;
   };
-  const activate = async (id: number) => {
+  const activate = async (id: string) => {
     await api.post(endpoints.academic.curriculumActivate(id));
     reload();
   };
-  const archive = async (id: number) => {
+  const archive = async (id: string) => {
     await api.post(endpoints.academic.curriculumArchive(id));
     reload();
   };
-  const remove = async (id: number) => {
+  const remove = async (id: string) => {
     await api.delete(endpoints.academic.curriculum(id));
     reload();
   };

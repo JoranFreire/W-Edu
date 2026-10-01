@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -11,7 +13,7 @@ router = APIRouter(prefix="/windows")
 
 
 @router.get("", response_model=list[RegistrationWindowOut])
-def list_windows(term_id: int | None = None, db: Session = Depends(get_db), _: Student = Depends(get_current_secretariat)):
+def list_windows(term_id: UUID | None = None, db: Session = Depends(get_db), _: Student = Depends(get_current_secretariat)):
     return RegistrationWindowService(db).list(term_id)
 
 
@@ -21,10 +23,10 @@ def create_window(data: RegistrationWindowCreate, db: Session = Depends(get_db),
 
 
 @router.patch("/{window_id}", response_model=RegistrationWindowOut)
-def update_window(window_id: int, data: RegistrationWindowUpdate, db: Session = Depends(get_db), _: Student = Depends(get_current_secretariat)):
+def update_window(window_id: UUID, data: RegistrationWindowUpdate, db: Session = Depends(get_db), _: Student = Depends(get_current_secretariat)):
     return RegistrationWindowService(db).update(window_id, data)
 
 
 @router.delete("/{window_id}", status_code=204)
-def delete_window(window_id: int, db: Session = Depends(get_db), _: Student = Depends(get_current_secretariat)):
+def delete_window(window_id: UUID, db: Session = Depends(get_db), _: Student = Depends(get_current_secretariat)):
     RegistrationWindowService(db).delete(window_id)

@@ -5,7 +5,7 @@ import OfficeFinalProjectSection from './OfficeFinalProjectSection';
 import OfficeInternshipsSection from './OfficeInternshipsSection';
 
 /** Aba da ficha: estagios e TCC do aluno. */
-export default function OfficeInternshipTab({ enrollmentId, editable }: { enrollmentId: number; editable: boolean }) {
+export default function OfficeInternshipTab({ enrollmentId, editable }: { enrollmentId: string; editable: boolean }) {
   const advisors = useAdvisors();
   return (
     <div className="space-y-6">

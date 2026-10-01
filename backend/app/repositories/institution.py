@@ -1,5 +1,8 @@
+from uuid import UUID
+
 from sqlalchemy.orm import Session
 
+from app.core.ids import parse_id
 from app.core.tenancy import UNSCOPED
 from app.models.institution import Campus, Institution, InstitutionMembership
 
@@ -8,16 +11,18 @@ class InstitutionRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def get_by_id(self, institution_id: int) -> Institution | None:
+    def get_by_id(self, institution_id: UUID) -> Institution | None:
         return self.db.get(Institution, institution_id)
 
     def get_by_slug(self, slug: str) -> Institution | None:
         return self.db.query(Institution).filter(Institution.slug == slug).first()
 
-    def get_by_ref(self, ref: str | int) -> Institution | None:
-        if isinstance(ref, int) or ref.isdigit():
-            return self.get_by_id(int(ref))
-        return self.get_by_slug(ref)
+    def get_by_ref(self, ref: str | UUID) -> Institution | None:
+        """Instituicao pelo id (UUID) ou pelo slug."""
+        institution_id = parse_id(ref)
+        if institution_id:
+            return self.get_by_id(institution_id)
+        return self.get_by_slug(str(ref))
 
     def list_all(self) -> list[Institution]:
         return self.db.query(Institution).order_by(Institution.name).all()
@@ -41,14 +46,14 @@ class MembershipRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def get(self, institution_id: int, user_id: int) -> InstitutionMembership | None:
+    def get(self, institution_id: UUID, user_id: UUID) -> InstitutionMembership | None:
         return (
             self.db.query(InstitutionMembership)
             .filter(InstitutionMembership.institution_id == institution_id, InstitutionMembership.user_id == user_id)
             .first()
         )
 
-    def list_active_for_user(self, user_id: int) -> list[InstitutionMembership]:
+    def list_active_for_user(self, user_id: UUID) -> list[InstitutionMembership]:
         return (
             self.db.query(InstitutionMembership)
             .filter(InstitutionMembership.user_id == user_id, InstitutionMembership.is_active.is_(True))
@@ -56,7 +61,7 @@ class MembershipRepository:
             .all()
         )
 
-    def list_all_for_user(self, user_id: int) -> list[InstitutionMembership]:
+    def list_all_for_user(self, user_id: UUID) -> list[InstitutionMembership]:
         return self.db.query(InstitutionMembership).filter(InstitutionMembership.user_id == user_id).all()
 
     def add(self, membership: InstitutionMembership) -> InstitutionMembership:
@@ -68,13 +73,13 @@ class CampusRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def get_by_id(self, campus_id: int) -> Campus | None:
+    def get_by_id(self, campus_id: UUID) -> Campus | None:
         return self.db.get(Campus, campus_id)
 
     def list_all(self) -> list[Campus]:
         return self.db.query(Campus).order_by(Campus.name).all()
 
-    def list_by_institution(self, institution_id: int) -> list[Campus]:
+    def list_by_institution(self, institution_id: UUID) -> list[Campus]:
         return (
             self.db.query(Campus)
             .execution_options(**UNSCOPED)

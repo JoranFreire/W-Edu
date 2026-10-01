@@ -1,3 +1,4 @@
+from uuid import UUID
 from datetime import datetime, timezone
 
 from sqlalchemy.orm import Session
@@ -21,7 +22,7 @@ class NotificationInboxService:
     def summary(self, user: Student) -> InboxSummaryOut:
         return InboxSummaryOut(unread=self.repo.unread_count(user.id))
 
-    def mark_read(self, user: Student, event_id: int) -> NotificationEvent:
+    def mark_read(self, user: Student, event_id: UUID) -> NotificationEvent:
         event = self.repo.get_for(user.id, event_id)
         if not event:
             raise not_found("Aviso não encontrado")

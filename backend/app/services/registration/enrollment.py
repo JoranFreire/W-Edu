@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from sqlalchemy.orm import Session
 
@@ -29,7 +30,7 @@ class SubjectRegistrationService:
         self.promotion = WaitlistPromotionService(db)
         self.lifecycle = EnrollmentLifecycleService(db)
 
-    def register_in_window(self, student: Student, window_id: int, offering_id: int) -> RegistrationResultOut:
+    def register_in_window(self, student: Student, window_id: UUID, offering_id: UUID) -> RegistrationResultOut:
         window, enrollment = self.access.resolve(student, window_id)
         ensure_window_open(window)
         offering = self._offering(offering_id, window.term_id)
@@ -37,18 +38,18 @@ class SubjectRegistrationService:
             raise conflict("A turma não está aberta para matrícula")
         return self._register(enrollment, offering, window.max_credits, window.allow_waitlist, override=False)
 
-    def drop_in_window(self, student: Student, window_id: int, offering_id: int) -> None:
+    def drop_in_window(self, student: Student, window_id: UUID, offering_id: UUID) -> None:
         window, enrollment = self.access.resolve(student, window_id)
         ensure_window_open(window)
         self._drop(enrollment.student_id, self._offering(offering_id, window.term_id))
 
-    def register_by_office(self, program_enrollment_id: int, offering_id: int, override: bool) -> RegistrationResultOut:
+    def register_by_office(self, program_enrollment_id: UUID, offering_id: UUID, override: bool) -> RegistrationResultOut:
         enrollment = self.lifecycle.get_or_404(program_enrollment_id)
         if enrollment.status != ProgramEnrollmentStatus.active:
             raise conflict("A matrícula no programa precisa estar ativa")
         return self._register(enrollment, self._offering(offering_id), None, True, override)
 
-    def drop_by_office(self, program_enrollment_id: int, offering_id: int) -> None:
+    def drop_by_office(self, program_enrollment_id: UUID, offering_id: UUID) -> None:
         enrollment = self.lifecycle.get_or_404(program_enrollment_id)
         self._drop(enrollment.student_id, self._offering(offering_id))
 
@@ -77,7 +78,7 @@ class SubjectRegistrationService:
         self.db.commit()
         return RegistrationResultOut(offering_id=offering.id, result="enrolled")
 
-    def _drop(self, student_id: int, offering: ClassOffering) -> None:
+    def _drop(self, student_id: UUID, offering: ClassOffering) -> None:
         if entry := self.records.waitlist_entry(offering.id, student_id):
             self.db.delete(entry)
             self.db.commit()
@@ -91,7 +92,7 @@ class SubjectRegistrationService:
         self.db.commit()
         self.promotion.fill(offering)
 
-    def _offering(self, offering_id: int, term_id: int | None = None) -> ClassOffering:
+    def _offering(self, offering_id: UUID, term_id: UUID | None = None) -> ClassOffering:
         offering = self.offerings.get_by_id(offering_id)
         if not offering:
             raise not_found("Turma não encontrada")

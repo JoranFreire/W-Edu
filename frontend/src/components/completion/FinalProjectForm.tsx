@@ -19,7 +19,7 @@ export default function FinalProjectForm({ project, advisors, onSave }: {
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
     try {
-      await onSave({ title: draft.title, advisor_id: draft.advisorId ? Number(draft.advisorId) : null, co_advisor_name: draft.coAdvisor || null, notes: null });
+      await onSave({ title: draft.title, advisor_id: draft.advisorId ? draft.advisorId : null, co_advisor_name: draft.coAdvisor || null, notes: null });
       toast.success('TCC salvo.');
     } catch (error) {
       toast.error(apiErrorMessage(error, 'Erro ao salvar o TCC.'));

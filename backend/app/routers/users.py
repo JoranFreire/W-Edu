@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -42,13 +44,13 @@ def me(current: User = Depends(get_current_user)):
 
 
 @router.get("/{user_id}", response_model=UserOut)
-def get_user(user_id: int, db: Session = Depends(get_db), _: User = Depends(get_current_user)):
+def get_user(user_id: UUID, db: Session = Depends(get_db), _: User = Depends(get_current_user)):
     return UserService(db).get_or_404(user_id)
 
 
 @router.patch("/{user_id}", response_model=UserOut)
 def update_user(
-    user_id: int,
+    user_id: UUID,
     data: UserUpdate,
     db: Session = Depends(get_db),
     current: User = Depends(get_current_user),
@@ -63,7 +65,7 @@ def update_user(
 
 @router.delete("/{user_id}", status_code=204)
 def delete_user(
-    user_id: int,
+    user_id: UUID,
     db: Session = Depends(get_db),
     current: User = Depends(get_current_user),
 ):
@@ -74,13 +76,13 @@ def delete_user(
 
 
 @router.get("/{user_id}/student-profile", response_model=StudentProfileOut)
-def get_student_profile(user_id: int, db: Session = Depends(get_db), _: User = Depends(get_current_user)):
+def get_student_profile(user_id: UUID, db: Session = Depends(get_db), _: User = Depends(get_current_user)):
     return UserService(db).get_student_profile(user_id)
 
 
 @router.patch("/{user_id}/student-profile", response_model=StudentProfileOut)
 def update_student_profile(
-    user_id: int,
+    user_id: UUID,
     data: StudentProfileUpdate,
     db: Session = Depends(get_db),
     current: User = Depends(get_current_user),
@@ -91,13 +93,13 @@ def update_student_profile(
 
 
 @router.get("/{user_id}/instructor-profile", response_model=InstructorProfileOut)
-def get_instructor_profile(user_id: int, db: Session = Depends(get_db), _: User = Depends(get_current_user)):
+def get_instructor_profile(user_id: UUID, db: Session = Depends(get_db), _: User = Depends(get_current_user)):
     return UserService(db).get_instructor_profile(user_id)
 
 
 @router.patch("/{user_id}/instructor-profile", response_model=InstructorProfileOut)
 def update_instructor_profile(
-    user_id: int,
+    user_id: UUID,
     data: InstructorProfileUpdate,
     db: Session = Depends(get_db),
     current: User = Depends(get_current_user),
@@ -108,13 +110,13 @@ def update_instructor_profile(
 
 
 @router.get("/{user_id}/availability", response_model=list[InstructorAvailabilityOut])
-def list_instructor_availability(user_id: int, db: Session = Depends(get_db), _: User = Depends(get_current_user)):
+def list_instructor_availability(user_id: UUID, db: Session = Depends(get_db), _: User = Depends(get_current_user)):
     return UserService(db).list_instructor_availability(user_id)
 
 
 @router.post("/{user_id}/availability", response_model=InstructorAvailabilityOut, status_code=201)
 def add_instructor_availability(
-    user_id: int,
+    user_id: UUID,
     data: InstructorAvailabilityCreate,
     db: Session = Depends(get_db),
     current: User = Depends(get_current_user),
@@ -124,7 +126,7 @@ def add_instructor_availability(
     return UserService(db).add_instructor_availability(user_id, data)
 
 
-def ensure_availability_owner_scope(current: User, service: UserService, owner_id: int) -> None:
+def ensure_availability_owner_scope(current: User, service: UserService, owner_id: UUID) -> None:
     if current.id == owner_id:
         return
     if current.role not in ADMIN_ROLES:
@@ -135,7 +137,7 @@ def ensure_availability_owner_scope(current: User, service: UserService, owner_i
 
 @router.patch("/availability/{availability_id}", response_model=InstructorAvailabilityOut)
 def update_instructor_availability(
-    availability_id: int,
+    availability_id: UUID,
     data: InstructorAvailabilityUpdate,
     db: Session = Depends(get_db),
     current: User = Depends(get_current_user),
@@ -149,7 +151,7 @@ def update_instructor_availability(
 
 @router.delete("/availability/{availability_id}", status_code=204)
 def delete_instructor_availability(
-    availability_id: int,
+    availability_id: UUID,
     db: Session = Depends(get_db),
     current: User = Depends(get_current_user),
 ):
@@ -162,13 +164,13 @@ def delete_instructor_availability(
 
 
 @router.get("/{user_id}/ratings", response_model=list[InstructorRatingOut])
-def list_instructor_ratings(user_id: int, db: Session = Depends(get_db), _: User = Depends(get_current_user)):
+def list_instructor_ratings(user_id: UUID, db: Session = Depends(get_db), _: User = Depends(get_current_user)):
     return UserService(db).list_instructor_ratings(user_id)
 
 
 @router.post("/{user_id}/ratings", response_model=InstructorRatingOut, status_code=201)
 def add_instructor_rating(
-    user_id: int,
+    user_id: UUID,
     data: InstructorRatingCreate,
     db: Session = Depends(get_db),
     current: User = Depends(get_current_user),

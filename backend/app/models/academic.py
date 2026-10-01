@@ -1,5 +1,8 @@
 """Estrutura curricular: unidades academicas, programas, disciplinas e matrizes."""
 
+from uuid import UUID
+
+from app.core.ids import new_id
 from datetime import date, datetime, timezone
 import enum
 
@@ -51,8 +54,8 @@ class ComponentKind(str, enum.Enum):
 class AcademicUnit(TenantMixin, Base):
     __tablename__ = "academic_units"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    parent_id: Mapped[int | None] = mapped_column(ForeignKey("academic_units.id"), index=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
+    parent_id: Mapped[UUID | None] = mapped_column(ForeignKey("academic_units.id"), index=True)
     name: Mapped[str] = mapped_column(String(200))
     kind: Mapped[AcademicUnitKind] = mapped_column(SAEnum(AcademicUnitKind), default=AcademicUnitKind.other)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
@@ -67,8 +70,8 @@ class Program(TenantMixin, Base):
     __tablename__ = "programs"
     __table_args__ = (UniqueConstraint("institution_id", "code"),)
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    unit_id: Mapped[int | None] = mapped_column(ForeignKey("academic_units.id"), index=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
+    unit_id: Mapped[UUID | None] = mapped_column(ForeignKey("academic_units.id"), index=True)
     code: Mapped[str] = mapped_column(String(40))
     name: Mapped[str] = mapped_column(String(200))
     level: Mapped[ProgramLevel] = mapped_column(SAEnum(ProgramLevel), default=ProgramLevel.free)
@@ -91,14 +94,14 @@ class Subject(TenantMixin, Base):
     __tablename__ = "subjects"
     __table_args__ = (UniqueConstraint("institution_id", "code"),)
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
     code: Mapped[str] = mapped_column(String(40))
     name: Mapped[str] = mapped_column(String(200))
     syllabus: Mapped[str | None] = mapped_column(Text)
     hours: Mapped[int] = mapped_column(Integer, default=0)
     credits: Mapped[int | None] = mapped_column(Integer)
     # Conteudo EAD reaproveitado (aulas, quiz, professor IA) de um curso existente.
-    course_id: Mapped[int | None] = mapped_column(ForeignKey("courses.id"), index=True)
+    course_id: Mapped[UUID | None] = mapped_column(ForeignKey("courses.id"), index=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
@@ -109,9 +112,9 @@ class SubjectPrerequisite(TenantMixin, Base):
     __tablename__ = "subject_prerequisites"
     __table_args__ = (UniqueConstraint("subject_id", "required_subject_id"),)
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    subject_id: Mapped[int] = mapped_column(ForeignKey("subjects.id", ondelete="CASCADE"), index=True)
-    required_subject_id: Mapped[int] = mapped_column(ForeignKey("subjects.id", ondelete="CASCADE"), index=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
+    subject_id: Mapped[UUID] = mapped_column(ForeignKey("subjects.id", ondelete="CASCADE"), index=True)
+    required_subject_id: Mapped[UUID] = mapped_column(ForeignKey("subjects.id", ondelete="CASCADE"), index=True)
 
     subject: Mapped["Subject"] = relationship(foreign_keys=[subject_id])
     required_subject: Mapped["Subject"] = relationship(foreign_keys=[required_subject_id])
@@ -123,9 +126,9 @@ class SubjectEquivalence(TenantMixin, Base):
     __tablename__ = "subject_equivalences"
     __table_args__ = (UniqueConstraint("subject_id", "equivalent_subject_id"),)
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    subject_id: Mapped[int] = mapped_column(ForeignKey("subjects.id", ondelete="CASCADE"), index=True)
-    equivalent_subject_id: Mapped[int] = mapped_column(ForeignKey("subjects.id", ondelete="CASCADE"), index=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
+    subject_id: Mapped[UUID] = mapped_column(ForeignKey("subjects.id", ondelete="CASCADE"), index=True)
+    equivalent_subject_id: Mapped[UUID] = mapped_column(ForeignKey("subjects.id", ondelete="CASCADE"), index=True)
 
     subject: Mapped["Subject"] = relationship(foreign_keys=[subject_id])
     equivalent_subject: Mapped["Subject"] = relationship(foreign_keys=[equivalent_subject_id])
@@ -135,8 +138,8 @@ class Curriculum(TenantMixin, Base):
     __tablename__ = "curricula"
     __table_args__ = (UniqueConstraint("program_id", "version"),)
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    program_id: Mapped[int] = mapped_column(ForeignKey("programs.id"), index=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
+    program_id: Mapped[UUID] = mapped_column(ForeignKey("programs.id"), index=True)
     version: Mapped[str] = mapped_column(String(40))
     valid_from: Mapped[date | None] = mapped_column(Date)
     status: Mapped[CurriculumStatus] = mapped_column(SAEnum(CurriculumStatus), default=CurriculumStatus.draft)
@@ -155,9 +158,9 @@ class CurriculumComponent(TenantMixin, Base):
     __tablename__ = "curriculum_components"
     __table_args__ = (UniqueConstraint("curriculum_id", "subject_id"),)
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    curriculum_id: Mapped[int] = mapped_column(ForeignKey("curricula.id", ondelete="CASCADE"), index=True)
-    subject_id: Mapped[int] = mapped_column(ForeignKey("subjects.id"), index=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
+    curriculum_id: Mapped[UUID] = mapped_column(ForeignKey("curricula.id", ondelete="CASCADE"), index=True)
+    subject_id: Mapped[UUID] = mapped_column(ForeignKey("subjects.id"), index=True)
     term_number: Mapped[int] = mapped_column(Integer)
     kind: Mapped[ComponentKind] = mapped_column(SAEnum(ComponentKind), default=ComponentKind.mandatory)
     # Sobrescrevem a carga da disciplina nesta matriz; vazio usa o valor da disciplina.

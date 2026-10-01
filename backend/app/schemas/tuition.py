@@ -1,3 +1,4 @@
+from uuid import UUID
 from datetime import date, datetime
 
 from pydantic import BaseModel, Field, model_validator
@@ -10,9 +11,9 @@ from app.schemas.academic_groups import PersonSummary
 class TuitionPlanCreate(BaseModel):
     name: str = Field(min_length=1, max_length=200)
     basis: TuitionBasis = TuitionBasis.program
-    term_id: int
-    program_id: int | None = None
-    class_group_id: int | None = None
+    term_id: UUID
+    program_id: UUID | None = None
+    class_group_id: UUID | None = None
     amount_cents: int = Field(ge=1)
     installments: int = Field(default=1, ge=1, le=24)
     first_due_on: date
@@ -27,14 +28,14 @@ class TuitionPlanUpdate(BaseModel):
 
 
 class TuitionPlanOut(BaseModel):
-    id: int
+    id: UUID
     name: str
     basis: TuitionBasis
-    term_id: int
+    term_id: UUID
     term_name: str
-    program_id: int | None
+    program_id: UUID | None
     program_name: str | None
-    class_group_id: int | None
+    class_group_id: UUID | None
     class_group_name: str | None
     amount_cents: int
     installments: int
@@ -66,8 +67,8 @@ class DiscountCreate(BaseModel):
 
 
 class DiscountOut(BaseModel):
-    id: int
-    program_enrollment_id: int
+    id: UUID
+    program_enrollment_id: UUID
     kind: DiscountKind
     percent: float | None
     amount_cents: int | None
@@ -99,11 +100,11 @@ class SettleInput(BaseModel):
 
 
 class TuitionChargeOut(BaseModel):
-    id: int
+    id: UUID
     student: PersonSummary | None
     payer: PersonSummary | None
-    program_enrollment_id: int | None
-    tuition_plan_id: int | None
+    program_enrollment_id: UUID | None
+    tuition_plan_id: UUID | None
     installment_number: int | None
     description: str | None
     due_on: date | None

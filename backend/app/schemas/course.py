@@ -1,3 +1,4 @@
+from uuid import UUID
 from datetime import datetime
 from pydantic import BaseModel
 from app.models.course import CourseModality
@@ -18,7 +19,7 @@ class CourseUpdate(BaseModel):
 
 
 class CourseOut(BaseModel):
-    id: int
+    id: UUID
     name: str
     description: str | None
     modality: CourseModality
@@ -29,7 +30,7 @@ class CourseOut(BaseModel):
 
 
 class CourseModuleCreate(BaseModel):
-    course_id: int | None = None
+    course_id: UUID | None = None
     title: str
     description: str | None = None
     order: int = 0
@@ -42,8 +43,8 @@ class CourseModuleUpdate(BaseModel):
 
 
 class CourseModuleOut(BaseModel):
-    id: int
-    course_id: int
+    id: UUID
+    course_id: UUID
     title: str
     description: str | None
     order: int
@@ -63,7 +64,7 @@ class LearningPathUpdate(BaseModel):
 
 
 class LearningPathOut(BaseModel):
-    id: int
+    id: UUID
     name: str
     description: str | None
     created_at: datetime
@@ -72,34 +73,34 @@ class LearningPathOut(BaseModel):
 
 
 class LearningPathCourseCreate(BaseModel):
-    course_id: int
+    course_id: UUID
     order: int = 0
 
 
 class LearningPathCourseOut(BaseModel):
-    id: int
-    learning_path_id: int
-    course_id: int
+    id: UUID
+    learning_path_id: UUID
+    course_id: UUID
     order: int
 
     model_config = {"from_attributes": True}
 
 
 class CoursePrerequisiteCreate(BaseModel):
-    prerequisite_course_id: int
+    prerequisite_course_id: UUID
 
 
 class CoursePrerequisiteOut(BaseModel):
-    id: int
-    course_id: int
-    prerequisite_course_id: int
+    id: UUID
+    course_id: UUID
+    prerequisite_course_id: UUID
 
     model_config = {"from_attributes": True}
 
 
 class CourseCompletionRuleOut(BaseModel):
-    id: int
-    course_id: int
+    id: UUID
+    course_id: UUID
     require_lessons_complete: bool
     minimum_progress_percent: int
     require_quiz: bool

@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from sqlalchemy.orm import Session
 
@@ -17,10 +18,10 @@ class EnrollmentEventRecorder:
         self,
         enrollment: ProgramEnrollment,
         kind: EnrollmentEventKind,
-        user_id: int | None,
+        user_id: UUID | None,
         *,
         reason: str | None = None,
-        term_id: int | None = None,
+        term_id: UUID | None = None,
         details: dict | None = None,
     ) -> ProgramEnrollmentEvent:
         return self.repo.add(ProgramEnrollmentEvent(
@@ -32,5 +33,5 @@ class EnrollmentEventRecorder:
             created_by_id=user_id,
         ))
 
-    def list(self, enrollment_id: int) -> list[ProgramEnrollmentEvent]:
+    def list(self, enrollment_id: UUID) -> list[ProgramEnrollmentEvent]:
         return self.repo.list_by_enrollment(enrollment_id)

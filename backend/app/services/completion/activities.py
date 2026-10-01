@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from datetime import datetime, timezone
 
@@ -26,26 +27,26 @@ class ComplementaryActivityService:
         self.lifecycle = EnrollmentLifecycleService(db)
         self.notices = NotificationEventService(db)
 
-    def list_for_enrollment(self, enrollment_id: int) -> list[ComplementaryActivity]:
+    def list_for_enrollment(self, enrollment_id: UUID) -> list[ComplementaryActivity]:
         self.lifecycle.get_or_404(enrollment_id)
         return self.repo.list_by_enrollment(enrollment_id)
 
     def list_mine(self, student: Student) -> list[ComplementaryActivity]:
         return self.repo.list_by_student(student.id)
 
-    def submit(self, student: Student, enrollment_id: int, data: ActivityCreate) -> ComplementaryActivity:
+    def submit(self, student: Student, enrollment_id: UUID, data: ActivityCreate) -> ComplementaryActivity:
         enrollment = self.own.get(student, enrollment_id)
         ensure_active(enrollment)
         return self.repo.save(ComplementaryActivity(program_enrollment_id=enrollment.id, **data.model_dump()))
 
-    def withdraw(self, student: Student, activity_id: int) -> None:
+    def withdraw(self, student: Student, activity_id: UUID) -> None:
         activity = self._get_or_404(activity_id)
         ensure_own(activity.program_enrollment, student)
         if activity.status != ReviewStatus.submitted:
             raise conflict("Atividade já avaliada")
         self.repo.delete(activity)
 
-    def decide(self, activity_id: int, data: ActivityDecision, reviewer: Student) -> ComplementaryActivity:
+    def decide(self, activity_id: UUID, data: ActivityDecision, reviewer: Student) -> ComplementaryActivity:
         activity = self._get_or_404(activity_id)
         if activity.status != ReviewStatus.submitted:
             raise conflict("Atividade já avaliada")
@@ -63,7 +64,7 @@ class ComplementaryActivityService:
         )
         return saved
 
-    def _get_or_404(self, activity_id: int) -> ComplementaryActivity:
+    def _get_or_404(self, activity_id: UUID) -> ComplementaryActivity:
         activity = self.repo.get_by_id(activity_id)
         if not activity:
             raise not_found("Atividade não encontrada")

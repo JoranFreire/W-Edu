@@ -1,3 +1,4 @@
+from uuid import UUID
 from datetime import date, datetime
 
 from pydantic import BaseModel, Field
@@ -7,8 +8,8 @@ from app.schemas.academic_groups import PersonSummary
 
 
 class OccurrenceCreate(BaseModel):
-    student_id: int
-    class_group_id: int | None = None
+    student_id: UUID
+    class_group_id: UUID | None = None
     kind: OccurrenceKind = OccurrenceKind.other
     severity: OccurrenceSeverity = OccurrenceSeverity.low
     description: str = Field(min_length=1, max_length=4000)
@@ -16,9 +17,9 @@ class OccurrenceCreate(BaseModel):
 
 
 class OccurrenceOut(BaseModel):
-    id: int
+    id: UUID
     student: PersonSummary
-    class_group_id: int | None
+    class_group_id: UUID | None
     kind: OccurrenceKind
     severity: OccurrenceSeverity
     description: str
@@ -35,14 +36,14 @@ class AgendaItemCreate(BaseModel):
     title: str = Field(min_length=1, max_length=200)
     description: str | None = Field(default=None, max_length=4000)
     due_on: date
-    class_offering_id: int | None = None
+    class_offering_id: UUID | None = None
 
 
 class AgendaItemOut(BaseModel):
-    id: int
-    class_group_id: int
+    id: UUID
+    class_group_id: UUID
     class_group_name: str
-    class_offering_id: int | None
+    class_offering_id: UUID | None
     class_offering_name: str | None
     kind: AgendaItemKind
     title: str

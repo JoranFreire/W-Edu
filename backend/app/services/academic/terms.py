@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from sqlalchemy.orm import Session
 
@@ -19,13 +20,13 @@ class AcademicTermService:
     def list(self) -> list[AcademicTerm]:
         return self.repo.list_all()
 
-    def get_or_404(self, term_id: int) -> AcademicTerm:
+    def get_or_404(self, term_id: UUID) -> AcademicTerm:
         term = self.repo.get_by_id(term_id)
         if not term:
             raise not_found("Período letivo não encontrado")
         return term
 
-    def get_not_closed(self, term_id: int) -> AcademicTerm:
+    def get_not_closed(self, term_id: UUID) -> AcademicTerm:
         term = self.get_or_404(term_id)
         if term.status == TermStatus.closed:
             raise conflict("Período letivo encerrado")
@@ -35,7 +36,7 @@ class AcademicTermService:
         self._ensure_unique_name(data.name)
         return self.repo.save(AcademicTerm(**data.model_dump()))
 
-    def update(self, term_id: int, data: AcademicTermUpdate) -> AcademicTerm:
+    def update(self, term_id: UUID, data: AcademicTermUpdate) -> AcademicTerm:
         term = self.get_not_closed(term_id)
         if data.name is not None and data.name != term.name:
             self._ensure_unique_name(data.name)
@@ -47,7 +48,7 @@ class AcademicTermService:
         apply_patch(term, data)
         return self.repo.save(term)
 
-    def change_status(self, term_id: int, target: TermStatus) -> AcademicTerm:
+    def change_status(self, term_id: UUID, target: TermStatus) -> AcademicTerm:
         term = self.get_or_404(term_id)
         if not can_change_term(term.status, target):
             raise conflict(f"Transição de {term.status.value} para {target.value} não permitida")
@@ -57,7 +58,7 @@ class AcademicTermService:
                 period.status = GradingPeriodStatus.closed
         return self.repo.save(term)
 
-    def delete(self, term_id: int) -> None:
+    def delete(self, term_id: UUID) -> None:
         term = self.get_or_404(term_id)
         if term.status != TermStatus.planned:
             raise conflict("Só períodos planejados podem ser excluídos")

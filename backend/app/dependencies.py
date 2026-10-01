@@ -3,6 +3,7 @@ from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.core.ids import parse_id
 from app.core.security import decode_access_payload
 from app.core.tenancy import bind_institution
 from app.core.tenant_host import slug_from_host
@@ -24,7 +25,8 @@ def _authenticate(token: str, db: Session) -> tuple[Student, dict]:
     student_id = payload.get("sub") if payload else None
     if not student_id:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token inválido")
-    student = StudentRepository(db).get_by_id(int(student_id))
+    user_id = parse_id(student_id)
+    student = StudentRepository(db).get_by_id(user_id) if user_id else None
     if not student or not student.is_active:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Usuário não encontrado")
     return student, payload

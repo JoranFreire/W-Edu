@@ -1,5 +1,8 @@
 """Responsaveis pelo aluno (escola basica): parentesco, responsavel financeiro e autorizacao de retirada."""
 
+from uuid import UUID
+
+from app.core.ids import new_id
 from datetime import datetime, timezone
 import enum
 
@@ -22,9 +25,9 @@ class StudentGuardian(TenantMixin, Base):
     __tablename__ = "student_guardians"
     __table_args__ = (UniqueConstraint("student_id", "guardian_id"),)
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    student_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
-    guardian_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
+    student_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"), index=True)
+    guardian_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"), index=True)
     relationship_kind: Mapped[GuardianRelationship] = mapped_column(SAEnum(GuardianRelationship), default=GuardianRelationship.other)
     is_financial: Mapped[bool] = mapped_column(Boolean, default=False)
     can_pick_up: Mapped[bool] = mapped_column(Boolean, default=True)

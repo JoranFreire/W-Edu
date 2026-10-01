@@ -7,7 +7,7 @@ import { useApiQuery } from '@/lib/hooks/useApiQuery';
 import type { Gradebook } from '@/types/assessment';
 
 /** Boletim parcial da turma (medias por etapa, media geral e frequencia). */
-export function useGradebook(offeringId: number) {
+export function useGradebook(offeringId: string) {
   const request = useCallback(
     () => api.get<Gradebook>(endpoints.assessment.gradebook(offeringId)).then((response) => response.data),
     [offeringId],

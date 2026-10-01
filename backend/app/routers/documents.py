@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends, File, Form, UploadFile
 from sqlalchemy.orm import Session
 
@@ -22,7 +24,7 @@ def list_documents(db: Session = Depends(get_db), current: Student = Depends(get
 
 
 @router.get("/{document_id}", response_model=DocumentOut)
-def get_document(document_id: int, db: Session = Depends(get_db), current: Student = Depends(get_current_admin_or_company_manager)):
+def get_document(document_id: UUID, db: Session = Depends(get_db), current: Student = Depends(get_current_admin_or_company_manager)):
     return DocumentService(db).get_document(document_id, current)
 
 
@@ -32,10 +34,10 @@ def create_document(
     document_type: str = Form("other"),
     description: str | None = Form(None),
     status: str = Form("draft"),
-    course_id: int | None = Form(None),
-    class_offering_id: int | None = Form(None),
-    organization_id: int | None = Form(None),
-    student_id: int | None = Form(None),
+    course_id: UUID | None = Form(None),
+    class_offering_id: UUID | None = Form(None),
+    organization_id: UUID | None = Form(None),
+    student_id: UUID | None = Form(None),
     external_reference: str | None = Form(None),
     version_notes: str | None = Form(None),
     external_url: str | None = Form(None),
@@ -60,7 +62,7 @@ def create_document(
 
 @router.patch("/{document_id}", response_model=DocumentOut)
 def update_document(
-    document_id: int,
+    document_id: UUID,
     data: DocumentUpdate,
     db: Session = Depends(get_db),
     current: Student = Depends(get_current_admin_or_company_manager),
@@ -69,13 +71,13 @@ def update_document(
 
 
 @router.get("/{document_id}/versions", response_model=list[DocumentVersionOut])
-def list_versions(document_id: int, db: Session = Depends(get_db), current: Student = Depends(get_current_admin_or_company_manager)):
+def list_versions(document_id: UUID, db: Session = Depends(get_db), current: Student = Depends(get_current_admin_or_company_manager)):
     return DocumentService(db).list_versions(document_id, current)
 
 
 @router.post("/{document_id}/versions", response_model=DocumentVersionOut, status_code=201)
 def add_version(
-    document_id: int,
+    document_id: UUID,
     version_notes: str | None = Form(None),
     external_url: str | None = Form(None),
     file: UploadFile | None = File(None),
@@ -88,8 +90,8 @@ def add_version(
 
 @router.get("/{document_id}/download")
 def download_latest(
-    document_id: int,
-    version_id: int | None = None,
+    document_id: UUID,
+    version_id: UUID | None = None,
     db: Session = Depends(get_db),
     current: Student = Depends(get_current_admin_or_company_manager),
 ):
@@ -98,8 +100,8 @@ def download_latest(
 
 @router.get("/{document_id}/versions/{version_id}/download")
 def download_version(
-    document_id: int,
-    version_id: int,
+    document_id: UUID,
+    version_id: UUID,
     db: Session = Depends(get_db),
     current: Student = Depends(get_current_admin_or_company_manager),
 ):

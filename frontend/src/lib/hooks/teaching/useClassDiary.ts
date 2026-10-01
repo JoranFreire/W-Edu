@@ -13,7 +13,7 @@ export interface DiaryEntryInput {
 }
 
 /** Registros de aula da turma. */
-export function useClassDiary(offeringId: number) {
+export function useClassDiary(offeringId: string) {
   const request = useCallback(
     () => api.get<DiaryEntry[]>(endpoints.assessment.diary(offeringId)).then((response) => response.data),
     [offeringId],
@@ -24,7 +24,7 @@ export function useClassDiary(offeringId: number) {
     await api.post(endpoints.assessment.diary(offeringId), input);
     reload();
   };
-  const remove = async (id: number) => {
+  const remove = async (id: string) => {
     await api.delete(endpoints.assessment.diaryEntry(id));
     reload();
   };

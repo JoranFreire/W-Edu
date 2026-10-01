@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from datetime import datetime, time, timezone
 
@@ -26,7 +27,7 @@ class TuitionBillingService:
         self.discounts = StudentDiscountRepository(db)
         self.payers = PayerResolver(db)
 
-    def generate(self, plan_id: int) -> GenerationOut:
+    def generate(self, plan_id: UUID) -> GenerationOut:
         plan = self.plans.get_or_404(plan_id)
         if not plan.is_active:
             raise conflict("Plano inativo")

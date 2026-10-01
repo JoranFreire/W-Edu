@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
@@ -21,7 +23,7 @@ class AnalyticsBase:
             return current.organization_id
         return None
 
-    def _attendance_rate_for_meetings(self, meeting_ids: list[int], organization_id: int | None = None) -> int:
+    def _attendance_rate_for_meetings(self, meeting_ids: list[UUID], organization_id: UUID | None = None) -> int:
         if not meeting_ids:
             return 0
         total_q = self.db.query(AttendanceRecord).filter(AttendanceRecord.scheduled_meeting_id.in_(meeting_ids))
@@ -35,7 +37,7 @@ class AnalyticsBase:
         total = total_q.count()
         return self._rate(attended_q.count(), total)
 
-    def _average_best_quiz_score(self, course_id: int, organization_id: int | None = None, student_ids: list[int] | None = None) -> int:
+    def _average_best_quiz_score(self, course_id: UUID, organization_id: UUID | None = None, student_ids: list[UUID] | None = None) -> int:
         quiz_ids = [row[0] for row in self.db.query(Quiz.id).join(Lesson, Quiz.lesson_id == Lesson.id).filter(Lesson.course_id == course_id).all()]
         if not quiz_ids:
             return 0
@@ -51,7 +53,7 @@ class AnalyticsBase:
             return 0
         return round(sum(score for _, score in best_scores) / len(best_scores))
 
-    def _class_ids_for_course(self, course_id: int, organization_id: int | None) -> list[int]:
+    def _class_ids_for_course(self, course_id: UUID, organization_id: UUID | None) -> list[UUID]:
         query = self.db.query(ClassOffering.id).filter(ClassOffering.course_id == course_id)
         if organization_id is not None:
             query = (

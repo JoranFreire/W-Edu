@@ -12,7 +12,7 @@ import type { User } from '@/types/auth';
 import type { Course } from '@/types/course';
 import type { ClassOffering, Room } from '@/types/schedule';
 
-const optionalId = (value: string) => (value ? Number(value) : null);
+const optionalId = (value: string) => value || null;
 
 export default function ClassOfferingForm({ courses, rooms, instructors = [], onCreated, onCancel, variant = 'card' }: {
   courses: Course[];
@@ -35,7 +35,7 @@ export default function ClassOfferingForm({ courses, rooms, instructors = [], on
     e.preventDefault();
     try {
       await create({
-        course_id: Number(form.course_id), name: form.name,
+        course_id: form.course_id, name: form.name,
         starts_at: toApiDateTime(form.starts_at), ends_at: toApiDateTime(form.ends_at),
         capacity: form.capacity, status: form.status,
         room_id: optionalId(form.room_id),

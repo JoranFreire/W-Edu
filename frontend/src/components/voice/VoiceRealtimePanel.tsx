@@ -5,7 +5,7 @@ import { useVoiceSession } from '@/lib/voice/useVoiceSession';
 import type { Session } from '@/types/course';
 
 interface VoiceRealtimePanelProps {
-  lessonId: number;
+  lessonId: string;
   onSessionUpdate: (session: Session) => void;
 }
 

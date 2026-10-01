@@ -1,3 +1,4 @@
+from uuid import UUID
 from datetime import datetime, timezone
 
 from fastapi import HTTPException, status
@@ -29,7 +30,7 @@ class CertificateIssuanceService:
         self.pdf = CertificatePdfService(db)
         self.notifications = NotificationEventService(db)
 
-    def issue(self, course_id: int, student_id: int, issued_by_id: int | None = None) -> Certificate:
+    def issue(self, course_id: UUID, student_id: UUID, issued_by_id: UUID | None = None) -> Certificate:
         evaluation = self.eligibility.evaluate(course_id, student_id)
         if not evaluation.eligible:
             raise HTTPException(
@@ -55,7 +56,7 @@ class CertificateIssuanceService:
             )
         return certificate
 
-    def auto_issue(self, course_id: int, student_id: int) -> Certificate | None:
+    def auto_issue(self, course_id: UUID, student_id: UUID) -> Certificate | None:
         """Emite se a regra permitir emissao automatica e o aluno for elegivel; nunca levanta erro."""
         try:
             rule = self.rules.get_rule(course_id)
@@ -65,7 +66,7 @@ class CertificateIssuanceService:
         except HTTPException:
             return None
 
-    def revoke(self, certificate_id: int, reason: str | None = None) -> Certificate:
+    def revoke(self, certificate_id: UUID, reason: str | None = None) -> Certificate:
         certificate = self.repo.get_by_id(certificate_id)
         if not certificate:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Certificado não encontrado")
@@ -73,7 +74,7 @@ class CertificateIssuanceService:
         certificate.revoked_reason = reason
         return self.repo.update(certificate)
 
-    def _create(self, course_id: int, student_id: int, issued_by_id: int | None) -> Certificate:
+    def _create(self, course_id: UUID, student_id: UUID, issued_by_id: UUID | None) -> Certificate:
         return self.repo.create(Certificate(
             student_id=student_id,
             course_id=course_id,
@@ -81,7 +82,7 @@ class CertificateIssuanceService:
             issued_by_id=issued_by_id,
         ))
 
-    def _reissue(self, certificate: Certificate, issued_by_id: int | None) -> Certificate:
+    def _reissue(self, certificate: Certificate, issued_by_id: UUID | None) -> Certificate:
         """Reemite um certificado revogado com novo codigo."""
         certificate.validation_code = validation_code()
         certificate.issued_at = datetime.now(timezone.utc)

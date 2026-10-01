@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -11,7 +13,7 @@ router = APIRouter()
 
 
 @router.post("/meetings/{meeting_id}/deliveries", response_model=MeetingDeliveryOut)
-def deliver_in_meeting(meeting_id: int, data: MeetingDeliveryInput, db: Session = Depends(get_db), current: Student = Depends(get_current_school_staff)):
+def deliver_in_meeting(meeting_id: UUID, data: MeetingDeliveryInput, db: Session = Depends(get_db), current: Student = Depends(get_current_school_staff)):
     return BenefitDeliveryService(db).deliver_in_meeting(meeting_id, data, current)
 
 
@@ -21,7 +23,7 @@ def deliver_to_student(data: IndividualDeliveryInput, db: Session = Depends(get_
 
 
 @router.get("/offerings/{offering_id}/deliveries", response_model=list[DeliveryOut])
-def offering_deliveries(offering_id: int, db: Session = Depends(get_db), current: Student = Depends(get_current_school_staff)):
+def offering_deliveries(offering_id: UUID, db: Session = Depends(get_db), current: Student = Depends(get_current_school_staff)):
     return BenefitDeliveryService(db).list_for_offering(offering_id, current)
 
 

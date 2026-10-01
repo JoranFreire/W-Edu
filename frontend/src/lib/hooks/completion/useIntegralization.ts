@@ -7,7 +7,7 @@ import { useApiQuery } from '@/lib/hooks/useApiQuery';
 import type { Integralization } from '@/types/completion';
 
 /** Integralizacao de uma matricula (secretaria). */
-export function useIntegralization(enrollmentId: number) {
+export function useIntegralization(enrollmentId: string) {
   const request = useCallback(
     () => api.get<Integralization>(endpoints.completion.integralization(enrollmentId)).then((response) => response.data),
     [enrollmentId],

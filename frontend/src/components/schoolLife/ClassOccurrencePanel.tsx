@@ -9,9 +9,9 @@ import OccurrenceForm from './OccurrenceForm';
 import StudentOccurrenceHistory from './StudentOccurrenceHistory';
 
 /** Professor registra ocorrencia de um aluno da turma e consulta o historico dele. */
-export default function ClassOccurrencePanel({ students, classGroupId }: { students: PersonSummary[]; classGroupId: number | null }) {
+export default function ClassOccurrencePanel({ students, classGroupId }: { students: PersonSummary[]; classGroupId: string | null }) {
   const { register } = useOccurrenceRegistration();
-  const [historyOf, setHistoryOf] = useState<number | null>(null);
+  const [historyOf, setHistoryOf] = useState<string | null>(null);
   // Muda a cada registro para recarregar o historico exibido.
   const [version, setVersion] = useState(0);
 
@@ -36,7 +36,7 @@ export default function ClassOccurrencePanel({ students, classGroupId }: { stude
       <section className={`${sectionCls} space-y-4`}>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-base font-semibold text-gray-900 dark:text-white">Histórico do aluno</h2>
-          <select aria-label="Aluno do histórico" value={historyOf ?? ''} onChange={(e) => setHistoryOf(Number(e.target.value) || null)} className={`${inputCls} md:w-72`}>
+          <select aria-label="Aluno do histórico" value={historyOf ?? ''} onChange={(e) => setHistoryOf(e.target.value || null)} className={`${inputCls} md:w-72`}>
             <option value="">Aluno…</option>
             {students.map((student) => <option key={student.id} value={student.id}>{student.name}</option>)}
           </select>

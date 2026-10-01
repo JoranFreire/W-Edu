@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from datetime import date
 
@@ -19,7 +20,7 @@ class AcademicTermRepository(Repository[AcademicTerm]):
     def get_by_name(self, name: str) -> AcademicTerm | None:
         return self.db.query(AcademicTerm).filter(AcademicTerm.name == name).first()
 
-    def is_referenced(self, term_id: int) -> bool:
+    def is_referenced(self, term_id: UUID) -> bool:
         checks = (
             self.db.query(ClassGroup.id).filter(ClassGroup.term_id == term_id),
             self.db.query(ProgramEnrollment.id).filter(ProgramEnrollment.entry_term_id == term_id),
@@ -31,14 +32,14 @@ class AcademicTermRepository(Repository[AcademicTerm]):
 class GradingPeriodRepository(Repository[GradingPeriod]):
     model = GradingPeriod
 
-    def list_by_term(self, term_id: int) -> list[GradingPeriod]:
+    def list_by_term(self, term_id: UUID) -> list[GradingPeriod]:
         return self.db.query(GradingPeriod).filter(GradingPeriod.term_id == term_id).order_by(GradingPeriod.order).all()
 
 
 class CalendarEventRepository(Repository[CalendarEvent]):
     model = CalendarEvent
 
-    def list(self, term_id: int | None = None, start: date | None = None, end: date | None = None) -> list[CalendarEvent]:
+    def list(self, term_id: UUID | None = None, start: date | None = None, end: date | None = None) -> list[CalendarEvent]:
         query = self.db.query(CalendarEvent)
         if term_id is not None:
             query = query.filter(CalendarEvent.term_id == term_id)

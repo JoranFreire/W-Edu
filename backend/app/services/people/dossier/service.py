@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from sqlalchemy.orm import Session
 
 from app.models.student import Student, UserRole
@@ -29,7 +31,7 @@ class UserDossierService:
         self.db = db
         self.repo = DossierRepository(db)
 
-    def build(self, current: Student, user_id: int) -> UserDossier:
+    def build(self, current: Student, user_id: UUID) -> UserDossier:
         user = StudentService(self.db).get_or_404(user_id)
         ensure_can_view_user(current, user)
         sees_family = _any(current, "secretariat.access", "school_life.access")

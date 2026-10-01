@@ -1,3 +1,6 @@
+from uuid import UUID
+
+from app.core.ids import new_id
 from datetime import datetime, timezone
 import enum
 from sqlalchemy import ForeignKey, String, Boolean, DateTime, Enum as SAEnum, Text, UniqueConstraint
@@ -27,7 +30,7 @@ class Organization(TenantMixin, Base):
     __tablename__ = "organizations"
     __table_args__ = (UniqueConstraint("institution_id", "name"),)
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
     name: Mapped[str] = mapped_column(String(200), index=True)
     legal_name: Mapped[str | None] = mapped_column(String(200))
     document: Mapped[str | None] = mapped_column(String(50), index=True)
@@ -43,12 +46,12 @@ class Organization(TenantMixin, Base):
 class Student(Base):
     __tablename__ = "users"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
     name: Mapped[str] = mapped_column(String(200))
     email: Mapped[str] = mapped_column(String(200), unique=True, index=True)
     password_hash: Mapped[str] = mapped_column(String(200))
     role: Mapped[UserRole] = mapped_column(SAEnum(UserRole), default=UserRole.student)
-    organization_id: Mapped[int | None] = mapped_column(ForeignKey("organizations.id"), nullable=True, index=True)
+    organization_id: Mapped[UUID | None] = mapped_column(ForeignKey("organizations.id"), nullable=True, index=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
@@ -79,8 +82,8 @@ User = Student
 class StudentProfile(Base):
     __tablename__ = "student_profiles"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    student_id: Mapped[int] = mapped_column(ForeignKey("users.id"), unique=True, index=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
+    student_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"), unique=True, index=True)
     phone: Mapped[str | None] = mapped_column(String(50))
     document: Mapped[str | None] = mapped_column(String(50), index=True)
     position: Mapped[str | None] = mapped_column(String(120))
@@ -94,8 +97,8 @@ class StudentProfile(Base):
 class InstructorProfile(Base):
     __tablename__ = "instructor_profiles"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    student_id: Mapped[int] = mapped_column(ForeignKey("users.id"), unique=True, index=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
+    student_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"), unique=True, index=True)
     specialties: Mapped[str | None] = mapped_column(Text)
     bio: Mapped[str | None] = mapped_column(Text)
     rating: Mapped[str | None] = mapped_column(String(20))
@@ -109,8 +112,8 @@ class InstructorProfile(Base):
 class InstructorAvailability(Base):
     __tablename__ = "instructor_availability"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    instructor_profile_id: Mapped[int] = mapped_column(ForeignKey("instructor_profiles.id"), index=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
+    instructor_profile_id: Mapped[UUID] = mapped_column(ForeignKey("instructor_profiles.id"), index=True)
     day_of_week: Mapped[int] = mapped_column()
     start_time: Mapped[str] = mapped_column(String(5))
     end_time: Mapped[str] = mapped_column(String(5))
@@ -124,9 +127,9 @@ class InstructorRating(Base):
     __tablename__ = "instructor_ratings"
     __table_args__ = ()
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    instructor_profile_id: Mapped[int] = mapped_column(ForeignKey("instructor_profiles.id"), index=True)
-    student_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
+    instructor_profile_id: Mapped[UUID] = mapped_column(ForeignKey("instructor_profiles.id"), index=True)
+    student_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"), index=True)
     score: Mapped[int] = mapped_column()
     comment: Mapped[str | None] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))

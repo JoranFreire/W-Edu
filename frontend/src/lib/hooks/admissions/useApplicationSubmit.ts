@@ -17,7 +17,7 @@ export function useApplicationSubmit(institution: string | null) {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const login = useAuthStore((state) => state.login);
 
-  const submit = async (callId: number, answers: ApplicationAnswers, account: NewAccount | null) => {
+  const submit = async (callId: string, answers: ApplicationAnswers, account: NewAccount | null) => {
     if (account) {
       await api.post('/users', account, { headers: institutionHeaders(institution) });
       await login({ email: account.email, password: account.password, ...(institution ? { institution } : {}) });

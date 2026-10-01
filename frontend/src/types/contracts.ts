@@ -2,7 +2,7 @@ export type ContractKind = 'enrollment' | 'reenrollment';
 export type ContractStatus = 'pending' | 'signed' | 'cancelled';
 
 export interface ContractTemplate {
-  id: number;
+  id: string;
   name: string;
   kind: ContractKind;
   body: string;
@@ -16,8 +16,8 @@ export interface ContractTemplateInput {
 }
 
 export interface Contract {
-  id: number;
-  program_enrollment_id: number;
+  id: string;
+  program_enrollment_id: string;
   student_name: string;
   registration_number: string;
   kind: ContractKind;
@@ -27,7 +27,7 @@ export interface Contract {
   validation_code: string;
   signer_name: string | null;
   signed_at: string | null;
-  document_id: number | null;
+  document_id: string | null;
   created_at: string;
 }
 

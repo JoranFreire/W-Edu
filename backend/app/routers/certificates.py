@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
@@ -24,13 +26,13 @@ router = APIRouter()
 
 
 @router.get("/rules/{course_id}", response_model=CertificateRuleOut)
-def get_rule(course_id: int, db: Session = Depends(get_db), _: Student = Depends(get_current_admin_or_coordinator)):
+def get_rule(course_id: UUID, db: Session = Depends(get_db), _: Student = Depends(get_current_admin_or_coordinator)):
     return CertificateRuleService(db).get_rule(course_id)
 
 
 @router.patch("/rules/{course_id}", response_model=CertificateRuleOut)
 def update_rule(
-    course_id: int,
+    course_id: UUID,
     data: CertificateRuleUpdate,
     db: Session = Depends(get_db),
     _: Student = Depends(get_current_admin_or_coordinator),
@@ -40,8 +42,8 @@ def update_rule(
 
 @router.get("/courses/{course_id}/students/{student_id}/eligibility", response_model=CertificateEligibilityOut)
 def check_eligibility(
-    course_id: int,
-    student_id: int,
+    course_id: UUID,
+    student_id: UUID,
     db: Session = Depends(get_db),
     _: Student = Depends(get_current_admin_or_coordinator),
 ):
@@ -50,8 +52,8 @@ def check_eligibility(
 
 @router.post("/courses/{course_id}/students/{student_id}/issue", response_model=CertificateIssueOut)
 def issue_certificate(
-    course_id: int,
-    student_id: int,
+    course_id: UUID,
+    student_id: UUID,
     db: Session = Depends(get_db),
     current: Student = Depends(get_current_admin_or_coordinator),
 ):
@@ -60,13 +62,13 @@ def issue_certificate(
 
 
 @router.get("/courses/{course_id}/certificates", response_model=list[CertificateOut])
-def list_course_certificates(course_id: int, db: Session = Depends(get_db), _: Student = Depends(get_current_admin_or_coordinator)):
+def list_course_certificates(course_id: UUID, db: Session = Depends(get_db), _: Student = Depends(get_current_admin_or_coordinator)):
     return CertificateQueryService(db).list_by_course(course_id)
 
 
 @router.post("/{certificate_id}/revoke", response_model=CertificateOut)
 def revoke_certificate(
-    certificate_id: int,
+    certificate_id: UUID,
     data: CertificateRevokeIn,
     db: Session = Depends(get_db),
     _: Student = Depends(get_current_admin),
@@ -80,13 +82,13 @@ def my_certificates(db: Session = Depends(get_db), current: Student = Depends(ge
 
 
 @router.get("/students/{student_id}", response_model=list[CertificateOut])
-def list_student_certificates(student_id: int, db: Session = Depends(get_db), _: Student = Depends(get_current_admin_or_coordinator)):
+def list_student_certificates(student_id: UUID, db: Session = Depends(get_db), _: Student = Depends(get_current_admin_or_coordinator)):
     return CertificateQueryService(db).list_by_student(student_id)
 
 
 @router.get("/{certificate_id}/download")
 def download_certificate(
-    certificate_id: int,
+    certificate_id: UUID,
     db: Session = Depends(get_db),
     current: Student = Depends(get_current_student),
 ):

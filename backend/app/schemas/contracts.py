@@ -1,3 +1,4 @@
+from uuid import UUID
 from datetime import datetime
 
 from pydantic import BaseModel, Field
@@ -18,7 +19,7 @@ class ContractTemplateUpdate(BaseModel):
 
 
 class ContractTemplateOut(BaseModel):
-    id: int
+    id: UUID
     name: str
     kind: ContractKind
     body: str
@@ -28,13 +29,13 @@ class ContractTemplateOut(BaseModel):
 
 
 class ContractIssue(BaseModel):
-    template_id: int
-    term_id: int | None = None
+    template_id: UUID
+    term_id: UUID | None = None
 
 
 class ContractOut(BaseModel):
-    id: int
-    program_enrollment_id: int
+    id: UUID
+    program_enrollment_id: UUID
     student_name: str
     registration_number: str
     kind: ContractKind
@@ -44,7 +45,7 @@ class ContractOut(BaseModel):
     validation_code: str
     signer_name: str | None
     signed_at: datetime | None
-    document_id: int | None
+    document_id: UUID | None
     created_at: datetime
 
 

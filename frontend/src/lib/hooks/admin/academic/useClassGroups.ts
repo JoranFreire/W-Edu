@@ -7,13 +7,13 @@ import { useApiQuery } from '@/lib/hooks/useApiQuery';
 import type { ClassGroup, Shift } from '@/types/academicGroups';
 
 export interface ClassGroupInput {
-  program_id: number;
-  term_id: number;
+  program_id: string;
+  term_id: string;
   name: string;
   curriculum_term_number: number | null;
   shift: Shift;
   capacity: number | null;
-  homeroom_teacher_id: number | null;
+  homeroom_teacher_id: string | null;
 }
 
 function editableFields(input: ClassGroupInput) {
@@ -22,20 +22,20 @@ function editableFields(input: ClassGroupInput) {
 }
 
 /** Turmas-grupo, opcionalmente de um periodo letivo. */
-export function useClassGroups(termId?: number) {
+export function useClassGroups(termId?: string) {
   const request = useCallback(
     () => api.get<ClassGroup[]>(endpoints.academic.classGroups, { params: { term_id: termId } }).then((response) => response.data),
     [termId],
   );
   const { data = [], loading, error, reload } = useApiQuery(request);
 
-  const save = async (id: number | null, input: ClassGroupInput) => {
+  const save = async (id: string | null, input: ClassGroupInput) => {
     // Programa e periodo sao fixos depois de criada a turma.
     if (id) await api.patch(endpoints.academic.classGroup(id), editableFields(input));
     else await api.post(endpoints.academic.classGroups, input);
     reload();
   };
-  const remove = async (id: number) => {
+  const remove = async (id: string) => {
     await api.delete(endpoints.academic.classGroup(id));
     reload();
   };

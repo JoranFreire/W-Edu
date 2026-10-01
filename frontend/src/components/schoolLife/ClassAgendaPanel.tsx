@@ -11,7 +11,7 @@ import AgendaItemForm from './AgendaItemForm';
 import AgendaList from './AgendaList';
 
 /** Agenda da turma-grupo (proximos itens), com publicacao e remocao. */
-export default function ClassAgendaPanel({ groupId, offeringId }: { groupId: number; offeringId: number | null }) {
+export default function ClassAgendaPanel({ groupId, offeringId }: { groupId: string; offeringId: string | null }) {
   const { items, error, publish, remove } = useClassAgenda(groupId, todayIso());
   useErrorToast(error, 'Erro ao carregar a agenda.');
 

@@ -14,9 +14,12 @@ Para uma consulta global deliberada use ``.execution_options(**UNSCOPED)``.
 """
 
 from collections.abc import Callable
+from uuid import UUID
 
 from sqlalchemy import ForeignKey, event, or_, select
 from sqlalchemy.orm import Mapped, ORMExecuteState, Session, declared_attr, mapped_column, with_loader_criteria
+
+from app.core.ids import parse_id
 
 
 INSTITUTION_KEY = "institution_id"
@@ -26,11 +29,11 @@ UNSCOPED = {SKIP_TENANT_FILTER: True}
 
 class TenantMixin:
     @declared_attr
-    def institution_id(cls) -> Mapped[int]:
+    def institution_id(cls) -> Mapped[UUID]:
         return mapped_column(ForeignKey("institutions.id"), index=True)
 
 
-BindHook = Callable[[Session, int | None], None]
+BindHook = Callable[[Session, UUID | None], None]
 _bind_hooks: list[BindHook] = []
 
 
@@ -40,7 +43,8 @@ def on_bind(hook: BindHook) -> BindHook:
     return hook
 
 
-def bind_institution(db: Session, institution_id: int | None) -> None:
+def bind_institution(db: Session, institution_id: UUID | str | None) -> None:
+    institution_id = parse_id(institution_id)
     if institution_id is None:
         db.info.pop(INSTITUTION_KEY, None)
     else:
@@ -49,7 +53,7 @@ def bind_institution(db: Session, institution_id: int | None) -> None:
         hook(db, institution_id)
 
 
-def bound_institution_id(db: Session) -> int | None:
+def bound_institution_id(db: Session) -> UUID | None:
     return db.info.get(INSTITUTION_KEY)
 
 

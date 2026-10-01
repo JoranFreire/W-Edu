@@ -1,3 +1,4 @@
+from uuid import UUID
 from datetime import datetime
 from pydantic import BaseModel, Field
 
@@ -13,8 +14,8 @@ class CertificateRuleUpdate(BaseModel):
 
 
 class CertificateRuleOut(BaseModel):
-    id: int
-    course_id: int
+    id: UUID
+    course_id: UUID
     require_lessons_complete: bool
     minimum_progress_percent: int
     require_quiz: bool
@@ -30,7 +31,7 @@ class CertificateRuleOut(BaseModel):
 
 class CertificateIssueOut(BaseModel):
     issued: bool
-    certificate_id: int | None = None
+    certificate_id: UUID | None = None
     validation_code: str | None = None
 
 
@@ -39,11 +40,11 @@ class CertificateRevokeIn(BaseModel):
 
 
 class CertificateOut(BaseModel):
-    id: int
-    student_id: int
-    course_id: int
+    id: UUID
+    student_id: UUID
+    course_id: UUID
     validation_code: str
-    issued_by_id: int | None
+    issued_by_id: UUID | None
     issued_at: datetime
     revoked_at: datetime | None
     revoked_reason: str | None
@@ -65,8 +66,8 @@ class CertificateValidationOut(BaseModel):
 
 
 class CertificateEligibilityOut(BaseModel):
-    course_id: int
-    student_id: int
+    course_id: UUID
+    student_id: UUID
     eligible: bool
     progress_percent: int
     quiz_percent: int

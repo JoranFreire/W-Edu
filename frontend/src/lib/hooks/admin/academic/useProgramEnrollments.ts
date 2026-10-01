@@ -7,14 +7,14 @@ import { useApiQuery } from '@/lib/hooks/useApiQuery';
 import type { ProgramEnrollment, ProgramEnrollmentStatus } from '@/types/academicGroups';
 
 export interface ProgramEnrollmentInput {
-  student_id: number;
-  program_id: number;
-  entry_term_id: number | null;
+  student_id: string;
+  program_id: string;
+  entry_term_id: string | null;
   registration_number: string | null;
 }
 
 export interface ProgramEnrollmentFilters {
-  program_id?: number;
+  program_id?: string;
   status?: ProgramEnrollmentStatus;
 }
 
@@ -33,7 +33,7 @@ export function useProgramEnrollments(filters: ProgramEnrollmentFilters) {
     reload();
     return created;
   };
-  const changeStatus = async (id: number, next: ProgramEnrollmentStatus) => {
+  const changeStatus = async (id: string, next: ProgramEnrollmentStatus) => {
     await api.post(endpoints.academic.programEnrollmentStatus(id), { status: next });
     reload();
   };

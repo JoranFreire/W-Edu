@@ -31,11 +31,11 @@ export function isAdminRole(role: UserRole | undefined | null): boolean {
 }
 
 export interface Student {
-  id: number;
+  id: string;
   name: string;
   email: string;
   role: UserRole;
-  organization_id: number | null;
+  organization_id: string | null;
   is_active: boolean;
   created_at: string;
 }
@@ -43,7 +43,7 @@ export interface Student {
 export type User = Student;
 
 export interface Organization {
-  id: number;
+  id: string;
   name: string;
   legal_name: string | null;
   document: string | null;
@@ -53,8 +53,8 @@ export interface Organization {
 }
 
 export interface StudentProfile {
-  id: number;
-  student_id: number;
+  id: string;
+  student_id: string;
   phone: string | null;
   document: string | null;
   position: string | null;
@@ -64,8 +64,8 @@ export interface StudentProfile {
 }
 
 export interface InstructorProfile {
-  id: number;
-  student_id: number;
+  id: string;
+  student_id: string;
   specialties: string | null;
   bio: string | null;
   rating: string | null;
@@ -73,8 +73,8 @@ export interface InstructorProfile {
 }
 
 export interface InstructorAvailability {
-  id: number;
-  instructor_profile_id: number;
+  id: string;
+  instructor_profile_id: string;
   day_of_week: number;
   start_time: string;
   end_time: string;
@@ -83,9 +83,9 @@ export interface InstructorAvailability {
 }
 
 export interface InstructorRating {
-  id: number;
-  instructor_profile_id: number;
-  student_id: number;
+  id: string;
+  instructor_profile_id: string;
+  student_id: string;
   score: number;
   comment: string | null;
   created_at: string;

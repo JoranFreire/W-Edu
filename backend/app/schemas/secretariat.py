@@ -1,3 +1,4 @@
+from uuid import UUID
 from datetime import date, datetime
 
 from pydantic import BaseModel, Field
@@ -15,41 +16,41 @@ class TransferOutInput(ReasonInput):
 
 
 class InternalTransferInput(ReasonInput):
-    program_id: int
-    curriculum_id: int | None = None
+    program_id: UUID
+    curriculum_id: UUID | None = None
 
 
 class CurriculumChangeInput(ReasonInput):
-    curriculum_id: int
+    curriculum_id: UUID
 
 
 class ReenrollInput(BaseModel):
-    term_id: int
+    term_id: UUID
     curriculum_term_number: int | None = Field(default=None, ge=1)
 
 
 class EnrollmentEventOut(BaseModel):
-    id: int
+    id: UUID
     kind: EnrollmentEventKind
-    term_id: int | None
+    term_id: UUID | None
     reason: str | None
     details: dict
-    created_by_id: int | None
+    created_by_id: UUID | None
     created_at: datetime
 
     model_config = {"from_attributes": True}
 
 
 class TermRegistrationOut(BaseModel):
-    id: int
-    term_id: int
+    id: UUID
+    term_id: UUID
     term_name: str
     curriculum_term_number: int | None
     registered_at: datetime
 
 
 class CreditTransferCreate(BaseModel):
-    subject_id: int
+    subject_id: UUID
     origin: CreditTransferOrigin = CreditTransferOrigin.external
     source_institution: str | None = Field(default=None, max_length=200)
     source_subject: str = Field(min_length=1, max_length=200)
@@ -63,8 +64,8 @@ class CreditTransferDecision(BaseModel):
 
 
 class CreditTransferOut(BaseModel):
-    id: int
-    subject_id: int
+    id: UUID
+    subject_id: UUID
     subject_code: str
     subject_name: str
     origin: CreditTransferOrigin
@@ -79,7 +80,7 @@ class CreditTransferOut(BaseModel):
 
 
 class TranscriptRow(BaseModel):
-    subject_id: int
+    subject_id: UUID
     code: str
     name: str
     term_number: int
@@ -106,7 +107,7 @@ class TranscriptSummary(BaseModel):
 
 
 class TranscriptOut(BaseModel):
-    program_enrollment_id: int
+    program_enrollment_id: UUID
     registration_number: str
     student_name: str
     program_code: str
@@ -119,7 +120,7 @@ class TranscriptOut(BaseModel):
 
 class DeclarationCreate(BaseModel):
     kind: DeclarationKind
-    term_id: int | None = None
+    term_id: UUID | None = None
 
 
 class DeclarationRevoke(BaseModel):
@@ -127,10 +128,10 @@ class DeclarationRevoke(BaseModel):
 
 
 class DeclarationOut(BaseModel):
-    id: int
-    program_enrollment_id: int
+    id: UUID
+    program_enrollment_id: UUID
     kind: DeclarationKind
-    term_id: int | None
+    term_id: UUID | None
     title: str
     lines: list[str]
     validation_code: str

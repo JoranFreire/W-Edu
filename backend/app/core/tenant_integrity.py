@@ -8,6 +8,8 @@ Antes de cada flush:
   do contrario a operacao falha com 404.
 """
 
+from uuid import UUID
+
 from fastapi import HTTPException, status
 from sqlalchemy import event, inspect, select
 from sqlalchemy.orm import MANYTOONE, Session
@@ -93,7 +95,7 @@ def _institution_of(session: Session, target: type, related, value) -> int | Non
     return row[0]
 
 
-def _is_member(session: Session, institution_id: int, related, value) -> bool:
+def _is_member(session: Session, institution_id: UUID, related, value) -> bool:
     from app.models.institution import InstitutionMembership
     from app.models.student import Student, UserRole
 

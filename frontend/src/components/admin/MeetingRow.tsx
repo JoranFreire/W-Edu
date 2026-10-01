@@ -9,11 +9,11 @@ export default function MeetingRow({ meeting, attendanceRecords, attendanceRepor
   attendanceReport: MeetingAttendanceReportRow[] | undefined;
   summary: MeetingAttendanceSummary | undefined;
   onGenerateCheckin: (meeting: ScheduledMeeting) => void;
-  onLoadAttendance: (meetingId: number) => void;
-  onLoadAttendanceReport: (meetingId: number) => void;
-  onMarkAttendance: (meeting: ScheduledMeeting, studentId: number, status: AttendanceStatus) => void;
-  onSavePracticalAssessment: (meeting: ScheduledMeeting, studentId: number, score: number, feedback: string | null) => void;
-  onLoadSummary: (meetingId: number) => void;
+  onLoadAttendance: (meetingId: string) => void;
+  onLoadAttendanceReport: (meetingId: string) => void;
+  onMarkAttendance: (meeting: ScheduledMeeting, studentId: string, status: AttendanceStatus) => void;
+  onSavePracticalAssessment: (meeting: ScheduledMeeting, studentId: string, score: number, feedback: string | null) => void;
+  onLoadSummary: (meetingId: string) => void;
   onClose: (meeting: ScheduledMeeting) => void;
 }) {
   return (

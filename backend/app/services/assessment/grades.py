@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from datetime import datetime, timezone
 
@@ -22,7 +23,7 @@ class GradeService:
         self.items = AssessmentItemService(db)
         self.offerings = TeachingOfferingService(db)
 
-    def list(self, item_id: int, user: Student) -> list[GradeRow]:
+    def list(self, item_id: UUID, user: Student) -> list[GradeRow]:
         item = self.items.get_for_teaching(item_id, user)
         entries = self.repo.by_item(item_id)
         return [
@@ -35,7 +36,7 @@ class GradeService:
             for enrollment in self.offerings.roster(item.class_offering_id)
         ]
 
-    def save(self, item_id: int, grades: list[GradeInput], user: Student) -> list[GradeRow]:
+    def save(self, item_id: UUID, grades: list[GradeInput], user: Student) -> list[GradeRow]:
         item = self.items.get_editable(item_id, user)
         valid_ids = {enrollment.id for enrollment in self.offerings.roster(item.class_offering_id)}
         for grade in grades:
@@ -46,7 +47,7 @@ class GradeService:
         self._upsert(item_id, {g.class_enrollment_id: (g.score, g.notes) for g in grades}, user.id)
         return self.list(item_id, user)
 
-    def import_quiz(self, item_id: int, user: Student) -> QuizImportResult:
+    def import_quiz(self, item_id: UUID, user: Student) -> QuizImportResult:
         """Melhor tentativa de cada aluno no quiz vinculado, convertida para a nota maxima do item."""
         item = self.items.get_editable(item_id, user)
         if item.kind != AssessmentKind.quiz or item.quiz_id is None:
@@ -62,7 +63,7 @@ class GradeService:
         self._upsert(item_id, scores, user.id)
         return QuizImportResult(imported=len(scores), without_attempt=len(enrollments) - len(scores))
 
-    def _upsert(self, item_id: int, values: dict[int, tuple[float | None, str | None]], grader_id: int) -> None:
+    def _upsert(self, item_id: UUID, values: dict[UUID, tuple[float | None, str | None]], grader_id: UUID) -> None:
         existing = self.repo.by_item(item_id)
         now = datetime.now(timezone.utc)
         for enrollment_id, (score, notes) in values.items():

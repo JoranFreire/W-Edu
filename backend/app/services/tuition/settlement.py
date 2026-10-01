@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from datetime import date, datetime, timezone
 
@@ -35,11 +36,11 @@ class TuitionSettlementService:
         self.repo = TuitionChargeRepository(db)
         self.late_fees = LateFeeSettingsService(db)
 
-    def quote(self, charge_id: int, on: date | None = None) -> SettlementOut:
+    def quote(self, charge_id: UUID, on: date | None = None) -> SettlementOut:
         charge = self.get_or_404(charge_id)
         return quote(charge, on or date.today(), self.late_fees.policy())
 
-    def settle(self, charge_id: int, paid_on: date | None, method: PaymentMethod) -> Charge:
+    def settle(self, charge_id: UUID, paid_on: date | None, method: PaymentMethod) -> Charge:
         charge = self.get_or_404(charge_id)
         if charge.status not in OPEN:
             raise conflict("Cobrança já quitada ou cancelada")
@@ -49,7 +50,7 @@ class TuitionSettlementService:
         charge.status, charge.payment_method, charge.paid_at = ChargeStatus.paid, method, datetime.now(timezone.utc)
         return self.repo.save(charge)
 
-    def get_or_404(self, charge_id: int) -> Charge:
+    def get_or_404(self, charge_id: UUID) -> Charge:
         charge = self.repo.get_by_id(charge_id)
         if not charge:
             raise not_found("Cobrança não encontrada")

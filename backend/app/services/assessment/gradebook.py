@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from sqlalchemy.orm import Session
 
@@ -24,7 +25,7 @@ class GradebookService:
         self.diary = ClassDiaryRepository(db)
         self.attendance = DiaryAttendanceRepository(db)
 
-    def build(self, offering_id: int, user: Student) -> GradebookOut:
+    def build(self, offering_id: UUID, user: Student) -> GradebookOut:
         offering = self.offerings.get_for_teaching(offering_id, user)
         snapshot = OfferingScores(self.db, offering)
         scheme, items = snapshot.scheme, snapshot.items

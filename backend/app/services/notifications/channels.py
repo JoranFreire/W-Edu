@@ -2,6 +2,7 @@ from email.message import EmailMessage
 import smtplib
 
 import httpx
+from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
@@ -54,7 +55,7 @@ class WhatsAppChannel:
             },
         }
         with httpx.Client(timeout=settings.NOTIFICATION_DISPATCH_TIMEOUT_SECONDS) as client:
-            response = client.post(f"{base_url}/messages", json=payload, headers=headers)
+            response = client.post(f"{base_url}/messages", json=jsonable_encoder(payload), headers=headers)
             response.raise_for_status()
 
 

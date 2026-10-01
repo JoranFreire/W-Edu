@@ -1,0 +1,3 @@
+# Postgres com o papel da aplicacao (sem superusuario, sujeito ao RLS) criado na primeira inicializacao.
+FROM postgres:16-alpine
+COPY init-db.sql /docker-entrypoint-initdb.d/01-init.sql

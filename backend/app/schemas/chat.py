@@ -1,11 +1,12 @@
+from uuid import UUID
 from datetime import datetime
 
 from pydantic import BaseModel, Field
 
 
 class ChatConversationCreate(BaseModel):
-    course_id: int
-    instructor_id: int | None = None
+    course_id: UUID
+    instructor_id: UUID | None = None
     subject: str | None = Field(default=None, max_length=200)
     message: str = Field(min_length=1)
 
@@ -15,9 +16,9 @@ class ChatMessageCreate(BaseModel):
 
 
 class ChatMessageOut(BaseModel):
-    id: int
-    conversation_id: int
-    sender_id: int
+    id: UUID
+    conversation_id: UUID
+    sender_id: UUID
     sender_name: str
     body: str
     created_at: datetime
@@ -26,12 +27,12 @@ class ChatMessageOut(BaseModel):
 
 
 class ChatConversationOut(BaseModel):
-    id: int
-    course_id: int
+    id: UUID
+    course_id: UUID
     course_name: str
-    student_id: int
+    student_id: UUID
     student_name: str
-    instructor_id: int | None
+    instructor_id: UUID | None
     instructor_name: str | None
     subject: str | None
     messages_count: int

@@ -12,7 +12,7 @@ import { isAdminRole } from '@/types/auth';
 
 export default function AdminProgramPage() {
   const router = useRouter();
-  const programId = Number(useParams<{ programId: string }>().programId);
+  const programId = useParams<{ programId: string }>().programId;
   const canDelete = isAdminRole(useAuthStore((state) => state.student?.role));
   const { program, error } = useProgram(programId);
   useErrorToast(error, 'Programa não encontrado.');

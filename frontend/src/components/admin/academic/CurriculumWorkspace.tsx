@@ -18,9 +18,9 @@ function defaultCurriculum(curricula: Curriculum[]): Curriculum | undefined {
 }
 
 /** Versoes da matriz de um programa: escolha da versao e ciclo de vida. */
-export default function CurriculumWorkspace({ programId, canDelete }: { programId: number; canDelete: boolean }) {
+export default function CurriculumWorkspace({ programId, canDelete }: { programId: string; canDelete: boolean }) {
   const { curricula, error, create, newVersion, activate, archive, remove } = useCurricula(programId);
-  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [creating, setCreating] = useState<'empty' | 'copy' | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
   useErrorToast(error, 'Erro ao carregar matrizes.');

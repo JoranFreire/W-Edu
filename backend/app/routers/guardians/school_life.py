@@ -1,3 +1,4 @@
+from uuid import UUID
 from datetime import date
 
 from fastapi import APIRouter, Depends
@@ -13,19 +14,19 @@ router = APIRouter(prefix="/me/dependents")
 
 
 @router.get("/{student_id}/occurrences", response_model=list[OccurrenceOut])
-def dependent_occurrences(student_id: int, db: Session = Depends(get_db), current: Student = Depends(get_current_guardian)):
+def dependent_occurrences(student_id: UUID, db: Session = Depends(get_db), current: Student = Depends(get_current_guardian)):
     return GuardianSchoolLifeService(db).occurrences_of(current, student_id)
 
 
 @router.post("/{student_id}/occurrences/{occurrence_id}/acknowledge", response_model=OccurrenceOut)
 def acknowledge_occurrence(
-    student_id: int, occurrence_id: int, db: Session = Depends(get_db), current: Student = Depends(get_current_guardian),
+    student_id: UUID, occurrence_id: UUID, db: Session = Depends(get_db), current: Student = Depends(get_current_guardian),
 ):
     return GuardianSchoolLifeService(db).acknowledge(current, student_id, occurrence_id)
 
 
 @router.get("/{student_id}/agenda", response_model=list[AgendaItemOut])
 def dependent_agenda(
-    student_id: int, from_date: date | None = None, db: Session = Depends(get_db), current: Student = Depends(get_current_guardian),
+    student_id: UUID, from_date: date | None = None, db: Session = Depends(get_db), current: Student = Depends(get_current_guardian),
 ):
     return GuardianSchoolLifeService(db).agenda_of(current, student_id, from_date)

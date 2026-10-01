@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -20,7 +22,7 @@ class InstitutionService:
     def list_all(self) -> list[Institution]:
         return self.repo.list_all()
 
-    def get_or_404(self, institution_id: int) -> Institution:
+    def get_or_404(self, institution_id: UUID) -> Institution:
         institution = self.repo.get_by_id(institution_id)
         if not institution:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Instituição não encontrada")

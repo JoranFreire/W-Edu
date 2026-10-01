@@ -1,3 +1,4 @@
+from uuid import UUID
 from datetime import datetime
 
 from pydantic import BaseModel, EmailStr, Field
@@ -27,7 +28,7 @@ class GuardianLinkUpdate(BaseModel):
 
 
 class GuardianLinkOut(BaseModel):
-    id: int
+    id: UUID
     student: PersonSummary
     guardian: PersonSummary
     relationship_kind: GuardianRelationship
@@ -39,7 +40,7 @@ class GuardianLinkOut(BaseModel):
 
 
 class DependentOut(BaseModel):
-    link_id: int
+    link_id: UUID
     student: PersonSummary
     relationship_kind: GuardianRelationship
     is_financial: bool
@@ -47,7 +48,7 @@ class DependentOut(BaseModel):
 
 
 class DependentChargeOut(BaseModel):
-    id: int
+    id: UUID
     amount_cents: int
     currency: str
     status: ChargeStatus
@@ -59,7 +60,7 @@ class DependentChargeOut(BaseModel):
 
 
 class DependentNoticeOut(BaseModel):
-    id: int
+    id: UUID
     title: str
     body: str
     created_at: datetime

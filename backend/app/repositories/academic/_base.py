@@ -1,3 +1,4 @@
+from uuid import UUID
 from typing import Generic, TypeVar
 
 from sqlalchemy.orm import Session
@@ -15,7 +16,7 @@ class Repository(Generic[T]):
     def __init__(self, db: Session):
         self.db = db
 
-    def get_by_id(self, entity_id: int) -> T | None:
+    def get_by_id(self, entity_id: UUID) -> T | None:
         return self.db.get(self.model, entity_id)
 
     def add(self, entity: T) -> T:

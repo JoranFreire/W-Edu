@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 import csv
 from datetime import date
@@ -29,7 +30,7 @@ class FundingReportService:
         self.minimum_wage = MinimumWageProvider(db)
         self.material_requests = MaterialRequestRepository(db)
 
-    def report(self, funding_id: int, minimum_wage_cents: int | None = None) -> FundingReportOut:
+    def report(self, funding_id: UUID, minimum_wage_cents: int | None = None) -> FundingReportOut:
         """Faixas de renda pelo salario minimo informado ou, sem ele, o do Banco Central."""
         funding = self.funding.get_or_404(funding_id)
         wage = MinimumWage(minimum_wage_cents, "informed", None) if minimum_wage_cents else self.minimum_wage.current()
@@ -60,7 +61,7 @@ class FundingReportService:
             budget_balance_cents=funding.amount_cents - spent if funding.amount_cents is not None else None,
         )
 
-    def csv(self, funding_id: int, minimum_wage_cents: int | None = None) -> str:
+    def csv(self, funding_id: UUID, minimum_wage_cents: int | None = None) -> str:
         """Planilha (separador ;) com indicadores por turma e beneficios entregues."""
         report = self.report(funding_id, minimum_wage_cents)
         buffer = io.StringIO()

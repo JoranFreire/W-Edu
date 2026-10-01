@@ -14,23 +14,23 @@ export interface GradingPeriodInput {
 }
 
 /** Etapas de avaliacao de um periodo letivo. */
-export function useGradingPeriods(termId: number) {
+export function useGradingPeriods(termId: string) {
   const request = useCallback(
     () => api.get<GradingPeriod[]>(endpoints.academic.gradingPeriods(termId)).then((response) => response.data),
     [termId],
   );
   const { data = [], loading, error, reload } = useApiQuery(request);
 
-  const save = async (id: number | null, input: GradingPeriodInput) => {
+  const save = async (id: string | null, input: GradingPeriodInput) => {
     if (id) await api.patch(endpoints.academic.gradingPeriod(id), input);
     else await api.post(endpoints.academic.gradingPeriods(termId), input);
     reload();
   };
-  const changeStatus = async (id: number, status: GradingPeriodStatus) => {
+  const changeStatus = async (id: string, status: GradingPeriodStatus) => {
     await api.post(endpoints.academic.gradingPeriodStatus(id), { status });
     reload();
   };
-  const remove = async (id: number) => {
+  const remove = async (id: string) => {
     await api.delete(endpoints.academic.gradingPeriod(id));
     reload();
   };

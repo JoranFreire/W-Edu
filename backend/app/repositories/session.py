@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from sqlalchemy.orm import Session as DBSession
 from app.models.session import Session
 
@@ -6,13 +8,13 @@ class SessionRepository:
     def __init__(self, db: DBSession):
         self.db = db
 
-    def get_by_id(self, session_id: int) -> Session | None:
+    def get_by_id(self, session_id: UUID) -> Session | None:
         return self.db.get(Session, session_id)
 
     def get_by_bevox_session_id(self, bevox_session_id: str) -> Session | None:
         return self.db.query(Session).filter(Session.bevox_session_id == bevox_session_id).first()
 
-    def list_by_student(self, student_id: int) -> list[Session]:
+    def list_by_student(self, student_id: UUID) -> list[Session]:
         return (
             self.db.query(Session)
             .filter(Session.student_id == student_id)

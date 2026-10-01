@@ -11,7 +11,7 @@ interface LineDraft { itemId: string; quantity: string }
 /** Nova requisicao: finalidade, data de uso, turma (opcional) e materiais com quantidade. */
 export default function MaterialRequestForm({ items, offerings, onSubmit }: {
   items: WarehouseItem[];
-  offerings: { id: number; name: string }[];
+  offerings: { id: string; name: string }[];
   onSubmit: (input: MaterialRequestInput) => Promise<void>;
 }) {
   const empty = { purpose: '', neededOn: '', offeringId: '', lines: [{ itemId: '', quantity: '1' }] as LineDraft[] };
@@ -23,8 +23,8 @@ export default function MaterialRequestForm({ items, offerings, onSubmit }: {
     event.preventDefault();
     try {
       await onSubmit({
-        purpose: draft.purpose, needed_on: draft.neededOn, class_offering_id: draft.offeringId ? Number(draft.offeringId) : null,
-        lines: draft.lines.filter((line) => line.itemId).map((line) => ({ item_id: Number(line.itemId), quantity: Number(line.quantity) })),
+        purpose: draft.purpose, needed_on: draft.neededOn, class_offering_id: draft.offeringId ? draft.offeringId : null,
+        lines: draft.lines.filter((line) => line.itemId).map((line) => ({ item_id: line.itemId, quantity: Number(line.quantity) })),
       });
       setDraft(empty);
       toast.success('Requisição enviada para aprovação.');

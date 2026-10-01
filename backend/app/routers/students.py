@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -29,13 +31,13 @@ def me(current: Student = Depends(get_current_student)):
 
 
 @router.get("/{student_id}", response_model=StudentOut)
-def get_student(student_id: int, db: Session = Depends(get_db), _: Student = Depends(get_current_student)):
+def get_student(student_id: UUID, db: Session = Depends(get_db), _: Student = Depends(get_current_student)):
     return StudentService(db).get_or_404(student_id)
 
 
 @router.patch("/{student_id}", response_model=StudentOut)
 def update_student(
-    student_id: int,
+    student_id: UUID,
     data: StudentUpdate,
     db: Session = Depends(get_db),
     current: Student = Depends(get_current_student),
@@ -50,7 +52,7 @@ def update_student(
 
 @router.delete("/{student_id}", status_code=204)
 def delete_student(
-    student_id: int,
+    student_id: UUID,
     db: Session = Depends(get_db),
     current: Student = Depends(get_current_student),
 ):

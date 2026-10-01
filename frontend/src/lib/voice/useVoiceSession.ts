@@ -16,7 +16,7 @@ export interface TranscriptEntry {
   text: string;
 }
 
-export function useVoiceSession(lessonId: number, onSessionUpdate: (session: Session) => void) {
+export function useVoiceSession(lessonId: string, onSessionUpdate: (session: Session) => void) {
   const [state, setState] = useState<VoiceState>('idle');
   const [statusText, setStatusText] = useState('Pronto para conectar');
   const [chatId, setChatId] = useState<string | null>(null);

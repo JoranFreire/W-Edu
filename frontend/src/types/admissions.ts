@@ -8,8 +8,8 @@ export type SeatKind = 'general' | 'reserved';
 export type DocumentReview = 'pending' | 'accepted' | 'rejected';
 
 export interface AdmissionCall {
-  id: number;
-  class_offering_id: number;
+  id: string;
+  class_offering_id: string;
   course_name: string;
   offering_name: string;
   starts_at: string;
@@ -35,7 +35,7 @@ export interface AdmissionCall {
 }
 
 export interface AdmissionCallInput {
-  class_offering_id: number;
+  class_offering_id: string;
   title: string;
   description: string | null;
   method: SelectionMethod;
@@ -63,7 +63,7 @@ export interface ApplicationAnswers {
 }
 
 export interface ApplicationDocument {
-  id: number;
+  id: string;
   kind: string;
   file_name: string;
   review: DocumentReview;
@@ -71,8 +71,8 @@ export interface ApplicationDocument {
 }
 
 export interface Application extends ApplicationAnswers {
-  id: number;
-  call_id: number;
+  id: string;
+  call_id: string;
   call_title: string;
   applicant: PersonSummary;
   protocol: string;
@@ -96,7 +96,7 @@ export interface ApplicationReviewInput {
 }
 
 export interface AdmissionResult {
-  call_id: number;
+  call_id: string;
   title: string;
   method: SelectionMethod;
   lottery_seed: string | null;

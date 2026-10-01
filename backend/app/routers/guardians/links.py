@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -11,20 +13,20 @@ router = APIRouter()
 
 
 @router.get("/students/{student_id}/links", response_model=list[GuardianLinkOut])
-def list_links(student_id: int, db: Session = Depends(get_db), _: Student = Depends(get_current_secretariat)):
+def list_links(student_id: UUID, db: Session = Depends(get_db), _: Student = Depends(get_current_secretariat)):
     return GuardianLinkService(db).list(student_id)
 
 
 @router.post("/students/{student_id}/links", response_model=GuardianLinkOut, status_code=201)
-def add_link(student_id: int, data: GuardianLinkCreate, db: Session = Depends(get_db), _: Student = Depends(get_current_secretariat)):
+def add_link(student_id: UUID, data: GuardianLinkCreate, db: Session = Depends(get_db), _: Student = Depends(get_current_secretariat)):
     return GuardianLinkService(db).add(student_id, data)
 
 
 @router.patch("/links/{link_id}", response_model=GuardianLinkOut)
-def update_link(link_id: int, data: GuardianLinkUpdate, db: Session = Depends(get_db), _: Student = Depends(get_current_secretariat)):
+def update_link(link_id: UUID, data: GuardianLinkUpdate, db: Session = Depends(get_db), _: Student = Depends(get_current_secretariat)):
     return GuardianLinkService(db).update(link_id, data)
 
 
 @router.delete("/links/{link_id}", status_code=204)
-def remove_link(link_id: int, db: Session = Depends(get_db), _: Student = Depends(get_current_secretariat)):
+def remove_link(link_id: UUID, db: Session = Depends(get_db), _: Student = Depends(get_current_secretariat)):
     GuardianLinkService(db).remove(link_id)

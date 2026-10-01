@@ -24,7 +24,7 @@ export default function AdminCoursesPage() {
   const { student } = useAuthStore();
   const canDelete = isAdminRole(student?.role);
   const catalog = useCourses();
-  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [editing, setEditing] = useState<{ course?: Course } | null>(null);
   const [courseToDelete, setCourseToDelete] = useState<Course | null>(null);
   const [viewMode, setViewMode] = useViewMode('admin-courses');

@@ -6,7 +6,7 @@ import { endpoints } from '@/lib/api/endpoints';
 import { useApiQuery } from '@/lib/hooks/useApiQuery';
 import type { Program } from '@/types/academic';
 
-export function useProgram(programId: number) {
+export function useProgram(programId: string) {
   const request = useCallback(
     () => api.get<Program>(endpoints.academic.program(programId)).then((response) => response.data),
     [programId],

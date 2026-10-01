@@ -2,7 +2,7 @@ export type SaasSubscriptionStatus = 'trial' | 'active' | 'past_due' | 'cancelle
 export type PlatformInvoiceStatus = 'pending' | 'paid' | 'cancelled';
 
 export interface SaasPlan {
-  id: number;
+  id: string;
   name: string;
   description: string | null;
   monthly_price_cents: number;
@@ -18,7 +18,7 @@ export interface SaasPlanInput {
 }
 
 export interface InstitutionSubscription {
-  institution_id: number;
+  institution_id: string;
   plan: SaasPlan;
   status: SaasSubscriptionStatus;
   started_on: string;
@@ -26,14 +26,14 @@ export interface InstitutionSubscription {
 }
 
 export interface SubscriptionInput {
-  plan_id: number;
+  plan_id: string;
   status: SaasSubscriptionStatus;
   trial_ends_on: string | null;
 }
 
 export interface PlatformInvoice {
-  id: number;
-  institution_id: number;
+  id: string;
+  institution_id: string;
   plan_name: string;
   period_start: string;
   period_end: string;

@@ -49,7 +49,7 @@ export default function RegistrationWindowFormModal({ window: current, terms, pr
   const submit = (event: React.FormEvent) => {
     event.preventDefault();
     const input: RegistrationWindowInput = {
-      term_id: Number(draft.termId), program_id: optionalNumber(draft.programId), name: draft.name,
+      term_id: draft.termId, program_id: draft.programId || null, name: draft.name,
       opens_at: toApiDateTime(draft.opensAt), closes_at: toApiDateTime(draft.closesAt),
       min_credits: optionalNumber(draft.minCredits), max_credits: optionalNumber(draft.maxCredits), allow_waitlist: draft.allowWaitlist,
     };

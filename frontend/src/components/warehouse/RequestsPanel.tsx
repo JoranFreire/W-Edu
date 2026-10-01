@@ -18,7 +18,7 @@ export default function RequestsPanel() {
   const [status, setStatus] = useState<RequestStatus | ''>('pending');
   const { requests, error, act } = useMaterialRequestsAdmin(status);
   useErrorToast(error, 'Erro ao carregar as requisições.');
-  const deliver = async (id: number) => {
+  const deliver = async (id: string) => {
     try {
       await act(id, 'deliver');
       toast.success('Retirada registrada.');

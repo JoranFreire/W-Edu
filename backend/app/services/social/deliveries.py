@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from datetime import date
 
@@ -35,7 +36,7 @@ class BenefitDeliveryService:
         self.meetings = ScheduledMeetingRepository(db)
         self.offerings = ClassOfferingRepository(db)
 
-    def deliver_in_meeting(self, meeting_id: int, data: MeetingDeliveryInput, user: Student) -> MeetingDeliveryOut:
+    def deliver_in_meeting(self, meeting_id: UUID, data: MeetingDeliveryInput, user: Student) -> MeetingDeliveryOut:
         meeting = self.meetings.get_by_id(meeting_id)
         if not meeting:
             raise not_found("Encontro não encontrado")
@@ -69,14 +70,14 @@ class BenefitDeliveryService:
         ))
         return delivery_out(delivery)
 
-    def list_for_offering(self, offering_id: int, user: Student) -> list[DeliveryOut]:
+    def list_for_offering(self, offering_id: UUID, user: Student) -> list[DeliveryOut]:
         ensure_can_follow(user, self._offering(offering_id))
         return [delivery_out(d) for d in self.deliveries.list_by_offering(offering_id)]
 
     def list_mine(self, user: Student) -> list[DeliveryOut]:
         return [delivery_out(d) for d in self.deliveries.list_by_student(user.id)]
 
-    def _item(self, item_id: int) -> BenefitItem:
+    def _item(self, item_id: UUID) -> BenefitItem:
         item = self.items.lock(item_id)
         if not item:
             raise not_found("Item não encontrado")
@@ -89,7 +90,7 @@ class BenefitDeliveryService:
         if needed > available:
             raise conflict(f"Estoque insuficiente de {item.name}: {available} disponível(is), {needed} necessário(s)")
 
-    def _offering(self, offering_id: int) -> ClassOffering:
+    def _offering(self, offering_id: UUID) -> ClassOffering:
         offering = self.offerings.get_by_id(offering_id)
         if not offering:
             raise not_found("Turma não encontrada")

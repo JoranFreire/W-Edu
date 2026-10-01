@@ -11,8 +11,8 @@ import type { ClassGroupMember, ProgramEnrollment } from '@/types/academicGroups
 export default function ClassGroupRoster({ members, candidates, onAdd, onRemove }: {
   members: ClassGroupMember[];
   candidates: ProgramEnrollment[];
-  onAdd: (enrollmentId: number) => Promise<void>;
-  onRemove: (enrollmentId: number) => Promise<void>;
+  onAdd: (enrollmentId: string) => Promise<void>;
+  onRemove: (enrollmentId: string) => Promise<void>;
 }) {
   const [selected, setSelected] = useState('');
 
@@ -29,7 +29,7 @@ export default function ClassGroupRoster({ members, candidates, onAdd, onRemove 
     event.preventDefault();
     if (!selected) return;
     attempt(async () => {
-      await onAdd(Number(selected));
+      await onAdd(selected);
       setSelected('');
     }, 'Aluno incluído na turma.');
   };

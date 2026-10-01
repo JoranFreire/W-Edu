@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from sqlalchemy import func
 
@@ -12,7 +13,7 @@ class SocialIndicatorRepository:
     def __init__(self, db):
         self.db = db
 
-    def applications(self, offering_ids: list[int]) -> dict[int, int]:
+    def applications(self, offering_ids: list[UUID]) -> dict[UUID, int]:
         if not offering_ids:
             return {}
         rows = (
@@ -24,12 +25,12 @@ class SocialIndicatorRepository:
         )
         return dict(rows)
 
-    def enrollments(self, offering_ids: list[int]) -> list[ClassEnrollment]:
+    def enrollments(self, offering_ids: list[UUID]) -> list[ClassEnrollment]:
         if not offering_ids:
             return []
         return self.db.query(ClassEnrollment).filter(ClassEnrollment.class_offering_id.in_(offering_ids)).all()
 
-    def confirmed_answers(self, offering_ids: list[int]) -> list[AdmissionApplication]:
+    def confirmed_answers(self, offering_ids: list[UUID]) -> list[AdmissionApplication]:
         if not offering_ids:
             return []
         return (

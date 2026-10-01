@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from sqlalchemy.orm import Session
 
@@ -21,17 +22,17 @@ class TeachingOfferingService:
     def list_for(self, user: Student) -> list[ClassOffering]:
         return self.repo.list(instructor_id=None if can_manage_all_offerings(user) else user.id)
 
-    def get_for_teaching(self, offering_id: int, user: Student) -> ClassOffering:
+    def get_for_teaching(self, offering_id: UUID, user: Student) -> ClassOffering:
         offering = self.repo.get_by_id(offering_id)
         if not offering:
             raise not_found("Turma não encontrada")
         ensure_can_teach(user, offering)
         return offering
 
-    def roster(self, offering_id: int) -> list[ClassEnrollment]:
+    def roster(self, offering_id: UUID) -> list[ClassEnrollment]:
         return self.repo.roster(offering_id)
 
-    def sync_group_enrollments(self, offering_id: int, user: Student) -> SyncEnrollmentsResult:
+    def sync_group_enrollments(self, offering_id: UUID, user: Student) -> SyncEnrollmentsResult:
         """Inscreve na oferta os alunos da turma-grupo vinculada (escola: a turma herda as disciplinas)."""
         offering = self.get_for_teaching(offering_id, user)
         if offering.class_group_id is None:

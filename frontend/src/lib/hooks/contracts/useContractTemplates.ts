@@ -11,12 +11,12 @@ export function useContractTemplates() {
   const request = useCallback(() => api.get<ContractTemplate[]>(endpoints.contracts.templates).then((response) => response.data), []);
   const { data = [], loading, error, reload } = useApiQuery(request);
 
-  const save = async (id: number | null, input: ContractTemplateInput) => {
+  const save = async (id: string | null, input: ContractTemplateInput) => {
     if (id) await api.patch(endpoints.contracts.template(id), { name: input.name, body: input.body });
     else await api.post(endpoints.contracts.templates, input);
     reload();
   };
-  const setActive = async (id: number, isActive: boolean) => {
+  const setActive = async (id: string, isActive: boolean) => {
     await api.patch(endpoints.contracts.template(id), { is_active: isActive });
     reload();
   };

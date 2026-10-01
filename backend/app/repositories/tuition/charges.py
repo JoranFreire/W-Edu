@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from sqlalchemy import or_
 
@@ -11,7 +12,7 @@ class TuitionChargeRepository(Repository[Charge]):
 
     model = Charge
 
-    def existing_installments(self, plan_id: int) -> set[tuple[int, int]]:
+    def existing_installments(self, plan_id: UUID) -> set[tuple[int, int]]:
         rows = (
             self.db.query(Charge.program_enrollment_id, Charge.installment_number)
             .filter(Charge.tuition_plan_id == plan_id)
@@ -19,7 +20,7 @@ class TuitionChargeRepository(Repository[Charge]):
         )
         return {(enrollment_id, number) for enrollment_id, number in rows}
 
-    def list_by_enrollment(self, enrollment_id: int) -> list[Charge]:
+    def list_by_enrollment(self, enrollment_id: UUID) -> list[Charge]:
         return (
             self.db.query(Charge)
             .filter(Charge.program_enrollment_id == enrollment_id)
@@ -27,7 +28,7 @@ class TuitionChargeRepository(Repository[Charge]):
             .all()
         )
 
-    def list_for_user(self, user_id: int) -> list[Charge]:
+    def list_for_user(self, user_id: UUID) -> list[Charge]:
         """Mensalidades em que o usuario e o aluno ou o responsavel que paga."""
         return (
             self.db.query(Charge)

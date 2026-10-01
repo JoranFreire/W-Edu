@@ -29,10 +29,10 @@ export default function AssessmentItemForm({ periods, onCreate }: {
       await onCreate({
         name: draft.name,
         kind: draft.kind,
-        grading_period_id: draft.grading_period_id ? Number(draft.grading_period_id) : null,
+        grading_period_id: draft.grading_period_id ? draft.grading_period_id : null,
         weight: Number(draft.weight),
         max_score: Number(draft.max_score),
-        quiz_id: draft.kind === 'quiz' && draft.quiz_id ? Number(draft.quiz_id) : null,
+        quiz_id: draft.kind === 'quiz' && draft.quiz_id ? draft.quiz_id : null,
         due_on: null,
       });
       setDraft(emptyDraft);

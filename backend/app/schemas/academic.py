@@ -1,3 +1,4 @@
+from uuid import UUID
 from datetime import date
 
 from pydantic import BaseModel, Field
@@ -11,22 +12,22 @@ CODE = Field(min_length=1, max_length=40)
 class AcademicUnitCreate(BaseModel):
     name: str = Field(min_length=1, max_length=200)
     kind: AcademicUnitKind = AcademicUnitKind.other
-    parent_id: int | None = None
+    parent_id: UUID | None = None
     is_active: bool = True
 
 
 class AcademicUnitUpdate(BaseModel):
     name: str | None = Field(default=None, min_length=1, max_length=200)
     kind: AcademicUnitKind | None = None
-    parent_id: int | None = None
+    parent_id: UUID | None = None
     is_active: bool | None = None
 
 
 class AcademicUnitOut(BaseModel):
-    id: int
+    id: UUID
     name: str
     kind: AcademicUnitKind
-    parent_id: int | None
+    parent_id: UUID | None
     is_active: bool
 
     model_config = {"from_attributes": True}
@@ -36,7 +37,7 @@ class ProgramCreate(BaseModel):
     code: str = CODE
     name: str = Field(min_length=1, max_length=200)
     level: ProgramLevel = ProgramLevel.free
-    unit_id: int | None = None
+    unit_id: UUID | None = None
     degree: str | None = None
     duration_terms: int | None = Field(default=None, ge=1)
     total_hours: int | None = Field(default=None, ge=0)
@@ -51,7 +52,7 @@ class ProgramUpdate(BaseModel):
     code: str | None = Field(default=None, min_length=1, max_length=40)
     name: str | None = Field(default=None, min_length=1, max_length=200)
     level: ProgramLevel | None = None
-    unit_id: int | None = None
+    unit_id: UUID | None = None
     degree: str | None = None
     duration_terms: int | None = Field(default=None, ge=1)
     total_hours: int | None = Field(default=None, ge=0)
@@ -63,11 +64,11 @@ class ProgramUpdate(BaseModel):
 
 
 class ProgramOut(BaseModel):
-    id: int
+    id: UUID
     code: str
     name: str
     level: ProgramLevel
-    unit_id: int | None
+    unit_id: UUID | None
     degree: str | None
     duration_terms: int | None
     total_hours: int | None
@@ -86,7 +87,7 @@ class SubjectCreate(BaseModel):
     syllabus: str | None = None
     hours: int = Field(default=0, ge=0)
     credits: int | None = Field(default=None, ge=0)
-    course_id: int | None = None
+    course_id: UUID | None = None
     is_active: bool = True
 
 
@@ -96,25 +97,25 @@ class SubjectUpdate(BaseModel):
     syllabus: str | None = None
     hours: int | None = Field(default=None, ge=0)
     credits: int | None = Field(default=None, ge=0)
-    course_id: int | None = None
+    course_id: UUID | None = None
     is_active: bool | None = None
 
 
 class SubjectOut(BaseModel):
-    id: int
+    id: UUID
     code: str
     name: str
     syllabus: str | None
     hours: int
     credits: int | None
-    course_id: int | None
+    course_id: UUID | None
     is_active: bool
 
     model_config = {"from_attributes": True}
 
 
 class SubjectSummary(BaseModel):
-    id: int
+    id: UUID
     code: str
     name: str
 
@@ -122,7 +123,7 @@ class SubjectSummary(BaseModel):
 
 
 class SubjectLinkCreate(BaseModel):
-    subject_id: int
+    subject_id: UUID
 
 
 class CurriculumCreate(BaseModel):
@@ -143,8 +144,8 @@ class CurriculumNewVersion(BaseModel):
 
 
 class CurriculumOut(BaseModel):
-    id: int
-    program_id: int
+    id: UUID
+    program_id: UUID
     version: str
     valid_from: date | None
     status: CurriculumStatus
@@ -154,7 +155,7 @@ class CurriculumOut(BaseModel):
 
 
 class CurriculumComponentCreate(BaseModel):
-    subject_id: int
+    subject_id: UUID
     term_number: int = Field(ge=1)
     kind: ComponentKind = ComponentKind.mandatory
     hours: int | None = Field(default=None, ge=0)
@@ -169,7 +170,7 @@ class CurriculumComponentUpdate(BaseModel):
 
 
 class CurriculumComponentOut(BaseModel):
-    id: int
+    id: UUID
     subject: SubjectSummary
     term_number: int
     kind: ComponentKind

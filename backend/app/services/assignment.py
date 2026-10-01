@@ -1,3 +1,4 @@
+from uuid import UUID
 from datetime import datetime, timezone
 
 from fastapi import HTTPException, UploadFile, status
@@ -19,7 +20,7 @@ class AssignmentSubmissionService:
         self.repo = AssignmentSubmissionRepository(db)
         self.lesson_service = LessonService(db)
 
-    def submit(self, lesson_id: int, current: Student, text: str | None, file: UploadFile | None) -> AssignmentSubmission:
+    def submit(self, lesson_id: UUID, current: Student, text: str | None, file: UploadFile | None) -> AssignmentSubmission:
         lesson = self.lesson_service.get_or_404(lesson_id)
         if lesson.type != LessonType.assessment:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Aula não aceita entrega de atividade")
@@ -54,15 +55,15 @@ class AssignmentSubmissionService:
             submission = self.repo.update(submission)
         return submission
 
-    def my_submission(self, lesson_id: int, current: Student) -> AssignmentSubmission | None:
+    def my_submission(self, lesson_id: UUID, current: Student) -> AssignmentSubmission | None:
         self.lesson_service.get_or_404(lesson_id)
         return self.repo.get_by_lesson_and_student(lesson_id, current.id)
 
-    def list_by_lesson(self, lesson_id: int) -> list[AssignmentSubmission]:
+    def list_by_lesson(self, lesson_id: UUID) -> list[AssignmentSubmission]:
         self.lesson_service.get_or_404(lesson_id)
         return self.repo.list_by_lesson(lesson_id)
 
-    def review(self, submission_id: int, data: AssignmentReviewIn, reviewer: Student) -> AssignmentSubmission:
+    def review(self, submission_id: UUID, data: AssignmentReviewIn, reviewer: Student) -> AssignmentSubmission:
         submission = self.repo.get_by_id(submission_id)
         if not submission:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Entrega não encontrada")
@@ -73,7 +74,7 @@ class AssignmentSubmissionService:
         submission.reviewed_by_id = reviewer.id
         return self.repo.update(submission)
 
-    def download(self, submission_id: int, current: Student):
+    def download(self, submission_id: UUID, current: Student):
         submission = self.repo.get_by_id(submission_id)
         if not submission:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Entrega não encontrada")

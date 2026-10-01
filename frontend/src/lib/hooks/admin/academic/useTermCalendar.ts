@@ -19,7 +19,7 @@ interface TermCalendarData {
 }
 
 /** Eventos do calendario de um periodo letivo e a contagem de dias letivos. */
-export function useTermCalendar(termId: number) {
+export function useTermCalendar(termId: string) {
   const request = useCallback(async (): Promise<TermCalendarData> => {
     const [events, summary] = await Promise.all([
       api.get<CalendarEvent[]>(endpoints.academic.calendarEvents, { params: { term_id: termId } }),
@@ -33,7 +33,7 @@ export function useTermCalendar(termId: number) {
     await api.post(endpoints.academic.calendarEvents, { ...input, term_id: termId });
     reload();
   };
-  const remove = async (id: number) => {
+  const remove = async (id: string) => {
     await api.delete(endpoints.academic.calendarEvent(id));
     reload();
   };

@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from sqlalchemy.orm import Session
 
@@ -16,15 +17,15 @@ class StudentDiscountService:
         self.repo = StudentDiscountRepository(db)
         self.lifecycle = EnrollmentLifecycleService(db)
 
-    def list(self, enrollment_id: int) -> list[StudentDiscount]:
+    def list(self, enrollment_id: UUID) -> list[StudentDiscount]:
         self.lifecycle.get_or_404(enrollment_id)
         return self.repo.list_by_enrollment(enrollment_id)
 
-    def create(self, enrollment_id: int, data: DiscountCreate) -> StudentDiscount:
+    def create(self, enrollment_id: UUID, data: DiscountCreate) -> StudentDiscount:
         enrollment = self.lifecycle.get_or_404(enrollment_id)
         return self.repo.save(StudentDiscount(program_enrollment_id=enrollment.id, **data.model_dump()))
 
-    def deactivate(self, discount_id: int) -> StudentDiscount:
+    def deactivate(self, discount_id: UUID) -> StudentDiscount:
         discount = self.repo.get_by_id(discount_id)
         if not discount:
             raise not_found("Desconto não encontrado")

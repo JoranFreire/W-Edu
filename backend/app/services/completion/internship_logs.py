@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from datetime import datetime, timezone
 
@@ -20,12 +21,12 @@ class InternshipLogService:
         self.repo = InternshipLogRepository(db)
         self.internships = InternshipService(db)
 
-    def list(self, internship_id: int, user: Student) -> list[InternshipLog]:
+    def list(self, internship_id: UUID, user: Student) -> list[InternshipLog]:
         internship = self.internships.get_or_404(internship_id)
         ensure_can_view_internship(user, internship.program_enrollment.student_id, internship.advisor_id)
         return self.repo.list_by_internship(internship_id)
 
-    def add(self, student: Student, internship_id: int, data: InternshipLogCreate) -> InternshipLog:
+    def add(self, student: Student, internship_id: UUID, data: InternshipLogCreate) -> InternshipLog:
         internship = self._own_internship(student, internship_id)
         if internship.status != InternshipStatus.in_progress:
             raise conflict("O estágio não está em andamento")
@@ -33,14 +34,14 @@ class InternshipLogService:
             raise bad_request("A data está fora do período do estágio")
         return self.repo.save(InternshipLog(internship_id=internship.id, **data.model_dump()))
 
-    def remove(self, student: Student, log_id: int) -> None:
+    def remove(self, student: Student, log_id: UUID) -> None:
         log = self._get_or_404(log_id)
         self._own_internship(student, log.internship_id)
         if log.status != ReviewStatus.submitted:
             raise conflict("Registro já validado")
         self.repo.delete(log)
 
-    def review(self, log_id: int, approved: bool, reviewer: Student) -> InternshipLog:
+    def review(self, log_id: UUID, approved: bool, reviewer: Student) -> InternshipLog:
         log = self._get_or_404(log_id)
         ensure_can_supervise(reviewer, log.internship.advisor_id)
         if log.status != ReviewStatus.submitted:
@@ -49,12 +50,12 @@ class InternshipLogService:
         log.reviewed_by_id, log.reviewed_at = reviewer.id, datetime.now(timezone.utc)
         return self.repo.save(log)
 
-    def _own_internship(self, student: Student, internship_id: int) -> Internship:
+    def _own_internship(self, student: Student, internship_id: UUID) -> Internship:
         internship = self.internships.get_or_404(internship_id)
         ensure_own(internship.program_enrollment, student)
         return internship
 
-    def _get_or_404(self, log_id: int) -> InternshipLog:
+    def _get_or_404(self, log_id: UUID) -> InternshipLog:
         log = self.repo.get_by_id(log_id)
         if not log:
             raise not_found("Registro de horas não encontrado")

@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from datetime import datetime, timezone
 
@@ -22,7 +23,7 @@ class MaterialFulfillmentService:
         self.items = WarehouseItemRepository(db)
         self.catalog = WarehouseCatalogService(db)
 
-    def deliver(self, request_id: int, operator: Student) -> RequestOut:
+    def deliver(self, request_id: UUID, operator: Student) -> RequestOut:
         request = self._get(request_id)
         if request.status != RequestStatus.approved:
             raise conflict("Só requisições aprovadas são retiradas")
@@ -39,7 +40,7 @@ class MaterialFulfillmentService:
         self.repo.commit()
         return request_out(request)
 
-    def register_return(self, request_id: int, data: ReturnInput) -> RequestOut:
+    def register_return(self, request_id: UUID, data: ReturnInput) -> RequestOut:
         request = self._get(request_id)
         if request.status != RequestStatus.delivered:
             raise conflict("Não há materiais emprestados nesta requisição")
@@ -57,7 +58,7 @@ class MaterialFulfillmentService:
         self.repo.commit()
         return request_out(request)
 
-    def _get(self, request_id: int) -> MaterialRequest:
+    def _get(self, request_id: UUID) -> MaterialRequest:
         request = self.repo.get(request_id)
         if not request:
             raise not_found("Requisição não encontrada")

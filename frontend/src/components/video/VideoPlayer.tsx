@@ -4,7 +4,7 @@ import ExternalVideoPlayer from './ExternalVideoPlayer';
 import LocalVideoPlayer from './LocalVideoPlayer';
 
 interface Props {
-  lessonId: number;
+  lessonId: string;
   videoUrl: string | null;
   hasVideoFile: boolean;
   onConsumed: () => void;

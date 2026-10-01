@@ -1,5 +1,8 @@
 """Contratos de matricula e rematricula: modelo da instituicao e contrato emitido, guardado no GED e aceito eletronicamente."""
 
+from uuid import UUID
+
+from app.core.ids import new_id
 from datetime import datetime, timezone
 import enum
 
@@ -30,7 +33,7 @@ class ContractTemplate(TenantMixin, Base):
 
     __tablename__ = "contract_templates"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
     name: Mapped[str] = mapped_column(String(200))
     kind: Mapped[ContractKind] = mapped_column(SAEnum(ContractKind), default=ContractKind.enrollment)
     body: Mapped[str] = mapped_column(Text)
@@ -43,20 +46,20 @@ class EnrollmentContract(TenantMixin, Base):
 
     __tablename__ = "enrollment_contracts"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    program_enrollment_id: Mapped[int] = mapped_column(ForeignKey("program_enrollments.id"), index=True)
-    template_id: Mapped[int | None] = mapped_column(ForeignKey("contract_templates.id"), index=True)
-    term_id: Mapped[int | None] = mapped_column(ForeignKey("academic_terms.id"), index=True)
-    document_id: Mapped[int | None] = mapped_column(ForeignKey("documents.id"), index=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
+    program_enrollment_id: Mapped[UUID] = mapped_column(ForeignKey("program_enrollments.id"), index=True)
+    template_id: Mapped[UUID | None] = mapped_column(ForeignKey("contract_templates.id"), index=True)
+    term_id: Mapped[UUID | None] = mapped_column(ForeignKey("academic_terms.id"), index=True)
+    document_id: Mapped[UUID | None] = mapped_column(ForeignKey("documents.id"), index=True)
     kind: Mapped[ContractKind] = mapped_column(SAEnum(ContractKind))
     title: Mapped[str] = mapped_column(String(200))
     body: Mapped[str] = mapped_column(Text)
     status: Mapped[ContractStatus] = mapped_column(SAEnum(ContractStatus), default=ContractStatus.pending)
     validation_code: Mapped[str] = mapped_column(String(40), unique=True, index=True)
-    signer_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"))
+    signer_id: Mapped[UUID | None] = mapped_column(ForeignKey("users.id"))
     signed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     signature_hash: Mapped[str | None] = mapped_column(String(128))
-    created_by_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"))
+    created_by_id: Mapped[UUID | None] = mapped_column(ForeignKey("users.id"))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
     program_enrollment: Mapped["ProgramEnrollment"] = relationship()

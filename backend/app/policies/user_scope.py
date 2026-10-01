@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import HTTPException, status
 
 from app.models.student import ADMIN_ROLES, InstructorAvailability, Student, UserRole
@@ -23,7 +25,7 @@ def ensure_can_view_user(current: Student, target: Student) -> None:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Usuário fora da empresa")
 
 
-def ensure_availability_scope(current: Student, service: StudentService, availability_id: int) -> InstructorAvailability:
+def ensure_availability_scope(current: Student, service: StudentService, availability_id: UUID) -> InstructorAvailability:
     availability = service.availability_repo.get_by_id(availability_id)
     if not availability:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Disponibilidade não encontrada")

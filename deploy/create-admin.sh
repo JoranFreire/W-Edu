@@ -22,7 +22,7 @@ if [ -z "$ID" ]; then
 fi
 
 psql postgresql://wedu:wedu@localhost:5432/wedu \
-  -c "UPDATE students SET role='admin' WHERE id=$ID;"
+  -c "UPDATE users SET role='admin' WHERE id='$ID';"
 
 echo ""
 echo "✓ Admin criado com sucesso!"

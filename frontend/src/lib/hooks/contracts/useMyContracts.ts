@@ -13,7 +13,7 @@ export function useMyContracts() {
   const request = useCallback(() => api.get<Contract[]>(endpoints.contracts.mine).then((response) => response.data), []);
   const { data = [], loading, error, reload } = useApiQuery(request);
 
-  const accept = async (contractId: number) => {
+  const accept = async (contractId: string) => {
     await api.post(endpoints.contracts.accept(contractId));
     reload();
   };

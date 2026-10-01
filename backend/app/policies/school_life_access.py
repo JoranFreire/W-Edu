@@ -1,5 +1,7 @@
 """Quem publica agenda da turma e quem remove registros da vida escolar."""
 
+from uuid import UUID
+
 from fastapi import HTTPException, status
 
 from app.models.academic_groups import ClassGroup
@@ -25,7 +27,7 @@ def ensure_can_view_history(user: Student, teaches_student: bool) -> None:
     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Você não leciona para este aluno")
 
 
-def ensure_can_remove(user: Student, author_id: int | None) -> None:
+def ensure_can_remove(user: Student, author_id: UUID | None) -> None:
     """Remove o registro quem o criou ou a coordenacao."""
     if user.role in COORDINATION or (author_id is not None and author_id == user.id):
         return

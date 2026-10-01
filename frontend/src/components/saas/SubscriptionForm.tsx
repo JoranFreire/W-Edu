@@ -20,7 +20,7 @@ export default function SubscriptionForm({ subscription, plans, onSubmit }: {
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
     try {
-      await onSubmit({ plan_id: Number(draft.planId), status: draft.status, trial_ends_on: draft.status === 'trial' && draft.trialEndsOn ? draft.trialEndsOn : null });
+      await onSubmit({ plan_id: draft.planId, status: draft.status, trial_ends_on: draft.status === 'trial' && draft.trialEndsOn ? draft.trialEndsOn : null });
       toast.success('Plano atualizado.');
     } catch (error) {
       toast.error(apiErrorMessage(error, 'Erro ao atualizar o plano.'));

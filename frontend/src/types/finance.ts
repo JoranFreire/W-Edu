@@ -4,7 +4,7 @@ export type PaymentMethod = 'pix' | 'card' | 'boleto' | 'manual';
 export type ChargeStatus = 'pending' | 'paid' | 'failed' | 'cancelled' | 'refunded';
 
 export interface BillingPlan {
-  id: number;
+  id: string;
   name: string;
   description: string | null;
   price_cents: number;
@@ -16,10 +16,10 @@ export interface BillingPlan {
 }
 
 export interface Subscription {
-  id: number;
-  billing_plan_id: number;
-  student_id: number | null;
-  organization_id: number | null;
+  id: string;
+  billing_plan_id: string;
+  student_id: string | null;
+  organization_id: string | null;
   status: SubscriptionStatus;
   start_date: string;
   current_period_start: string;
@@ -31,13 +31,13 @@ export interface Subscription {
 }
 
 export interface Charge {
-  id: number;
-  billing_plan_id: number | null;
-  subscription_id: number | null;
-  student_id: number | null;
-  organization_id: number | null;
-  course_id: number | null;
-  class_offering_id: number | null;
+  id: string;
+  billing_plan_id: string | null;
+  subscription_id: string | null;
+  student_id: string | null;
+  organization_id: string | null;
+  course_id: string | null;
+  class_offering_id: string | null;
   amount_cents: number;
   currency: string;
   payment_method: PaymentMethod;

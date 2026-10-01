@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from datetime import date
 
@@ -17,10 +18,10 @@ class MaterialRequestRepository:
             selectinload(MaterialRequest.lines).joinedload(MaterialRequestLine.item),
         )
 
-    def get(self, request_id: int) -> MaterialRequest | None:
+    def get(self, request_id: UUID) -> MaterialRequest | None:
         return self._query().filter(MaterialRequest.id == request_id).first()
 
-    def list(self, status: RequestStatus | None = None, requester_id: int | None = None) -> list[MaterialRequest]:
+    def list(self, status: RequestStatus | None = None, requester_id: UUID | None = None) -> list[MaterialRequest]:
         query = self._query()
         if status is not None:
             query = query.filter(MaterialRequest.status == status)
@@ -37,7 +38,7 @@ class MaterialRequestRepository:
             .all()
         )
 
-    def delivered_for_offerings(self, offering_ids: list[int]) -> list[MaterialRequest]:
+    def delivered_for_offerings(self, offering_ids: list[UUID]) -> list[MaterialRequest]:
         if not offering_ids:
             return []
         return (

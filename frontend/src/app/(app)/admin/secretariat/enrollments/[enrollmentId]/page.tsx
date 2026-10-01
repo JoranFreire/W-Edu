@@ -47,7 +47,7 @@ const financeTab: TabItem<FileTab> = { id: 'finance', label: 'Financeiro', icon:
 export default function EnrollmentFilePage() {
   const router = useRouter();
   const terms = useTerminology();
-  const enrollmentId = Number(useParams<{ enrollmentId: string }>().enrollmentId);
+  const enrollmentId = useParams<{ enrollmentId: string }>().enrollmentId;
   const role = useAuthStore((state) => state.student?.role);
   const canDecide = isAdminRole(role) || role === 'coordinator';
   // Bolsas, descontos e extrato: administracao e secretaria (a coordenacao nao ve o financeiro).

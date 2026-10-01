@@ -1,5 +1,8 @@
 """Requisitos de conclusao alem das disciplinas: atividades complementares, estagio e TCC."""
 
+from uuid import UUID
+
+from app.core.ids import new_id
 from datetime import date, datetime, timezone
 import enum
 
@@ -47,8 +50,8 @@ class ComplementaryActivity(TenantMixin, Base):
 
     __tablename__ = "complementary_activities"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    program_enrollment_id: Mapped[int] = mapped_column(ForeignKey("program_enrollments.id"), index=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
+    program_enrollment_id: Mapped[UUID] = mapped_column(ForeignKey("program_enrollments.id"), index=True)
     category: Mapped[ActivityCategory] = mapped_column(SAEnum(ActivityCategory), default=ActivityCategory.other)
     title: Mapped[str] = mapped_column(String(200))
     description: Mapped[str | None] = mapped_column(Text)
@@ -57,7 +60,7 @@ class ComplementaryActivity(TenantMixin, Base):
     hours_approved: Mapped[int | None] = mapped_column(Integer)
     status: Mapped[ReviewStatus] = mapped_column(SAEnum(ReviewStatus), default=ReviewStatus.submitted)
     decision_note: Mapped[str | None] = mapped_column(Text)
-    decided_by_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"))
+    decided_by_id: Mapped[UUID | None] = mapped_column(ForeignKey("users.id"))
     decided_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
@@ -69,11 +72,11 @@ class Internship(TenantMixin, Base):
 
     __tablename__ = "internships"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    program_enrollment_id: Mapped[int] = mapped_column(ForeignKey("program_enrollments.id"), index=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
+    program_enrollment_id: Mapped[UUID] = mapped_column(ForeignKey("program_enrollments.id"), index=True)
     company_name: Mapped[str] = mapped_column(String(200))
     supervisor_name: Mapped[str | None] = mapped_column(String(200))   # supervisor na concedente
-    advisor_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), index=True)  # orientador
+    advisor_id: Mapped[UUID | None] = mapped_column(ForeignKey("users.id"), index=True)  # orientador
     # Obrigatorio conta para a carga de estagio do programa; nao obrigatorio e so registro.
     is_mandatory: Mapped[bool] = mapped_column(Boolean, default=True)
     agreement_number: Mapped[str | None] = mapped_column(String(80))   # termo de compromisso
@@ -96,13 +99,13 @@ class InternshipLog(TenantMixin, Base):
 
     __tablename__ = "internship_logs"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    internship_id: Mapped[int] = mapped_column(ForeignKey("internships.id", ondelete="CASCADE"), index=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
+    internship_id: Mapped[UUID] = mapped_column(ForeignKey("internships.id", ondelete="CASCADE"), index=True)
     worked_on: Mapped[date] = mapped_column(Date)
     hours: Mapped[int] = mapped_column(Integer)
     activities: Mapped[str] = mapped_column(Text)
     status: Mapped[ReviewStatus] = mapped_column(SAEnum(ReviewStatus), default=ReviewStatus.submitted)
-    reviewed_by_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"))
+    reviewed_by_id: Mapped[UUID | None] = mapped_column(ForeignKey("users.id"))
     reviewed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
@@ -114,10 +117,10 @@ class FinalProject(TenantMixin, Base):
 
     __tablename__ = "final_projects"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    program_enrollment_id: Mapped[int] = mapped_column(ForeignKey("program_enrollments.id"), index=True, unique=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
+    program_enrollment_id: Mapped[UUID] = mapped_column(ForeignKey("program_enrollments.id"), index=True, unique=True)
     title: Mapped[str] = mapped_column(String(300))
-    advisor_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), index=True)
+    advisor_id: Mapped[UUID | None] = mapped_column(ForeignKey("users.id"), index=True)
     co_advisor_name: Mapped[str | None] = mapped_column(String(200))
     status: Mapped[FinalProjectStatus] = mapped_column(SAEnum(FinalProjectStatus), default=FinalProjectStatus.in_progress)
     defense_on: Mapped[date | None] = mapped_column(Date)

@@ -8,7 +8,7 @@ import { endpoints } from '@/lib/api/endpoints';
 import type { ChatConversation } from '@/types/chat';
 
 export default function CourseChatSection({ courseId, courseName, initialConversation }: {
-  courseId: number;
+  courseId: string;
   courseName: string;
   initialConversation: ChatConversation | null;
 }) {

@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from sqlalchemy.orm import Session
 from app.models.course import Course, CourseModule, CoursePrerequisite, LearningPath, LearningPathCourse
 
@@ -6,7 +8,7 @@ class CourseRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def get_by_id(self, course_id: int) -> Course | None:
+    def get_by_id(self, course_id: UUID) -> Course | None:
         return self.db.get(Course, course_id)
 
     def list_all(self) -> list[Course]:
@@ -32,10 +34,10 @@ class CourseModuleRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def get_by_id(self, module_id: int) -> CourseModule | None:
+    def get_by_id(self, module_id: UUID) -> CourseModule | None:
         return self.db.get(CourseModule, module_id)
 
-    def list_by_course(self, course_id: int) -> list[CourseModule]:
+    def list_by_course(self, course_id: UUID) -> list[CourseModule]:
         return (
             self.db.query(CourseModule)
             .filter(CourseModule.course_id == course_id)
@@ -63,7 +65,7 @@ class LearningPathRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def get_by_id(self, path_id: int) -> LearningPath | None:
+    def get_by_id(self, path_id: UUID) -> LearningPath | None:
         return self.db.get(LearningPath, path_id)
 
     def list_all(self) -> list[LearningPath]:
@@ -90,7 +92,7 @@ class LearningPathRepository:
         self.db.refresh(path_course)
         return path_course
 
-    def list_courses(self, path_id: int) -> list[LearningPathCourse]:
+    def list_courses(self, path_id: UUID) -> list[LearningPathCourse]:
         return (
             self.db.query(LearningPathCourse)
             .filter(LearningPathCourse.learning_path_id == path_id)
@@ -102,7 +104,7 @@ class LearningPathRepository:
         self.db.delete(link)
         self.db.commit()
 
-    def get_course_link(self, path_id: int, course_id: int) -> LearningPathCourse | None:
+    def get_course_link(self, path_id: UUID, course_id: UUID) -> LearningPathCourse | None:
         return (
             self.db.query(LearningPathCourse)
             .filter(LearningPathCourse.learning_path_id == path_id, LearningPathCourse.course_id == course_id)
@@ -114,7 +116,7 @@ class CoursePrerequisiteRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def list_by_course(self, course_id: int) -> list[CoursePrerequisite]:
+    def list_by_course(self, course_id: UUID) -> list[CoursePrerequisite]:
         return (
             self.db.query(CoursePrerequisite)
             .filter(CoursePrerequisite.course_id == course_id)
@@ -127,7 +129,7 @@ class CoursePrerequisiteRepository:
         self.db.refresh(prerequisite)
         return prerequisite
 
-    def get_link(self, course_id: int, prerequisite_course_id: int) -> CoursePrerequisite | None:
+    def get_link(self, course_id: UUID, prerequisite_course_id: UUID) -> CoursePrerequisite | None:
         return (
             self.db.query(CoursePrerequisite)
             .filter(

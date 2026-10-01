@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -23,7 +25,7 @@ def list_all_students(db: Session = Depends(get_db), current: Student = Depends(
 
 
 @router.get("/users/{student_id}/dossier", response_model=UserDossier)
-def user_dossier(student_id: int, db: Session = Depends(get_db), current: Student = Depends(get_current_academic_staff)):
+def user_dossier(student_id: UUID, db: Session = Depends(get_db), current: Student = Depends(get_current_academic_staff)):
     return UserDossierService(db).build(current, student_id)
 
 
@@ -42,7 +44,7 @@ def create_student(data: StudentCreate, db: Session = Depends(get_db), current: 
 @router.patch("/students/{student_id}", response_model=StudentOut)
 @router.patch("/users/{student_id}", response_model=StudentOut)
 def update_student(
-    student_id: int,
+    student_id: UUID,
     data: StudentUpdate,
     db: Session = Depends(get_db),
     current: Student = Depends(get_current_academic_staff),
@@ -60,6 +62,6 @@ def update_student(
 
 @router.delete("/students/{student_id}", status_code=204)
 @router.delete("/users/{student_id}", status_code=204)
-def delete_student(student_id: int, db: Session = Depends(get_db), current: Student = Depends(get_current_admin)):
+def delete_student(student_id: UUID, db: Session = Depends(get_db), current: Student = Depends(get_current_admin)):
     ensure_super_admin_boundary(current, target=StudentService(db).get_or_404(student_id))
     StudentService(db).delete(student_id)

@@ -10,8 +10,8 @@ import type { CertificateEligibility, CertificateIssueResult } from '@/types/cer
 /** Escolha do aluno, verificacao de elegibilidade e emissao. */
 export default function CertificateIssuer({ enrolledStudents, onCheckEligibility, onIssue }: {
   enrolledStudents: Student[];
-  onCheckEligibility: (studentId: number) => Promise<CertificateEligibility>;
-  onIssue: (studentId: number) => Promise<CertificateIssueResult>;
+  onCheckEligibility: (studentId: string) => Promise<CertificateEligibility>;
+  onIssue: (studentId: string) => Promise<CertificateIssueResult>;
 }) {
   const [studentId, setStudentId] = useState('');
   const [eligibility, setEligibility] = useState<CertificateEligibility | null>(null);
@@ -23,13 +23,13 @@ export default function CertificateIssuer({ enrolledStudents, onCheckEligibility
 
   const check = async () => {
     if (!studentId) return;
-    try { setEligibility(await onCheckEligibility(Number(studentId))); } catch { toast.error('Erro ao verificar elegibilidade.'); }
+    try { setEligibility(await onCheckEligibility(studentId)); } catch { toast.error('Erro ao verificar elegibilidade.'); }
   };
 
   const issue = async () => {
     if (!studentId) return;
     try {
-      const result = await onIssue(Number(studentId));
+      const result = await onIssue(studentId);
       toast.success(`Certificado emitido: ${result.validation_code}`);
       selectStudent('');
     } catch (error) {

@@ -1,5 +1,8 @@
 """Planos SaaS da plataforma: o super admin cobra cada instituicao pelo plano contratado (tabelas globais, sem tenant)."""
 
+from uuid import UUID
+
+from app.core.ids import new_id
 from datetime import date, datetime, timezone
 import enum
 
@@ -29,7 +32,7 @@ class PlatformInvoiceStatus(str, enum.Enum):
 class SaasPlan(Base):
     __tablename__ = "saas_plans"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
     name: Mapped[str] = mapped_column(String(120), unique=True)
     description: Mapped[str | None] = mapped_column(Text)
     monthly_price_cents: Mapped[int] = mapped_column(Integer)
@@ -44,9 +47,9 @@ class InstitutionSubscription(Base):
 
     __tablename__ = "institution_subscriptions"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    institution_id: Mapped[int] = mapped_column(ForeignKey("institutions.id"), unique=True, index=True)
-    plan_id: Mapped[int] = mapped_column(ForeignKey("saas_plans.id"), index=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
+    institution_id: Mapped[UUID] = mapped_column(ForeignKey("institutions.id"), unique=True, index=True)
+    plan_id: Mapped[UUID] = mapped_column(ForeignKey("saas_plans.id"), index=True)
     status: Mapped[SaasSubscriptionStatus] = mapped_column(SAEnum(SaasSubscriptionStatus), default=SaasSubscriptionStatus.trial)
     started_on: Mapped[date] = mapped_column(Date)
     trial_ends_on: Mapped[date | None] = mapped_column(Date)
@@ -61,9 +64,9 @@ class PlatformInvoice(Base):
     __tablename__ = "platform_invoices"
     __table_args__ = (UniqueConstraint("subscription_id", "period_start"),)
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    institution_id: Mapped[int] = mapped_column(ForeignKey("institutions.id"), index=True)
-    subscription_id: Mapped[int] = mapped_column(ForeignKey("institution_subscriptions.id"), index=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
+    institution_id: Mapped[UUID] = mapped_column(ForeignKey("institutions.id"), index=True)
+    subscription_id: Mapped[UUID] = mapped_column(ForeignKey("institution_subscriptions.id"), index=True)
     plan_name: Mapped[str] = mapped_column(String(120))
     period_start: Mapped[date] = mapped_column(Date)
     period_end: Mapped[date] = mapped_column(Date)

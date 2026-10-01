@@ -1,5 +1,7 @@
 """Movimentacoes da matricula: rematricula, trancamento, reativacao, cancelamento e transferencias."""
 
+from uuid import UUID
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -28,7 +30,7 @@ router = APIRouter(prefix="/enrollments/{enrollment_id}")
 
 def _status_change(target: ProgramEnrollmentStatus):
     def change(
-        enrollment_id: int,
+        enrollment_id: UUID,
         data: ReasonInput,
         db: Session = Depends(get_db),
         current: Student = Depends(get_current_secretariat),
@@ -48,14 +50,14 @@ for path, target in (
 
 
 @router.post("/transfer-out", response_model=ProgramEnrollmentOut)
-def transfer_out(enrollment_id: int, data: TransferOutInput, db: Session = Depends(get_db), current: Student = Depends(get_current_secretariat)):
+def transfer_out(enrollment_id: UUID, data: TransferOutInput, db: Session = Depends(get_db), current: Student = Depends(get_current_secretariat)):
     EnrollmentLifecycleService(db).transfer_out(enrollment_id, data.destination, data.reason, current.id)
     return ProgramEnrollmentService(db).get_or_404(enrollment_id)
 
 
 @router.post("/transfer-internal", response_model=ProgramEnrollmentOut, status_code=201)
 def transfer_internal(
-    enrollment_id: int,
+    enrollment_id: UUID,
     data: InternalTransferInput,
     db: Session = Depends(get_db),
     current: Student = Depends(get_current_secretariat),
@@ -65,7 +67,7 @@ def transfer_internal(
 
 @router.post("/change-curriculum", response_model=ProgramEnrollmentOut)
 def change_curriculum(
-    enrollment_id: int,
+    enrollment_id: UUID,
     data: CurriculumChangeInput,
     db: Session = Depends(get_db),
     current: Student = Depends(get_current_secretariat),
@@ -75,21 +77,21 @@ def change_curriculum(
 
 
 @router.get("/registrations", response_model=list[TermRegistrationOut])
-def list_registrations(enrollment_id: int, db: Session = Depends(get_db), _: Student = Depends(get_current_secretariat)):
+def list_registrations(enrollment_id: UUID, db: Session = Depends(get_db), _: Student = Depends(get_current_secretariat)):
     return ReenrollmentService(db).list(enrollment_id)
 
 
 @router.post("/registrations", response_model=TermRegistrationOut, status_code=201)
-def reenroll(enrollment_id: int, data: ReenrollInput, db: Session = Depends(get_db), current: Student = Depends(get_current_secretariat)):
+def reenroll(enrollment_id: UUID, data: ReenrollInput, db: Session = Depends(get_db), current: Student = Depends(get_current_secretariat)):
     return ReenrollmentService(db).reenroll(enrollment_id, data, current.id)
 
 
 @router.get("/events", response_model=list[EnrollmentEventOut])
-def list_events(enrollment_id: int, db: Session = Depends(get_db), _: Student = Depends(get_current_secretariat)):
+def list_events(enrollment_id: UUID, db: Session = Depends(get_db), _: Student = Depends(get_current_secretariat)):
     EnrollmentLifecycleService(db).get_or_404(enrollment_id)
     return EnrollmentEventRecorder(db).list(enrollment_id)
 
 
 @router.get("", response_model=ProgramEnrollmentOut)
-def get_enrollment(enrollment_id: int, db: Session = Depends(get_db), _: Student = Depends(get_current_secretariat)):
+def get_enrollment(enrollment_id: UUID, db: Session = Depends(get_db), _: Student = Depends(get_current_secretariat)):
     return ProgramEnrollmentService(db).get_or_404(enrollment_id)

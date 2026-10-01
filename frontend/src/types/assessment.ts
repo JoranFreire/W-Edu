@@ -10,7 +10,7 @@ export interface ConceptBand {
 }
 
 export interface GradingScheme {
-  id: number | null;
+  id: string | null;
   name: string;
   scale: GradingScale;
   min_value: number;
@@ -24,39 +24,39 @@ export interface GradingScheme {
 }
 
 export interface TeachingOffering {
-  id: number;
+  id: string;
   name: string;
-  course_id: number;
-  instructor_id: number | null;
-  term_id: number | null;
-  subject_id: number | null;
-  class_group_id: number | null;
-  grading_scheme_id: number | null;
+  course_id: string;
+  instructor_id: string | null;
+  term_id: string | null;
+  subject_id: string | null;
+  class_group_id: string | null;
+  grading_scheme_id: string | null;
   starts_at: string;
   ends_at: string;
 }
 
 export interface AssessmentItem {
-  id: number;
-  class_offering_id: number;
-  grading_period_id: number | null;
+  id: string;
+  class_offering_id: string;
+  grading_period_id: string | null;
   name: string;
   kind: AssessmentKind;
   weight: number;
   max_score: number;
-  quiz_id: number | null;
+  quiz_id: string | null;
   due_on: string | null;
 }
 
 export interface GradeRow {
-  class_enrollment_id: number;
+  class_enrollment_id: string;
   student: PersonSummary;
   score: number | null;
   notes: string | null;
 }
 
 export interface GradebookRow {
-  class_enrollment_id: number;
+  class_enrollment_id: string;
   student: PersonSummary;
   scores: Record<string, number | null>;
   period_averages: Record<string, number | null>;
@@ -68,25 +68,25 @@ export interface GradebookRow {
 
 export interface Gradebook {
   scheme: GradingScheme;
-  periods: { id: number | null; name: string; status: string }[];
+  periods: { id: string | null; name: string; status: string }[];
   items: AssessmentItem[];
   rows: GradebookRow[];
   total_lessons: number;
 }
 
 export interface DiaryEntry {
-  id: number;
-  class_offering_id: number;
+  id: string;
+  class_offering_id: string;
   date: string;
   lesson_count: number;
   content_taught: string;
-  instructor_id: number | null;
-  scheduled_meeting_id: number | null;
+  instructor_id: string | null;
+  scheduled_meeting_id: string | null;
   locked: boolean;
 }
 
 export interface DiaryAttendanceRow {
-  class_enrollment_id: number;
+  class_enrollment_id: string;
   student: PersonSummary;
   absences: number;
   justified: boolean;
@@ -96,13 +96,13 @@ export interface DiaryAttendanceRow {
 export type ClassEnrollmentResult = 'in_progress' | 'recovery' | 'approved' | 'failed' | 'failed_attendance';
 
 export interface PeriodResult {
-  grading_period_id: number;
+  grading_period_id: string;
   average: number | null;
   absences: number;
 }
 
 export interface FinalResultRow {
-  class_enrollment_id: number;
+  class_enrollment_id: string;
   student: PersonSummary;
   periods: PeriodResult[];
   average: number | null;
@@ -114,14 +114,14 @@ export interface FinalResultRow {
 
 export interface OfferingResults {
   scheme: GradingScheme;
-  closed_period_ids: number[];
-  pending_period_ids: number[];
+  closed_period_ids: string[];
+  pending_period_ids: string[];
   finalized: boolean;
   rows: FinalResultRow[];
 }
 
 export interface ReportCardEntry {
-  class_offering_id: number;
+  class_offering_id: string;
   offering_name: string;
   periods: { name: string; average: number | null; absences: number }[];
   final_grade: number | null;

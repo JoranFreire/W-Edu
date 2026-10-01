@@ -9,18 +9,18 @@ export default function ClassOfferingsList({ classes, courses, rooms, meetings, 
   classes: ClassOffering[];
   courses: Course[];
   rooms: Room[];
-  meetings: Record<number, ScheduledMeeting[]>;
-  attendance: Record<number, AttendanceRecord[]>;
-  attendanceReports: Record<number, MeetingAttendanceReportRow[]>;
-  summaries: Record<number, MeetingAttendanceSummary>;
+  meetings: Record<string, ScheduledMeeting[]>;
+  attendance: Record<string, AttendanceRecord[]>;
+  attendanceReports: Record<string, MeetingAttendanceReportRow[]>;
+  summaries: Record<string, MeetingAttendanceSummary>;
   onCreateMeeting: (cls: ClassOffering) => void;
-  onLoadMeetings: (classId: number) => void;
+  onLoadMeetings: (classId: string) => void;
   onGenerateCheckin: (meeting: ScheduledMeeting) => void;
-  onLoadAttendance: (meetingId: number) => void;
-  onLoadAttendanceReport: (meetingId: number) => void;
-  onMarkAttendance: (meeting: ScheduledMeeting, studentId: number, status: AttendanceStatus) => void;
-  onSavePracticalAssessment: (meeting: ScheduledMeeting, studentId: number, score: number, feedback: string | null) => void;
-  onLoadSummary: (meetingId: number) => void;
+  onLoadAttendance: (meetingId: string) => void;
+  onLoadAttendanceReport: (meetingId: string) => void;
+  onMarkAttendance: (meeting: ScheduledMeeting, studentId: string, status: AttendanceStatus) => void;
+  onSavePracticalAssessment: (meeting: ScheduledMeeting, studentId: string, score: number, feedback: string | null) => void;
+  onLoadSummary: (meetingId: string) => void;
   onCloseMeeting: (meeting: ScheduledMeeting) => void;
   /** Horario semanal, so para ofertas de disciplina. */
   onEditSlots?: (cls: ClassOffering) => void;

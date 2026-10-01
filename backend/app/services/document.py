@@ -1,3 +1,4 @@
+from uuid import UUID
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -24,7 +25,7 @@ class DocumentService:
         documents = self.repo.list_all()
         return [document for document in documents if self._can_access(current, document)]
 
-    def get_document(self, document_id: int, current: Student) -> Document:
+    def get_document(self, document_id: UUID, current: Student) -> Document:
         document = self.repo.get_by_id(document_id)
         if not document or not self._can_access(current, document):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Documento não encontrado")
@@ -47,7 +48,7 @@ class DocumentService:
             self._add_version(document, current, file=file, version_data=version_data)
         return self.repo.get_by_id(document.id) or document
 
-    def update_document(self, document_id: int, data: DocumentUpdate, current: Student) -> Document:
+    def update_document(self, document_id: UUID, data: DocumentUpdate, current: Student) -> Document:
         document = self.get_document(document_id, current)
         payload = data.model_dump(exclude_none=True)
         merged = DocumentCreate(
@@ -70,7 +71,7 @@ class DocumentService:
 
     def add_version(
         self,
-        document_id: int,
+        document_id: UUID,
         current: Student,
         file: UploadFile | None = None,
         version_data: DocumentVersionCreate | None = None,
@@ -78,11 +79,11 @@ class DocumentService:
         document = self.get_document(document_id, current)
         return self._add_version(document, current, file=file, version_data=version_data)
 
-    def list_versions(self, document_id: int, current: Student) -> list[DocumentVersion]:
+    def list_versions(self, document_id: UUID, current: Student) -> list[DocumentVersion]:
         document = self.get_document(document_id, current)
         return self.version_repo.list_by_document(document.id)
 
-    def download(self, document_id: int, version_id: int | None, current: Student):
+    def download(self, document_id: UUID, version_id: UUID | None, current: Student):
         document = self.get_document(document_id, current)
         version = self._resolve_version(document, version_id)
         return self._download_version(version)
@@ -128,7 +129,7 @@ class DocumentService:
         self.repo.update(document)
         return version
 
-    def _resolve_version(self, document: Document, version_id: int | None) -> DocumentVersion:
+    def _resolve_version(self, document: Document, version_id: UUID | None) -> DocumentVersion:
         if version_id is not None:
             version = self.version_repo.get_by_id(version_id)
             if not version or version.document_id != document.id:

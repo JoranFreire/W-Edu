@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from collections import defaultdict
 
@@ -14,7 +15,7 @@ from app.services.assessment.schemes import GradingSchemeService
 NO_PERIOD = "none"
 
 
-def period_key(period_id: int | None) -> str:
+def period_key(period_id: UUID | None) -> str:
     return str(period_id) if period_id is not None else NO_PERIOD
 
 
@@ -29,9 +30,9 @@ class OfferingScores:
         for item in self.items:
             self.items_by_period[period_key(item.grading_period_id)].append(item)
 
-    def score(self, item_id: int, enrollment_id: int) -> float | None:
+    def score(self, item_id: UUID, enrollment_id: UUID) -> float | None:
         return self.scores.get((item_id, enrollment_id))
 
-    def period_average(self, enrollment_id: int, key: str) -> float | None:
+    def period_average(self, enrollment_id: UUID, key: str) -> float | None:
         scored = [ScoredItem(self.score(item.id, enrollment_id), item.max_score, item.weight) for item in self.items_by_period.get(key, [])]
         return average(scored, self.scheme.formula, self.scheme.min_value, self.scheme.max_value)

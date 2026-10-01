@@ -1,3 +1,4 @@
+from uuid import UUID
 from datetime import datetime
 
 from pydantic import BaseModel, EmailStr, Field
@@ -10,7 +11,7 @@ SLUG_PATTERN = r"^[a-z0-9]+(?:-[a-z0-9]+)*$"
 
 
 class InstitutionSummary(BaseModel):
-    id: int
+    id: UUID
     slug: str
     name: str
     type: InstitutionType
@@ -82,8 +83,8 @@ class CampusUpdate(BaseModel):
 
 
 class CampusOut(BaseModel):
-    id: int
-    institution_id: int
+    id: UUID
+    institution_id: UUID
     name: str
     address: str | None
     is_active: bool

@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from sqlalchemy.orm import Session
 
@@ -18,7 +19,7 @@ class FundingSourceService:
     def list(self) -> list[FundingSource]:
         return self.repo.list()
 
-    def get_or_404(self, funding_id: int) -> FundingSource:
+    def get_or_404(self, funding_id: UUID) -> FundingSource:
         funding = self.repo.get_by_id(funding_id)
         if not funding:
             raise not_found("Financiador não encontrado")
@@ -29,7 +30,7 @@ class FundingSourceService:
         self._validate(funding)
         return self.repo.save(funding)
 
-    def update(self, funding_id: int, data: FundingSourceUpdate) -> FundingSource:
+    def update(self, funding_id: UUID, data: FundingSourceUpdate) -> FundingSource:
         funding = self.get_or_404(funding_id)
         apply_patch(funding, data, clearable=frozenset({"agreement_number", "amount_cents", "ends_on", "notes"}))
         self._validate(funding)

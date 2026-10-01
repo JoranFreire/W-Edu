@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from datetime import datetime, timezone
 
@@ -50,13 +51,13 @@ class AdmissionCallService:
         counts = self.applications.count_by_call([call.id for call in calls])
         return [to_out(call, counts.get(call.id, 0)) for call in calls]
 
-    def get_or_404(self, call_id: int) -> AdmissionCall:
+    def get_or_404(self, call_id: UUID) -> AdmissionCall:
         call = self.repo.get_by_id(call_id)
         if not call:
             raise not_found("Edital não encontrado")
         return call
 
-    def detail(self, call_id: int) -> AdmissionCallOut:
+    def detail(self, call_id: UUID) -> AdmissionCallOut:
         call = self.get_or_404(call_id)
         return to_out(call, self.applications.count_by_call([call.id]).get(call.id, 0))
 
@@ -70,7 +71,7 @@ class AdmissionCallService:
         self._validate_window(call)
         return to_out(self.repo.save(call))
 
-    def update(self, call_id: int, data: AdmissionCallUpdate) -> AdmissionCallOut:
+    def update(self, call_id: UUID, data: AdmissionCallUpdate) -> AdmissionCallOut:
         call = self.get_or_404(call_id)
         if call.status == AdmissionCallStatus.selected:
             raise conflict("Resultado já publicado")
@@ -78,7 +79,7 @@ class AdmissionCallService:
         self._validate_window(call)
         return self.detail(self.repo.save(call).id)
 
-    def change_status(self, call_id: int, status: AdmissionCallStatus) -> AdmissionCallOut:
+    def change_status(self, call_id: UUID, status: AdmissionCallStatus) -> AdmissionCallOut:
         call = self.get_or_404(call_id)
         if status not in TRANSITIONS.get(call.status, set()):
             raise conflict("Mudança de situação não permitida")

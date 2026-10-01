@@ -1,3 +1,4 @@
+from uuid import UUID
 from datetime import date
 
 from fastapi import APIRouter, Depends
@@ -15,7 +16,7 @@ router = APIRouter()
 
 
 @router.get("/enrollments/{enrollment_id}/charges", response_model=list[TuitionChargeOut])
-def enrollment_statement(enrollment_id: int, db: Session = Depends(get_db), _: Student = Depends(get_current_finance_staff)):
+def enrollment_statement(enrollment_id: UUID, db: Session = Depends(get_db), _: Student = Depends(get_current_finance_staff)):
     return TuitionStatementService(db).for_enrollment(enrollment_id)
 
 
@@ -25,10 +26,10 @@ def my_statement(db: Session = Depends(get_db), current: Student = Depends(get_c
 
 
 @router.get("/charges/{charge_id}/quote", response_model=SettlementOut)
-def quote_charge(charge_id: int, on: date | None = None, db: Session = Depends(get_db), current: Student = Depends(get_current_student)):
+def quote_charge(charge_id: UUID, on: date | None = None, db: Session = Depends(get_db), current: Student = Depends(get_current_student)):
     return TuitionStatementService(db).quote_for(current, charge_id, on)
 
 
 @router.post("/charges/{charge_id}/settle", response_model=ChargeOut)
-def settle_charge(charge_id: int, data: SettleInput, db: Session = Depends(get_db), _: Student = Depends(get_current_admin)):
+def settle_charge(charge_id: UUID, data: SettleInput, db: Session = Depends(get_db), _: Student = Depends(get_current_admin)):
     return TuitionSettlementService(db).settle(charge_id, data.paid_on, data.payment_method)

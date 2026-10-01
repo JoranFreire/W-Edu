@@ -12,7 +12,7 @@ export default function ApprovalForm({ request, onApprove, onReject }: {
   onApprove: (body: unknown) => Promise<void>;
   onReject: (note: string) => Promise<void>;
 }) {
-  const [quantities, setQuantities] = useState<Record<number, string>>(
+  const [quantities, setQuantities] = useState<Record<string, string>>(
     Object.fromEntries(request.lines.map((line) => [line.id, String(line.quantity_requested)])),
   );
   const [due, setDue] = useState(request.needed_on);

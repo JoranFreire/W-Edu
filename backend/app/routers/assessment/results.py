@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -11,28 +13,28 @@ router = APIRouter()
 
 
 @router.post("/offerings/{offering_id}/periods/{period_id}/close", response_model=PeriodClosureOut)
-def close_period(offering_id: int, period_id: int, db: Session = Depends(get_db), current: Student = Depends(get_current_teaching_staff)):
+def close_period(offering_id: UUID, period_id: UUID, db: Session = Depends(get_db), current: Student = Depends(get_current_teaching_staff)):
     return PeriodClosureService(db).close(offering_id, period_id, current)
 
 
 @router.delete("/offerings/{offering_id}/periods/{period_id}/close", status_code=204)
-def reopen_period(offering_id: int, period_id: int, db: Session = Depends(get_db), current: Student = Depends(get_current_admin_or_coordinator)):
+def reopen_period(offering_id: UUID, period_id: UUID, db: Session = Depends(get_db), current: Student = Depends(get_current_admin_or_coordinator)):
     PeriodClosureService(db).reopen(offering_id, period_id, current)
 
 
 @router.get("/offerings/{offering_id}/results", response_model=OfferingResultsOut)
-def get_results(offering_id: int, db: Session = Depends(get_db), current: Student = Depends(get_current_teaching_staff)):
+def get_results(offering_id: UUID, db: Session = Depends(get_db), current: Student = Depends(get_current_teaching_staff)):
     return FinalResultService(db).overview(offering_id, current)
 
 
 @router.post("/offerings/{offering_id}/results/compute", response_model=OfferingResultsOut)
-def compute_results(offering_id: int, db: Session = Depends(get_db), current: Student = Depends(get_current_teaching_staff)):
+def compute_results(offering_id: UUID, db: Session = Depends(get_db), current: Student = Depends(get_current_teaching_staff)):
     return FinalResultService(db).compute(offering_id, current)
 
 
 @router.put("/offerings/{offering_id}/recovery", response_model=OfferingResultsOut)
 def save_recovery(
-    offering_id: int,
+    offering_id: UUID,
     data: list[RecoveryInput],
     db: Session = Depends(get_db),
     current: Student = Depends(get_current_teaching_staff),
@@ -41,7 +43,7 @@ def save_recovery(
 
 
 @router.post("/offerings/{offering_id}/finalize", response_model=OfferingResultsOut)
-def finalize_offering(offering_id: int, db: Session = Depends(get_db), current: Student = Depends(get_current_admin_or_coordinator)):
+def finalize_offering(offering_id: UUID, db: Session = Depends(get_db), current: Student = Depends(get_current_admin_or_coordinator)):
     return FinalResultService(db).finalize(offering_id, current)
 
 

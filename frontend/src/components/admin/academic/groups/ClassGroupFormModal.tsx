@@ -40,13 +40,13 @@ export default function ClassGroupFormModal({ group, programs, terms, teachers, 
   const submit = (event: React.FormEvent) => {
     event.preventDefault();
     const input: ClassGroupInput = {
-      program_id: Number(form.program_id),
-      term_id: Number(form.term_id),
+      program_id: form.program_id,
+      term_id: form.term_id,
       name: form.name,
       curriculum_term_number: toOptionalInt(form.curriculum_term_number),
       shift: form.shift,
       capacity: toOptionalInt(form.capacity),
-      homeroom_teacher_id: form.homeroom_teacher_id ? Number(form.homeroom_teacher_id) : null,
+      homeroom_teacher_id: form.homeroom_teacher_id ? form.homeroom_teacher_id : null,
     };
     run(() => onSave(input)).catch((error) => toast.error(apiErrorMessage(error, 'Erro ao salvar turma.')));
   };

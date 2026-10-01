@@ -7,7 +7,7 @@ import { applicationStatusLabels, selectionMethodLabels } from '@/lib/academic/a
 import { usePublicCall } from '@/lib/hooks/admissions/usePublicCall';
 
 function Result() {
-  const callId = Number(useParams<{ callId: string }>().callId);
+  const callId = useParams<{ callId: string }>().callId;
   const { result, call } = usePublicCall(callId, useSearchParams().get('institution'));
   if (!call) return <p className="text-sm text-gray-500 dark:text-gray-400">Carregando...</p>;
   if (!result) return <p className="text-sm text-gray-500 dark:text-gray-400">Resultado ainda não publicado.</p>;

@@ -11,7 +11,7 @@ import LessonModal from './LessonModal';
 import VideoUploadButton from './VideoUploadButton';
 
 interface Props {
-  courseId: number;
+  courseId: string;
   lessons: Lesson[];
   modules: CourseModule[];
   canDelete: boolean;
@@ -21,7 +21,7 @@ interface Props {
 export default function LessonsPanel({ courseId, lessons, modules, canDelete, onChanged }: Props) {
   const [lessonModal, setLessonModal] = useState<{ open: boolean; lesson?: Lesson }>({ open: false });
   const [lessonToDelete, setLessonToDelete] = useState<Lesson | null>(null);
-  const [openSubmissionsLessonId, setOpenSubmissionsLessonId] = useState<number | null>(null);
+  const [openSubmissionsLessonId, setOpenSubmissionsLessonId] = useState<string | null>(null);
 
   const saveLesson = async (data: Partial<Lesson>) => {
     try {

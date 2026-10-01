@@ -9,9 +9,9 @@ export default function LearningPathCard({ path, courses, pathCourses, canDelete
   pathCourses: LearningPathCourse[];
   canDelete: boolean;
   onEdit: (path: LearningPath) => void;
-  onDelete: (id: number) => void;
-  onAddCourse: (pathId: number) => void;
-  onRemoveCourse: (pathId: number, courseId: number) => void;
+  onDelete: (id: string) => void;
+  onAddCourse: (pathId: string) => void;
+  onRemoveCourse: (pathId: string, courseId: string) => void;
 }) {
   return (
     <div className="rounded-xl border border-gray-200 bg-white p-5 dark:border-gray-700 dark:bg-gray-800">

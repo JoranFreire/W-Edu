@@ -8,7 +8,7 @@ import { useApiQuery } from '@/lib/hooks/useApiQuery';
 import type { AdmissionCall, AdmissionResult } from '@/types/admissions';
 
 /** Um edital publicado e, depois da selecao, o resultado por protocolo. */
-export function usePublicCall(callId: number, institution: string | null) {
+export function usePublicCall(callId: string, institution: string | null) {
   const request = useCallback(async () => {
     const headers = institutionHeaders(institution);
     const call = (await api.get<AdmissionCall>(endpoints.admissions.publicCall(callId), { headers })).data;

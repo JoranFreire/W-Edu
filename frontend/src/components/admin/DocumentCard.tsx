@@ -13,9 +13,9 @@ type VersionDraft = { notes: string; external_url: string; file: File | null };
 export default function DocumentCard({ document, draft, onUpdateStatus, onAddVersion, onDraftChange }: {
   document: Document;
   draft: VersionDraft;
-  onUpdateStatus: (id: number, status: DocumentStatus) => void;
-  onAddVersion: (id: number) => void;
-  onDraftChange: (id: number, draft: VersionDraft) => void;
+  onUpdateStatus: (id: string, status: DocumentStatus) => void;
+  onAddVersion: (id: string) => void;
+  onDraftChange: (id: string, draft: VersionDraft) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
   const [versionModalOpen, setVersionModalOpen] = useState(false);

@@ -1,3 +1,4 @@
+from uuid import UUID
 from datetime import datetime
 from pydantic import BaseModel, Field
 
@@ -7,19 +8,19 @@ from app.models.schedule import AttendanceMethod, AttendanceStatus, ClassEnrollm
 class LocationCreate(BaseModel):
     name: str
     address: str | None = None
-    campus_id: int | None = None
+    campus_id: UUID | None = None
 
 
 class LocationUpdate(BaseModel):
     name: str | None = None
     address: str | None = None
-    campus_id: int | None = None
+    campus_id: UUID | None = None
     is_active: bool | None = None
 
 
 class LocationOut(BaseModel):
-    id: int
-    campus_id: int | None
+    id: UUID
+    campus_id: UUID | None
     name: str
     address: str | None
     is_active: bool
@@ -29,14 +30,14 @@ class LocationOut(BaseModel):
 
 
 class RoomCreate(BaseModel):
-    location_id: int
+    location_id: UUID
     name: str
     capacity: int = Field(gt=0)
     resources: str | None = None
 
 
 class RoomUpdate(BaseModel):
-    location_id: int | None = None
+    location_id: UUID | None = None
     name: str | None = None
     capacity: int | None = Field(default=None, gt=0)
     resources: str | None = None
@@ -44,8 +45,8 @@ class RoomUpdate(BaseModel):
 
 
 class RoomOut(BaseModel):
-    id: int
-    location_id: int
+    id: UUID
+    location_id: UUID
     name: str
     capacity: int
     resources: str | None
@@ -56,57 +57,57 @@ class RoomOut(BaseModel):
 
 
 class ClassOfferingCreate(BaseModel):
-    course_id: int
+    course_id: UUID
     name: str
     starts_at: datetime
     ends_at: datetime
     capacity: int = Field(gt=0)
     status: ClassStatus = ClassStatus.draft
-    location_id: int | None = None
-    room_id: int | None = None
-    instructor_id: int | None = None
-    term_id: int | None = None
-    subject_id: int | None = None
-    class_group_id: int | None = None
-    grading_scheme_id: int | None = None
-    funding_source_id: int | None = None
+    location_id: UUID | None = None
+    room_id: UUID | None = None
+    instructor_id: UUID | None = None
+    term_id: UUID | None = None
+    subject_id: UUID | None = None
+    class_group_id: UUID | None = None
+    grading_scheme_id: UUID | None = None
+    funding_source_id: UUID | None = None
     max_absence_percent: float | None = Field(default=None, gt=0, le=100)
 
 
 class ClassOfferingUpdate(BaseModel):
-    course_id: int | None = None
+    course_id: UUID | None = None
     name: str | None = None
     starts_at: datetime | None = None
     ends_at: datetime | None = None
     capacity: int | None = Field(default=None, gt=0)
     status: ClassStatus | None = None
-    location_id: int | None = None
-    room_id: int | None = None
-    instructor_id: int | None = None
-    term_id: int | None = None
-    subject_id: int | None = None
-    class_group_id: int | None = None
-    grading_scheme_id: int | None = None
-    funding_source_id: int | None = None
+    location_id: UUID | None = None
+    room_id: UUID | None = None
+    instructor_id: UUID | None = None
+    term_id: UUID | None = None
+    subject_id: UUID | None = None
+    class_group_id: UUID | None = None
+    grading_scheme_id: UUID | None = None
+    funding_source_id: UUID | None = None
     max_absence_percent: float | None = Field(default=None, gt=0, le=100)
 
 
 class ClassOfferingOut(BaseModel):
-    id: int
-    course_id: int
+    id: UUID
+    course_id: UUID
     name: str
     starts_at: datetime
     ends_at: datetime
     capacity: int
     status: ClassStatus
-    location_id: int | None
-    room_id: int | None
-    instructor_id: int | None
-    term_id: int | None
-    subject_id: int | None
-    class_group_id: int | None
-    grading_scheme_id: int | None
-    funding_source_id: int | None = None
+    location_id: UUID | None
+    room_id: UUID | None
+    instructor_id: UUID | None
+    term_id: UUID | None
+    subject_id: UUID | None
+    class_group_id: UUID | None
+    grading_scheme_id: UUID | None
+    funding_source_id: UUID | None = None
     max_absence_percent: float | None = None
     created_at: datetime
 
@@ -114,9 +115,9 @@ class ClassOfferingOut(BaseModel):
 
 
 class ClassEnrollmentOut(BaseModel):
-    id: int
-    class_offering_id: int
-    student_id: int
+    id: UUID
+    class_offering_id: UUID
+    student_id: UUID
     status: ClassEnrollmentStatus
     enrolled_at: datetime
 
@@ -124,9 +125,9 @@ class ClassEnrollmentOut(BaseModel):
 
 
 class WaitlistEntryOut(BaseModel):
-    id: int
-    class_offering_id: int
-    student_id: int
+    id: UUID
+    class_offering_id: UUID
+    student_id: UUID
     position: int
     created_at: datetime
 
@@ -140,9 +141,9 @@ class ClassJoinOut(BaseModel):
 
 
 class ScheduledMeetingCreate(BaseModel):
-    class_offering_id: int
-    lesson_id: int | None = None
-    room_id: int | None = None
+    class_offering_id: UUID
+    lesson_id: UUID | None = None
+    room_id: UUID | None = None
     title: str
     starts_at: datetime
     ends_at: datetime
@@ -151,8 +152,8 @@ class ScheduledMeetingCreate(BaseModel):
 
 
 class ScheduledMeetingUpdate(BaseModel):
-    lesson_id: int | None = None
-    room_id: int | None = None
+    lesson_id: UUID | None = None
+    room_id: UUID | None = None
     title: str | None = None
     starts_at: datetime | None = None
     ends_at: datetime | None = None
@@ -161,10 +162,10 @@ class ScheduledMeetingUpdate(BaseModel):
 
 
 class ScheduledMeetingOut(BaseModel):
-    id: int
-    class_offering_id: int
-    lesson_id: int | None
-    room_id: int | None
+    id: UUID
+    class_offering_id: UUID
+    lesson_id: UUID | None
+    room_id: UUID | None
     title: str
     starts_at: datetime
     ends_at: datetime
@@ -178,7 +179,7 @@ class ScheduledMeetingOut(BaseModel):
 
 
 class InstructorAvailabilitySlotOut(BaseModel):
-    id: int
+    id: UUID
     day_of_week: int
     start_time: str
     end_time: str
@@ -188,12 +189,12 @@ class InstructorAvailabilitySlotOut(BaseModel):
 
 
 class InstructorAgendaMeetingOut(BaseModel):
-    id: int
-    class_offering_id: int
+    id: UUID
+    class_offering_id: UUID
     class_name: str
-    course_id: int
+    course_id: UUID
     course_name: str
-    room_id: int | None
+    room_id: UUID | None
     room_name: str | None
     title: str
     starts_at: datetime
@@ -205,11 +206,11 @@ class InstructorAgendaMeetingOut(BaseModel):
 class InstructorAgendaSuggestionOut(BaseModel):
     starts_at: datetime
     ends_at: datetime
-    availability_id: int
+    availability_id: UUID
 
 
 class InstructorAgendaOut(BaseModel):
-    instructor_id: int
+    instructor_id: UUID
     instructor_name: str
     range_start: datetime
     range_end: datetime
@@ -223,8 +224,8 @@ class CheckinTokenCreate(BaseModel):
 
 
 class CheckinTokenOut(BaseModel):
-    id: int
-    scheduled_meeting_id: int
+    id: UUID
+    scheduled_meeting_id: UUID
     token: str
     expires_at: datetime
     is_active: bool
@@ -234,17 +235,17 @@ class CheckinTokenOut(BaseModel):
 
 
 class AttendanceRecordCreate(BaseModel):
-    student_id: int
+    student_id: UUID
     status: AttendanceStatus = AttendanceStatus.present
     method: AttendanceMethod = AttendanceMethod.manual
     notes: str | None = None
 
 
 class AttendanceRecordOut(BaseModel):
-    id: int
-    scheduled_meeting_id: int
-    class_offering_id: int
-    student_id: int
+    id: UUID
+    scheduled_meeting_id: UUID
+    class_offering_id: UUID
+    student_id: UUID
     status: AttendanceStatus
     method: AttendanceMethod
     recorded_at: datetime
@@ -254,8 +255,8 @@ class AttendanceRecordOut(BaseModel):
 
 
 class MeetingAttendanceSummary(BaseModel):
-    meeting_id: int
-    class_offering_id: int
+    meeting_id: UUID
+    class_offering_id: UUID
     total_enrolled: int
     present: int
     late: int
@@ -264,7 +265,7 @@ class MeetingAttendanceSummary(BaseModel):
 
 
 class MeetingAttendanceReportRow(BaseModel):
-    student_id: int
+    student_id: UUID
     student_name: str
     student_email: str
     status: AttendanceStatus
@@ -278,21 +279,21 @@ class MeetingAttendanceReportRow(BaseModel):
 
 
 class PracticalAssessmentRecordCreate(BaseModel):
-    student_id: int
+    student_id: UUID
     score: int = Field(ge=0, le=100)
     status: PracticalAssessmentStatus = PracticalAssessmentStatus.reviewed
     feedback: str | None = None
 
 
 class PracticalAssessmentRecordOut(BaseModel):
-    id: int
-    scheduled_meeting_id: int
-    class_offering_id: int
-    student_id: int
+    id: UUID
+    scheduled_meeting_id: UUID
+    class_offering_id: UUID
+    student_id: UUID
     score: int
     status: PracticalAssessmentStatus
     feedback: str | None
     recorded_at: datetime
-    recorded_by_id: int | None
+    recorded_by_id: UUID | None
 
     model_config = {"from_attributes": True}

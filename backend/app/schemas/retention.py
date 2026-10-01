@@ -1,3 +1,4 @@
+from uuid import UUID
 from datetime import datetime
 from typing import Literal
 
@@ -8,7 +9,7 @@ from app.schemas.academic_groups import PersonSummary
 
 
 class RetentionRow(BaseModel):
-    class_enrollment_id: int
+    class_enrollment_id: UUID
     student: PersonSummary
     status: ClassEnrollmentStatus
     sessions: int
@@ -21,7 +22,7 @@ class RetentionRow(BaseModel):
 
 
 class RetentionReportOut(BaseModel):
-    class_offering_id: int
+    class_offering_id: UUID
     offering_name: str
     max_absence_percent: float | None
     rows: list[RetentionRow]

@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -22,7 +24,7 @@ def create_unit(data: AcademicUnitCreate, db: Session = Depends(get_db), _: Stud
 
 @router.patch("/{unit_id}", response_model=AcademicUnitOut)
 def update_unit(
-    unit_id: int,
+    unit_id: UUID,
     data: AcademicUnitUpdate,
     db: Session = Depends(get_db),
     _: Student = Depends(get_current_admin_or_coordinator),
@@ -31,5 +33,5 @@ def update_unit(
 
 
 @router.delete("/{unit_id}", status_code=204)
-def delete_unit(unit_id: int, db: Session = Depends(get_db), _: Student = Depends(get_current_admin)):
+def delete_unit(unit_id: UUID, db: Session = Depends(get_db), _: Student = Depends(get_current_admin)):
     AcademicUnitService(db).delete(unit_id)

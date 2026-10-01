@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -16,10 +18,10 @@ def public_calls(db: Session = Depends(get_db), _: Institution = Depends(get_pub
 
 
 @router.get("/{call_id}", response_model=AdmissionCallOut)
-def public_call(call_id: int, db: Session = Depends(get_db), _: Institution = Depends(get_public_institution)):
+def public_call(call_id: UUID, db: Session = Depends(get_db), _: Institution = Depends(get_public_institution)):
     return PublicAdmissionsService(db).detail(call_id)
 
 
 @router.get("/{call_id}/result", response_model=AdmissionResultOut)
-def public_result(call_id: int, db: Session = Depends(get_db), _: Institution = Depends(get_public_institution)):
+def public_result(call_id: UUID, db: Session = Depends(get_db), _: Institution = Depends(get_public_institution)):
     return PublicAdmissionsService(db).result(call_id)

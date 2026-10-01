@@ -27,6 +27,7 @@ import httpx
 import starlette.concurrency
 import starlette.routing
 
+from scripts.check_support import MISSING_ID, ApiClient  # noqa: E402
 import app.models  # noqa: F401
 from app.core.database import Base, SessionLocal, engine
 from app.core.security import hash_password
@@ -61,7 +62,7 @@ def seed() -> dict[str, int]:
             institution = Institution(slug=slug, name=slug.replace("-", " ").title(), type=InstitutionType.school)
             db.add(institution)
             db.flush()
-            ids[slug] = institution.id
+            ids[slug] = str(institution.id)
         users = (("root", UserRole.super_admin, ["escola-a"]), ("admin-a", UserRole.institution_admin, ["escola-a"]),
                  ("admin-b", UserRole.institution_admin, ["escola-b"]))
         for name, role, slugs in users:
@@ -111,7 +112,7 @@ async def check_subscription_and_seats(c: Checker, root: dict, admin_a: dict, id
     none = await c.call("GET", "/saas/current", 200, "no plan yet", admin_a)
     c.expect(none["subscription"] is None and none["usage"]["max_students"] is None, f"no subscription: {none}")
     await c.call("PUT", f"/saas/institutions/{a}/subscription", 409, "inactive plan", root, json={"plan_id": plans["retired"]})
-    await c.call("PUT", f"/saas/institutions/9999/subscription", 404, "unknown institution", root, json={"plan_id": plans["basic"]})
+    await c.call("PUT", f"/saas/institutions/{MISSING_ID}/subscription", 404, "unknown institution", root, json={"plan_id": plans["basic"]})
     await c.call("PUT", f"/saas/institutions/{a}/subscription", 403, "institution admin cannot subscribe", admin_a, json={"plan_id": plans["pro"]})
     subscription = await c.call("PUT", f"/saas/institutions/{a}/subscription", 200, "trial on basic", root,
                                 json={"plan_id": plans["basic"], "status": "trial", "started_on": "2027-01-01", "trial_ends_on": "2027-01-31"})
@@ -162,7 +163,7 @@ async def check_invoices(c: Checker, root: dict, admin_a: dict, ids: dict, plans
 async def run() -> int:
     ids = seed()
     transport = httpx.ASGITransport(app=app)
-    async with httpx.AsyncClient(transport=transport, base_url="http://testserver") as client:
+    async with ApiClient(transport=transport, base_url="http://testserver") as client:
         c = Checker(client)
         root, admin_a = await c.login("root@example.com"), await c.login("admin-a@example.com")
         plans = await check_catalog(c, root, admin_a)

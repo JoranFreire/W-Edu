@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from datetime import date
 
@@ -25,7 +26,7 @@ class OccurrenceService:
         self.scope = TeachingScopeRepository(db)
         self.notices = FamilyNoticeService(db)
 
-    def list_for_student(self, student_id: int, viewer: Student) -> list[StudentOccurrence]:
+    def list_for_student(self, student_id: UUID, viewer: Student) -> list[StudentOccurrence]:
         self.students.get_or_404(student_id)
         ensure_can_view_history(viewer, viewer.role == UserRole.instructor and self.scope.teaches_student(viewer.id, student_id))
         return self.repo.list_by_student(student_id)
@@ -42,7 +43,7 @@ class OccurrenceService:
         self.notices.occurrence_registered(occurrence)
         return self.repo.save(occurrence)
 
-    def remove(self, occurrence_id: int, user: Student) -> None:
+    def remove(self, occurrence_id: UUID, user: Student) -> None:
         occurrence = self.repo.get_by_id(occurrence_id)
         if not occurrence:
             raise not_found("Ocorrência não encontrada")

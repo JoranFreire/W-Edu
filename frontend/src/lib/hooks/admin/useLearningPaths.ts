@@ -9,7 +9,7 @@ import type { Course, LearningPath, LearningPathCourse } from '@/types/course';
 interface LearningPathsData {
   paths: LearningPath[];
   courses: Course[];
-  pathCourses: Record<number, LearningPathCourse[]>;
+  pathCourses: Record<string, LearningPathCourse[]>;
 }
 
 export interface LearningPathInput {
@@ -42,12 +42,12 @@ export function useLearningPaths() {
     ...data,
     loading,
     error,
-    savePath: withReload((pathId: number | null, input: LearningPathInput) =>
+    savePath: withReload((pathId: string | null, input: LearningPathInput) =>
       pathId ? api.patch(endpoints.learningPaths.detail(pathId), input) : api.post(endpoints.learningPaths.list, input)),
-    deletePath: withReload((pathId: number) => api.delete(endpoints.learningPaths.detail(pathId))),
-    addCourse: withReload((pathId: number, courseId: number) =>
+    deletePath: withReload((pathId: string) => api.delete(endpoints.learningPaths.detail(pathId))),
+    addCourse: withReload((pathId: string, courseId: string) =>
       api.post(endpoints.learningPaths.courses(pathId), { course_id: courseId, order: (data.pathCourses[pathId]?.length ?? 0) + 1 })),
-    removeCourse: withReload((pathId: number, courseId: number) =>
+    removeCourse: withReload((pathId: string, courseId: string) =>
       api.delete(`${endpoints.learningPaths.courses(pathId)}/${courseId}`)),
   };
 }

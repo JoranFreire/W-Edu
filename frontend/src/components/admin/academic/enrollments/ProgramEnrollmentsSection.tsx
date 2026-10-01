@@ -19,7 +19,7 @@ import ProgramEnrollmentFormModal from './ProgramEnrollmentFormModal';
 
 export default function ProgramEnrollmentsSection() {
   const labels = useTerminology();
-  const [programId, setProgramId] = useState<number | undefined>();
+  const [programId, setProgramId] = useState<string | undefined>();
   const [status, setStatus] = useState<ProgramEnrollmentStatus | undefined>();
   const { enrollments, error, create, changeStatus } = useProgramEnrollments({ program_id: programId, status });
   const { programs } = usePrograms();
@@ -48,7 +48,7 @@ export default function ProgramEnrollmentsSection() {
     <section className={`${sectionCls} space-y-4`}>
       <SectionHeader title="Matrículas" description={`Vínculo do aluno com o ${labels.program.toLowerCase()} e número de matrícula.`} actionLabel="Nova matrícula" onAction={() => setCreating(true)} />
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        <select aria-label="Filtrar por programa" value={programId ?? ''} onChange={(e) => setProgramId(e.target.value ? Number(e.target.value) : undefined)} className={inputCls}>
+        <select aria-label="Filtrar por programa" value={programId ?? ''} onChange={(e) => setProgramId(e.target.value || undefined)} className={inputCls}>
           <option value="">Todos os programas</option>
           {programs.map((program) => <option key={program.id} value={program.id}>{program.code} · {program.name}</option>)}
         </select>

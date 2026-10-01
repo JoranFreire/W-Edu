@@ -1,5 +1,8 @@
 """Secretaria academica: movimentacoes da matricula, rematricula e aproveitamento de estudos."""
 
+from uuid import UUID
+
+from app.core.ids import new_id
 from datetime import date, datetime, timezone
 import enum
 
@@ -49,13 +52,13 @@ class ProgramEnrollmentEvent(TenantMixin, Base):
 
     __tablename__ = "program_enrollment_events"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    program_enrollment_id: Mapped[int] = mapped_column(ForeignKey("program_enrollments.id"), index=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
+    program_enrollment_id: Mapped[UUID] = mapped_column(ForeignKey("program_enrollments.id"), index=True)
     kind: Mapped[EnrollmentEventKind] = mapped_column(SAEnum(EnrollmentEventKind))
-    term_id: Mapped[int | None] = mapped_column(ForeignKey("academic_terms.id"), index=True)
+    term_id: Mapped[UUID | None] = mapped_column(ForeignKey("academic_terms.id"), index=True)
     reason: Mapped[str | None] = mapped_column(Text)
     details: Mapped[dict] = mapped_column(JSON, default=dict)
-    created_by_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"))
+    created_by_id: Mapped[UUID | None] = mapped_column(ForeignKey("users.id"))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
 
@@ -65,12 +68,12 @@ class TermRegistration(TenantMixin, Base):
     __tablename__ = "term_registrations"
     __table_args__ = (UniqueConstraint("program_enrollment_id", "term_id"),)
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    program_enrollment_id: Mapped[int] = mapped_column(ForeignKey("program_enrollments.id"), index=True)
-    term_id: Mapped[int] = mapped_column(ForeignKey("academic_terms.id"), index=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
+    program_enrollment_id: Mapped[UUID] = mapped_column(ForeignKey("program_enrollments.id"), index=True)
+    term_id: Mapped[UUID] = mapped_column(ForeignKey("academic_terms.id"), index=True)
     # Serie/semestre que o aluno cursa no periodo.
     curriculum_term_number: Mapped[int | None] = mapped_column(Integer)
-    created_by_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"))
+    created_by_id: Mapped[UUID | None] = mapped_column(ForeignKey("users.id"))
     registered_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
     term: Mapped["AcademicTerm"] = relationship()
@@ -81,9 +84,9 @@ class CreditTransfer(TenantMixin, Base):
 
     __tablename__ = "credit_transfers"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    program_enrollment_id: Mapped[int] = mapped_column(ForeignKey("program_enrollments.id"), index=True)
-    subject_id: Mapped[int] = mapped_column(ForeignKey("subjects.id"), index=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
+    program_enrollment_id: Mapped[UUID] = mapped_column(ForeignKey("program_enrollments.id"), index=True)
+    subject_id: Mapped[UUID] = mapped_column(ForeignKey("subjects.id"), index=True)
     origin: Mapped[CreditTransferOrigin] = mapped_column(SAEnum(CreditTransferOrigin), default=CreditTransferOrigin.external)
     source_institution: Mapped[str | None] = mapped_column(String(200))
     source_subject: Mapped[str] = mapped_column(String(200))
@@ -91,7 +94,7 @@ class CreditTransfer(TenantMixin, Base):
     hours: Mapped[int | None] = mapped_column(Integer)
     status: Mapped[CreditTransferStatus] = mapped_column(SAEnum(CreditTransferStatus), default=CreditTransferStatus.requested)
     decision_note: Mapped[str | None] = mapped_column(Text)
-    decided_by_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"))
+    decided_by_id: Mapped[UUID | None] = mapped_column(ForeignKey("users.id"))
     decided_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
@@ -103,14 +106,14 @@ class AcademicDeclaration(TenantMixin, Base):
 
     __tablename__ = "academic_declarations"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    program_enrollment_id: Mapped[int] = mapped_column(ForeignKey("program_enrollments.id"), index=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
+    program_enrollment_id: Mapped[UUID] = mapped_column(ForeignKey("program_enrollments.id"), index=True)
     kind: Mapped[DeclarationKind] = mapped_column(SAEnum(DeclarationKind))
-    term_id: Mapped[int | None] = mapped_column(ForeignKey("academic_terms.id"))
+    term_id: Mapped[UUID | None] = mapped_column(ForeignKey("academic_terms.id"))
     validation_code: Mapped[str] = mapped_column(String(40), unique=True, index=True)
     title: Mapped[str] = mapped_column(String(120))
     lines: Mapped[list] = mapped_column(JSON, default=list)
-    issued_by_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"))
+    issued_by_id: Mapped[UUID | None] = mapped_column(ForeignKey("users.id"))
     issued_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
     signature_hash: Mapped[str] = mapped_column(String(128))
     revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

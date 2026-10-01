@@ -1,3 +1,4 @@
+from uuid import UUID
 from datetime import datetime, timezone
 
 from fastapi import HTTPException, status
@@ -27,10 +28,10 @@ class NotificationEventService:
         *,
         channel: NotificationChannel = NotificationChannel.internal,
         template_key: str | None = None,
-        recipient_student_id: int | None = None,
-        course_id: int | None = None,
-        class_offering_id: int | None = None,
-        scheduled_meeting_id: int | None = None,
+        recipient_student_id: UUID | None = None,
+        course_id: UUID | None = None,
+        class_offering_id: UUID | None = None,
+        scheduled_meeting_id: UUID | None = None,
         scheduled_for: datetime | None = None,
     ) -> NotificationEvent:
         key = template_key or event_type.value
@@ -72,7 +73,7 @@ class NotificationEventService:
             scheduled_for=data.scheduled_for,
         )
 
-    def retry(self, event_id: int) -> NotificationEvent:
+    def retry(self, event_id: UUID) -> NotificationEvent:
         """Devolve um evento que falhou para a fila; o worker tenta entregar de novo."""
         event = self._get_or_404(event_id)
         if event.status != NotificationStatus.failed:
@@ -81,7 +82,7 @@ class NotificationEventService:
         event.error_message = None
         return self.repo.update(event)
 
-    def _get_or_404(self, event_id: int) -> NotificationEvent:
+    def _get_or_404(self, event_id: UUID) -> NotificationEvent:
         event = self.repo.get_by_id(event_id)
         if not event:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Evento não encontrado")

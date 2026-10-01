@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -26,5 +28,5 @@ def mark_all_read(db: Session = Depends(get_db), current: Student = Depends(get_
 
 
 @router.post("/{event_id}/read", response_model=InboxNoticeOut)
-def mark_read(event_id: int, db: Session = Depends(get_db), current: Student = Depends(get_current_student)):
+def mark_read(event_id: UUID, db: Session = Depends(get_db), current: Student = Depends(get_current_student)):
     return NotificationInboxService(db).mark_read(current, event_id)

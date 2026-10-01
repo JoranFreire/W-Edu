@@ -1,3 +1,4 @@
+from uuid import UUID
 from datetime import date
 
 from pydantic import BaseModel, Field
@@ -26,7 +27,7 @@ class FundingSourceUpdate(BaseModel):
 
 
 class FundingSourceOut(BaseModel):
-    id: int
+    id: UUID
     name: str
     kind: FundingKind
     agreement_number: str | None
@@ -55,7 +56,7 @@ class BenefitItemUpdate(BaseModel):
 
 
 class BenefitItemOut(BaseModel):
-    id: int
+    id: UUID
     name: str
     kind: BenefitKind
     unit: str
@@ -69,43 +70,43 @@ class StockEntryCreate(BaseModel):
     quantity: int = Field(ge=1)
     unit_cost_cents: int | None = Field(default=None, ge=0)
     origin: StockOrigin = StockOrigin.purchase
-    funding_source_id: int | None = None
+    funding_source_id: UUID | None = None
     received_on: date
     notes: str | None = Field(default=None, max_length=2000)
 
 
 class StockEntryOut(BaseModel):
-    id: int
-    item_id: int
+    id: UUID
+    item_id: UUID
     quantity: int
     unit_cost_cents: int
     origin: StockOrigin
-    funding_source_id: int | None
+    funding_source_id: UUID | None
     received_on: date
 
     model_config = {"from_attributes": True}
 
 
 class MeetingDeliveryInput(BaseModel):
-    item_id: int
+    item_id: UUID
     quantity: int = Field(default=1, ge=1, le=100)
 
 
 class IndividualDeliveryInput(BaseModel):
-    item_id: int
-    student_id: int
-    class_offering_id: int
+    item_id: UUID
+    student_id: UUID
+    class_offering_id: UUID
     quantity: int = Field(default=1, ge=1, le=100)
     delivered_on: date | None = None
 
 
 class DeliveryOut(BaseModel):
-    id: int
-    item_id: int
+    id: UUID
+    item_id: UUID
     item_name: str
     student: PersonSummary
-    class_offering_id: int
-    scheduled_meeting_id: int | None
+    class_offering_id: UUID
+    scheduled_meeting_id: UUID | None
     quantity: int
     unit_cost_cents: int
     delivered_on: date
@@ -117,7 +118,7 @@ class MeetingDeliveryOut(BaseModel):
 
 
 class OfferingIndicators(BaseModel):
-    class_offering_id: int | None
+    class_offering_id: UUID | None
     name: str
     applications: int
     enrolled: int

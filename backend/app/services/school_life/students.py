@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from sqlalchemy.orm import Session
 
@@ -17,7 +18,7 @@ class SchoolStudentLookup:
         self.users = StudentRepository(db)
         self.memberships = MembershipService(db)
 
-    def get_or_404(self, student_id: int) -> Student:
+    def get_or_404(self, student_id: UUID) -> Student:
         student = self.users.get_by_id(student_id)
         if not student or student.role != UserRole.student or not self.memberships.get(bound_institution_id(self.db), student.id):
             raise not_found("Aluno não encontrado")

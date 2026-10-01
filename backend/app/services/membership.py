@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from sqlalchemy.orm import Session
 
 from app.models.institution import InstitutionMembership
@@ -15,10 +17,10 @@ class MembershipService:
     def list_active(self, user: Student) -> list[InstitutionMembership]:
         return self.repo.list_active_for_user(user.id)
 
-    def get(self, institution_id: int, user_id: int) -> InstitutionMembership | None:
+    def get(self, institution_id: UUID, user_id: UUID) -> InstitutionMembership | None:
         return self.repo.get(institution_id, user_id)
 
-    def add_member(self, institution_id: int, user: Student) -> InstitutionMembership:
+    def add_member(self, institution_id: UUID, user: Student) -> InstitutionMembership:
         membership = self.repo.get(institution_id, user.id)
         if membership:
             membership.role = user.role
@@ -26,13 +28,13 @@ class MembershipService:
             return membership
         return self.repo.add(InstitutionMembership(institution_id=institution_id, user_id=user.id, role=user.role))
 
-    def sync_member_role(self, institution_id: int, user: Student) -> None:
+    def sync_member_role(self, institution_id: UUID, user: Student) -> None:
         membership = self.repo.get(institution_id, user.id)
         if membership:
             membership.role = user.role
             membership.is_active = user.is_active
 
-    def detach(self, institution_id: int | None, user: Student) -> bool:
+    def detach(self, institution_id: UUID | None, user: Student) -> bool:
         """Remove o vinculo com a instituicao ativa.
 
         Retorna True quando o usuario nao pertence a mais nenhuma instituicao

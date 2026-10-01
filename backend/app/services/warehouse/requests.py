@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from sqlalchemy.orm import Session
 
@@ -43,7 +44,7 @@ class MaterialRequestService:
     def list_mine(self, requester: Student) -> list[RequestOut]:
         return [request_out(r) for r in sorted(self.repo.list(requester_id=requester.id), key=lambda r: r.id, reverse=True)]
 
-    def cancel(self, requester: Student, request_id: int) -> RequestOut:
+    def cancel(self, requester: Student, request_id: UUID) -> RequestOut:
         request = self.repo.get(request_id)
         if not request or request.requester_id != requester.id:
             raise not_found("Requisição não encontrada")

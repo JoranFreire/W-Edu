@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -11,13 +13,13 @@ router = APIRouter()
 
 
 @router.get("/terms/{term_id}/grading-periods", response_model=list[GradingPeriodOut])
-def list_grading_periods(term_id: int, db: Session = Depends(get_db), _: Student = Depends(get_current_student)):
+def list_grading_periods(term_id: UUID, db: Session = Depends(get_db), _: Student = Depends(get_current_student)):
     return GradingPeriodService(db).list(term_id)
 
 
 @router.post("/terms/{term_id}/grading-periods", response_model=GradingPeriodOut, status_code=201)
 def create_grading_period(
-    term_id: int,
+    term_id: UUID,
     data: GradingPeriodCreate,
     db: Session = Depends(get_db),
     _: Student = Depends(get_current_admin_or_coordinator),
@@ -27,7 +29,7 @@ def create_grading_period(
 
 @router.patch("/grading-periods/{period_id}", response_model=GradingPeriodOut)
 def update_grading_period(
-    period_id: int,
+    period_id: UUID,
     data: GradingPeriodUpdate,
     db: Session = Depends(get_db),
     _: Student = Depends(get_current_admin_or_coordinator),
@@ -37,7 +39,7 @@ def update_grading_period(
 
 @router.post("/grading-periods/{period_id}/status", response_model=GradingPeriodOut)
 def change_grading_period_status(
-    period_id: int,
+    period_id: UUID,
     data: GradingPeriodStatusChange,
     db: Session = Depends(get_db),
     _: Student = Depends(get_current_admin_or_coordinator),
@@ -46,5 +48,5 @@ def change_grading_period_status(
 
 
 @router.delete("/grading-periods/{period_id}", status_code=204)
-def delete_grading_period(period_id: int, db: Session = Depends(get_db), _: Student = Depends(get_current_admin)):
+def delete_grading_period(period_id: UUID, db: Session = Depends(get_db), _: Student = Depends(get_current_admin)):
     GradingPeriodService(db).delete(period_id)

@@ -10,7 +10,7 @@ import type { Occurrence } from '@/types/schoolLife';
 import OccurrenceList from './OccurrenceList';
 
 /** Historico de ocorrencias de um aluno para o professor; remove so as que ele registrou. */
-export default function StudentOccurrenceHistory({ studentId }: { studentId: number }) {
+export default function StudentOccurrenceHistory({ studentId }: { studentId: string }) {
   const user = useAuthStore((state) => state.student);
   const { occurrences, error, remove } = useStudentOccurrences(studentId);
   useErrorToast(error, 'Erro ao carregar o histórico do aluno.');

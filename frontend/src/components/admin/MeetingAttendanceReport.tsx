@@ -23,7 +23,7 @@ const actions: Array<{ status: AttendanceStatus; label: string }> = [
 
 type PracticalDraft = { score: string; feedback: string };
 
-function buildDrafts(rows: MeetingAttendanceReportRow[]): Record<number, PracticalDraft> {
+function buildDrafts(rows: MeetingAttendanceReportRow[]): Record<string, PracticalDraft> {
   return Object.fromEntries(rows.map((row) => [
     row.student_id,
     { score: row.practical_score === null ? '' : String(row.practical_score), feedback: row.practical_feedback ?? '' },
@@ -32,8 +32,8 @@ function buildDrafts(rows: MeetingAttendanceReportRow[]): Record<number, Practic
 
 export default function MeetingAttendanceReport({ rows, onMarkAttendance, onSavePractical }: {
   rows: MeetingAttendanceReportRow[];
-  onMarkAttendance: (studentId: number, status: AttendanceStatus) => void;
-  onSavePractical: (studentId: number, score: number, feedback: string | null) => void;
+  onMarkAttendance: (studentId: string, status: AttendanceStatus) => void;
+  onSavePractical: (studentId: string, score: number, feedback: string | null) => void;
 }) {
   const [drafts, setDrafts] = useState(() => buildDrafts(rows));
   const [draftsSource, setDraftsSource] = useState(rows);
@@ -46,7 +46,7 @@ export default function MeetingAttendanceReport({ rows, onMarkAttendance, onSave
   const draftFor = (row: MeetingAttendanceReportRow) =>
     drafts[row.student_id] ?? { score: row.practical_score === null ? '' : String(row.practical_score), feedback: row.practical_feedback ?? '' };
 
-  const updateDraft = (studentId: number, patch: Partial<{ score: string; feedback: string }>) => {
+  const updateDraft = (studentId: string, patch: Partial<{ score: string; feedback: string }>) => {
     setDrafts((current) => ({ ...current, [studentId]: { ...draftFor(rows.find((row) => row.student_id === studentId)!), ...patch } }));
   };
 

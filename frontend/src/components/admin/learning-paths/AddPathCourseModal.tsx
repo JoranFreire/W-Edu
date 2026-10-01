@@ -6,7 +6,7 @@ import type { Course } from '@/types/course';
 
 export default function AddPathCourseModal({ availableCourses, onAdd, onClose }: {
   availableCourses: Course[];
-  onAdd: (courseId: number) => void;
+  onAdd: (courseId: string) => void;
   onClose: () => void;
 }) {
   const [selectedId, setSelectedId] = useState('');
@@ -19,7 +19,7 @@ export default function AddPathCourseModal({ availableCourses, onAdd, onClose }:
       </select>
       <div className="mt-5 flex justify-end gap-3">
         <button type="button" onClick={onClose} className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">Cancelar</button>
-        <button type="button" disabled={!selectedId} onClick={() => onAdd(Number(selectedId))} className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-60">Adicionar</button>
+        <button type="button" disabled={!selectedId} onClick={() => onAdd(selectedId)} className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-60">Adicionar</button>
       </div>
     </Modal>
   );

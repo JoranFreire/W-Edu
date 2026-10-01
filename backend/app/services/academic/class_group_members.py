@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from sqlalchemy.orm import Session
 
@@ -18,11 +19,11 @@ class ClassGroupMemberService:
         self.groups = ClassGroupService(db)
         self.enrollments = ProgramEnrollmentService(db)
 
-    def list(self, group_id: int) -> list[ClassGroupMemberOut]:
+    def list(self, group_id: UUID) -> list[ClassGroupMemberOut]:
         self.groups.get_or_404(group_id)
         return [self._to_out(member) for member in self.repo.list_by_group(group_id)]
 
-    def add(self, group_id: int, enrollment_id: int) -> ClassGroupMemberOut:
+    def add(self, group_id: UUID, enrollment_id: UUID) -> ClassGroupMemberOut:
         group = self.groups.get_or_404(group_id)
         self.groups.terms.get_not_closed(group.term_id)
         enrollment = self.enrollments.get_or_404(enrollment_id)
@@ -37,7 +38,7 @@ class ClassGroupMemberService:
         member = self.repo.save(ClassGroupMember(class_group_id=group_id, program_enrollment_id=enrollment_id))
         return self._to_out(member)
 
-    def remove(self, group_id: int, enrollment_id: int) -> None:
+    def remove(self, group_id: UUID, enrollment_id: UUID) -> None:
         member = self.repo.get(group_id, enrollment_id)
         if not member:
             raise not_found("Aluno não está nesta turma")

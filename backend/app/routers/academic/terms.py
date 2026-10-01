@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -27,13 +29,13 @@ def create_term(data: AcademicTermCreate, db: Session = Depends(get_db), _: Stud
 
 
 @router.get("/{term_id}", response_model=AcademicTermOut)
-def get_term(term_id: int, db: Session = Depends(get_db), _: Student = Depends(get_current_student)):
+def get_term(term_id: UUID, db: Session = Depends(get_db), _: Student = Depends(get_current_student)):
     return AcademicTermService(db).get_or_404(term_id)
 
 
 @router.patch("/{term_id}", response_model=AcademicTermOut)
 def update_term(
-    term_id: int,
+    term_id: UUID,
     data: AcademicTermUpdate,
     db: Session = Depends(get_db),
     _: Student = Depends(get_current_admin_or_coordinator),
@@ -43,7 +45,7 @@ def update_term(
 
 @router.post("/{term_id}/status", response_model=AcademicTermOut)
 def change_term_status(
-    term_id: int,
+    term_id: UUID,
     data: TermStatusChange,
     db: Session = Depends(get_db),
     _: Student = Depends(get_current_admin_or_coordinator),
@@ -52,10 +54,10 @@ def change_term_status(
 
 
 @router.delete("/{term_id}", status_code=204)
-def delete_term(term_id: int, db: Session = Depends(get_db), _: Student = Depends(get_current_admin)):
+def delete_term(term_id: UUID, db: Session = Depends(get_db), _: Student = Depends(get_current_admin)):
     AcademicTermService(db).delete(term_id)
 
 
 @router.get("/{term_id}/calendar-summary", response_model=TermCalendarSummary)
-def term_calendar_summary(term_id: int, db: Session = Depends(get_db), _: Student = Depends(get_current_student)):
+def term_calendar_summary(term_id: UUID, db: Session = Depends(get_db), _: Student = Depends(get_current_student)):
     return CalendarEventService(db).summary(term_id)

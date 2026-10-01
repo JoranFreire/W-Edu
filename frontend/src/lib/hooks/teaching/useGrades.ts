@@ -7,13 +7,13 @@ import { useApiQuery } from '@/lib/hooks/useApiQuery';
 import type { GradeRow } from '@/types/assessment';
 
 export interface GradeInput {
-  class_enrollment_id: number;
+  class_enrollment_id: string;
   score: number | null;
   notes: string | null;
 }
 
 /** Notas de uma avaliacao para os alunos da turma. */
-export function useGrades(itemId: number) {
+export function useGrades(itemId: string) {
   const request = useCallback(
     () => api.get<GradeRow[]>(endpoints.assessment.grades(itemId)).then((response) => response.data),
     [itemId],

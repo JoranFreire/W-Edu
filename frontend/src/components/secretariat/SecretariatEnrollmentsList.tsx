@@ -15,7 +15,7 @@ import { useErrorToast } from '@/lib/hooks/useErrorToast';
 
 /** Busca de matriculas por aluno ou numero, com acesso a ficha e nova matricula. */
 export default function SecretariatEnrollmentsList() {
-  const [programId, setProgramId] = useState<number | undefined>();
+  const [programId, setProgramId] = useState<string | undefined>();
   const [search, setSearch] = useState('');
   const [creating, setCreating] = useState(false);
   const { enrollments, error, create } = useProgramEnrollments({ program_id: programId });
@@ -40,7 +40,7 @@ export default function SecretariatEnrollmentsList() {
       <SectionHeader title="Matrículas" description="Localize o aluno para ver o histórico, movimentar a matrícula ou registrar aproveitamento." actionLabel="Nova matrícula" onAction={() => setCreating(true)} />
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <input aria-label="Buscar matrícula" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Nome, e-mail ou número de matrícula" className={inputCls} />
-        <select aria-label="Filtrar por programa" value={programId ?? ''} onChange={(e) => setProgramId(e.target.value ? Number(e.target.value) : undefined)} className={inputCls}>
+        <select aria-label="Filtrar por programa" value={programId ?? ''} onChange={(e) => setProgramId(e.target.value || undefined)} className={inputCls}>
           <option value="">Todos os programas</option>
           {programs.map((program) => <option key={program.id} value={program.id}>{program.code} · {program.name}</option>)}
         </select>

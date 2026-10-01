@@ -11,12 +11,12 @@ import ActivityList from './ActivityList';
 import IntegralizationSummary from './IntegralizationSummary';
 
 /** Aba da ficha: requisitos de conclusao e analise das atividades complementares. */
-export default function OfficeIntegralizationTab({ enrollmentId }: { enrollmentId: number }) {
+export default function OfficeIntegralizationTab({ enrollmentId }: { enrollmentId: string }) {
   const { integralization, error, reload } = useIntegralization(enrollmentId);
   const { activities, decide } = useEnrollmentActivities(enrollmentId);
   useErrorToast(error, 'Erro ao carregar a integralização.');
 
-  const handleDecide = async (activityId: number, input: ActivityDecisionInput) => {
+  const handleDecide = async (activityId: string, input: ActivityDecisionInput) => {
     await decide(activityId, input);
     reload();
   };

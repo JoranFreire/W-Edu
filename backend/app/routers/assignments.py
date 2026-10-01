@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends, File, Form, UploadFile
 from sqlalchemy.orm import Session
 
@@ -12,7 +14,7 @@ router = APIRouter()
 
 @router.get("/lessons/{lesson_id}/me", response_model=AssignmentSubmissionOut | None)
 def my_lesson_submission(
-    lesson_id: int,
+    lesson_id: UUID,
     db: Session = Depends(get_db),
     current: Student = Depends(get_current_student),
 ):
@@ -21,7 +23,7 @@ def my_lesson_submission(
 
 @router.post("/lessons/{lesson_id}/submit", response_model=AssignmentSubmissionOut, status_code=201)
 def submit_assignment(
-    lesson_id: int,
+    lesson_id: UUID,
     text: str | None = Form(None),
     file: UploadFile | None = File(None),
     db: Session = Depends(get_db),
@@ -32,7 +34,7 @@ def submit_assignment(
 
 @router.get("/lessons/{lesson_id}/submissions", response_model=list[AssignmentSubmissionOut])
 def list_lesson_submissions(
-    lesson_id: int,
+    lesson_id: UUID,
     db: Session = Depends(get_db),
     _: Student = Depends(get_current_admin_or_coordinator),
 ):
@@ -41,7 +43,7 @@ def list_lesson_submissions(
 
 @router.patch("/submissions/{submission_id}", response_model=AssignmentSubmissionOut)
 def review_submission(
-    submission_id: int,
+    submission_id: UUID,
     data: AssignmentReviewIn,
     db: Session = Depends(get_db),
     current: Student = Depends(get_current_admin_or_coordinator),
@@ -51,7 +53,7 @@ def review_submission(
 
 @router.get("/submissions/{submission_id}/download")
 def download_submission(
-    submission_id: int,
+    submission_id: UUID,
     db: Session = Depends(get_db),
     current: Student = Depends(get_current_student),
 ):

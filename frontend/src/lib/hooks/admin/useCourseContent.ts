@@ -7,7 +7,7 @@ import { useApiQuery } from '@/lib/hooks/useApiQuery';
 import type { CourseModule, CoursePrerequisite, Lesson } from '@/types/course';
 
 /** Modulos, aulas e pre-requisitos de um curso, cada um recarregavel separadamente. */
-export function useCourseContent(courseId: number) {
+export function useCourseContent(courseId: string) {
   const modules = useApiQuery(useCallback(
     () => api.get<CourseModule[]>(endpoints.courses.modules(courseId)).then((response) => response.data), [courseId]));
   const lessons = useApiQuery(useCallback(

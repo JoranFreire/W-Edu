@@ -1,3 +1,4 @@
+from uuid import UUID
 from datetime import datetime
 
 from pydantic import BaseModel, Field
@@ -13,9 +14,9 @@ class ForumPostCreate(BaseModel):
 
 
 class ForumPostOut(BaseModel):
-    id: int
-    thread_id: int
-    author_id: int
+    id: UUID
+    thread_id: UUID
+    author_id: UUID
     author_name: str
     body: str
     created_at: datetime
@@ -25,9 +26,9 @@ class ForumPostOut(BaseModel):
 
 
 class ForumThreadOut(BaseModel):
-    id: int
-    course_id: int
-    author_id: int
+    id: UUID
+    course_id: UUID
+    author_id: UUID
     author_name: str
     title: str
     body: str

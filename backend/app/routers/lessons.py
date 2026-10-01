@@ -1,8 +1,11 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends, Query, Request, UploadFile
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.core.ids import parse_id
 from app.core.security import decode_access_token
 from app.dependencies import get_current_admin, get_current_admin_or_coordinator, get_current_student
 from app.models.student import Student
@@ -29,7 +32,8 @@ def _get_streaming_student(
     if not student_id:
         from fastapi import HTTPException, status
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token inválido")
-    student = StudentRepository(db).get_by_id(int(student_id))
+    user_id = parse_id(student_id)
+    student = StudentRepository(db).get_by_id(user_id) if user_id else None
     if not student or not student.is_active:
         from fastapi import HTTPException, status
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Usuário não encontrado")
@@ -43,31 +47,31 @@ def create_lesson(data: LessonCreate, db: Session = Depends(get_db), _: Student 
 
 @router.get("/course/{course_id}", response_model=list[LessonOut])
 def list_lessons_by_course(
-    course_id: int, db: Session = Depends(get_db), _: Student = Depends(get_current_student)
+    course_id: UUID, db: Session = Depends(get_db), _: Student = Depends(get_current_student)
 ):
     return LessonService(db).list_by_course(course_id)
 
 
 @router.get("/{lesson_id}", response_model=LessonOut)
-def get_lesson(lesson_id: int, db: Session = Depends(get_db), _: Student = Depends(get_current_student)):
+def get_lesson(lesson_id: UUID, db: Session = Depends(get_db), _: Student = Depends(get_current_student)):
     return LessonService(db).get_or_404(lesson_id)
 
 
 @router.patch("/{lesson_id}", response_model=LessonOut)
 def update_lesson(
-    lesson_id: int, data: LessonUpdate, db: Session = Depends(get_db), _: Student = Depends(get_current_admin_or_coordinator)
+    lesson_id: UUID, data: LessonUpdate, db: Session = Depends(get_db), _: Student = Depends(get_current_admin_or_coordinator)
 ):
     return LessonService(db).update(lesson_id, data)
 
 
 @router.delete("/{lesson_id}", status_code=204)
-def delete_lesson(lesson_id: int, db: Session = Depends(get_db), _: Student = Depends(get_current_admin)):
+def delete_lesson(lesson_id: UUID, db: Session = Depends(get_db), _: Student = Depends(get_current_admin)):
     LessonService(db).delete(lesson_id)
 
 
 @router.post("/{lesson_id}/video", response_model=LessonOut)
 def upload_lesson_video(
-    lesson_id: int,
+    lesson_id: UUID,
     file: UploadFile,
     db: Session = Depends(get_db),
     _: Student = Depends(get_current_admin_or_coordinator),
@@ -81,7 +85,7 @@ def upload_lesson_video(
 
 @router.get("/{lesson_id}/video/stream")
 def stream_lesson_video(
-    lesson_id: int,
+    lesson_id: UUID,
     request: Request,
     db: Session = Depends(get_db),
     _: Student = Depends(_get_streaming_student),
@@ -95,7 +99,7 @@ def stream_lesson_video(
 
 @router.delete("/{lesson_id}/video", response_model=LessonOut)
 def delete_lesson_video(
-    lesson_id: int,
+    lesson_id: UUID,
     db: Session = Depends(get_db),
     _: Student = Depends(get_current_admin_or_coordinator),
 ):

@@ -1,3 +1,4 @@
+from uuid import UUID
 from datetime import datetime, timedelta, timezone
 
 from jose import JWTError, jwt
@@ -16,11 +17,11 @@ def verify_password(plain: str, hashed: str) -> bool:
     return pwd_context.verify(plain, hashed)
 
 
-def create_access_token(subject: str, institution_id: int | None = None) -> str:
+def create_access_token(subject: str, institution_id: UUID | None = None) -> str:
     expire = datetime.now(timezone.utc) + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     claims = {"sub": subject, "exp": expire}
     if institution_id is not None:
-        claims["inst"] = institution_id
+        claims["inst"] = str(institution_id)
     return jwt.encode(claims, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
 
 

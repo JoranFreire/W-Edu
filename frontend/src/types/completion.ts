@@ -15,7 +15,7 @@ export interface Requirement {
 }
 
 export interface Integralization {
-  program_enrollment_id: number;
+  program_enrollment_id: string;
   registration_number: string;
   program_name: string;
   cr: number | null;
@@ -24,8 +24,8 @@ export interface Integralization {
 }
 
 export interface Activity {
-  id: number;
-  program_enrollment_id: number;
+  id: string;
+  program_enrollment_id: string;
   category: ActivityCategory;
   title: string;
   description: string | null;
@@ -53,8 +53,8 @@ export interface ActivityDecisionInput {
 }
 
 export interface Internship {
-  id: number;
-  program_enrollment_id: number;
+  id: string;
+  program_enrollment_id: string;
   student: PersonSummary;
   company_name: string;
   supervisor_name: string | null;
@@ -73,7 +73,7 @@ export interface Internship {
 export interface InternshipInput {
   company_name: string;
   supervisor_name: string | null;
-  advisor_id: number | null;
+  advisor_id: string | null;
   is_mandatory: boolean;
   agreement_number: string | null;
   starts_on: string;
@@ -82,8 +82,8 @@ export interface InternshipInput {
 }
 
 export interface InternshipLog {
-  id: number;
-  internship_id: number;
+  id: string;
+  internship_id: string;
   worked_on: string;
   hours: number;
   activities: string;
@@ -98,8 +98,8 @@ export interface InternshipLogInput {
 }
 
 export interface FinalProject {
-  id: number;
-  program_enrollment_id: number;
+  id: string;
+  program_enrollment_id: string;
   student: PersonSummary;
   title: string;
   advisor: PersonSummary | null;
@@ -113,7 +113,7 @@ export interface FinalProject {
 
 export interface FinalProjectInput {
   title: string;
-  advisor_id: number | null;
+  advisor_id: string | null;
   co_advisor_name: string | null;
   notes: string | null;
 }

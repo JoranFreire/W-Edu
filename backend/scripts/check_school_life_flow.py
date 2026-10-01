@@ -26,6 +26,7 @@ import httpx
 import starlette.concurrency
 import starlette.routing
 
+from scripts.check_support import MISSING_ID, ApiClient  # noqa: E402
 import app.models  # noqa: F401
 from app.core.database import Base, SessionLocal, engine
 from app.core.security import hash_password
@@ -71,7 +72,7 @@ def seed() -> dict[str, int]:
             db.add(user)
             db.flush()
             db.add(InstitutionMembership(institution_id=institution.id, user_id=user.id, role=role))
-            ids[name] = user.id
+            ids[name] = str(user.id)
         db.commit()
     return ids
 
@@ -131,7 +132,7 @@ async def check_occurrences(c: Checker, h: dict, ids: dict, ctx: dict) -> dict[s
     merit = await c.call("POST", "/school/occurrences", 201, "secretary registers merit", h["secretaria"],
                          json={"student_id": ids["ana"], "kind": "merit", "description": "Ajudou colegas", "occurred_on": "2027-03-12"})
     await c.call("POST", "/school/occurrences", 404, "unknown student", prof, json={**occurrence, "student_id": ids["prof"]})
-    await c.call("POST", "/school/occurrences", 404, "unknown group", prof, json={**occurrence, "class_group_id": 9999})
+    await c.call("POST", "/school/occurrences", 404, "unknown group", prof, json={**occurrence, "class_group_id": MISSING_ID})
     await c.call("POST", "/school/occurrences", 403, "student cannot register", h["ana"], json=occurrence)
 
     listed = await c.call("GET", f"/school/students/{ids['ana']}/occurrences", 200, "list occurrences", coord)
@@ -160,7 +161,7 @@ async def check_agenda(c: Checker, h: dict, ids: dict, ctx: dict) -> None:
     await c.call("POST", path, 403, "instructor outside the group", h["outro"], json={"title": "X", "due_on": "2027-03-15"})
     await c.call("POST", f"/school/class-groups/{ctx['other_group']}/agenda", 400, "offering of another group", h["coord"],
                  json={"title": "X", "due_on": "2027-03-15", "class_offering_id": ctx["offering"]})
-    await c.call("POST", "/school/class-groups/9999/agenda", 404, "unknown group", h["coord"], json={"title": "X", "due_on": "2027-03-15"})
+    await c.call("POST", f"/school/class-groups/{MISSING_ID}/agenda", 404, "unknown group", h["coord"], json={"title": "X", "due_on": "2027-03-15"})
 
     upcoming = await c.call("GET", path, 200, "group agenda from date", prof, params={"from_date": "2027-03-01"})
     c.expect([i["title"] for i in upcoming] == ["Exercícios p. 42", "Feira de ciências"], f"agenda ordered by date: {upcoming}")
@@ -214,7 +215,7 @@ async def check_inbox(c: Checker, h: dict) -> None:
 async def run() -> int:
     ids = seed()
     transport = httpx.ASGITransport(app=app)
-    async with httpx.AsyncClient(transport=transport, base_url="http://testserver") as client:
+    async with ApiClient(transport=transport, base_url="http://testserver") as client:
         c = Checker(client)
         h = {name: await c.login(f"{name}@example.com") for name, _ in USERS}
         ctx = await setup_structure(c, h, ids)

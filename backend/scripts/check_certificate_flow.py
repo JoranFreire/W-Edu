@@ -29,6 +29,7 @@ import httpx
 import starlette.concurrency
 import starlette.routing
 
+from scripts.check_support import ApiClient  # noqa: E402
 import app.models  # noqa: F401
 from app.core.database import Base, SessionLocal, engine
 from app.core.security import hash_password
@@ -101,7 +102,7 @@ async def run() -> int:
             failures.append(message)
 
     transport = httpx.ASGITransport(app=app)
-    async with httpx.AsyncClient(transport=transport, base_url="http://testserver") as client:
+    async with ApiClient(transport=transport, base_url="http://testserver") as client:
         async def login(email: str) -> dict[str, str]:
             response = await client.post("/auth/login", json={"email": email, "password": PASSWORD})
             return {"Authorization": f"Bearer {response.json()['access_token']}"}

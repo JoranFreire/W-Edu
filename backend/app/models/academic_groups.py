@@ -1,5 +1,8 @@
 """Vinculo do aluno ao programa e turmas-grupo (ex.: 7o ano A)."""
 
+from uuid import UUID
+
+from app.core.ids import new_id
 from datetime import date, datetime, timezone
 import enum
 
@@ -34,11 +37,11 @@ class ProgramEnrollment(TenantMixin, Base):
     __tablename__ = "program_enrollments"
     __table_args__ = (UniqueConstraint("institution_id", "registration_number"),)
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    student_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
-    program_id: Mapped[int] = mapped_column(ForeignKey("programs.id"), index=True)
-    curriculum_id: Mapped[int] = mapped_column(ForeignKey("curricula.id"), index=True)
-    entry_term_id: Mapped[int | None] = mapped_column(ForeignKey("academic_terms.id"), index=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
+    student_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"), index=True)
+    program_id: Mapped[UUID] = mapped_column(ForeignKey("programs.id"), index=True)
+    curriculum_id: Mapped[UUID] = mapped_column(ForeignKey("curricula.id"), index=True)
+    entry_term_id: Mapped[UUID | None] = mapped_column(ForeignKey("academic_terms.id"), index=True)
     registration_number: Mapped[str] = mapped_column(String(40))
     status: Mapped[ProgramEnrollmentStatus] = mapped_column(
         SAEnum(ProgramEnrollmentStatus), default=ProgramEnrollmentStatus.active
@@ -46,7 +49,7 @@ class ProgramEnrollment(TenantMixin, Base):
     enrolled_on: Mapped[date] = mapped_column(Date, default=lambda: _now().date())
     status_changed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
     # Transferencia interna: matricula de origem (outro programa da instituicao).
-    transferred_from_id: Mapped[int | None] = mapped_column(ForeignKey("program_enrollments.id"), index=True)
+    transferred_from_id: Mapped[UUID | None] = mapped_column(ForeignKey("program_enrollments.id"), index=True)
     # Conclusao do programa e colacao de grau (Fase 14).
     concluded_on: Mapped[date | None] = mapped_column(Date)
     ceremony_on: Mapped[date | None] = mapped_column(Date)
@@ -61,15 +64,15 @@ class ClassGroup(TenantMixin, Base):
     __tablename__ = "class_groups"
     __table_args__ = (UniqueConstraint("term_id", "name"),)
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    program_id: Mapped[int] = mapped_column(ForeignKey("programs.id"), index=True)
-    term_id: Mapped[int] = mapped_column(ForeignKey("academic_terms.id"), index=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
+    program_id: Mapped[UUID] = mapped_column(ForeignKey("programs.id"), index=True)
+    term_id: Mapped[UUID] = mapped_column(ForeignKey("academic_terms.id"), index=True)
     # Serie/semestre da matriz que a turma cursa (ex.: 7 para "7o ano A").
     curriculum_term_number: Mapped[int | None] = mapped_column(Integer)
     name: Mapped[str] = mapped_column(String(80))
     shift: Mapped[Shift] = mapped_column(SAEnum(Shift), default=Shift.morning)
     capacity: Mapped[int | None] = mapped_column(Integer)
-    homeroom_teacher_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), index=True)
+    homeroom_teacher_id: Mapped[UUID | None] = mapped_column(ForeignKey("users.id"), index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
     program: Mapped["Program"] = relationship()
@@ -84,9 +87,9 @@ class ClassGroupMember(TenantMixin, Base):
     __tablename__ = "class_group_members"
     __table_args__ = (UniqueConstraint("class_group_id", "program_enrollment_id"),)
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    class_group_id: Mapped[int] = mapped_column(ForeignKey("class_groups.id", ondelete="CASCADE"), index=True)
-    program_enrollment_id: Mapped[int] = mapped_column(ForeignKey("program_enrollments.id"), index=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
+    class_group_id: Mapped[UUID] = mapped_column(ForeignKey("class_groups.id", ondelete="CASCADE"), index=True)
+    program_enrollment_id: Mapped[UUID] = mapped_column(ForeignKey("program_enrollments.id"), index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
     class_group: Mapped["ClassGroup"] = relationship(back_populates="members")

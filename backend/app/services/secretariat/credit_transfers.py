@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from datetime import datetime, timezone
 
@@ -21,11 +22,11 @@ class CreditTransferService:
         self.repo = CreditTransferRepository(db)
         self.lifecycle = EnrollmentLifecycleService(db)
 
-    def list(self, enrollment_id: int) -> list[CreditTransferOut]:
+    def list(self, enrollment_id: UUID) -> list[CreditTransferOut]:
         self.lifecycle.get_or_404(enrollment_id)
         return [self._to_out(transfer) for transfer in self.repo.list_by_enrollment(enrollment_id)]
 
-    def request(self, enrollment_id: int, data: CreditTransferCreate) -> CreditTransferOut:
+    def request(self, enrollment_id: UUID, data: CreditTransferCreate) -> CreditTransferOut:
         enrollment = self.lifecycle.get_or_404(enrollment_id)
         if enrollment.status not in OPEN:
             raise conflict("Matrícula encerrada não recebe aproveitamento")
@@ -35,7 +36,7 @@ class CreditTransferService:
             raise conflict("Já existe aproveitamento pendente ou aprovado para esta disciplina")
         return self._to_out(self.repo.save(CreditTransfer(program_enrollment_id=enrollment_id, **data.model_dump())))
 
-    def decide(self, transfer_id: int, data: CreditTransferDecision, user_id: int) -> CreditTransferOut:
+    def decide(self, transfer_id: UUID, data: CreditTransferDecision, user_id: UUID) -> CreditTransferOut:
         transfer = self.repo.get_by_id(transfer_id)
         if not transfer:
             raise not_found("Aproveitamento não encontrado")

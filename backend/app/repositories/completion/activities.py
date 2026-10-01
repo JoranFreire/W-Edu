@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from sqlalchemy import func
 
@@ -10,7 +11,7 @@ from app.repositories.academic._base import Repository
 class ComplementaryActivityRepository(Repository[ComplementaryActivity]):
     model = ComplementaryActivity
 
-    def list_by_enrollment(self, enrollment_id: int) -> list[ComplementaryActivity]:
+    def list_by_enrollment(self, enrollment_id: UUID) -> list[ComplementaryActivity]:
         return (
             self.db.query(ComplementaryActivity)
             .filter(ComplementaryActivity.program_enrollment_id == enrollment_id)
@@ -18,7 +19,7 @@ class ComplementaryActivityRepository(Repository[ComplementaryActivity]):
             .all()
         )
 
-    def list_by_student(self, student_id: int) -> list[ComplementaryActivity]:
+    def list_by_student(self, student_id: UUID) -> list[ComplementaryActivity]:
         return (
             self.db.query(ComplementaryActivity)
             .join(ProgramEnrollment, ProgramEnrollment.id == ComplementaryActivity.program_enrollment_id)
@@ -27,7 +28,7 @@ class ComplementaryActivityRepository(Repository[ComplementaryActivity]):
             .all()
         )
 
-    def approved_hours(self, enrollment_id: int) -> int:
+    def approved_hours(self, enrollment_id: UUID) -> int:
         total = (
             self.db.query(func.sum(ComplementaryActivity.hours_approved))
             .filter(ComplementaryActivity.program_enrollment_id == enrollment_id, ComplementaryActivity.status == ReviewStatus.approved)

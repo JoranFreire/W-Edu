@@ -14,7 +14,7 @@ import type { CalendarEventKind } from '@/types/academicCalendar';
 const emptyDraft: CalendarEventInput = { kind: 'holiday', title: '', starts_on: '', ends_on: null };
 
 /** Calendario do periodo: dias letivos calculados e eventos (feriados, recessos, provas). */
-export default function CalendarPanel({ termId, editable }: { termId: number; editable: boolean }) {
+export default function CalendarPanel({ termId, editable }: { termId: string; editable: boolean }) {
   const { events, summary, error, add, remove } = useTermCalendar(termId);
   const [draft, setDraft] = useState(emptyDraft);
   useErrorToast(error, 'Erro ao carregar calendário.');
@@ -30,7 +30,7 @@ export default function CalendarPanel({ termId, editable }: { termId: number; ed
     }
   };
 
-  const handleRemove = async (id: number) => {
+  const handleRemove = async (id: string) => {
     try { await remove(id); } catch (err) { toast.error(apiErrorMessage(err, 'Erro ao remover evento.')); }
   };
 

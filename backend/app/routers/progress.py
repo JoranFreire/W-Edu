@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -12,7 +14,7 @@ router = APIRouter()
 
 @router.put("/{lesson_id}", response_model=ProgressOut)
 def update_progress(
-    lesson_id: int,
+    lesson_id: UUID,
     data: ProgressUpdate,
     db: Session = Depends(get_db),
     current: Student = Depends(get_current_student),
@@ -32,7 +34,7 @@ def my_course_progress(db: Session = Depends(get_db), current: Student = Depends
 
 @router.post("/consume/{lesson_id}", response_model=ProgressOut)
 def mark_consumed(
-    lesson_id: int,
+    lesson_id: UUID,
     db: Session = Depends(get_db),
     current: Student = Depends(get_current_student),
 ):

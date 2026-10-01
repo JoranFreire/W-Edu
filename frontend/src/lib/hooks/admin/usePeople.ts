@@ -10,14 +10,14 @@ export interface NewUserInput {
   email: string;
   password: string;
   role: UserRole;
-  organization_id: number | null;
+  organization_id: string | null;
 }
 
 export interface UserUpdateInput {
   name: string;
   email: string;
   role: UserRole;
-  organization_id: number | null;
+  organization_id: string | null;
   is_active: boolean;
 }
 
@@ -53,9 +53,9 @@ export function usePeople() {
     error,
     reload,
     createUser: withReload((input: NewUserInput) => api.post('/admin/users', input)),
-    updateUser: withReload((id: number, input: UserUpdateInput) => api.patch(`/admin/users/${id}`, input)),
-    deleteUser: withReload((id: number) => api.delete(`/admin/users/${id}`)),
+    updateUser: withReload((id: string, input: UserUpdateInput) => api.patch(`/admin/users/${id}`, input)),
+    deleteUser: withReload((id: string) => api.delete(`/admin/users/${id}`)),
     createOrganization: withReload((input: OrganizationInput) => api.post('/admin/organizations', input)),
-    updateOrganization: withReload((id: number, input: OrganizationInput) => api.patch(`/admin/organizations/${id}`, input)),
+    updateOrganization: withReload((id: string, input: OrganizationInput) => api.patch(`/admin/organizations/${id}`, input)),
   };
 }

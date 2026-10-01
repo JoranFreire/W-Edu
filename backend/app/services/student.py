@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -39,7 +41,7 @@ class StudentService:
         self.availability_repo = InstructorAvailabilityRepository(db)
         self.rating_repo = InstructorRatingRepository(db)
 
-    def create(self, data: StudentCreate, institution_id: int | None = None) -> Student:
+    def create(self, data: StudentCreate, institution_id: UUID | None = None) -> Student:
         institution_id = institution_id or bound_institution_id(self.db)
         if institution_id is None:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Instituição não informada")
@@ -63,7 +65,7 @@ class StudentService:
         self.ensure_default_profile(student)
         return student
 
-    def get_or_404(self, student_id: int) -> Student:
+    def get_or_404(self, student_id: UUID) -> Student:
         student = self.repo.get_by_id(student_id)
         if not student:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuário não encontrado")
@@ -72,10 +74,10 @@ class StudentService:
     def list_all(self) -> list[Student]:
         return self.repo.list_all()
 
-    def list_by_organization(self, organization_id: int) -> list[Student]:
+    def list_by_organization(self, organization_id: UUID) -> list[Student]:
         return self.repo.list_by_organization(organization_id)
 
-    def update(self, student_id: int, data: StudentUpdate) -> Student:
+    def update(self, student_id: UUID, data: StudentUpdate) -> Student:
         student = self.get_or_404(student_id)
         payload = data.model_dump(exclude_none=True)
         if "email" in payload and payload["email"] != student.email and self.repo.get_by_email(payload["email"]):
@@ -91,7 +93,7 @@ class StudentService:
         self.ensure_default_profile(student)
         return student
 
-    def delete(self, student_id: int) -> None:
+    def delete(self, student_id: UUID) -> None:
         student = self.get_or_404(student_id)
         # Usuario de outras instituicoes perde so o vinculo com a ativa; senao, e excluido.
         if not MembershipService(self.db).detach(bound_institution_id(self.db), student):
@@ -105,7 +107,7 @@ class StudentService:
         if student.role == UserRole.instructor and not self.profile_repo.get_instructor_profile(student.id):
             self.profile_repo.create_instructor_profile(InstructorProfile(student_id=student.id))
 
-    def update_student_profile(self, student_id: int, data: StudentProfileUpdate) -> StudentProfile:
+    def update_student_profile(self, student_id: UUID, data: StudentProfileUpdate) -> StudentProfile:
         self.get_or_404(student_id)
         profile = self.profile_repo.get_student_profile(student_id)
         if not profile:
@@ -114,14 +116,14 @@ class StudentService:
             setattr(profile, field, value)
         return self.profile_repo.update(profile)
 
-    def get_student_profile(self, student_id: int) -> StudentProfile:
+    def get_student_profile(self, student_id: UUID) -> StudentProfile:
         self.get_or_404(student_id)
         profile = self.profile_repo.get_student_profile(student_id)
         if not profile:
             profile = self.profile_repo.create_student_profile(StudentProfile(student_id=student_id))
         return profile
 
-    def update_instructor_profile(self, student_id: int, data: InstructorProfileUpdate) -> InstructorProfile:
+    def update_instructor_profile(self, student_id: UUID, data: InstructorProfileUpdate) -> InstructorProfile:
         student = self.get_or_404(student_id)
         if student.role != UserRole.instructor:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Usuário não é instrutor")
@@ -132,7 +134,7 @@ class StudentService:
             setattr(profile, field, value)
         return self.profile_repo.update(profile)
 
-    def get_instructor_profile(self, student_id: int) -> InstructorProfile:
+    def get_instructor_profile(self, student_id: UUID) -> InstructorProfile:
         student = self.get_or_404(student_id)
         if student.role != UserRole.instructor:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Usuário não é instrutor")
@@ -141,11 +143,11 @@ class StudentService:
             profile = self.profile_repo.create_instructor_profile(InstructorProfile(student_id=student_id))
         return profile
 
-    def list_instructor_availability(self, student_id: int):
+    def list_instructor_availability(self, student_id: UUID):
         profile = self.get_instructor_profile(student_id)
         return self.availability_repo.list_by_instructor_profile(profile.id)
 
-    def add_instructor_availability(self, student_id: int, data: InstructorAvailabilityCreate):
+    def add_instructor_availability(self, student_id: UUID, data: InstructorAvailabilityCreate):
         profile = self.get_instructor_profile(student_id)
         self._validate_availability_window(data.start_time, data.end_time)
         return self.availability_repo.create(
@@ -157,7 +159,7 @@ class StudentService:
             )
         )
 
-    def update_instructor_availability(self, availability_id: int, data: InstructorAvailabilityUpdate):
+    def update_instructor_availability(self, availability_id: UUID, data: InstructorAvailabilityUpdate):
         availability = self.availability_repo.get_by_id(availability_id)
         if not availability:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Disponibilidade não encontrada")
@@ -169,13 +171,13 @@ class StudentService:
             setattr(availability, field, value)
         return self.availability_repo.update(availability)
 
-    def delete_instructor_availability(self, availability_id: int) -> None:
+    def delete_instructor_availability(self, availability_id: UUID) -> None:
         availability = self.availability_repo.get_by_id(availability_id)
         if not availability:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Disponibilidade não encontrada")
         self.availability_repo.delete(availability)
 
-    def add_instructor_rating(self, student_id: int, instructor_student_id: int, data: InstructorRatingCreate):
+    def add_instructor_rating(self, student_id: UUID, instructor_student_id: UUID, data: InstructorRatingCreate):
         if data.score < 1 or data.score > 5:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Nota deve estar entre 1 e 5")
         instructor_profile = self.get_instructor_profile(instructor_student_id)
@@ -188,7 +190,7 @@ class StudentService:
             )
         )
 
-    def list_instructor_ratings(self, instructor_student_id: int):
+    def list_instructor_ratings(self, instructor_student_id: UUID):
         instructor_profile = self.get_instructor_profile(instructor_student_id)
         return self.rating_repo.list_by_instructor_profile(instructor_profile.id)
 
@@ -206,7 +208,7 @@ class OrganizationService:
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Empresa já cadastrada")
         return self.repo.create(Organization(**data.model_dump()))
 
-    def get_or_404(self, organization_id: int) -> Organization:
+    def get_or_404(self, organization_id: UUID) -> Organization:
         organization = self.repo.get_by_id(organization_id)
         if not organization:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Empresa não encontrada")
@@ -222,7 +224,7 @@ class OrganizationService:
             return []
         return [self.get_or_404(current.organization_id)]
 
-    def update(self, organization_id: int, data: OrganizationUpdate) -> Organization:
+    def update(self, organization_id: UUID, data: OrganizationUpdate) -> Organization:
         organization = self.get_or_404(organization_id)
         for field, value in data.model_dump(exclude_none=True).items():
             setattr(organization, field, value)

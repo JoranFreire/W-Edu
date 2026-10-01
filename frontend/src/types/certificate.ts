@@ -1,6 +1,6 @@
 export interface CertificateRule {
-  id: number;
-  course_id: number;
+  id: string;
+  course_id: string;
   require_lessons_complete: boolean;
   minimum_progress_percent: number;
   require_quiz: boolean;
@@ -13,11 +13,11 @@ export interface CertificateRule {
 }
 
 export interface Certificate {
-  id: number;
-  student_id: number;
-  course_id: number;
+  id: string;
+  student_id: string;
+  course_id: string;
   validation_code: string;
-  issued_by_id: number | null;
+  issued_by_id: string | null;
   issued_at: string;
   revoked_at: string | null;
   revoked_reason: string | null;
@@ -28,8 +28,8 @@ export interface Certificate {
 }
 
 export interface CertificateEligibility {
-  course_id: number;
-  student_id: number;
+  course_id: string;
+  student_id: string;
   eligible: boolean;
   progress_percent: number;
   quiz_percent: number;
@@ -48,6 +48,6 @@ export interface CertificateValidation {
 
 export interface CertificateIssueResult {
   issued: boolean;
-  certificate_id: number | null;
+  certificate_id: string | null;
   validation_code: string | null;
 }

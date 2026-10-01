@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from sqlalchemy.orm import Session
 
@@ -24,18 +25,18 @@ class ClassGroupService:
         self.programs = ProgramService(db)
         self.terms = AcademicTermService(db)
 
-    def list(self, term_id: int | None = None, program_id: int | None = None) -> list[ClassGroupOut]:
+    def list(self, term_id: UUID | None = None, program_id: UUID | None = None) -> list[ClassGroupOut]:
         groups = self.repo.list(term_id=term_id, program_id=program_id)
         counts = self.repo.member_counts([group.id for group in groups])
         return [self.to_out(group, counts.get(group.id, 0)) for group in groups]
 
-    def get_or_404(self, group_id: int) -> ClassGroup:
+    def get_or_404(self, group_id: UUID) -> ClassGroup:
         group = self.repo.get_by_id(group_id)
         if not group:
             raise not_found("Turma não encontrada")
         return group
 
-    def detail(self, group_id: int) -> ClassGroupOut:
+    def detail(self, group_id: UUID) -> ClassGroupOut:
         group = self.get_or_404(group_id)
         return self.to_out(group, self.repo.member_counts([group.id]).get(group.id, 0))
 
@@ -48,7 +49,7 @@ class ClassGroupService:
             raise conflict("Já existe turma com este nome no período")
         return self.to_out(self.repo.save(ClassGroup(**data.model_dump())), 0)
 
-    def update(self, group_id: int, data: ClassGroupUpdate) -> ClassGroupOut:
+    def update(self, group_id: UUID, data: ClassGroupUpdate) -> ClassGroupOut:
         group = self.get_or_404(group_id)
         self.terms.get_not_closed(group.term_id)
         if data.name is not None and data.name != group.name and self.repo.get_by_name(group.term_id, data.name):
@@ -58,7 +59,7 @@ class ClassGroupService:
         apply_patch(group, data, clearable=frozenset({"curriculum_term_number", "capacity", "homeroom_teacher_id"}))
         return self.detail(self.repo.save(group).id)
 
-    def delete(self, group_id: int) -> None:
+    def delete(self, group_id: UUID) -> None:
         group = self.get_or_404(group_id)
         if group.members:
             raise conflict("Turma possui alunos; remova-os antes")
@@ -85,7 +86,7 @@ class ClassGroupService:
         if term_number is not None and duration is not None and term_number > duration:
             raise bad_request("Série/semestre além da duração do programa")
 
-    def _validate_teacher(self, teacher_id: int | None) -> None:
+    def _validate_teacher(self, teacher_id: UUID | None) -> None:
         if teacher_id is None:
             return
         teacher = self.students.get_by_id(teacher_id)

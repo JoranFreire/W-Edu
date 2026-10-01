@@ -15,11 +15,11 @@ export function useTuitionPlans() {
     await api.post(endpoints.tuition.plans, input);
     reload();
   };
-  const setActive = async (planId: number, isActive: boolean) => {
+  const setActive = async (planId: string, isActive: boolean) => {
     await api.patch(endpoints.tuition.plan(planId), { is_active: isActive });
     reload();
   };
-  const generate = async (planId: number) => (await api.post<GenerationResult>(endpoints.tuition.generate(planId))).data;
+  const generate = async (planId: string) => (await api.post<GenerationResult>(endpoints.tuition.generate(planId))).data;
 
   return { plans: data, loading, error, create, setActive, generate };
 }

@@ -1,5 +1,6 @@
 """Regras da matricula por disciplina (funcoes puras)."""
 
+from uuid import UUID
 from dataclasses import dataclass, field
 from datetime import datetime, time, timezone
 
@@ -29,7 +30,7 @@ def clashing(target: list[WeeklySlot], taken: dict[str, list[WeeklySlot]]) -> li
     return sorted(name for name, slots in taken.items() if any(overlaps(a, b) for a in target for b in slots))
 
 
-def missing_prerequisites(required: dict[int, str], done: set[int]) -> list[str]:
+def missing_prerequisites(required: dict[UUID, str], done: set[UUID]) -> list[str]:
     return sorted(name for subject_id, name in required.items() if subject_id not in done)
 
 

@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from sqlalchemy.orm import Session
 
@@ -14,7 +15,7 @@ class SeatAllocator:
         self.records = StudentRecordRepository(db)
         self.offerings = TermOfferingRepository(db)
 
-    def enroll(self, offering_id: int, student_id: int) -> ClassEnrollment:
+    def enroll(self, offering_id: UUID, student_id: UUID) -> ClassEnrollment:
         """Reaproveita a inscricao cancelada antes (uma por aluno e oferta)."""
         enrollment = self.records.enrollment(offering_id, student_id)
         if enrollment is None:
@@ -25,7 +26,7 @@ class SeatAllocator:
         enrollment.final_grade = enrollment.recovery_score = enrollment.attendance_rate = None
         return enrollment
 
-    def waitlist(self, offering_id: int, student_id: int) -> WaitlistEntry:
+    def waitlist(self, offering_id: UUID, student_id: UUID) -> WaitlistEntry:
         entry = WaitlistEntry(class_offering_id=offering_id, student_id=student_id, position=self.offerings.next_waitlist_position(offering_id))
         self.db.add(entry)
         return entry

@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from sqlalchemy.orm import Session
 
@@ -14,5 +15,5 @@ class OwnEnrollmentLookup:
     def __init__(self, db: Session):
         self.repo = ProgramEnrollmentRepository(db)
 
-    def get(self, student: Student, enrollment_id: int) -> ProgramEnrollment:
+    def get(self, student: Student, enrollment_id: UUID) -> ProgramEnrollment:
         return ensure_own(self.repo.get_by_id(enrollment_id), student)

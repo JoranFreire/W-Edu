@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from sqlalchemy.orm import Session
 
@@ -23,7 +24,7 @@ class WaitlistPromotionService:
         self.seats = SeatAllocator(db)
         self.notices = NotificationEventService(db)
 
-    def fill(self, offering: ClassOffering) -> list[int]:
+    def fill(self, offering: ClassOffering) -> list[UUID]:
         free = offering.capacity - self.offerings.seats_taken([offering.id]).get(offering.id, 0)
         promoted = []
         for entry in self.offerings.waitlist(offering.id):
@@ -45,7 +46,7 @@ class WaitlistPromotionService:
             )
         return promoted
 
-    def _program_enrollment(self, student_id: int, subject_id: int | None) -> ProgramEnrollment | None:
+    def _program_enrollment(self, student_id: UUID, subject_id: UUID | None) -> ProgramEnrollment | None:
         """Matricula ativa cuja matriz tem a disciplina (senao, a primeira ativa)."""
         active = self.enrollments.list(student_id=student_id, status=ProgramEnrollmentStatus.active)
         with_subject = [e for e in active if any(c.subject_id == subject_id for c in e.curriculum.components)]

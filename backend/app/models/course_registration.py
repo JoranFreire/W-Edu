@@ -1,5 +1,8 @@
 """Matricula por disciplina (perfil universidade): janelas de matricula e horario semanal das ofertas."""
 
+from uuid import UUID
+
+from app.core.ids import new_id
 from datetime import datetime, time, timezone
 
 from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Time
@@ -18,10 +21,10 @@ class RegistrationWindow(TenantMixin, Base):
 
     __tablename__ = "registration_windows"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    term_id: Mapped[int] = mapped_column(ForeignKey("academic_terms.id"), index=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
+    term_id: Mapped[UUID] = mapped_column(ForeignKey("academic_terms.id"), index=True)
     # Vazio: vale para todos os programas da instituicao.
-    program_id: Mapped[int | None] = mapped_column(ForeignKey("programs.id"), index=True)
+    program_id: Mapped[UUID | None] = mapped_column(ForeignKey("programs.id"), index=True)
     name: Mapped[str] = mapped_column(String(120))
     opens_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     closes_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
@@ -40,8 +43,8 @@ class OfferingTimeSlot(TenantMixin, Base):
 
     __tablename__ = "offering_time_slots"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    class_offering_id: Mapped[int] = mapped_column(ForeignKey("class_offerings.id", ondelete="CASCADE"), index=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
+    class_offering_id: Mapped[UUID] = mapped_column(ForeignKey("class_offerings.id", ondelete="CASCADE"), index=True)
     weekday: Mapped[int] = mapped_column(Integer)
     starts_at: Mapped[time] = mapped_column(Time)
     ends_at: Mapped[time] = mapped_column(Time)

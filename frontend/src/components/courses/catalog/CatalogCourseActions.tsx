@@ -3,7 +3,7 @@ import { PlusCircleIcon } from '@heroicons/react/24/outline';
 
 /** Acao do aluno sobre um curso do catalogo: continuar (matriculado) ou matricular. */
 export default function CatalogCourseActions({ courseId, enrolled, onEnroll }: {
-  courseId: number;
+  courseId: string;
   enrolled: boolean;
   onEnroll: () => void;
 }) {

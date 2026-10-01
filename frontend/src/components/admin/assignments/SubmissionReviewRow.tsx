@@ -15,7 +15,7 @@ const fieldCls = 'rounded-lg border border-gray-300 bg-white px-2 py-2 text-xs t
 export default function SubmissionReviewRow({ submission, onDownload, onReview }: {
   submission: AssignmentSubmission;
   onDownload: (submission: AssignmentSubmission) => void;
-  onReview: (submissionId: number, review: SubmissionReview) => Promise<void>;
+  onReview: (submissionId: string, review: SubmissionReview) => Promise<void>;
 }) {
   const [status, setStatus] = useState(submission.status);
   const [score, setScore] = useState(submission.score === null ? '' : String(submission.score));

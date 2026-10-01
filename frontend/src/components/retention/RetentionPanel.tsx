@@ -9,11 +9,11 @@ import { useRetentionReport } from '@/lib/hooks/retention/useRetentionReport';
 import { useErrorToast } from '@/lib/hooks/useErrorToast';
 
 /** Frequencia por aluno com nivel de risco; a secretaria/coordenacao readmite quem foi desligado. */
-export default function RetentionPanel({ offeringId, canReadmit }: { offeringId: number; canReadmit: boolean }) {
+export default function RetentionPanel({ offeringId, canReadmit }: { offeringId: string; canReadmit: boolean }) {
   const { report, error, readmit } = useRetentionReport(offeringId);
   useErrorToast(error, 'Erro ao carregar a frequência.');
   if (!report) return <Spinner />;
-  const handleReadmit = async (enrollmentId: number) => {
+  const handleReadmit = async (enrollmentId: string) => {
     try {
       await readmit(enrollmentId);
       toast.success('Aluno readmitido.');

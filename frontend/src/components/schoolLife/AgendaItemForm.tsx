@@ -11,7 +11,7 @@ import type { AgendaItemInput, AgendaItemKind } from '@/types/schoolLife';
 
 /** Publica item na agenda da turma, opcionalmente ligado a oferta (disciplina). */
 export default function AgendaItemForm({ offeringId, onSubmit }: {
-  offeringId: number | null;
+  offeringId: string | null;
   onSubmit: (input: AgendaItemInput) => Promise<void>;
 }) {
   const empty: AgendaItemInput = { kind: 'homework', title: '', description: null, due_on: todayIso(), class_offering_id: offeringId };

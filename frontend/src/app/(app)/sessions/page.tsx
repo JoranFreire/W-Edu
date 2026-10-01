@@ -12,7 +12,7 @@ type SessionFilter = 'all' | 'completed' | 'open' | 'transcript';
 
 export default function SessionsPage() {
   const [sessions, setSessions] = useState<SessionHistory[]>([]);
-  const [expanded, setExpanded] = useState<number | null>(null);
+  const [expanded, setExpanded] = useState<string | null>(null);
   const [filter, setFilter] = useState<SessionFilter>('all');
   const [loading, setLoading] = useState(true);
 

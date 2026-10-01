@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -11,5 +13,5 @@ router = APIRouter()
 
 
 @router.get("/offerings/{offering_id}/gradebook", response_model=GradebookOut)
-def get_gradebook(offering_id: int, db: Session = Depends(get_db), current: Student = Depends(get_current_teaching_staff)):
+def get_gradebook(offering_id: UUID, db: Session = Depends(get_db), current: Student = Depends(get_current_teaching_staff)):
     return GradebookService(db).build(offering_id, current)

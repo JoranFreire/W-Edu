@@ -1,3 +1,6 @@
+from uuid import UUID
+
+from app.core.ids import new_id
 from datetime import datetime, timezone
 import enum
 
@@ -43,7 +46,7 @@ class NotificationTemplate(TenantMixin, Base):
     __tablename__ = "notification_templates"
     __table_args__ = (UniqueConstraint("institution_id", "key", "channel"),)
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
     key: Mapped[str] = mapped_column(String(120), index=True)
     channel: Mapped[NotificationChannel] = mapped_column(SAEnum(NotificationChannel), default=NotificationChannel.internal)
     title_template: Mapped[str] = mapped_column(String(200))
@@ -60,14 +63,14 @@ class NotificationTemplate(TenantMixin, Base):
 class NotificationEvent(TenantMixin, Base):
     __tablename__ = "notification_events"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=new_id)
     event_type: Mapped[NotificationEventType] = mapped_column(SAEnum(NotificationEventType), index=True)
     channel: Mapped[NotificationChannel] = mapped_column(SAEnum(NotificationChannel), default=NotificationChannel.internal)
     template_key: Mapped[str | None] = mapped_column(String(120), index=True)
-    recipient_student_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True, index=True)
-    course_id: Mapped[int | None] = mapped_column(ForeignKey("courses.id"), nullable=True, index=True)
-    class_offering_id: Mapped[int | None] = mapped_column(ForeignKey("class_offerings.id"), nullable=True, index=True)
-    scheduled_meeting_id: Mapped[int | None] = mapped_column(ForeignKey("scheduled_meetings.id"), nullable=True, index=True)
+    recipient_student_id: Mapped[UUID | None] = mapped_column(ForeignKey("users.id"), nullable=True, index=True)
+    course_id: Mapped[UUID | None] = mapped_column(ForeignKey("courses.id"), nullable=True, index=True)
+    class_offering_id: Mapped[UUID | None] = mapped_column(ForeignKey("class_offerings.id"), nullable=True, index=True)
+    scheduled_meeting_id: Mapped[UUID | None] = mapped_column(ForeignKey("scheduled_meetings.id"), nullable=True, index=True)
     payload: Mapped[dict] = mapped_column(JSON, default=dict)
     title: Mapped[str] = mapped_column(String(200))
     body: Mapped[str] = mapped_column(Text)

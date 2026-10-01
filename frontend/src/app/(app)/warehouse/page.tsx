@@ -16,7 +16,7 @@ export default function WarehouseRequestsPage() {
   const { requests, error, create, cancel } = useMyMaterialRequests();
   const { offerings } = useTeachingOfferings();
   useErrorToast(error, 'Erro ao carregar as requisições.');
-  const handleCancel = async (id: number) => {
+  const handleCancel = async (id: string) => {
     try {
       await cancel(id);
       toast.success('Requisição cancelada.');

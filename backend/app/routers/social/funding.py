@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends, Query
 from fastapi.responses import Response
 from sqlalchemy.orm import Session
@@ -23,19 +25,19 @@ def create_funding_source(data: FundingSourceCreate, db: Session = Depends(get_d
 
 
 @router.patch("/{funding_id}", response_model=FundingSourceOut)
-def update_funding_source(funding_id: int, data: FundingSourceUpdate, db: Session = Depends(get_db), _: Student = Depends(get_current_admin_or_coordinator)):
+def update_funding_source(funding_id: UUID, data: FundingSourceUpdate, db: Session = Depends(get_db), _: Student = Depends(get_current_admin_or_coordinator)):
     return FundingSourceService(db).update(funding_id, data)
 
 
 @router.get("/{funding_id}/report", response_model=FundingReportOut)
 def funding_report(
-    funding_id: int, minimum_wage_cents: int | None = Query(default=None, ge=1),
+    funding_id: UUID, minimum_wage_cents: int | None = Query(default=None, ge=1),
     db: Session = Depends(get_db), _: Student = Depends(get_current_secretariat),
 ):
     return FundingReportService(db).report(funding_id, minimum_wage_cents)
 
 
 @router.get("/{funding_id}/report.csv")
-def funding_report_csv(funding_id: int, db: Session = Depends(get_db), _: Student = Depends(get_current_secretariat)):
+def funding_report_csv(funding_id: UUID, db: Session = Depends(get_db), _: Student = Depends(get_current_secretariat)):
     content = FundingReportService(db).csv(funding_id)
     return Response(content, media_type="text/csv; charset=utf-8", headers={"Content-Disposition": f'attachment; filename="prestacao_contas_{funding_id}.csv"'})

@@ -15,7 +15,7 @@ export function useSaasPlans() {
     await api.post(endpoints.saas.plans, input);
     reload();
   };
-  const setActive = async (planId: number, isActive: boolean) => {
+  const setActive = async (planId: string, isActive: boolean) => {
     await api.patch(endpoints.saas.plan(planId), { is_active: isActive });
     reload();
   };

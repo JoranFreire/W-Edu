@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from sqlalchemy.orm import Session
 
@@ -37,11 +38,11 @@ class FinalResultService:
         self.attendance = DiaryAttendanceRepository(db)
         self.notices = ResultNoticeService(db)
 
-    def overview(self, offering_id: int, user: Student) -> OfferingResultsOut:
+    def overview(self, offering_id: UUID, user: Student) -> OfferingResultsOut:
         offering = self.offerings.get_for_teaching(offering_id, user)
         snapshot = OfferingScores(self.db, offering)
         closed = self.closure_repo.closed_period_ids(offering_id)
-        by_enrollment: dict[int, list] = {}
+        by_enrollment: dict[UUID, list] = {}
         for result in self.results.by_offering(offering_id):
             by_enrollment.setdefault(result.class_enrollment_id, []).append(result)
         rows = [
@@ -66,7 +67,7 @@ class FinalResultService:
             rows=rows,
         )
 
-    def compute(self, offering_id: int, user: Student) -> OfferingResultsOut:
+    def compute(self, offering_id: UUID, user: Student) -> OfferingResultsOut:
         offering = self.offerings.get_for_teaching(offering_id, user)
         ensure_offering_open(offering)
         self._consolidate_pending(offering, user)
@@ -74,7 +75,7 @@ class FinalResultService:
         self.db.commit()
         return self.overview(offering_id, user)
 
-    def save_recovery(self, offering_id: int, values: list[RecoveryInput], user: Student) -> OfferingResultsOut:
+    def save_recovery(self, offering_id: UUID, values: list[RecoveryInput], user: Student) -> OfferingResultsOut:
         offering = self.offerings.get_for_teaching(offering_id, user)
         ensure_offering_open(offering)
         scheme = OfferingScores(self.db, offering).scheme
@@ -94,7 +95,7 @@ class FinalResultService:
         self.db.commit()
         return self.overview(offering_id, user)
 
-    def finalize(self, offering_id: int, user: Student) -> OfferingResultsOut:
+    def finalize(self, offering_id: UUID, user: Student) -> OfferingResultsOut:
         """Publica o resultado: turma e inscricoes concluidas, lancamentos bloqueados e aviso ao aluno."""
         offering = self.offerings.get_for_teaching(offering_id, user)
         ensure_offering_open(offering)
@@ -113,7 +114,7 @@ class FinalResultService:
         snapshot = OfferingScores(self.db, offering)
         total_lessons = self.diary.total_lessons(offering.id)
         absences = self.attendance.unjustified_absences(offering.id)
-        by_enrollment: dict[int, list] = {}
+        by_enrollment: dict[UUID, list] = {}
         for result in self.results.by_offering(offering.id):
             by_enrollment.setdefault(result.class_enrollment_id, []).append(result)
         enrollments = self.offerings.roster(offering.id)
@@ -124,7 +125,7 @@ class FinalResultService:
         return enrollments
 
     @staticmethod
-    def _average(snapshot: OfferingScores, enrollment_id: int, period_results: list) -> float | None:
+    def _average(snapshot: OfferingScores, enrollment_id: UUID, period_results: list) -> float | None:
         """Media das etapas consolidadas, mais avaliacoes sem etapa (calculadas na hora)."""
         values = [result.average for result in period_results]
         if NO_PERIOD in snapshot.items_by_period:
@@ -132,8 +133,9 @@ class FinalResultService:
         return mean_of(values)
 
     @staticmethod
-    def _pending_periods(snapshot: OfferingScores, closed: set[int]) -> list[int]:
-        return sorted(int(key) for key in snapshot.items_by_period if key != NO_PERIOD and int(key) not in closed)
+    def _pending_periods(snapshot: OfferingScores, closed: set[UUID]) -> list[UUID]:
+        # Chaves do snapshot sao o id da etapa em texto; UUID v7 ordena pela criacao, como antes o id inteiro.
+        return sorted(UUID(key) for key in snapshot.items_by_period if key != NO_PERIOD and UUID(key) not in closed)
 
     def _consolidate_pending(self, offering: ClassOffering, user: Student) -> None:
         """Etapas com avaliacoes precisam estar fechadas; as encerradas na instituicao sao consolidadas aqui."""

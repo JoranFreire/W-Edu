@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from datetime import datetime, timezone
 
@@ -28,7 +29,7 @@ class RetentionService:
         self.ledgers = AttendanceLedgerBuilder(db)
         self.notices = NotificationEventService(db)
 
-    def report(self, offering_id: int, user: Student) -> RetentionReportOut:
+    def report(self, offering_id: UUID, user: Student) -> RetentionReportOut:
         offering = self._offering(offering_id)
         ensure_can_follow(user, offering)
         tracked = self.enrollments.tracked(offering.id)
@@ -45,7 +46,7 @@ class RetentionService:
         rows.sort(key=lambda row: (row.dismissed_at is not None, -row.absence_percent))
         return RetentionReportOut(class_offering_id=offering.id, offering_name=offering.name, max_absence_percent=offering.max_absence_percent, rows=rows)
 
-    def evaluate(self, offering_id: int) -> EvaluationOut:
+    def evaluate(self, offering_id: UUID) -> EvaluationOut:
         return EvaluationOut(dismissed=[PersonSummary.model_validate(s) for s in self.dismiss_exceeded(self._offering(offering_id))])
 
     def dismiss_exceeded(self, offering: ClassOffering) -> list[Student]:
@@ -73,7 +74,7 @@ class RetentionService:
             )
         return [student for student, _ in dismissed]
 
-    def readmit(self, enrollment_id: int) -> RetentionRow:
+    def readmit(self, enrollment_id: UUID) -> RetentionRow:
         enrollment = self.enrollments.get(enrollment_id)
         if not enrollment:
             raise not_found("Inscrição não encontrada")
@@ -88,7 +89,7 @@ class RetentionService:
             level=level(ledger, enrollment.class_offering.max_absence_percent or DEFAULT_LIMIT_PERCENT), dismissed_at=None, dismissal_reason=None,
         )
 
-    def _offering(self, offering_id: int) -> ClassOffering:
+    def _offering(self, offering_id: UUID) -> ClassOffering:
         offering = self.offerings.get_by_id(offering_id)
         if not offering:
             raise not_found("Turma não encontrada")

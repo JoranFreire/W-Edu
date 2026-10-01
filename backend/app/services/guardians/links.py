@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from sqlalchemy.orm import Session
 
@@ -25,11 +26,11 @@ class GuardianLinkService:
         self.students = StudentService(db)
         self.memberships = MembershipService(db)
 
-    def list(self, student_id: int) -> list[StudentGuardian]:
+    def list(self, student_id: UUID) -> list[StudentGuardian]:
         self._student_or_404(student_id)
         return self.repo.list_by_student(student_id)
 
-    def add(self, student_id: int, data: GuardianLinkCreate) -> StudentGuardian:
+    def add(self, student_id: UUID, data: GuardianLinkCreate) -> StudentGuardian:
         self._student_or_404(student_id)
         guardian = self._guardian_account(data)
         if self.repo.get(student_id, guardian.id):
@@ -43,14 +44,14 @@ class GuardianLinkService:
             self.repo.clear_primary(student_id, except_id=link.id)
         return self.repo.save(link)
 
-    def update(self, link_id: int, data: GuardianLinkUpdate) -> StudentGuardian:
+    def update(self, link_id: UUID, data: GuardianLinkUpdate) -> StudentGuardian:
         link = self._link_or_404(link_id)
         apply_patch(link, data)
         if data.is_primary:
             self.repo.clear_primary(link.student_id, except_id=link.id)
         return self.repo.save(link)
 
-    def remove(self, link_id: int) -> None:
+    def remove(self, link_id: UUID) -> None:
         self.repo.delete(self._link_or_404(link_id))
 
     def _guardian_account(self, data: GuardianLinkCreate) -> Student:
@@ -65,13 +66,13 @@ class GuardianLinkService:
             raise bad_request("Informe uma senha inicial para a nova conta do responsável")
         return self.students.create(StudentCreate(name=data.name, email=data.email, password=data.password, role=UserRole.guardian))
 
-    def _student_or_404(self, student_id: int) -> Student:
+    def _student_or_404(self, student_id: UUID) -> Student:
         student = self.users.get_by_id(student_id)
         if not student or student.role != UserRole.student:
             raise not_found("Aluno não encontrado")
         return student
 
-    def _link_or_404(self, link_id: int) -> StudentGuardian:
+    def _link_or_404(self, link_id: UUID) -> StudentGuardian:
         link = self.repo.get_by_id(link_id)
         if not link:
             raise not_found("Vínculo não encontrado")

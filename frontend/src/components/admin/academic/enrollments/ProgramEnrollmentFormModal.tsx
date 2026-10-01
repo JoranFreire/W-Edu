@@ -29,9 +29,9 @@ export default function ProgramEnrollmentFormModal({ students, programs, terms, 
   const submit = (event: React.FormEvent) => {
     event.preventDefault();
     const input: ProgramEnrollmentInput = {
-      student_id: Number(form.student_id),
-      program_id: Number(form.program_id),
-      entry_term_id: form.entry_term_id ? Number(form.entry_term_id) : null,
+      student_id: form.student_id,
+      program_id: form.program_id,
+      entry_term_id: form.entry_term_id ? form.entry_term_id : null,
       registration_number: form.registration_number.trim() || null,
     };
     run(() => onSave(input)).catch((error) => toast.error(apiErrorMessage(error, 'Erro ao matricular.')));

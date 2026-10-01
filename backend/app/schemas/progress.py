@@ -1,3 +1,4 @@
+from uuid import UUID
 from datetime import datetime
 from typing import Optional
 from pydantic import BaseModel
@@ -9,9 +10,9 @@ class ProgressUpdate(BaseModel):
 
 
 class ProgressOut(BaseModel):
-    id: int
-    student_id: int
-    lesson_id: int
+    id: UUID
+    student_id: UUID
+    lesson_id: UUID
     status: ProgressStatus
     content_consumed_at: Optional[datetime]
     updated_at: datetime
@@ -20,7 +21,7 @@ class ProgressOut(BaseModel):
 
 
 class CourseProgressOut(BaseModel):
-    course_id: int
+    course_id: UUID
     course_name: str
     total_lessons: int
     done_lessons: int

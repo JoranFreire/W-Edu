@@ -18,7 +18,7 @@ import { useAuthStore } from '@/store/authStore';
 /** Um edital: situacao, analise das inscricoes, selecao e chamadas sucessivas. */
 export default function AdmissionCallPage() {
   const router = useRouter();
-  const callId = Number(useParams<{ callId: string }>().callId);
+  const callId = useParams<{ callId: string }>().callId;
   const slug = useAuthStore((state) => state.institution?.slug ?? null);
   const admission = useAdmissionCall(callId);
   const { call, applications } = admission;

@@ -31,7 +31,7 @@ export default function CallFormModal({ offerings, onSave, onClose }: {
   const submit = (event: React.FormEvent) => {
     event.preventDefault();
     const input: AdmissionCallInput = {
-      class_offering_id: Number(form.offeringId), title: form.title, description: form.description || null, method: form.method,
+      class_offering_id: form.offeringId, title: form.title, description: form.description || null, method: form.method,
       seats: Number(form.seats), reserved_seats: Number(form.reserved || 0), reserved_label: form.reservedLabel || null,
       opens_at: toApiDateTime(form.opensAt), closes_at: toApiDateTime(form.closesAt), confirmation_days: Number(form.confirmationDays),
       min_age: toOptionalInt(form.minAge), max_age: toOptionalInt(form.maxAge), min_schooling: (form.minSchooling || null) as Schooling | null,

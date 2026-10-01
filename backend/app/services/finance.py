@@ -1,3 +1,4 @@
+from uuid import UUID
 from datetime import datetime, timedelta, timezone
 
 from fastapi import HTTPException, status
@@ -26,7 +27,7 @@ class FinanceService:
     def create_plan(self, data: BillingPlanCreate) -> BillingPlan:
         return self.plan_repo.create(BillingPlan(**data.model_dump()))
 
-    def update_plan(self, plan_id: int, data: BillingPlanUpdate) -> BillingPlan:
+    def update_plan(self, plan_id: UUID, data: BillingPlanUpdate) -> BillingPlan:
         plan = self._get_plan_or_404(plan_id)
         for field, value in data.model_dump(exclude_none=True).items():
             setattr(plan, field, value)
@@ -59,7 +60,7 @@ class FinanceService:
         )
         return self.subscription_repo.create(subscription)
 
-    def update_subscription(self, subscription_id: int, data: SubscriptionUpdate) -> Subscription:
+    def update_subscription(self, subscription_id: UUID, data: SubscriptionUpdate) -> Subscription:
         subscription = self._get_subscription_or_404(subscription_id)
         for field, value in data.model_dump(exclude_none=True).items():
             setattr(subscription, field, value)
@@ -92,7 +93,7 @@ class FinanceService:
             charge = self.charge_repo.update(charge)
         return charge
 
-    def sync_charge_gateway(self, charge_id: int) -> Charge:
+    def sync_charge_gateway(self, charge_id: UUID) -> Charge:
         charge = self._get_charge_or_404(charge_id)
         if charge.gateway_name != "asaas":
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cobrança não usa gateway Asaas")
@@ -101,43 +102,43 @@ class FinanceService:
         charge = apply_gateway_payload(charge, AsaasGateway().create_charge(charge))
         return self.charge_repo.update(charge)
 
-    def update_charge(self, charge_id: int, data: ChargeUpdate) -> Charge:
+    def update_charge(self, charge_id: UUID, data: ChargeUpdate) -> Charge:
         charge = self._get_charge_or_404(charge_id)
         for field, value in data.model_dump(exclude_none=True).items():
             setattr(charge, field, value)
         return self.charge_repo.update(charge)
 
-    def mark_paid(self, charge_id: int, method: PaymentMethod = PaymentMethod.manual) -> Charge:
+    def mark_paid(self, charge_id: UUID, method: PaymentMethod = PaymentMethod.manual) -> Charge:
         charge = self._get_charge_or_404(charge_id)
         charge.status = ChargeStatus.paid
         charge.payment_method = method
         charge.paid_at = datetime.now(timezone.utc)
         return self.charge_repo.update(charge)
 
-    def mark_failed(self, charge_id: int) -> Charge:
+    def mark_failed(self, charge_id: UUID) -> Charge:
         charge = self._get_charge_or_404(charge_id)
         charge.status = ChargeStatus.failed
         return self.charge_repo.update(charge)
 
-    def _get_plan_or_404(self, plan_id: int) -> BillingPlan:
+    def _get_plan_or_404(self, plan_id: UUID) -> BillingPlan:
         plan = self.plan_repo.get_by_id(plan_id)
         if not plan:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Plano não encontrado")
         return plan
 
-    def _get_subscription_or_404(self, subscription_id: int) -> Subscription:
+    def _get_subscription_or_404(self, subscription_id: UUID) -> Subscription:
         subscription = self.subscription_repo.get_by_id(subscription_id)
         if not subscription:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Assinatura não encontrada")
         return subscription
 
-    def _get_charge_or_404(self, charge_id: int) -> Charge:
+    def _get_charge_or_404(self, charge_id: UUID) -> Charge:
         charge = self.charge_repo.get_by_id(charge_id)
         if not charge:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Cobrança não encontrada")
         return charge
 
-    def _validate_subscription_target(self, student_id: int | None, organization_id: int | None) -> None:
+    def _validate_subscription_target(self, student_id: UUID | None, organization_id: UUID | None) -> None:
         if not student_id and not organization_id:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Informe aluno ou empresa")
         if student_id and not self.student_repo.get_by_id(student_id):
@@ -145,7 +146,7 @@ class FinanceService:
         if organization_id and not self.organization_repo.get_by_id(organization_id):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Empresa não encontrada")
 
-    def _validate_charge_target(self, student_id: int | None, organization_id: int | None, subscription_id: int | None) -> None:
+    def _validate_charge_target(self, student_id: UUID | None, organization_id: UUID | None, subscription_id: UUID | None) -> None:
         if not subscription_id and not student_id and not organization_id:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Informe assinatura, aluno ou empresa")
         if student_id and not self.student_repo.get_by_id(student_id):

@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -18,20 +20,20 @@ def list_requests(status: RequestStatus | None = None, db: Session = Depends(get
 
 
 @router.post("/{request_id}/approve", response_model=RequestOut)
-def approve(request_id: int, data: ApprovalInput, db: Session = Depends(get_db), current: Student = Depends(get_current_warehouse_manager)):
+def approve(request_id: UUID, data: ApprovalInput, db: Session = Depends(get_db), current: Student = Depends(get_current_warehouse_manager)):
     return MaterialRequestReviewService(db).approve(request_id, data, current)
 
 
 @router.post("/{request_id}/reject", response_model=RequestOut)
-def reject(request_id: int, data: RejectInput, db: Session = Depends(get_db), current: Student = Depends(get_current_warehouse_manager)):
+def reject(request_id: UUID, data: RejectInput, db: Session = Depends(get_db), current: Student = Depends(get_current_warehouse_manager)):
     return MaterialRequestReviewService(db).reject(request_id, data, current)
 
 
 @router.post("/{request_id}/deliver", response_model=RequestOut)
-def deliver(request_id: int, db: Session = Depends(get_db), current: Student = Depends(get_current_warehouse_manager)):
+def deliver(request_id: UUID, db: Session = Depends(get_db), current: Student = Depends(get_current_warehouse_manager)):
     return MaterialFulfillmentService(db).deliver(request_id, current)
 
 
 @router.post("/{request_id}/returns", response_model=RequestOut)
-def register_return(request_id: int, data: ReturnInput, db: Session = Depends(get_db), _: Student = Depends(get_current_warehouse_manager)):
+def register_return(request_id: UUID, data: ReturnInput, db: Session = Depends(get_db), _: Student = Depends(get_current_warehouse_manager)):
     return MaterialFulfillmentService(db).register_return(request_id, data)

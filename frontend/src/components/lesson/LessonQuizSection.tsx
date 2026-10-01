@@ -11,7 +11,7 @@ export default function LessonQuizSection({ quiz, lastAttempt, consumed, isDone,
   isDone: boolean;
   showQuiz: boolean;
   setShowQuiz: (v: boolean) => void;
-  lessonId: number;
+  lessonId: string;
   refreshProgress: () => Promise<void>;
   onAttempt: (a: QuizAttempt) => void;
   onPass: () => Promise<void>;

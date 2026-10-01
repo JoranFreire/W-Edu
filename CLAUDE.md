@@ -14,6 +14,7 @@ Vale para todo código tocado, novo ou antigo. Ao alterar um arquivo que mistura
 - Autorização por permissão (RBAC): guards em `app/dependencies.py` exigem uma chave do catálogo (`app/services/access/catalog.py`); o papel do usuário concede um conjunto padrão e perfis de acesso da instituição somam permissões. Recurso novo ganha permissão no catálogo, não um novo teste de papel.
 - Áreas grandes viram pacote com um módulo por responsabilidade (ex.: `app/services/certificates/`, `app/services/notifications/`, `app/services/academic/`, `app/services/assessment/`, `app/services/secretariat/`, `app/services/registration/`, `app/services/completion/`, `app/services/tuition/`, `app/services/contracts/`, `app/services/saas/`, `app/services/admissions/`, `app/services/retention/`, `app/services/social/`, `app/services/access/`, `app/services/warehouse/`, `app/routers/admin/`).
 - Infraestrutura transversal em `app/core/` com um módulo por preocupação (ex.: `tenancy.py` filtra leitura; `tenant_integrity.py` valida gravação).
+- Ids: UUID versão 7 gerado pela aplicação (`app/core/ids.py`: `new_id`, crescente no tempo; `parse_id` para texto). Colunas de id e chaves estrangeiras são `Mapped[UUID]` (tipo `IdType`, que aceita o id em texto). Nunca trate id como número: nada de `int(id)`, sentinela `[-1]` em `IN` (lista vazia já funciona) nem aritmética para ordenar.
 
 **Frontend**
 - Página: compõe hooks e componentes; não faz `api.*` direto nem concentra várias telas.
@@ -22,6 +23,7 @@ Vale para todo código tocado, novo ou antigo. Ao alterar um arquivo que mistura
 - Utilitários puros em `src/lib/` (`dates.ts`, `files/saveBlob.ts`, `api/errors.ts`, `text/slugify.ts`).
 - Nomenclatura acadêmica (série/semestre/módulo, disciplina/componente): `useTerminology()` (presets em `src/lib/institution/terminology.ts`); não fixe esses termos nas telas.
 - Erros de API: `apiErrorMessage(error, fallback)`; nunca `catch (e: any)`.
+- Ids são `string` (UUID): nada de `Number(id)` em parâmetros de rota ou selects; mapas por id são `Record<string, …>`.
 - Estado de `localStorage`: `useStoredValue`; formulário que parte de dados carregados: componente filho com `key` e estado inicial por props.
 
 ## Multi-tenant

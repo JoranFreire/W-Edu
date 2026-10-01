@@ -7,7 +7,7 @@ export default function NewUserModal({ organizations, availableRoles, onClose, o
   organizations: Organization[];
   availableRoles: Array<[UserRole, string]>;
   onClose: () => void;
-  onSave: (data: { name: string; email: string; password: string; role: UserRole; organization_id: number | null }) => Promise<void>;
+  onSave: (data: { name: string; email: string; password: string; role: UserRole; organization_id: string | null }) => Promise<void>;
 }) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -19,7 +19,7 @@ export default function NewUserModal({ organizations, availableRoles, onClose, o
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-    await onSave({ name, email, password, role, organization_id: organizationId ? Number(organizationId) : null });
+    await onSave({ name, email, password, role, organization_id: organizationId ? organizationId : null });
     setSaving(false);
   };
 

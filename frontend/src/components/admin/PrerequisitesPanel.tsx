@@ -10,7 +10,7 @@ import ConfirmDialog from './ConfirmDialog';
 import { apiErrorMessage } from '@/lib/api/errors';
 
 interface Props {
-  courseId: number;
+  courseId: string;
   courses: Course[];
   prerequisites: CoursePrerequisite[];
   canDelete: boolean;
@@ -20,7 +20,7 @@ interface Props {
 export default function PrerequisitesPanel({ courseId, courses, prerequisites, canDelete, onChanged }: Props) {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedCourseId, setSelectedCourseId] = useState('');
-  const [prerequisiteToDelete, setPrerequisiteToDelete] = useState<number | null>(null);
+  const [prerequisiteToDelete, setPrerequisiteToDelete] = useState<string | null>(null);
   const prerequisiteIds = new Set(prerequisites.map((item) => item.prerequisite_course_id));
   const options = courses.filter((c) => c.id !== courseId && !prerequisiteIds.has(c.id));
 
@@ -31,7 +31,7 @@ export default function PrerequisitesPanel({ courseId, courses, prerequisites, c
   };
 
   const addPrerequisite = async () => {
-    const prerequisiteCourseId = Number(selectedCourseId);
+    const prerequisiteCourseId = selectedCourseId;
     if (!Number.isInteger(prerequisiteCourseId) || !options.some((c) => c.id === prerequisiteCourseId)) {
       toast.error('Curso pré-requisito inválido.'); return;
     }

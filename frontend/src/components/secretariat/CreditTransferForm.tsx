@@ -22,7 +22,7 @@ export default function CreditTransferForm({ pending, onRequest }: {
     event.preventDefault();
     try {
       await onRequest({
-        subject_id: Number(draft.subject_id),
+        subject_id: draft.subject_id,
         origin: draft.source_institution ? 'external' : 'internal',
         source_institution: draft.source_institution || null,
         source_subject: draft.source_subject,

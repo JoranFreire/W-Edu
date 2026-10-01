@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from sqlalchemy import or_
 from sqlalchemy.orm import Session, joinedload
@@ -13,7 +14,7 @@ class TranscriptRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def attempts(self, student_id: int, subject_ids: set[int]) -> list[ClassEnrollment]:
+    def attempts(self, student_id: UUID, subject_ids: set[UUID]) -> list[ClassEnrollment]:
         if not subject_ids:
             return []
         return (
@@ -29,7 +30,7 @@ class TranscriptRepository:
             .all()
         )
 
-    def equivalences(self, subject_ids: set[int]) -> list[tuple[int, int]]:
+    def equivalences(self, subject_ids: set[UUID]) -> list[tuple[int, int]]:
         if not subject_ids:
             return []
         rows = (

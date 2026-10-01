@@ -13,12 +13,12 @@ import { useErrorToast } from '@/lib/hooks/useErrorToast';
 export default function SecretariatAgendaPage() {
   const router = useRouter();
   const { terms, error } = useAcademicTerms();
-  const [chosenTerm, setChosenTerm] = useState<number | null>(null);
-  const [groupId, setGroupId] = useState<number | null>(null);
+  const [chosenTerm, setChosenTerm] = useState<string | null>(null);
+  const [groupId, setGroupId] = useState<string | null>(null);
   useErrorToast(error, 'Erro ao carregar períodos letivos.');
   const termId = chosenTerm ?? terms.find((term) => term.status === 'open')?.id ?? terms[0]?.id ?? null;
 
-  const changeTerm = (next: number | null) => {
+  const changeTerm = (next: string | null) => {
     setChosenTerm(next);
     setGroupId(null);
   };

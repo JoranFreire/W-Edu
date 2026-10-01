@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -21,15 +23,15 @@ def create_item(data: BenefitItemCreate, db: Session = Depends(get_db), _: Stude
 
 
 @router.patch("/{item_id}", response_model=BenefitItemOut)
-def update_item(item_id: int, data: BenefitItemUpdate, db: Session = Depends(get_db), _: Student = Depends(get_current_secretariat)):
+def update_item(item_id: UUID, data: BenefitItemUpdate, db: Session = Depends(get_db), _: Student = Depends(get_current_secretariat)):
     return BenefitCatalogService(db).update(item_id, data)
 
 
 @router.get("/{item_id}/stock", response_model=list[StockEntryOut])
-def stock_entries(item_id: int, db: Session = Depends(get_db), _: Student = Depends(get_current_secretariat)):
+def stock_entries(item_id: UUID, db: Session = Depends(get_db), _: Student = Depends(get_current_secretariat)):
     return BenefitCatalogService(db).entries(item_id)
 
 
 @router.post("/{item_id}/stock", response_model=BenefitItemOut, status_code=201)
-def receive_stock(item_id: int, data: StockEntryCreate, db: Session = Depends(get_db), current: Student = Depends(get_current_secretariat)):
+def receive_stock(item_id: UUID, data: StockEntryCreate, db: Session = Depends(get_db), current: Student = Depends(get_current_secretariat)):
     return BenefitCatalogService(db).receive(item_id, data, current)

@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -26,7 +28,7 @@ def list_organizations(db: Session = Depends(get_db), current: Student = Depends
 
 @router.patch("/organizations/{organization_id}", response_model=OrganizationOut)
 def update_organization(
-    organization_id: int,
+    organization_id: UUID,
     data: OrganizationUpdate,
     db: Session = Depends(get_db),
     _: Student = Depends(get_current_admin),

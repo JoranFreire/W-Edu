@@ -44,7 +44,7 @@ export default function UnitFormModal({ unit, units, onSave, onClose }: {
         <label className={labelCls}>Unidade superior
           <select
             value={form.parent_id ?? ''}
-            onChange={(e) => setForm({ ...form, parent_id: e.target.value ? Number(e.target.value) : null })}
+            onChange={(e) => setForm({ ...form, parent_id: e.target.value || null })}
             className={`mt-1 ${inputCls}`}
           >
             <option value="">Nenhuma</option>

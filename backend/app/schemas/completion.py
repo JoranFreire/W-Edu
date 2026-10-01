@@ -1,3 +1,4 @@
+from uuid import UUID
 from datetime import date, datetime
 from typing import Literal
 
@@ -22,8 +23,8 @@ class ActivityDecision(BaseModel):
 
 
 class ActivityOut(BaseModel):
-    id: int
-    program_enrollment_id: int
+    id: UUID
+    program_enrollment_id: UUID
     category: ActivityCategory
     title: str
     description: str | None
@@ -41,7 +42,7 @@ class ActivityOut(BaseModel):
 class InternshipCreate(BaseModel):
     company_name: str = Field(min_length=1, max_length=200)
     supervisor_name: str | None = Field(default=None, max_length=200)
-    advisor_id: int | None = None
+    advisor_id: UUID | None = None
     is_mandatory: bool = True
     agreement_number: str | None = Field(default=None, max_length=80)
     starts_on: date
@@ -52,7 +53,7 @@ class InternshipCreate(BaseModel):
 
 class InternshipUpdate(BaseModel):
     supervisor_name: str | None = Field(default=None, max_length=200)
-    advisor_id: int | None = None
+    advisor_id: UUID | None = None
     agreement_number: str | None = Field(default=None, max_length=80)
     ends_on: date | None = None
     planned_hours: int | None = Field(default=None, ge=1)
@@ -61,8 +62,8 @@ class InternshipUpdate(BaseModel):
 
 
 class InternshipOut(BaseModel):
-    id: int
-    program_enrollment_id: int
+    id: UUID
+    program_enrollment_id: UUID
     student: PersonSummary
     company_name: str
     supervisor_name: str | None
@@ -89,8 +90,8 @@ class LogReview(BaseModel):
 
 
 class InternshipLogOut(BaseModel):
-    id: int
-    internship_id: int
+    id: UUID
+    internship_id: UUID
     worked_on: date
     hours: int
     activities: str
@@ -102,7 +103,7 @@ class InternshipLogOut(BaseModel):
 
 class FinalProjectInput(BaseModel):
     title: str = Field(min_length=1, max_length=300)
-    advisor_id: int | None = None
+    advisor_id: UUID | None = None
     co_advisor_name: str | None = Field(default=None, max_length=200)
     notes: str | None = Field(default=None, max_length=4000)
 
@@ -117,8 +118,8 @@ class FinalProjectResult(BaseModel):
 
 
 class FinalProjectOut(BaseModel):
-    id: int
-    program_enrollment_id: int
+    id: UUID
+    program_enrollment_id: UUID
     student: PersonSummary
     title: str
     advisor: PersonSummary | None
@@ -143,7 +144,7 @@ class RequirementOut(BaseModel):
 
 
 class IntegralizationOut(BaseModel):
-    program_enrollment_id: int
+    program_enrollment_id: UUID
     registration_number: str
     program_name: str
     cr: float | None

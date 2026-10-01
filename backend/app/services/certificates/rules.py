@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from sqlalchemy.orm import Session
 
 from app.models.course import Course, CourseCompletionRule, CourseModality
@@ -13,14 +15,14 @@ class CertificateRuleService:
         self.db = db
         self.repo = CourseCompletionRuleRepository(db)
 
-    def get_rule(self, course_id: int) -> CourseCompletionRule:
+    def get_rule(self, course_id: UUID) -> CourseCompletionRule:
         course = get_course_or_404(self.db, course_id)
         rule = self.repo.get_by_course(course_id)
         if rule:
             return rule
         return self.repo.create(self._default_rule(course))
 
-    def update_rule(self, course_id: int, data: CertificateRuleUpdate) -> CourseCompletionRule:
+    def update_rule(self, course_id: UUID, data: CertificateRuleUpdate) -> CourseCompletionRule:
         rule = self.get_rule(course_id)
         for field, value in data.model_dump(exclude_none=True).items():
             setattr(rule, field, value)

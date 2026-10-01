@@ -7,7 +7,7 @@ import { endpoints } from '@/lib/api/endpoints';
 import type { Lesson, Progress, Session } from '@/types/course';
 import type { Quiz, QuizAttempt } from '@/types/quiz';
 
-export function useLessonPage(lessonId: number) {
+export function useLessonPage(lessonId: string) {
   const [lesson, setLesson] = useState<Lesson | null>(null);
   const [progress, setProgress] = useState<Progress | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -31,7 +31,7 @@ export function useLessonPage(lessonId: number) {
     ]).then(([l, p, s, q, a]) => {
       setLesson(l.data);
       setProgress(p.data.find((x) => x.lesson_id === lessonId) ?? null);
-      setSession(s.data.filter((x) => x.lesson_id === lessonId).sort((a, b) => b.id - a.id)[0] ?? null);
+      setSession(s.data.filter((x) => x.lesson_id === lessonId).sort((a, b) => b.id.localeCompare(a.id))[0] ?? null);
       if (q) setQuiz(q.data);
       if (a && a.data.length > 0) setLastAttempt(a.data[0]);
     });

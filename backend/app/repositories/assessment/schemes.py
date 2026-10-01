@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from app.models.assessment import GradingScheme
 from app.models.schedule import ClassOffering
@@ -17,12 +18,12 @@ class GradingSchemeRepository(Repository[GradingScheme]):
     def get_default(self) -> GradingScheme | None:
         return self.db.query(GradingScheme).filter(GradingScheme.is_default.is_(True)).first()
 
-    def clear_default(self, except_id: int | None = None) -> None:
+    def clear_default(self, except_id: UUID | None = None) -> None:
         query = self.db.query(GradingScheme).filter(GradingScheme.is_default.is_(True))
         if except_id is not None:
             query = query.filter(GradingScheme.id != except_id)
         for scheme in query.all():
             scheme.is_default = False
 
-    def is_used(self, scheme_id: int) -> bool:
+    def is_used(self, scheme_id: UUID) -> bool:
         return self.db.query(ClassOffering.id).filter(ClassOffering.grading_scheme_id == scheme_id).first() is not None

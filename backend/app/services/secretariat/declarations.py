@@ -1,4 +1,5 @@
 from __future__ import annotations
+from uuid import UUID
 
 from datetime import date, datetime, timezone
 
@@ -32,14 +33,14 @@ class DeclarationService:
         self.diary = ClassDiaryRepository(db)
         self.attendance = DiaryAttendanceRepository(db)
 
-    def list(self, enrollment_id: int) -> list[AcademicDeclaration]:
+    def list(self, enrollment_id: UUID) -> list[AcademicDeclaration]:
         self.lifecycle.get_or_404(enrollment_id)
         return self.repo.list_by_enrollment(enrollment_id)
 
     def list_for_student(self, student: Student) -> list[AcademicDeclaration]:
         return self.repo.list_for_student(student.id)
 
-    def issue(self, enrollment_id: int, data: DeclarationCreate, user_id: int) -> AcademicDeclaration:
+    def issue(self, enrollment_id: UUID, data: DeclarationCreate, user_id: UUID) -> AcademicDeclaration:
         enrollment = self.lifecycle.get_or_404(enrollment_id)
         content = self._content(enrollment, data)
         declaration = self.repo.add(AcademicDeclaration(
@@ -51,13 +52,13 @@ class DeclarationService:
         declaration.signature_hash = sign(self._parts(declaration))
         return self.repo.save(declaration)
 
-    def get_or_404(self, declaration_id: int) -> AcademicDeclaration:
+    def get_or_404(self, declaration_id: UUID) -> AcademicDeclaration:
         declaration = self.repo.get_by_id(declaration_id)
         if not declaration:
             raise not_found("Declaração não encontrada")
         return declaration
 
-    def get_for_student(self, declaration_id: int, student: Student) -> AcademicDeclaration:
+    def get_for_student(self, declaration_id: UUID, student: Student) -> AcademicDeclaration:
         declaration = self.get_or_404(declaration_id)
         if self.lifecycle.get_or_404(declaration.program_enrollment_id).student_id != student.id:
             raise not_found("Declaração não encontrada")
@@ -69,7 +70,7 @@ class DeclarationService:
             footer.insert(0, "DOCUMENTO REVOGADO")
         return render_text_pdf(declaration.title, [*declaration.lines, "", *footer], title_size=20, body_size=12, leading=24)
 
-    def revoke(self, declaration_id: int, reason: str) -> AcademicDeclaration:
+    def revoke(self, declaration_id: UUID, reason: str) -> AcademicDeclaration:
         declaration = self.get_or_404(declaration_id)
         if declaration.revoked_at:
             raise conflict("Declaração já revogada")
@@ -115,7 +116,7 @@ class DeclarationService:
             raise conflict("Declaração de conclusão exige programa concluído")
         return DeclarationData(**base, concluded_on=enrollment.concluded_on, ceremony_on=enrollment.ceremony_on)
 
-    def _attendance(self, student_id: int, term_id: int) -> tuple[tuple[str, float | None], ...]:
+    def _attendance(self, student_id: UUID, term_id: UUID) -> tuple[tuple[str, float | None], ...]:
         rows = []
         for class_enrollment in self.repo.term_class_enrollments(student_id, term_id):
             rate = class_enrollment.attendance_rate

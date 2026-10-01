@@ -1,3 +1,4 @@
+from uuid import UUID
 from datetime import date, datetime
 
 from pydantic import BaseModel, Field, model_validator
@@ -9,7 +10,7 @@ from app.schemas.academic_groups import PersonSummary
 
 
 class AdmissionCallCreate(BaseModel):
-    class_offering_id: int
+    class_offering_id: UUID
     title: str = Field(min_length=1, max_length=200)
     description: str | None = Field(default=None, max_length=8000)
     method: SelectionMethod = SelectionMethod.first_come
@@ -48,8 +49,8 @@ class CallStatusChange(BaseModel):
 
 
 class AdmissionCallOut(BaseModel):
-    id: int
-    class_offering_id: int
+    id: UUID
+    class_offering_id: UUID
     course_name: str
     offering_name: str
     starts_at: datetime
@@ -84,7 +85,7 @@ class ApplicationCreate(BaseModel):
 
 
 class ApplicationDocumentOut(BaseModel):
-    id: int
+    id: UUID
     kind: str
     file_name: str
     review: DocumentReview
@@ -94,8 +95,8 @@ class ApplicationDocumentOut(BaseModel):
 
 
 class ApplicationOut(BaseModel):
-    id: int
-    call_id: int
+    id: UUID
+    call_id: UUID
     call_title: str
     applicant: PersonSummary
     protocol: str
@@ -139,7 +140,7 @@ class ResultEntry(BaseModel):
 
 
 class AdmissionResultOut(BaseModel):
-    call_id: int
+    call_id: UUID
     title: str
     method: SelectionMethod
     lottery_seed: str | None

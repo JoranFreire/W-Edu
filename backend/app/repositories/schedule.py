@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from sqlalchemy import func
 from sqlalchemy.orm import Session, selectinload
 
@@ -19,7 +21,7 @@ class LocationRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def get_by_id(self, location_id: int) -> Location | None:
+    def get_by_id(self, location_id: UUID) -> Location | None:
         return self.db.get(Location, location_id)
 
     def list_all(self) -> list[Location]:
@@ -41,13 +43,13 @@ class RoomRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def get_by_id(self, room_id: int) -> Room | None:
+    def get_by_id(self, room_id: UUID) -> Room | None:
         return self.db.get(Room, room_id)
 
     def list_all(self) -> list[Room]:
         return self.db.query(Room).order_by(Room.name).all()
 
-    def list_by_location(self, location_id: int) -> list[Room]:
+    def list_by_location(self, location_id: UUID) -> list[Room]:
         return self.db.query(Room).filter(Room.location_id == location_id).order_by(Room.name).all()
 
     def create(self, room: Room) -> Room:
@@ -66,13 +68,13 @@ class ClassOfferingRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def get_by_id(self, class_id: int) -> ClassOffering | None:
+    def get_by_id(self, class_id: UUID) -> ClassOffering | None:
         return self.db.get(ClassOffering, class_id)
 
     def list_all(self) -> list[ClassOffering]:
         return self.db.query(ClassOffering).order_by(ClassOffering.starts_at.desc()).all()
 
-    def list_by_course(self, course_id: int) -> list[ClassOffering]:
+    def list_by_course(self, course_id: UUID) -> list[ClassOffering]:
         return (
             self.db.query(ClassOffering)
             .filter(ClassOffering.course_id == course_id)
@@ -91,7 +93,7 @@ class ClassOfferingRepository:
         self.db.refresh(class_offering)
         return class_offering
 
-    def active_enrollment_count(self, class_id: int) -> int:
+    def active_enrollment_count(self, class_id: UUID) -> int:
         return (
             self.db.query(func.count(ClassEnrollment.id))
             .filter(
@@ -102,7 +104,7 @@ class ClassOfferingRepository:
             or 0
         )
 
-    def get_enrollment(self, class_id: int, student_id: int) -> ClassEnrollment | None:
+    def get_enrollment(self, class_id: UUID, student_id: UUID) -> ClassEnrollment | None:
         return (
             self.db.query(ClassEnrollment)
             .filter(ClassEnrollment.class_offering_id == class_id, ClassEnrollment.student_id == student_id)
@@ -115,14 +117,14 @@ class ClassOfferingRepository:
         self.db.refresh(enrollment)
         return enrollment
 
-    def get_waitlist_entry(self, class_id: int, student_id: int) -> WaitlistEntry | None:
+    def get_waitlist_entry(self, class_id: UUID, student_id: UUID) -> WaitlistEntry | None:
         return (
             self.db.query(WaitlistEntry)
             .filter(WaitlistEntry.class_offering_id == class_id, WaitlistEntry.student_id == student_id)
             .first()
         )
 
-    def next_waitlist_position(self, class_id: int) -> int:
+    def next_waitlist_position(self, class_id: UUID) -> int:
         current = (
             self.db.query(func.max(WaitlistEntry.position))
             .filter(WaitlistEntry.class_offering_id == class_id)
@@ -137,7 +139,7 @@ class ClassOfferingRepository:
         self.db.refresh(entry)
         return entry
 
-    def list_enrollments(self, class_id: int) -> list[ClassEnrollment]:
+    def list_enrollments(self, class_id: UUID) -> list[ClassEnrollment]:
         return (
             self.db.query(ClassEnrollment)
             .filter(ClassEnrollment.class_offering_id == class_id)
@@ -145,7 +147,7 @@ class ClassOfferingRepository:
             .all()
         )
 
-    def list_waitlist(self, class_id: int) -> list[WaitlistEntry]:
+    def list_waitlist(self, class_id: UUID) -> list[WaitlistEntry]:
         return (
             self.db.query(WaitlistEntry)
             .filter(WaitlistEntry.class_offering_id == class_id)
@@ -158,10 +160,10 @@ class ScheduledMeetingRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def get_by_id(self, meeting_id: int) -> ScheduledMeeting | None:
+    def get_by_id(self, meeting_id: UUID) -> ScheduledMeeting | None:
         return self.db.get(ScheduledMeeting, meeting_id)
 
-    def list_by_class(self, class_id: int) -> list[ScheduledMeeting]:
+    def list_by_class(self, class_id: UUID) -> list[ScheduledMeeting]:
         return (
             self.db.query(ScheduledMeeting)
             .filter(ScheduledMeeting.class_offering_id == class_id)
@@ -180,7 +182,7 @@ class ScheduledMeetingRepository:
         self.db.refresh(meeting)
         return meeting
 
-    def list_active_enrollments(self, class_id: int) -> list[ClassEnrollment]:
+    def list_active_enrollments(self, class_id: UUID) -> list[ClassEnrollment]:
         return (
             self.db.query(ClassEnrollment)
             .options(selectinload(ClassEnrollment.student))
@@ -196,14 +198,14 @@ class AttendanceRecordRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def get_by_meeting_and_student(self, meeting_id: int, student_id: int) -> AttendanceRecord | None:
+    def get_by_meeting_and_student(self, meeting_id: UUID, student_id: UUID) -> AttendanceRecord | None:
         return (
             self.db.query(AttendanceRecord)
             .filter(AttendanceRecord.scheduled_meeting_id == meeting_id, AttendanceRecord.student_id == student_id)
             .first()
         )
 
-    def list_by_meeting(self, meeting_id: int) -> list[AttendanceRecord]:
+    def list_by_meeting(self, meeting_id: UUID) -> list[AttendanceRecord]:
         return (
             self.db.query(AttendanceRecord)
             .filter(AttendanceRecord.scheduled_meeting_id == meeting_id)
@@ -230,7 +232,7 @@ class CheckinTokenRepository:
     def get_by_token(self, token: str) -> CheckinToken | None:
         return self.db.query(CheckinToken).filter(CheckinToken.token == token).first()
 
-    def list_by_meeting(self, meeting_id: int) -> list[CheckinToken]:
+    def list_by_meeting(self, meeting_id: UUID) -> list[CheckinToken]:
         return (
             self.db.query(CheckinToken)
             .filter(CheckinToken.scheduled_meeting_id == meeting_id)
@@ -249,7 +251,7 @@ class PracticalAssessmentRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def get_by_meeting_and_student(self, meeting_id: int, student_id: int) -> PracticalAssessmentRecord | None:
+    def get_by_meeting_and_student(self, meeting_id: UUID, student_id: UUID) -> PracticalAssessmentRecord | None:
         return (
             self.db.query(PracticalAssessmentRecord)
             .filter(
@@ -259,7 +261,7 @@ class PracticalAssessmentRepository:
             .first()
         )
 
-    def list_by_meeting(self, meeting_id: int) -> list[PracticalAssessmentRecord]:
+    def list_by_meeting(self, meeting_id: UUID) -> list[PracticalAssessmentRecord]:
         return (
             self.db.query(PracticalAssessmentRecord)
             .filter(PracticalAssessmentRecord.scheduled_meeting_id == meeting_id)

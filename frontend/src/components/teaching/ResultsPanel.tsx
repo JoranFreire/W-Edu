@@ -13,7 +13,7 @@ import RecoveryForm from './RecoveryForm';
 
 /** Fechamento de etapas, calculo do resultado, recuperacao e publicacao (coordenacao). */
 export default function ResultsPanel({ offeringId, periods, isCoordination, onChanged }: {
-  offeringId: number;
+  offeringId: string;
   periods: GradingPeriod[];
   isCoordination: boolean;
   onChanged: () => void;

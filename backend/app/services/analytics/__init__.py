@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from sqlalchemy.orm import Session
 
 from app.models.student import Student
@@ -30,16 +32,16 @@ class AnalyticsService:
     def courses(self, current: Student) -> list[CourseAnalyticsOut]:
         return self._entities.courses(current)
 
-    def course(self, course_id: int, current: Student | None = None) -> CourseAnalyticsOut:
+    def course(self, course_id: UUID, current: Student | None = None) -> CourseAnalyticsOut:
         return self._entities.course(course_id, current)
 
     def student_me(self, current: Student) -> StudentAnalyticsOut:
         return self._entities.student_me(current)
 
-    def student(self, student_id: int, current: Student | None = None) -> StudentAnalyticsOut:
+    def student(self, student_id: UUID, current: Student | None = None) -> StudentAnalyticsOut:
         return self._entities.student(student_id, current)
 
-    def class_(self, class_id: int, current: Student | None = None) -> ClassAnalyticsOut:
+    def class_(self, class_id: UUID, current: Student | None = None) -> ClassAnalyticsOut:
         return self._entities.class_(class_id, current)
 
     def completion_report(self, current: Student) -> list[CompletionReportRowOut]:

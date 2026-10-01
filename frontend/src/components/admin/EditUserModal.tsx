@@ -8,7 +8,7 @@ export default function EditUserModal({ user, organizations, availableRoles, onC
   organizations: Organization[];
   availableRoles: Array<[UserRole, string]>;
   onClose: () => void;
-  onSave: (id: number, data: { name: string; email: string; role: UserRole; organization_id: number | null; is_active: boolean }) => Promise<void>;
+  onSave: (id: string, data: { name: string; email: string; role: UserRole; organization_id: string | null; is_active: boolean }) => Promise<void>;
 }) {
   const [name, setName] = useState(user.name);
   const [email, setEmail] = useState(user.email);
@@ -20,7 +20,7 @@ export default function EditUserModal({ user, organizations, availableRoles, onC
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-    await onSave(user.id, { name, email, role, organization_id: organizationId ? Number(organizationId) : null, is_active: isActive });
+    await onSave(user.id, { name, email, role, organization_id: organizationId ? organizationId : null, is_active: isActive });
     setSaving(false);
   };
 

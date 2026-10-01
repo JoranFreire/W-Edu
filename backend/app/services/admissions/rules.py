@@ -1,5 +1,6 @@
 """Regras do processo seletivo (funcoes puras): requisitos, classificacao e distribuicao das vagas."""
 
+from uuid import UUID
 from dataclasses import dataclass
 from datetime import date, datetime
 import random
@@ -57,7 +58,7 @@ def ineligibility(requirements: Requirements, answers: Answers, reference_day: d
 
 @dataclass(frozen=True)
 class Candidate:
-    id: int
+    id: UUID
     applied_at: datetime
     score: float | None
     reserved: bool   # concorre a reserva (declarou e a conferencia nao recusou)
