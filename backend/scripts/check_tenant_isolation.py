@@ -502,7 +502,9 @@ async def run() -> int:
         r = await client.get("/institutions/public", headers={"X-Forwarded-Host": "escola-a.wedu.test:443"})
         c.expect(r.status_code == 200 and r.json()["slug"] == "escola-a", f"public branding by host: {r.text}")
         r = await client.get("/institutions/public")
-        c.expect(r.status_code == 404, f"no public branding without subdomain: {r.status_code}")
+        c.expect(r.status_code == 200 and r.json() is None, f"no public branding without subdomain: {r.status_code} {r.text}")
+        r = await client.get("/institutions/public", headers={"X-Forwarded-Host": "inexistente.wedu.test"})
+        c.expect(r.status_code == 404, f"unknown subdomain: {r.status_code}")
         r = await client.post(
             "/users",
             json={"name": "Via host", "email": "host@example.com", "password": PASSWORD},

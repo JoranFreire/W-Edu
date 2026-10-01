@@ -2,23 +2,23 @@
 
 import { useMemo, useState } from 'react';
 import { useStoredValue } from '@/lib/hooks/useStoredValue';
-import { type RoleFilter, isRoleFilter, matchesRoleFilter, matchesSearch, roleFilters } from '@/lib/users/roleFilters';
+import { DEFAULT_FILTERS, type UserFilters, activeFilterCount, applyFilters, countByRole, parseFilters } from '@/lib/users/userFilters';
 import type { User } from '@/types/auth';
 
-/** Filtro por perfil (lembrado no navegador, para voltar do dossie no mesmo filtro) e busca por nome/e-mail. */
+/** Filtros da lista de usuarios: lembrados no navegador (para voltar do dossie igual); a busca vale so na tela. */
 export function useUserFilters(users: User[]) {
-  const [stored, setStored] = useStoredValue('w-edu-users-role-filter');
-  const filter: RoleFilter = isRoleFilter(stored) ? stored : 'all';
+  const [stored, setStored] = useStoredValue('w-edu-users-filters');
+  const filters = useMemo(() => parseFilters(stored), [stored]);
   const [query, setQuery] = useState('');
 
-  const counts = useMemo(
-    () => Object.fromEntries(roleFilters.map(({ id }) => [id, users.filter((user) => matchesRoleFilter(user, id)).length])) as Record<RoleFilter, number>,
-    [users],
-  );
-  const filtered = useMemo(
-    () => users.filter((user) => matchesRoleFilter(user, filter) && matchesSearch(user, query)),
-    [users, filter, query],
-  );
+  const filtered = useMemo(() => applyFilters(users, filters, query), [users, filters, query]);
+  const counts = useMemo(() => countByRole(users, filters, query), [users, filters, query]);
 
-  return { filter, setFilter: (next: RoleFilter) => setStored(next), query, setQuery, counts, filtered };
+  const update = (patch: Partial<UserFilters>) => setStored(JSON.stringify({ ...filters, ...patch }));
+  const reset = () => {
+    setStored(JSON.stringify({ ...DEFAULT_FILTERS, sort: filters.sort }));
+    setQuery('');
+  };
+
+  return { filters, update, reset, query, setQuery, filtered, counts, active: activeFilterCount(filters, query) };
 }
