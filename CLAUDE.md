@@ -45,6 +45,7 @@ python scripts/check_academic_calendar_flow.py
 python scripts/check_assessment_flow.py
 python scripts/check_secretariat_flow.py
 python scripts/check_guardians_flow.py
+python scripts/check_school_life_flow.py
 python scripts/check_rls.py                     # Postgres com superusuario em DATABASE_URL; cria role/banco proprios
 alembic upgrade head && alembic check           # migration alinhada aos models
 ```

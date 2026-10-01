@@ -4,7 +4,7 @@
 
 **Fase:** 2 — Voz com Professor IA (em andamento)  
 **Ultima atualizacao:** 2026-09-30  
-**Proximo marco:** Fase 15 — Perfil Escola Basica, entrega 2 (ocorrencias e agenda escolar). Entrega 1 (responsaveis e portal) concluida.
+**Proximo marco:** Fase 16 — Perfil Universidade. Fase 15 (responsaveis, portal, ocorrencias e agenda escolar) concluida.
 
 ## Visao Alvo
 
@@ -290,7 +290,7 @@ Objetivo: estrutura comum a escola, universidade e profissionalizante.
 
 - [x] Responsaveis e vinculo aluno/responsavel (financeiro, retirada).
 - [x] Portal do responsavel: boletim, frequencia, comunicados, financeiro.
-- [ ] Ocorrencias e agenda escolar.
+- [x] Ocorrencias e agenda escolar (ciencia do responsavel no portal; comunicado a familia a cada registro).
 - [ ] Futuro: BNCC e exportacao Educacenso.
 
 ### Fase 16 — Perfil Universidade

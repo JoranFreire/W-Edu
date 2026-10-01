@@ -30,6 +30,14 @@ DEFAULT_TEMPLATES = {
         "Boletim disponível",
         "O resultado final de {class_name} foi publicado: {result_label}.",
     ),
+    (NotificationEventType.occurrence_registered, NotificationChannel.internal): (
+        "Nova ocorrência",
+        "Foi registrada uma ocorrência ({kind_label}) para {student_name} em {occurred_on}.",
+    ),
+    (NotificationEventType.agenda_published, NotificationChannel.internal): (
+        "Agenda da turma",
+        "{kind_label} para {due_on}: {title} ({class_group_name}).",
+    ),
     (NotificationEventType.meeting_reminder, NotificationChannel.internal): (
         "Lembrete de encontro",
         "Você tem um encontro em {starts_at}: {meeting_title}.",

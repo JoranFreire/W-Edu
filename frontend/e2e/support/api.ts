@@ -74,3 +74,39 @@ export async function enrollInSeedProgram(request: APIRequestContext, studentId:
   const enrollment: { id: number } = await response.json();
   return enrollment;
 }
+
+/** Responsavel novo (conta criada pela secretaria) vinculado ao aluno. */
+export async function linkGuardian(request: APIRequestContext, studentId: number, name: string, email: string, institution = 'escola-alfa') {
+  const response = await request.post(`${API_URL}/guardians/students/${studentId}/links`, {
+    headers: await adminHeaders(request, institution),
+    data: { name, email, password: E2E_PASSWORD, relationship_kind: 'mother' },
+  });
+  if (!response.ok()) throw new Error(`linkGuardian: ${response.status()} ${await response.text()}`);
+}
+
+/** Turma-grupo do programa EF-E2E com a matricula alocada e uma oferta ministrada pelo Instrutor Alfa. */
+export async function createClassGroupOffering(request: APIRequestContext, name: string, enrollmentId: number, institution = 'escola-alfa') {
+  const admin = await adminHeaders(request, institution);
+  const term = await createOpenTerm(request, `Período ${name}`, institution);
+  const programs: { id: number; code: string }[] = await (await request.get(`${API_URL}/academic/programs`, { headers: admin })).json();
+  const program = programs.find((item) => item.code === 'EF-E2E');
+  const group = await request.post(`${API_URL}/academic/class-groups`, { headers: admin, data: { program_id: program?.id, term_id: term.id, name } });
+  if (!group.ok()) throw new Error(`classGroup: ${group.status()} ${await group.text()}`);
+  const { id: groupId }: { id: number } = await group.json();
+  const member = await request.post(`${API_URL}/academic/class-groups/${groupId}/members`, { headers: admin, data: { program_enrollment_id: enrollmentId } });
+  if (!member.ok()) throw new Error(`member: ${member.status()} ${await member.text()}`);
+  const courses: { id: number; name: string }[] = await (await request.get(`${API_URL}/courses`, { headers: admin })).json();
+  const people: { id: number; email: string }[] = await (await request.get(`${API_URL}/admin/users`, { headers: admin })).json();
+  const now = Date.now();
+  const offering = await request.post(`${API_URL}/schedule/classes`, {
+    headers: admin,
+    data: {
+      course_id: courses.find((item) => item.name === 'Matemática')?.id, name: `Matemática ${name}`, capacity: 10, status: 'open',
+      instructor_id: people.find((person) => person.email === users.instrutor)?.id, class_group_id: groupId,
+      starts_at: new Date(now).toISOString(), ends_at: new Date(now + 30 * 86_400_000).toISOString(),
+    },
+  });
+  if (!offering.ok()) throw new Error(`offering: ${offering.status()} ${await offering.text()}`);
+  const { id: offeringId }: { id: number } = await offering.json();
+  return { groupId, offeringId };
+}

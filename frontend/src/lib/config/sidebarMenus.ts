@@ -14,6 +14,7 @@ export const studentMenu: MenuItem[] = [
   { name: 'Meus Cursos', href: '/courses', icon: BookOpenIcon },
   { name: 'Progresso', href: '/progress', icon: ChartBarIcon },
   { name: 'Boletim', href: '/report-card', icon: ChartBarIcon },
+  { name: 'Agenda escolar', href: '/school-agenda', icon: CalendarDaysIcon },
   { name: 'Histórico escolar', href: '/transcript', icon: DocumentChartBarIcon },
   { name: 'Certificados', href: '/certificates', icon: ShieldCheckIcon },
   { name: 'Sessões de Voz', href: '/sessions', icon: MicrophoneIcon },
@@ -64,7 +65,7 @@ export const coordinatorMenu: MenuItem[] = [
 export const instructorMenu: MenuItem[] = [
   { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
   { name: 'Diário de classe', href: '/teaching', icon: PencilSquareIcon },
-  ...studentMenu.filter((item) => item.href !== '/dashboard'),
+  ...studentMenu.filter((item) => item.href !== '/dashboard' && item.href !== '/school-agenda'),
 ];
 
 export const secretaryMenu: MenuItem[] = [

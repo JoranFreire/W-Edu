@@ -128,6 +128,20 @@ Toda movimentacao fica registrada em `program_enrollment_events` (quem, quando, 
 
 A conta do responsavel e unica na plataforma: vincular um e-mail ja cadastrado como responsavel (em outra instituicao ou para irmaos) reaproveita a conta e cria o vinculo com a instituicao ativa.
 
+## Vida escolar (`/school`)
+
+| Recurso | Student | Guardian | Instructor | Coordinator | Secretary | Admin |
+| --- | --- | --- | --- | --- | --- | --- |
+| Registrar ocorrencia e ver ocorrencias do aluno | Nao | Nao | Sim | Sim | Sim | Sim |
+| Remover ocorrencia | Nao | Nao | So as que registrou | Sim | So as que registrou | Sim |
+| Ver e dar ciencia de ocorrencias do dependente | Nao | Dependentes vinculados | Nao | Nao | Nao | Nao |
+| Ver agenda da turma-grupo | Nao | Nao | Sim | Sim | Sim | Sim |
+| Publicar na agenda da turma-grupo | Nao | Nao | Turmas que rege ou em que leciona | Sim | Sim | Sim |
+| Remover item da agenda | Nao | Nao | So os que publicou | Sim | So os que publicou | Sim |
+| Agenda das proprias turmas (`/school/my/agenda`) | Sim | Do dependente, no portal | Sim | Sim | Sim | Sim |
+
+O guard `get_current_school_staff` cobre a equipe escolar; o escopo por turma e por autor fica em `app/policies/school_life_access.py`.
+
 ## Agenda e Presencial
 
 | Recurso | Student | Instructor | Coordinator | Company Manager | Admin |

@@ -171,6 +171,16 @@ EXPECTED: list[ExpectedRoute] = [
     ("GET", "/guardians/me/dependents/{student_id}/transcripts", "get_current_guardian"),
     ("GET", "/guardians/me/dependents/{student_id}/notices", "get_current_guardian"),
     ("GET", "/guardians/me/dependents/{student_id}/charges", "get_current_guardian"),
+    ("GET", "/guardians/me/dependents/{student_id}/occurrences", "get_current_guardian"),
+    ("POST", "/guardians/me/dependents/{student_id}/occurrences/{occurrence_id}/acknowledge", "get_current_guardian"),
+    ("GET", "/guardians/me/dependents/{student_id}/agenda", "get_current_guardian"),
+    ("GET", "/school/students/{student_id}/occurrences", "get_current_school_staff"),
+    ("POST", "/school/occurrences", "get_current_school_staff"),
+    ("DELETE", "/school/occurrences/{occurrence_id}", "get_current_school_staff"),
+    ("GET", "/school/class-groups/{group_id}/agenda", "get_current_school_staff"),
+    ("POST", "/school/class-groups/{group_id}/agenda", "get_current_school_staff"),
+    ("DELETE", "/school/agenda/{item_id}", "get_current_school_staff"),
+    ("GET", "/school/my/agenda", "get_current_student"),
 ]
 
 

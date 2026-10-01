@@ -180,7 +180,7 @@ Implementado na Fase 14 (entrega 1), em `/secretariat`: `program_enrollment_even
 
 - Responsaveis (`guardians`, `student_guardians` com parentesco, responsavel financeiro e autorizacao de retirada). Implementado na Fase 15 (entrega 1): `student_guardians` com TenantMixin e RLS; o responsavel e um usuario com papel `guardian`; portal em `/guardians/me/dependents` (boletim, historico, comunicados e, para o responsavel financeiro, cobrancas), com acesso restrito por `app/policies/guardian_access.py`.
 - Portal e app do responsavel: boletim, frequencia, comunicados e financeiro.
-- Ocorrencias disciplinares e agenda escolar.
+- Ocorrencias disciplinares e agenda escolar. Implementado na Fase 15 (entrega 2): `student_occurrences` (tipo, gravidade, autor e ciencia do responsavel) e `agenda_items` (tarefa, prova, evento ou aviso por turma-grupo, opcionalmente ligado a oferta), ambos com TenantMixin e RLS; rotas em `/school` (equipe escolar) e `/guardians/me/dependents/{id}/occurrences|agenda` (portal); cada registro gera comunicado enderecado ao aluno (`occurrence_registered`, `agenda_published`), exibido aos responsaveis. Regras de publicacao/remocao em `app/policies/school_life_access.py`.
 - Futuro: habilidades BNCC por disciplina e exportacao para o Educacenso.
 
 ### Universidade

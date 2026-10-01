@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { AcademicCapIcon, ArrowsRightLeftIcon, ClockIcon, DocumentTextIcon, UserGroupIcon } from '@heroicons/react/24/outline';
+import { AcademicCapIcon, ArrowsRightLeftIcon, ClockIcon, DocumentTextIcon, ExclamationTriangleIcon, UserGroupIcon } from '@heroicons/react/24/outline';
 import ConclusionPanel from '@/components/secretariat/ConclusionPanel';
 import CreditTransfersPanel from '@/components/secretariat/CreditTransfersPanel';
 import DeclarationsPanel from '@/components/secretariat/DeclarationsPanel';
@@ -10,6 +10,7 @@ import GuardiansPanel from '@/components/secretariat/GuardiansPanel';
 import EnrollmentTimeline from '@/components/secretariat/EnrollmentTimeline';
 import MovementActions from '@/components/secretariat/MovementActions';
 import TranscriptTable from '@/components/secretariat/TranscriptTable';
+import OccurrencesPanel from '@/components/schoolLife/OccurrencesPanel';
 import BackButton from '@/components/common/BackButton';
 import Spinner from '@/components/common/Spinner';
 import TabNav, { type TabItem } from '@/components/common/TabNav';
@@ -22,13 +23,14 @@ import { useTerminology } from '@/lib/hooks/useTerminology';
 import { useAuthStore } from '@/store/authStore';
 import { isAdminRole } from '@/types/auth';
 
-type FileTab = 'transcript' | 'credits' | 'documents' | 'guardians' | 'timeline';
+type FileTab = 'transcript' | 'credits' | 'documents' | 'guardians' | 'occurrences' | 'timeline';
 
 const tabs: TabItem<FileTab>[] = [
   { id: 'transcript', label: 'Histórico escolar', icon: AcademicCapIcon },
   { id: 'credits', label: 'Aproveitamento', icon: ArrowsRightLeftIcon },
   { id: 'documents', label: 'Documentos e conclusão', icon: DocumentTextIcon },
   { id: 'guardians', label: 'Responsáveis', icon: UserGroupIcon },
+  { id: 'occurrences', label: 'Ocorrências', icon: ExclamationTriangleIcon },
   { id: 'timeline', label: 'Movimentações', icon: ClockIcon },
 ];
 
@@ -74,6 +76,7 @@ export default function EnrollmentFilePage() {
           </div>
         )}
         {tab === 'guardians' && <GuardiansPanel studentId={enrollment.student.id} />}
+        {tab === 'occurrences' && <OccurrencesPanel student={enrollment.student} />}
         {tab === 'timeline' && (
           <section className={`${sectionCls} grid grid-cols-1 gap-6 md:grid-cols-2`}>
             <div>

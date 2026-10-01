@@ -8,3 +8,9 @@ export const dayLabels = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'S
 
 /** 'AAAA-MM-DD' -> 'DD/MM/AAAA' sem converter fuso (datas puras do calendario academico). */
 export const formatIsoDate = (value: string) => value.split('-').reverse().join('/');
+
+/** Data local de hoje em 'AAAA-MM-DD'. */
+export function todayIso(): string {
+  const now = new Date();
+  return new Date(now.getTime() - now.getTimezoneOffset() * 60_000).toISOString().slice(0, 10);
+}
