@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../config/api_config.dart';
+import '../config/persona_config.dart';
 import 'auth_interceptor.dart';
 import 'token_store.dart';
 
@@ -27,6 +28,26 @@ final dioProvider = Provider<Dio>((ref) {
     tokens: ref.watch(tokenStoreProvider),
     onSessaoExpirada: () => ref.read(sessaoExpiradaProvider.notifier).avisar(),
   ));
+  return dio;
+});
+
+/// Endereço do Persona; nulo desliga o reconhecimento facial. Os testes o sobrescrevem.
+final personaBaseUrlProvider = Provider<String?>((ref) => PersonaConfig.baseUrl);
+
+/// Cliente do Persona (segundo dio, como na ADR 0012). Nulo quando desligado.
+/// O login facial vai sem token: quem entra ainda não tem sessão.
+final personaDioProvider = Provider<Dio?>((ref) {
+  final baseUrl = ref.watch(personaBaseUrlProvider);
+  if (baseUrl == null) return null;
+  final dio = Dio(BaseOptions(
+    baseUrl: baseUrl,
+    connectTimeout: ApiConfig.connectTimeout,
+    // Envio das fotos e conferência do rosto levam mais que uma requisição comum.
+    receiveTimeout: const Duration(seconds: 60),
+    headers: {'Accept': 'application/json'},
+  ));
+  final adapter = ref.watch(httpAdapterProvider);
+  if (adapter != null) dio.httpClientAdapter = adapter;
   return dio;
 });
 

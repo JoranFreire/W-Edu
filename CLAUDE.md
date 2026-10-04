@@ -33,6 +33,7 @@ Vale para todo código tocado, novo ou antigo. Ao alterar um arquivo que mistura
 - Riverpod 3 + go_router + dio + flutter_secure_storage, por feature: `features/<x>/{data/, <x>_providers.dart, screens/, widgets/}`; dependências `features` → `shared` → `core`.
 - Repositório só faz HTTP → model; estado remoto em provider com `AsyncValue` (carregando, erro e vazio via `ListaRemota`).
 - Abas por papel em `router/rotas.dart` (`Aba.visivelPara`); o redirect bloqueia rota de aba não permitida.
+- Persona (reconhecimento facial): o app fala direto com a API dele (`personaDioProvider`, `PERSONA_BASE_URL`); as fotos nunca passam pelo backend do W-Edu. Login facial em `features/login_facial/` (conta lembrada no aparelho, 1:1).
 - Cache versionado (como o catálogo do WS-ServicePortal): telas pessoais usam `observarArea` (`core/cache/`), que entrega o JSON salvo em disco, confere `sync/versions` e só baixa a área que mudou; offline fica com o salvo. Repositório devolve o JSON bruto e o model o lê (`Model.lista`). Puxar para atualizar: `ref.atualizarDaApi(provider, chave)`. Sair apaga o cache.
 
 ## Multi-tenant
@@ -50,7 +51,7 @@ Backend (`backend/`):
 python scripts/check_permissions.py
 python scripts/check_role_guards.py
 python scripts/check_api_permissions.py
-python scripts/check_tenant_isolation.py        # DATABASE_URL=postgresql://... para rodar no Postgres
+python scripts/check_tenant_isolation.py        # DATABASE_URL=postgresql://... para rodar no Postgres (banco de teste: os scripts apagam as tabelas e recusam nomes sem check/test/e2e/tmp/scratch)
 python scripts/check_certificate_flow.py
 python scripts/check_curriculum_flow.py
 python scripts/check_academic_calendar_flow.py

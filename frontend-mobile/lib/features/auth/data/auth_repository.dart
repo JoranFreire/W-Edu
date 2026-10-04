@@ -26,6 +26,13 @@ class AuthRepository {
     return eu();
   }
 
+  /// Login facial: troca o assertion que o Persona emitiu (rosto conferido) pelo token.
+  Future<Usuario> entrarComRosto(String assertion) async {
+    final resposta = await _dio.post<Map<String, dynamic>>('auth/facial-login', data: {'assertion': assertion});
+    await _tokens.salvar(resposta.data!['access_token'] as String);
+    return eu();
+  }
+
   /// A pessoa, a instituição ativa (a do token) e as permissões nela, juntas. `Future.wait` repassa
   /// o próprio erro da API (o `.wait` de record o embrulharia e o 401 se perderia).
   Future<Usuario> eu() async {

@@ -22,6 +22,14 @@ a área cuja versão mudou (a versão sobe sozinha no backend a cada gravação 
 que está salvo. Puxar para atualizar ignora a versão e baixa direto; voltar para o app confere as versões de novo; sair
 da conta apaga o cache.
 
+## Login facial (Persona)
+
+Com `--dart-define=PERSONA_BASE_URL=https://persona.exemplo/api/v1`, a tela de login oferece **Entrar com o rosto**
+para a última conta que entrou com senha no aparelho (o login facial é 1:1). O app fala direto com o Persona:
+pede o desafio de prova de vida, tira uma foto por passo (de frente e virando para os dois lados), envia ao Persona,
+que confere e assina um assertion, e troca esse assertion pelo token em `POST /auth/facial-login` do W-Edu. As fotos
+não passam pelo W-Edu nem ficam no aparelho. Qualquer recusa volta para a senha. Sem a variável, o app fica só com senha.
+
 ## Rodar
 
 Com a API no ar (ex.: `docker compose up -d` na raiz e `docker compose --profile demo run --rm seed`):

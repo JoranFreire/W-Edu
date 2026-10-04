@@ -52,4 +52,9 @@ void main() {
     expect(redirecionar(AsyncData(professor), Rotas.materiais), isNull);
     expect(redirecionar(AsyncData(_usuario(['student'])), Rotas.materiais), Rotas.inicio);
   });
+
+  test('login facial é tela de entrada', () {
+    expect(redirecionar(const AsyncData(null), Rotas.loginFacial), isNull);
+    expect(redirecionar(AsyncData(_usuario(['student'])), Rotas.loginFacial), Rotas.inicio);
+  });
 }

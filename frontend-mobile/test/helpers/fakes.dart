@@ -2,7 +2,10 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/widgets.dart';
 import 'package:wedu_mobile/core/cache/cache_local.dart';
+import 'package:wedu_mobile/features/auth/data/conta_lembrada.dart';
+import 'package:wedu_mobile/features/login_facial/data/captura_de_rosto.dart';
 import 'package:wedu_mobile/core/network/token_store.dart';
 
 /// Resposta programada: recebe a requisição e devolve (status, corpo JSON).
@@ -180,3 +183,44 @@ Map<String, dynamic> requisicaoJson(String id, {String status = 'approved', Stri
          'quantity_approved': 2, 'quantity_delivered': 0, 'quantity_returned': 0, 'quantity_lost': 0, 'outstanding': 0},
       ],
     };
+
+class ContaLembradaEmMemoria implements ContaLembradaStore {
+  ContaLembradaEmMemoria([this.atual]);
+
+  ContaLembrada? atual;
+
+  @override
+  Future<ContaLembrada?> ler() async => atual;
+
+  @override
+  Future<void> salvar(ContaLembrada conta) async => atual = conta;
+
+  @override
+  Future<void> esquecer() async => atual = null;
+}
+
+const contaDaAna = ContaLembrada(usuarioId: 'u-1', instituicaoId: 'i-1', nome: 'Ana Souza', email: 'ana@escola.example.com');
+
+/// Câmera falsa: cada foto é um JPEG de mentira numerado.
+class CameraFalsa implements CapturaDeRosto {
+  CameraFalsa({this.semPermissao = false});
+
+  final bool semPermissao;
+  int fotos = 0;
+  bool aberta = false;
+
+  @override
+  Future<void> abrir() async {
+    if (semPermissao) throw StateError('sem permissão');
+    aberta = true;
+  }
+
+  @override
+  Widget visor() => const SizedBox.expand();
+
+  @override
+  Future<Uint8List> fotografar() async => Uint8List.fromList([0xFF, 0xD8, ++fotos]);
+
+  @override
+  Future<void> fechar() async => aberta = false;
+}

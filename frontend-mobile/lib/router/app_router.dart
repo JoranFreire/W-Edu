@@ -12,6 +12,7 @@ import '../features/boletim/screens/boletim_screen.dart';
 import '../features/dependentes/screens/dependente_screen.dart';
 import '../features/dependentes/screens/dependentes_screen.dart';
 import '../features/inicio/screens/inicio_screen.dart';
+import '../features/login_facial/screens/login_facial_screen.dart';
 import '../features/materiais/screens/materiais_screen.dart';
 import '../features/perfil/screens/perfil_screen.dart';
 import 'rotas.dart';
@@ -31,6 +32,7 @@ final routerProvider = Provider<GoRouter>((ref) {
     routes: [
       GoRoute(path: Rotas.carregando, builder: (_, _) => const CarregandoScreen()),
       GoRoute(path: Rotas.login, builder: (_, _) => const LoginScreen()),
+      GoRoute(path: Rotas.loginFacial, builder: (_, _) => const LoginFacialScreen()),
       // Um ramo por aba, na ordem de `Aba`; cada um guarda a própria pilha e rolagem.
       // A barra mostra só as abas dos papéis da pessoa.
       StatefulShellRoute.indexedStack(

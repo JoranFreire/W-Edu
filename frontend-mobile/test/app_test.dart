@@ -7,6 +7,7 @@ import 'package:wedu_mobile/app.dart';
 import 'package:wedu_mobile/core/cache/cache_local.dart';
 import 'package:wedu_mobile/core/cache/cache_providers.dart';
 import 'package:wedu_mobile/core/network/network_providers.dart';
+import 'package:wedu_mobile/features/auth/auth_providers.dart';
 
 import 'helpers/fakes.dart';
 
@@ -40,6 +41,7 @@ void main() {
         tokenStoreProvider.overrideWithValue(tokens),
         httpAdapterProvider.overrideWithValue(servidor),
         cacheLocalProvider.overrideWithValue(cache),
+        contaLembradaStoreProvider.overrideWithValue(ContaLembradaEmMemoria()),
       ],
       child: const WEduApp(),
     ));

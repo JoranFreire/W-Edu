@@ -6,6 +6,7 @@ import '../features/auth/data/usuario.dart';
 class Rotas {
   static const carregando = '/carregando';
   static const login = '/login';
+  static const loginFacial = '/login/face';
   static const inicio = '/';
   static const avisos = '/avisos';
   static const agenda = '/agenda';
@@ -52,7 +53,7 @@ enum Aba {
 ///
 /// Fora do GoRouter para poder ser testada sem montar app nenhum.
 String? redirecionar(AsyncValue<Usuario?> auth, String local) {
-  final naEntrada = local == Rotas.login || local == Rotas.carregando;
+  final naEntrada = local == Rotas.login || local == Rotas.loginFacial || local == Rotas.carregando;
 
   // Ainda conferindo o token salvo, ou falhou ao conferir (sem rede): espera
   // na tela de carregamento, que oferece "tentar de novo".
@@ -61,7 +62,7 @@ String? redirecionar(AsyncValue<Usuario?> auth, String local) {
   }
 
   final usuario = auth.value;
-  if (usuario == null) return local == Rotas.login ? null : Rotas.login;
+  if (usuario == null) return local == Rotas.login || local == Rotas.loginFacial ? null : Rotas.login;
   if (naEntrada) return Rotas.inicio;
 
   // Benefícios do próprio aluno (o responsável os vê em cada dependente).

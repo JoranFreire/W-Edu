@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/api_error.dart';
 import '../auth_providers.dart';
+import '../widgets/entrar_com_rosto.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -110,6 +111,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               )
                             : const Text('Entrar'),
                       ),
+                      const EntrarComRosto(),
                     ],
                   ),
                 ),
