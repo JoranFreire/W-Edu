@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../features/auth/auth_providers.dart';
-import '../features/avisos/avisos_providers.dart';
-import 'rotas.dart';
+import '../features/notices/notices_providers.dart';
+import 'routes.dart';
 
 /// A moldura das telas logadas: a barra de abas embaixo, só com as abas dos papéis da pessoa.
 class ShellScreen extends ConsumerWidget {

@@ -4,9 +4,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:wedu_mobile/app.dart';
-import 'package:wedu_mobile/core/cache/cache_local.dart';
+import 'package:wedu_mobile/core/cache/local_cache.dart';
 import 'package:wedu_mobile/core/cache/cache_providers.dart';
-import 'package:wedu_mobile/shared/cofre/cofre_providers.dart';
+import 'package:wedu_mobile/shared/vault/vault_providers.dart';
 import 'package:wedu_mobile/core/network/network_providers.dart';
 import 'package:wedu_mobile/features/auth/auth_providers.dart';
 

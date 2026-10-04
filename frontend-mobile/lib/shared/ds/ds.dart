@@ -2,7 +2,7 @@
 library;
 
 export 'app_badge.dart';
-export 'detalhe.dart';
-export 'estados.dart';
-export 'lista_remota.dart';
-export 'qr_retirada.dart';
+export 'detail.dart';
+export 'states.dart';
+export 'remote_list.dart';
+export 'pickup_qr.dart';

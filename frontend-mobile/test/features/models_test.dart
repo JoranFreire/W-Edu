@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:wedu_mobile/features/agenda/data/item_agenda.dart';
-import 'package:wedu_mobile/features/auth/data/instituicao.dart';
-import 'package:wedu_mobile/features/auth/data/usuario.dart';
-import 'package:wedu_mobile/features/avisos/data/aviso.dart';
-import 'package:wedu_mobile/features/beneficios/data/beneficio.dart';
-import 'package:wedu_mobile/features/boletim/data/boletim.dart';
-import 'package:wedu_mobile/features/dependentes/data/dependente.dart';
-import 'package:wedu_mobile/features/materiais/data/requisicao.dart';
+import 'package:wedu_mobile/features/agenda/data/agenda_item.dart';
+import 'package:wedu_mobile/features/auth/data/institution.dart';
+import 'package:wedu_mobile/features/auth/data/user.dart';
+import 'package:wedu_mobile/features/notices/data/notice.dart';
+import 'package:wedu_mobile/features/benefits/data/benefit.dart';
+import 'package:wedu_mobile/features/report_card/data/report_card.dart';
+import 'package:wedu_mobile/features/dependents/data/dependent.dart';
+import 'package:wedu_mobile/features/materials/data/material_request.dart';
 
 import '../helpers/fakes.dart';
 

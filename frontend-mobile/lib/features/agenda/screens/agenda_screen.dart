@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/cache/observar_area.dart';
+import '../../../core/cache/watch_area.dart';
 import '../agenda_providers.dart';
-import '../widgets/agenda_lista.dart';
+import '../widgets/agenda_list.dart';
 
 /// Agenda escolar do aluno: tarefas, provas, eventos e avisos das turmas dele.
 class AgendaScreen extends ConsumerWidget {

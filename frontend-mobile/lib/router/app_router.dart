@@ -4,23 +4,23 @@ import 'package:go_router/go_router.dart';
 
 import '../features/agenda/screens/agenda_screen.dart';
 import '../features/auth/auth_providers.dart';
-import '../features/auth/screens/carregando_screen.dart';
+import '../features/auth/screens/loading_screen.dart';
 import '../features/auth/screens/login_screen.dart';
-import '../features/beneficios/screens/beneficios_screen.dart';
-import '../features/chamada_facial/screens/chamada_encontros_screen.dart';
-import '../features/chamada_facial/screens/chamada_screen.dart';
-import '../features/chamada_facial/screens/chamada_turmas_screen.dart';
-import '../features/biometria/screens/biometria_screen.dart';
-import '../features/biometria/screens/cadastro_facial_screen.dart';
-import '../features/avisos/screens/avisos_screen.dart';
-import '../features/boletim/screens/boletim_screen.dart';
-import '../features/dependentes/screens/dependente_screen.dart';
-import '../features/dependentes/screens/dependentes_screen.dart';
-import '../features/inicio/screens/inicio_screen.dart';
-import '../features/login_facial/screens/login_facial_screen.dart';
-import '../features/materiais/screens/materiais_screen.dart';
-import '../features/perfil/screens/perfil_screen.dart';
-import 'rotas.dart';
+import '../features/benefits/screens/benefits_screen.dart';
+import '../features/attendance/screens/attendance_meetings_screen.dart';
+import '../features/attendance/screens/attendance_screen.dart';
+import '../features/attendance/screens/attendance_classes_screen.dart';
+import '../features/biometrics/screens/biometrics_screen.dart';
+import '../features/biometrics/screens/face_enrollment_screen.dart';
+import '../features/notices/screens/notices_screen.dart';
+import '../features/report_card/screens/report_card_screen.dart';
+import '../features/dependents/screens/dependent_screen.dart';
+import '../features/dependents/screens/dependents_screen.dart';
+import '../features/home/screens/home_screen.dart';
+import '../features/face_login/screens/face_login_screen.dart';
+import '../features/materials/screens/materials_screen.dart';
+import '../features/profile/screens/profile_screen.dart';
+import 'routes.dart';
 import 'shell_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -54,15 +54,15 @@ final routerProvider = Provider<GoRouter>((ref) {
                 builder: (_, _) => const ChamadaTurmasScreen(),
                 routes: [
                   GoRoute(
-                    path: ':turma',
-                    builder: (_, state) => ChamadaEncontrosScreen(turmaId: state.pathParameters['turma']!),
+                    path: ':offering',
+                    builder: (_, state) => ChamadaEncontrosScreen(turmaId: state.pathParameters['offering']!),
                     routes: [
                       GoRoute(
-                        path: ':encontro',
+                        path: ':meeting',
                         builder: (_, state) => ChamadaScreen(
-                          turmaId: state.pathParameters['turma']!,
-                          encontroId: state.pathParameters['encontro']!,
-                          pendenteId: state.uri.queryParameters['pendente'],
+                          turmaId: state.pathParameters['offering']!,
+                          encontroId: state.pathParameters['meeting']!,
+                          pendenteId: state.uri.queryParameters['pending'],
                         ),
                       ),
                     ],
@@ -86,9 +86,9 @@ final routerProvider = Provider<GoRouter>((ref) {
             builder: (_, _) => const PerfilScreen(),
             routes: [
               GoRoute(
-                path: 'biometria',
+                path: 'biometrics',
                 builder: (_, _) => const BiometriaScreen(),
-                routes: [GoRoute(path: 'cadastro', builder: (_, _) => const CadastroFacialScreen())],
+                routes: [GoRoute(path: 'enrollment', builder: (_, _) => const CadastroFacialScreen())],
               ),
             ],
           )),

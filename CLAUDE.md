@@ -31,10 +31,11 @@ Vale para todo código tocado, novo ou antigo. Ao alterar um arquivo que mistura
 
 **Mobile** (`frontend-mobile/`)
 - Riverpod 3 + go_router + dio + flutter_secure_storage, por feature: `features/<x>/{data/, <x>_providers.dart, screens/, widgets/}`; dependências `features` → `shared` → `core`.
+- Pastas, arquivos (`lib/` e `test/`) e rotas do go_router em inglês (`features/attendance/`, `/report-card`); classes, variáveis e textos da tela em português.
 - Repositório só faz HTTP → model; estado remoto em provider com `AsyncValue` (carregando, erro e vazio via `ListaRemota`).
-- Abas por papel em `router/rotas.dart` (`Aba.visivelPara`); o redirect bloqueia rota de aba não permitida.
-- Persona (reconhecimento facial): o app fala direto com a API dele (`personaDioProvider`, `PERSONA_BASE_URL`); as fotos nunca passam pelo backend do W-Edu. Login facial em `features/login_facial/` (conta lembrada no aparelho, 1:1); autorizações por finalidade (termo com versão e hash) e cadastro do rosto em `features/biometria/`; captura com prova de vida em `shared/rosto/`; chamada facial do professor em `features/chamada_facial/` (o resultado só vale depois da revisão; sem rede, as fotos vão cifradas para a fila em `shared/cofre/` e seguem quando a rede volta).
-- Cache versionado (como o catálogo do WS-ServicePortal): telas pessoais usam `observarArea` (`core/cache/`), que entrega o JSON salvo em disco, confere `sync/versions` e só baixa a área que mudou; offline fica com o salvo. Repositório devolve o JSON bruto e o model o lê (`Model.lista`). Puxar para atualizar: `ref.atualizarDaApi(provider, chave)`. Sair apaga o cache.
+- Abas por papel em `router/routes.dart` (`Aba.visivelPara`); o redirect bloqueia rota de aba não permitida.
+- Persona (reconhecimento facial): o app fala direto com a API dele (`personaDioProvider`, `PERSONA_BASE_URL`); as fotos nunca passam pelo backend do W-Edu. Login facial em `features/face_login/` (conta lembrada no aparelho, 1:1); autorizações por finalidade (termo com versão e hash) e cadastro do rosto em `features/biometrics/`; captura com prova de vida em `shared/face/`; chamada facial do professor em `features/attendance/` (o resultado só vale depois da revisão; sem rede, as fotos vão cifradas para a fila em `shared/vault/` e seguem quando a rede volta).
+- Cache versionado (como o catálogo do WS-ServicePortal): telas pessoais usam `observarArea` (`core/cache/watch_area.dart`), que entrega o JSON salvo em disco, confere `sync/versions` e só baixa a área que mudou; offline fica com o salvo. Repositório devolve o JSON bruto e o model o lê (`Model.lista`). Puxar para atualizar: `ref.atualizarDaApi(provider, chave)`. Sair apaga o cache.
 
 ## Multi-tenant
 

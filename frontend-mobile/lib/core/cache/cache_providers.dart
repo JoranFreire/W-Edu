@@ -1,9 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../network/network_providers.dart';
-import 'cache_local.dart';
-import 'sincronizador.dart';
-import 'versoes_repository.dart';
+import 'local_cache.dart';
+import 'synchronizer.dart';
+import 'versions_repository.dart';
 
 /// Nos testes, troca-se por um cache em memória.
 final cacheLocalProvider = Provider<CacheLocal>((ref) => CacheEmArquivo());

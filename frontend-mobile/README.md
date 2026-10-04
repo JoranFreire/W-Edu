@@ -7,12 +7,15 @@ Stack: Riverpod 3 + go_router + dio + flutter_secure_storage, organizado por fea
 
 ```
 lib/
-  core/       config, tema, rede (dio, interceptor do token, erros), formatação
-  shared/ds/  design system (`ds.dart` exporta tudo)
-  features/   auth, inicio, avisos, agenda, boletim, dependentes, perfil
+  core/       config, tema, rede (dio, interceptor do token, erros), cache versionado, formatação
+  shared/     ds/ (design system, `ds.dart` exporta tudo), face/ (câmera e prova de vida), vault/ (arquivos cifrados)
+  features/   auth, home, notices, agenda, report_card, dependents, benefits, materials, profile,
+              face_login, biometrics, attendance
               cada uma com data/ (models + repositório), <feature>_providers.dart, screens/, widgets/
-  router/     rotas, abas por papel e redirect de autenticação
+  router/     routes.dart (rotas, abas por papel e redirect de autenticação), app_router.dart
 ```
+
+Pastas, arquivos e rotas em inglês; classes, variáveis e textos da tela em português.
 
 ## Cache e uso offline
 

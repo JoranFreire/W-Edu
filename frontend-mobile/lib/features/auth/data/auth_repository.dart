@@ -1,10 +1,10 @@
 import 'package:dio/dio.dart';
 
-import '../../../core/cache/cache_local.dart';
+import '../../../core/cache/local_cache.dart';
 import '../../../core/network/token_store.dart';
-import '../../../shared/cofre/cofre_de_arquivos.dart';
-import 'instituicao.dart';
-import 'usuario.dart';
+import '../../../shared/vault/file_vault.dart';
+import 'institution.dart';
+import 'user.dart';
 
 class AuthRepository {
   AuthRepository(this._dio, this._tokens, this._cache, this._cofre);
