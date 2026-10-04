@@ -2,22 +2,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../l10n/l10n.dart';
 import '../../../router/routes.dart';
 import '../../../shared/ds/ds.dart';
 import '../../../shared/face/face.dart';
 import '../biometrics_providers.dart';
+import '../widgets/biometrics_labels.dart';
 
 /// Cadastro do próprio rosto: a mesma prova de vida do login (de frente e virando para os dois lados).
-class CadastroFacialScreen extends ConsumerWidget {
-  const CadastroFacialScreen({super.key});
+class FaceEnrollmentScreen extends ConsumerWidget {
+  const FaceEnrollmentScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final etapa = ref.watch(cadastroFacialProvider);
-    final notifier = ref.read(cadastroFacialProvider.notifier);
-    final tema = Theme.of(context);
+    final step = ref.watch(faceEnrollmentProvider);
+    final notifier = ref.read(faceEnrollmentProvider.notifier);
+    final theme = Theme.of(context);
+    final l10n = context.l10n;
     return Scaffold(
-      appBar: AppBar(title: const Text('Cadastrar o rosto')),
+      appBar: AppBar(title: Text(l10n.enrollmentTitle)),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -25,44 +28,58 @@ class CadastroFacialScreen extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Expanded(
-                child: switch (etapa) {
-                  CadastroPronto() => _Aviso(Icons.face_rounded,
-                      'Em um lugar bem iluminado, olhe para a câmera e vire o rosto para os dois lados quando pedir. '
-                      'As fotos vão só para a conferência e não ficam no aparelho.'),
-                  CadastroAbrindoCamera() || CadastroEnviando() => const Carregando(),
-                  CadastroCapturando(:final passo, :final numero, :final total) =>
-                    VisorDoPasso(passo: passo, numero: numero, total: total, visor: notifier.captura?.visor()),
-                  CadastroFeito() => _Aviso(Icons.verified_user_rounded, 'Rosto cadastrado.'),
-                  CadastroFalhou(:final mensagem) => _Aviso(Icons.error_outline_rounded, mensagem, cor: tema.colorScheme.error),
+                child: switch (step) {
+                  EnrollmentReady() => _Notice(Icons.face_rounded, l10n.enrollmentIntro),
+                  EnrollmentOpeningCamera() || EnrollmentSending() => const LoadingView(),
+                  EnrollmentCapturing(:final step, :final current, :final total) => StepViewfinder(
+                    step: step,
+                    current: current,
+                    total: total,
+                    preview: notifier.camera?.preview(),
+                  ),
+                  EnrollmentDone() => _Notice(Icons.verified_user_rounded, l10n.enrollmentDone),
+                  EnrollmentFailed() => _Notice(Icons.error_outline_rounded, _failureMessage(step, l10n), color: theme.colorScheme.error),
                 },
               ),
               const SizedBox(height: 16),
-              if (etapa is CadastroPronto || etapa is CadastroFalhou)
-                FilledButton(onPressed: notifier.iniciar, child: Text(etapa is CadastroFalhou ? 'Tentar de novo' : 'Começar')),
-              if (etapa is CadastroFeito)
-                FilledButton(onPressed: () => context.go(Rotas.biometria), child: const Text('Concluir')),
+              if (step is EnrollmentReady || step is EnrollmentFailed)
+                FilledButton(onPressed: notifier.start, child: Text(step is EnrollmentFailed ? l10n.tryAgain : l10n.start)),
+              if (step is EnrollmentDone) FilledButton(onPressed: () => context.go(Routes.biometrics), child: Text(l10n.finish)),
             ],
           ),
         ),
       ),
     );
   }
+
+  String _failureMessage(EnrollmentFailed failed, AppLocalizations l10n) => switch (failed.reason) {
+    EnrollmentFailure.unavailable => l10n.enrollmentUnavailable,
+    EnrollmentFailure.cameraUnavailable => l10n.enrollmentCameraUnavailable,
+    EnrollmentFailure.rejected => personaErrorMessage(failed.error!, l10n, fallback: l10n.enrollmentError),
+  };
 }
 
-class _Aviso extends StatelessWidget {
-  const _Aviso(this.icone, this.texto, {this.cor});
+class _Notice extends StatelessWidget {
+  const _Notice(this.icon, this.text, {this.color});
 
-  final IconData icone;
-  final String texto;
-  final Color? cor;
+  final IconData icon;
+  final String text;
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
-    final tema = Theme.of(context);
-    return Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-      Icon(icone, size: 72, color: cor ?? tema.colorScheme.primary),
-      const SizedBox(height: 16),
-      Text(texto, textAlign: TextAlign.center, style: tema.textTheme.bodyLarge?.copyWith(color: cor)),
-    ]);
+    final theme = Theme.of(context);
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(icon, size: 72, color: color ?? theme.colorScheme.primary),
+        const SizedBox(height: 16),
+        Text(
+          text,
+          textAlign: TextAlign.center,
+          style: theme.textTheme.bodyLarge?.copyWith(color: color),
+        ),
+      ],
+    );
   }
 }

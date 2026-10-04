@@ -2,143 +2,145 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/network/network_providers.dart';
 import '../../shared/face/face.dart';
-import 'data/face_enrollment_repository.dart';
-import 'data/consents_repository.dart';
-import 'data/purpose.dart';
-import 'data/refusals.dart';
 import 'data/biometric_status.dart';
+import 'data/consents_repository.dart';
+import 'data/face_enrollment_repository.dart';
+import 'data/purpose.dart';
 import 'data/terms.dart';
 
 /// Nulos quando o Persona não está configurado (a tela nem aparece).
-final consentimentosRepositoryProvider = Provider<ConsentimentosRepository?>((ref) {
+final consentsRepositoryProvider = Provider<ConsentsRepository?>((ref) {
   final dio = ref.watch(personaDioProvider);
-  return dio == null ? null : ConsentimentosRepository(dio);
+  return dio == null ? null : ConsentsRepository(dio);
 });
 
-final cadastroFacialRepositoryProvider = Provider<CadastroFacialRepository?>((ref) {
+final faceEnrollmentRepositoryProvider = Provider<FaceEnrollmentRepository?>((ref) {
   final dio = ref.watch(personaDioProvider);
-  return dio == null ? null : CadastroFacialRepository(dio);
+  return dio == null ? null : FaceEnrollmentRepository(dio);
 });
 
 /// Situação de quem está logado (sempre da rede: autorizar e revogar valem na hora).
-final minhaSituacaoBiometricaProvider = FutureProvider.autoDispose<SituacaoBiometrica>(
-  (ref) => ref.watch(consentimentosRepositoryProvider)!.minhaSituacao(),
-);
+final myBiometricStatusProvider = FutureProvider.autoDispose<BiometricStatus>((ref) => ref.watch(consentsRepositoryProvider)!.myStatus());
 
-final situacaoDoDependenteProvider = FutureProvider.autoDispose.family<SituacaoBiometrica, String>(
-  (ref, alunoId) => ref.watch(consentimentosRepositoryProvider)!.situacaoDoDependente(alunoId),
+final dependentBiometricStatusProvider = FutureProvider.autoDispose.family<BiometricStatus, String>(
+  (ref, studentId) => ref.watch(consentsRepositoryProvider)!.dependentStatus(studentId),
 );
 
 /// Autorizar (depois de ler o termo) e revogar, da própria pessoa ou do dependente menor.
-final consentimentosAcoesProvider = Provider<ConsentimentosAcoes>(ConsentimentosAcoes.new);
+final consentActionsProvider = Provider<ConsentActions>(ConsentActions.new);
 
-class ConsentimentosAcoes {
-  ConsentimentosAcoes(this._ref);
+class ConsentActions {
+  ConsentActions(this._ref);
 
   final Ref _ref;
 
-  ConsentimentosRepository get _repo => _ref.read(consentimentosRepositoryProvider)!;
+  ConsentsRepository get _repo => _ref.read(consentsRepositoryProvider)!;
 
-  Future<Termos> termos(Finalidade finalidade) => _repo.termos(finalidade);
+  Future<ConsentTerms> terms(Purpose purpose) => _repo.terms(purpose);
 
-  Future<void> autorizar(Termos termos, {String? dependenteId}) async {
-    await _repo.autorizar(termos, dependenteId: dependenteId);
-    _atualizar(dependenteId);
+  Future<void> grant(ConsentTerms terms, {String? dependentId}) async {
+    await _repo.grant(terms, dependentId: dependentId);
+    _refresh(dependentId);
   }
 
-  Future<void> revogar(Finalidade finalidade, {String? dependenteId}) async {
-    await _repo.revogar(finalidade, dependenteId: dependenteId);
-    _atualizar(dependenteId);
+  Future<void> revoke(Purpose purpose, {String? dependentId}) async {
+    await _repo.revoke(purpose, dependentId: dependentId);
+    _refresh(dependentId);
   }
 
-  void _atualizar(String? dependenteId) => dependenteId == null
-      ? _ref.invalidate(minhaSituacaoBiometricaProvider)
-      : _ref.invalidate(situacaoDoDependenteProvider(dependenteId));
+  void _refresh(String? dependentId) =>
+      dependentId == null ? _ref.invalidate(myBiometricStatusProvider) : _ref.invalidate(dependentBiometricStatusProvider(dependentId));
 }
 
 /// Etapas do cadastro do rosto.
-sealed class EtapaCadastro {
-  const EtapaCadastro();
+sealed class EnrollmentStep {
+  const EnrollmentStep();
 }
 
-class CadastroPronto extends EtapaCadastro {
-  const CadastroPronto();
+class EnrollmentReady extends EnrollmentStep {
+  const EnrollmentReady();
 }
 
-class CadastroAbrindoCamera extends EtapaCadastro {
-  const CadastroAbrindoCamera();
+class EnrollmentOpeningCamera extends EnrollmentStep {
+  const EnrollmentOpeningCamera();
 }
 
-class CadastroCapturando extends EtapaCadastro {
-  const CadastroCapturando(this.passo, this.numero, this.total);
-  final PassoDesafio passo;
-  final int numero;
+class EnrollmentCapturing extends EnrollmentStep {
+  const EnrollmentCapturing(this.step, this.current, this.total);
+  final ChallengeStep step;
+  final int current;
   final int total;
 }
 
-class CadastroEnviando extends EtapaCadastro {
-  const CadastroEnviando();
+class EnrollmentSending extends EnrollmentStep {
+  const EnrollmentSending();
 }
 
-class CadastroFeito extends EtapaCadastro {
-  const CadastroFeito();
+class EnrollmentDone extends EnrollmentStep {
+  const EnrollmentDone();
 }
 
-class CadastroFalhou extends EtapaCadastro {
-  const CadastroFalhou(this.mensagem);
-  final String mensagem;
+/// Por que não cadastrou (a tela traduz): sem Persona, sem câmera, ou o erro da API.
+enum EnrollmentFailure { unavailable, cameraUnavailable, rejected }
+
+class EnrollmentFailed extends EnrollmentStep {
+  const EnrollmentFailed(this.reason, [this.error]);
+  final EnrollmentFailure reason;
+
+  /// O erro da API, para a tela ler o código do Persona (`no_active_consent`...).
+  final Object? error;
 }
 
-final cadastroFacialProvider = NotifierProvider.autoDispose<CadastroFacialNotifier, EtapaCadastro>(CadastroFacialNotifier.new);
+final faceEnrollmentProvider = NotifierProvider.autoDispose<FaceEnrollmentNotifier, EnrollmentStep>(FaceEnrollmentNotifier.new);
 
 /// Cadastro do próprio rosto: desafio → uma foto por passo → Persona confere a prova de vida e
 /// guarda o modelo do rosto (cifrado). As fotos ficam só em memória no aparelho.
-class CadastroFacialNotifier extends Notifier<EtapaCadastro> {
-  CapturaDeRosto? _captura;
+class FaceEnrollmentNotifier extends Notifier<EnrollmentStep> {
+  DeviceCameraCapture? _camera;
 
   @override
-  EtapaCadastro build() {
-    ref.onDispose(() => _captura?.fechar());
-    return const CadastroPronto();
+  EnrollmentStep build() {
+    ref.onDispose(() => _camera?.close());
+    return const EnrollmentReady();
   }
 
-  CapturaDeRosto? get captura => _captura;
+  DeviceCameraCapture? get camera => _camera;
 
-  Future<void> iniciar() async {
-    if (state is CadastroAbrindoCamera || state is CadastroCapturando || state is CadastroEnviando) return;
-    final repo = ref.read(cadastroFacialRepositoryProvider);
+  Future<void> start() async {
+    if (state is EnrollmentOpeningCamera || state is EnrollmentCapturing || state is EnrollmentSending) return;
+    final repo = ref.read(faceEnrollmentRepositoryProvider);
     if (repo == null) {
-      state = const CadastroFalhou('O reconhecimento facial não está disponível.');
+      state = const EnrollmentFailed(EnrollmentFailure.unavailable);
       return;
     }
-    state = const CadastroAbrindoCamera();
-    final CapturaDeRosto captura = _captura ?? ref.read(capturaDeRostoProvider);
-    _captura = captura;
+    state = const EnrollmentOpeningCamera();
+    final DeviceCameraCapture camera = _camera ?? ref.read(faceCameraProvider);
+    _camera = camera;
     try {
-      await captura.abrir();
+      await camera.open();
     } on Object {
-      state = const CadastroFalhou('Não foi possível abrir a câmera. Confira a permissão do app.');
+      state = const EnrollmentFailed(EnrollmentFailure.cameraUnavailable);
       return;
     }
     try {
-      final desafio = await repo.desafio();
-      final fotos = await capturarPassos(
-        captura: captura,
-        desafio: desafio,
-        pausa: ref.read(pausaEntrePassosProvider),
-        aoMudarDePasso: (passo, numero, total) => state = CadastroCapturando(passo, numero, total),
-        continuar: () => ref.mounted,
+      final challenge = await repo.challenge();
+      final photos = await captureSteps(
+        camera: camera,
+        challenge: challenge,
+        pause: ref.read(stepPauseProvider),
+        onStep: (step, current, total) => state = EnrollmentCapturing(step, current, total),
+        keepGoing: () => ref.mounted,
       );
-      if (!ref.mounted || fotos.length < desafio.passos.length) return;
-      state = const CadastroEnviando();
-      await repo.cadastrar(desafio.id, fotos);
+      if (!ref.mounted || photos.length < challenge.steps.length) return;
+      state = const EnrollmentSending();
+      await repo.enroll(challenge.id, photos);
       if (!ref.mounted) return;
-      ref.invalidate(minhaSituacaoBiometricaProvider);
-      state = const CadastroFeito();
-    } on Object catch (erro) {
-      if (ref.mounted) state = CadastroFalhou(mensagemDoPersona(erro, 'Não foi possível cadastrar o rosto.'));
+      ref.invalidate(myBiometricStatusProvider);
+      state = const EnrollmentDone();
+    } on Object catch (error) {
+      if (ref.mounted) state = EnrollmentFailed(EnrollmentFailure.rejected, error);
     } finally {
-      await captura.fechar();
+      await camera.close();
     }
   }
 }

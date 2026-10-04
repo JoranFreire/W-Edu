@@ -1,38 +1,42 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../l10n/l10n.dart';
 import '../../../router/routes.dart';
 import '../data/biometric_status.dart';
 
 /// Situação do cadastro do rosto e o atalho para cadastrar (ou refazer).
-class CadastroRostoCard extends StatelessWidget {
-  const CadastroRostoCard({super.key, required this.situacao});
+class FaceEnrollmentCard extends StatelessWidget {
+  const FaceEnrollmentCard({super.key, required this.status});
 
-  final SituacaoBiometrica situacao;
+  final BiometricStatus status;
 
   @override
   Widget build(BuildContext context) {
-    final tema = Theme.of(context);
-    final texto = situacao.rostoCadastrado
-        ? 'Seu rosto está cadastrado.'
-        : situacao.podeCadastrarRosto
-            ? 'Falta cadastrar o rosto para usar o que foi autorizado.'
-            : 'Autorize pelo menos um uso abaixo para cadastrar o rosto.';
+    final theme = Theme.of(context);
+    final l10n = context.l10n;
+    final text = status.faceEnrolled
+        ? l10n.faceEnrolled
+        : status.canEnrollFace
+        ? l10n.faceEnrollmentMissing
+        : l10n.faceEnrollmentNeedsConsent;
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(children: [
-              Icon(situacao.rostoCadastrado ? Icons.verified_user_rounded : Icons.face_retouching_natural, color: tema.colorScheme.primary),
-              const SizedBox(width: 12),
-              Expanded(child: Text(texto, style: tema.textTheme.bodyLarge)),
-            ]),
+            Row(
+              children: [
+                Icon(status.faceEnrolled ? Icons.verified_user_rounded : Icons.face_retouching_natural, color: theme.colorScheme.primary),
+                const SizedBox(width: 12),
+                Expanded(child: Text(text, style: theme.textTheme.bodyLarge)),
+              ],
+            ),
             const SizedBox(height: 12),
             FilledButton.tonal(
-              onPressed: situacao.podeCadastrarRosto ? () => context.go(Rotas.cadastroFacial) : null,
-              child: Text(situacao.rostoCadastrado ? 'Refazer o cadastro do rosto' : 'Cadastrar meu rosto'),
+              onPressed: status.canEnrollFace ? () => context.go(Routes.faceEnrollment) : null,
+              child: Text(status.faceEnrolled ? l10n.reenrollFace : l10n.enrollMyFace),
             ),
           ],
         ),

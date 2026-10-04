@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 
 /// Atalho do início: ícone, título, um número ou frase e o toque leva à aba.
-class ResumoCard extends StatelessWidget {
-  const ResumoCard({super.key, required this.icone, required this.titulo, required this.valor, required this.onTap});
+class SummaryCard extends StatelessWidget {
+  const SummaryCard({super.key, required this.icon, required this.title, required this.value, required this.onTap});
 
-  final IconData icone;
-  final String titulo;
-  final String valor;
+  final IconData icon;
+  final String title;
+  final String value;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final tema = Theme.of(context);
+    final theme = Theme.of(context);
     return Card(
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
@@ -20,14 +20,14 @@ class ResumoCard extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           child: Row(
             children: [
-              Icon(icone, color: tema.colorScheme.primary, size: 28),
+              Icon(icon, color: theme.colorScheme.primary, size: 28),
               const SizedBox(width: 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(titulo, style: tema.textTheme.labelMedium?.copyWith(color: tema.colorScheme.onSurfaceVariant)),
-                    Text(valor, style: tema.textTheme.titleMedium),
+                    Text(title, style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+                    Text(value, style: theme.textTheme.titleMedium),
                   ],
                 ),
               ),

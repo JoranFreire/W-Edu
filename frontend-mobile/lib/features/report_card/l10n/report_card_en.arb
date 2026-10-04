@@ -1,0 +1,15 @@
+{
+  "reportCardTitle": "Report card",
+  "reportCardEmpty": "No grades published yet.",
+  "reportCardNoPeriods": "No closed periods yet.",
+  "reportCardAbsences": "{count, plural, =1{1 absence} other{{count} absences}}",
+  "reportCardFinalGrade": "Final grade: {grade}",
+  "reportCardRecovery": "Recovery: {grade}",
+  "reportCardAttendance": "Attendance: {rate}",
+  "reportCardPassingGrade": "Passing grade: {grade}",
+  "subjectInProgress": "In progress",
+  "subjectRecovery": "In recovery",
+  "subjectApproved": "Passed",
+  "subjectFailed": "Failed",
+  "subjectFailedAttendance": "Failed for absences"
+}

@@ -1,0 +1,22 @@
+{
+  "signInWithAnotherAccount": "Sign in with another account",
+  "loginSubtitle": "Sign in with your institution account",
+  "emailLabel": "Email",
+  "emailRequired": "Enter your email.",
+  "passwordLabel": "Password",
+  "passwordRequired": "Enter your password.",
+  "showPassword": "Show password",
+  "hidePassword": "Hide password",
+  "signIn": "Sign in",
+  "signInError": "Could not sign in.",
+  "faceSignInAs": "Sign in with your face as {name}",
+  "notYouUseAnotherAccount": "Not {name}? Use another account",
+  "faceLoginTitle": "Sign in with your face",
+  "faceLoginHello": "Hi, {name}",
+  "faceLoginIntro": "Let's check it's you.\nYou will look at the camera and turn your face to both sides.",
+  "faceChecking": "Checking…",
+  "signInWithPassword": "Sign in with password",
+  "faceLoginUnavailable": "Face sign-in is not available. Use your password.",
+  "faceLoginCameraUnavailable": "Could not open the camera. Check the permission or use your password.",
+  "faceLoginRefused": "Could not sign in with your face. Use your password."
+}

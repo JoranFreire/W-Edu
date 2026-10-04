@@ -1,0 +1,13 @@
+{
+  "dependentsTitle": "Meus dependentes",
+  "dependentsEmpty": "Nenhum aluno vinculado à sua conta. Procure a secretaria.",
+  "dependentFallbackName": "Dependente",
+  "dependentTabFace": "Rosto",
+  "dependentTabBenefits": "Benefícios",
+  "financialBadge": "Financeiro",
+  "relationshipMother": "Mãe",
+  "relationshipFather": "Pai",
+  "relationshipLegalGuardian": "Responsável legal",
+  "relationshipGrandparent": "Avó/avô",
+  "relationshipOther": "Responsável"
+}

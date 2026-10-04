@@ -6,41 +6,41 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../attendance_providers.dart';
 
 /// Bytes de uma imagem do Persona (recorte do rosto ou foto do cadastro), com o token do professor.
-final imagemDoPersonaProvider = FutureProvider.autoDispose.family<Uint8List, String>(
-  (ref, caminho) => ref.watch(chamadaRepositoryProvider)!.imagem(caminho),
+final personaImageProvider = FutureProvider.autoDispose.family<Uint8List, String>(
+  (ref, path) => ref.watch(attendanceRepositoryProvider)!.image(path),
 );
 
-class ImagemDoPersona extends ConsumerWidget {
-  const ImagemDoPersona({super.key, required this.caminho, required this.legenda});
+class PersonaImage extends ConsumerWidget {
+  const PersonaImage({super.key, required this.path, required this.caption});
 
-  final String? caminho;
-  final String legenda;
+  final String? path;
+  final String caption;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final tema = Theme.of(context);
-    final caminho = this.caminho;
-    final imagem = caminho == null ? null : ref.watch(imagemDoPersonaProvider(caminho));
+    final theme = Theme.of(context);
+    final path = this.path;
+    final image = path == null ? null : ref.watch(personaImageProvider(path));
     return Column(
       children: [
         SizedBox.square(
           dimension: 96,
           child: ClipRRect(
             borderRadius: BorderRadius.circular(12),
-            child: switch (imagem) {
+            child: switch (image) {
               AsyncData(:final value) => Image.memory(
-                  value,
-                  fit: BoxFit.cover,
-                  semanticLabel: legenda,
-                  errorBuilder: (_, _, _) => const Icon(Icons.broken_image_outlined),
-                ),
+                value,
+                fit: BoxFit.cover,
+                semanticLabel: caption,
+                errorBuilder: (_, _, _) => const Icon(Icons.broken_image_outlined),
+              ),
               AsyncLoading() => const Center(child: CircularProgressIndicator()),
-              _ => ColoredBox(color: tema.colorScheme.surfaceContainerHighest, child: const Icon(Icons.image_not_supported_outlined)),
+              _ => ColoredBox(color: theme.colorScheme.surfaceContainerHighest, child: const Icon(Icons.image_not_supported_outlined)),
             },
           ),
         ),
         const SizedBox(height: 4),
-        Text(legenda, style: tema.textTheme.labelSmall),
+        Text(caption, style: theme.textTheme.labelSmall),
       ],
     );
   }

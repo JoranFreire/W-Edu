@@ -2,7 +2,7 @@
 library;
 
 export 'capture_steps.dart';
-export 'face_capture.dart';
 export 'challenge.dart';
+export 'face_capture.dart';
 export 'face_providers.dart';
 export 'step_viewfinder.dart';

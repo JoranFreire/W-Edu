@@ -1,0 +1,8 @@
+{
+  "agendaTitle": "Agenda escolar",
+  "agendaEmpty": "Nada na agenda por enquanto.",
+  "agendaKindHomework": "Tarefa",
+  "agendaKindTest": "Prova",
+  "agendaKindEvent": "Evento",
+  "agendaKindNotice": "Aviso"
+}

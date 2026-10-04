@@ -6,44 +6,44 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:wedu_mobile/shared/vault/file_vault.dart';
 
 void main() {
-  late Directory pasta;
+  late Directory folder;
 
   setUp(() async {
     FlutterSecureStorage.setMockInitialValues({});
-    pasta = await Directory.systemTemp.createTemp('cofre');
+    folder = await Directory.systemTemp.createTemp('vault');
   });
 
-  tearDown(() => pasta.delete(recursive: true));
+  tearDown(() => folder.delete(recursive: true));
 
   test('guarda cifrado e lê de volta', () async {
-    final cofre = CofreCifrado(pasta: () async => pasta);
-    final foto = Uint8List.fromList(List.generate(2048, (i) => i % 251));
-    await cofre.guardar('chamada_1_CENTER', foto);
+    final vault = EncryptedFileVault(folder: () async => folder);
+    final photo = Uint8List.fromList(List.generate(2048, (i) => i % 251));
+    await vault.store('attendance_1_CENTER', photo);
 
-    final noDisco = await File('${pasta.path}/cofre/chamada_1_CENTER').readAsBytes();
-    expect(noDisco.length, greaterThan(foto.length), reason: 'nonce e MAC junto');
-    expect(_contem(noDisco, foto.sublist(0, 64)), isFalse, reason: 'nada em claro no disco');
-    expect(await cofre.ler('chamada_1_CENTER'), foto);
+    final onDisk = await File('${folder.path}/vault/attendance_1_CENTER').readAsBytes();
+    expect(onDisk.length, greaterThan(photo.length), reason: 'nonce e MAC junto');
+    expect(_contains(onDisk, photo.sublist(0, 64)), isFalse, reason: 'nada em claro no disco');
+    expect(await vault.read('attendance_1_CENTER'), photo);
   });
 
   test('outra chave não decifra; apagar remove', () async {
-    await CofreCifrado(pasta: () async => pasta).guardar('x', Uint8List.fromList([1, 2, 3]));
+    await EncryptedFileVault(folder: () async => folder).store('x', Uint8List.fromList([1, 2, 3]));
     FlutterSecureStorage.setMockInitialValues({});
-    final outro = CofreCifrado(pasta: () async => pasta);
-    expect(await outro.ler('x'), isNull);
-    await outro.apagar('x');
-    expect(await File('${pasta.path}/cofre/x').exists(), isFalse);
-    expect(await outro.ler('nada'), isNull);
+    final other = EncryptedFileVault(folder: () async => folder);
+    expect(await other.read('x'), isNull);
+    await other.delete('x');
+    expect(await File('${folder.path}/vault/x').exists(), isFalse);
+    expect(await other.read('missing'), isNull);
   });
 }
 
-bool _contem(List<int> dados, List<int> trecho) {
-  for (var i = 0; i + trecho.length <= dados.length; i++) {
-    var igual = true;
-    for (var j = 0; j < trecho.length && igual; j++) {
-      igual = dados[i + j] == trecho[j];
+bool _contains(List<int> data, List<int> chunk) {
+  for (var i = 0; i + chunk.length <= data.length; i++) {
+    var equal = true;
+    for (var j = 0; j < chunk.length && equal; j++) {
+      equal = data[i + j] == chunk[j];
     }
-    if (igual) return true;
+    if (equal) return true;
   }
   return false;
 }

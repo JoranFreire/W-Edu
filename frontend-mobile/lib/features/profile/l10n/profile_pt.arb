@@ -1,0 +1,35 @@
+{
+  "profileTitle": "Perfil",
+  "profileEmail": "E-mail",
+  "profileRole": "{count, plural, =1{Papel} other{Papéis}}",
+  "@profileRole": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "profileInstitution": "Instituição",
+  "profileFaceRecognition": "Reconhecimento facial",
+  "profileFaceRecognitionHint": "Entrar com o rosto, catraca e presença: autorizações e cadastro do rosto",
+  "signOut": "Sair",
+  "signOutTitle": "Sair da conta?",
+  "signOutBody": "Você vai precisar entrar de novo com e-mail e senha.",
+  "signOutPendingAttendance": "{count, plural, =1{Há 1 chamada com fotos ainda não enviadas: ela será apagada do aparelho.} other{Há {count} chamadas com fotos ainda não enviadas: elas serão apagadas do aparelho.}}",
+  "@signOutPendingAttendance": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "roleStudent": "Aluno",
+  "roleInstructor": "Instrutor",
+  "roleCoordinator": "Coordenação",
+  "roleSecretary": "Secretaria",
+  "roleGuardian": "Responsável",
+  "roleCompanyManager": "Gestão empresa",
+  "roleInstitutionAdmin": "Admin da instituição",
+  "roleAdmin": "Admin",
+  "roleSuperAdmin": "Admin da plataforma"
+}

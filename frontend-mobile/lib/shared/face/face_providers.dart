@@ -3,10 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'face_capture.dart';
 
 /// A câmera da prova de vida (os testes põem uma falsa).
-final capturaDeRostoProvider = Provider<CapturaDeRosto>((ref) => CameraFrontal());
+final faceCameraProvider = Provider<DeviceCameraCapture>((ref) => FrontCamera());
 
 /// A câmera da foto da sala (chamada facial).
-final cameraDeSalaProvider = Provider<CapturaDeRosto>((ref) => CameraTraseira());
+final roomCameraProvider = Provider<DeviceCameraCapture>((ref) => BackCamera());
 
 /// Tempo para a pessoa fazer cada movimento antes da foto (zero nos testes).
-final pausaEntrePassosProvider = Provider<Duration>((ref) => const Duration(seconds: 2));
+final stepPauseProvider = Provider<Duration>((ref) => const Duration(seconds: 2));

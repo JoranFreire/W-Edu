@@ -2,45 +2,44 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/format/dates.dart';
+import '../../../l10n/l10n.dart';
 import '../../../shared/ds/ds.dart';
-import '../notices_providers.dart';
 import '../data/notice.dart';
+import '../notices_providers.dart';
 import '../widgets/notice_card.dart';
 
-class AvisosScreen extends ConsumerWidget {
-  const AvisosScreen({super.key});
+class NoticesScreen extends ConsumerWidget {
+  const NoticesScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final avisos = ref.watch(avisosProvider);
-    final notifier = ref.read(avisosProvider.notifier);
-    final temNaoLido = avisos.value?.any((aviso) => !aviso.lido) ?? false;
+    final notices = ref.watch(noticesProvider);
+    final notifier = ref.read(noticesProvider.notifier);
+    final hasUnread = notices.value?.any((notice) => !notice.isRead) ?? false;
+    final l10n = context.l10n;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Avisos'),
-        actions: [
-          if (temNaoLido)
-            TextButton(onPressed: notifier.marcarTodos, child: const Text('Marcar todos como lidos')),
-        ],
+        title: Text(l10n.noticesTitle),
+        actions: [if (hasUnread) TextButton(onPressed: notifier.markAllAsRead, child: Text(l10n.markAllAsRead))],
       ),
-      body: ListaRemota<Aviso>(
-        valor: avisos,
-        onRecarregar: notifier.recarregar,
-        textoVazio: 'Nenhum aviso por enquanto.',
-        iconeVazio: Icons.notifications_none_rounded,
-        itemBuilder: (context, aviso) => AvisoCard(
-          aviso: aviso,
+      body: RemoteList<Notice>(
+        value: notices,
+        onRefresh: notifier.reload,
+        emptyText: l10n.noNotices,
+        emptyIcon: Icons.notifications_none_rounded,
+        itemBuilder: (context, notice) => NoticeCard(
+          notice: notice,
           onTap: () {
-            notifier.marcarLido(aviso);
-            _abrir(context, aviso);
+            notifier.markAsRead(notice);
+            _open(context, notice);
           },
         ),
       ),
     );
   }
 
-  void _abrir(BuildContext context, Aviso aviso) {
+  void _open(BuildContext context, Notice notice) {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -51,11 +50,11 @@ class AvisosScreen extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(aviso.titulo, style: Theme.of(context).textTheme.titleLarge),
+              Text(notice.title, style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: 4),
-              Text(formatarDiaHora(aviso.criadoEm), style: Theme.of(context).textTheme.labelMedium),
+              Text(formatDayTime(notice.createdAt), style: Theme.of(context).textTheme.labelMedium),
               const SizedBox(height: 16),
-              Text(aviso.corpo, style: Theme.of(context).textTheme.bodyLarge),
+              Text(notice.body, style: Theme.of(context).textTheme.bodyLarge),
             ],
           ),
         ),

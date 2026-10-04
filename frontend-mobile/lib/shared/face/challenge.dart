@@ -1,27 +1,26 @@
 /// Passo da prova de vida, na ordem que o Persona sorteou. O servidor só exige
 /// que os dois giros sejam para lados opostos (a câmera frontal pode espelhar),
-/// então "esquerda" e "direita" aqui são só para guiar a pessoa.
-enum PassoDesafio {
-  frente('CENTER', 'Olhe para a câmera'),
-  esquerda('TURN_LEFT', 'Vire o rosto para a esquerda'),
-  direita('TURN_RIGHT', 'Vire o rosto para a direita');
+/// então "esquerda" e "direita" são só para guiar a pessoa.
+enum ChallengeStep {
+  center('CENTER'),
+  turnLeft('TURN_LEFT'),
+  turnRight('TURN_RIGHT');
 
-  const PassoDesafio(this.valor, this.instrucao);
-  final String valor;
-  final String instrucao;
+  const ChallengeStep(this.value);
+  final String value;
 
-  static PassoDesafio de(String valor) => values.firstWhere((p) => p.valor == valor);
+  static ChallengeStep of(String value) => values.firstWhere((step) => step.value == value);
 }
 
 /// Desafio de prova de vida (uso único, vale cerca de 60 s).
-class Desafio {
-  const Desafio({required this.id, required this.passos});
+class Challenge {
+  const Challenge({required this.id, required this.steps});
 
   final String id;
-  final List<PassoDesafio> passos;
+  final List<ChallengeStep> steps;
 
-  factory Desafio.fromJson(Map<String, dynamic> json) => Desafio(
-        id: json['challenge_id'] as String,
-        passos: [for (final passo in json['steps'] as List<dynamic>) PassoDesafio.de(passo as String)],
-      );
+  factory Challenge.fromJson(Map<String, dynamic> json) => Challenge(
+    id: json['challenge_id'] as String,
+    steps: [for (final step in json['steps'] as List<dynamic>) ChallengeStep.of(step as String)],
+  );
 }

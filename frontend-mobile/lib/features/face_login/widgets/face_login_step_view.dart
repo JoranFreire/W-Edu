@@ -1,53 +1,74 @@
 import 'package:flutter/material.dart';
 
+import '../../../l10n/l10n.dart';
 import '../../../shared/face/face.dart';
 import '../face_login_providers.dart';
 
 /// O meio da tela: orientação, visor da câmera com o passo pedido, conferência ou recusa.
-class EtapaLoginFacialView extends StatelessWidget {
-  const EtapaLoginFacialView({super.key, required this.etapa, this.visor});
+class FaceLoginStepView extends StatelessWidget {
+  const FaceLoginStepView({super.key, required this.step, this.preview});
 
-  final EtapaLoginFacial etapa;
-  final Widget? visor;
+  final FaceLoginStep step;
+  final Widget? preview;
 
   @override
   Widget build(BuildContext context) {
-    final tema = Theme.of(context);
-    return switch (etapa) {
-      Pronto() => _Mensagem(
-          icone: Icons.face_rounded,
-          texto: 'Vamos conferir que é você.\nVocê vai olhar para a câmera e virar o rosto para os dois lados.',
-        ),
-      AbrindoCamera() || Conferindo() => Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const CircularProgressIndicator(),
-            const SizedBox(height: 16),
-            Text(etapa is Conferindo ? 'Conferindo…' : 'Abrindo a câmera…', style: tema.textTheme.bodyLarge),
-          ],
-        ),
-      Capturando(:final passo, :final numero, :final total) => VisorDoPasso(passo: passo, numero: numero, total: total, visor: visor),
-      NaoEntrou(:final mensagem) => _Mensagem(icone: Icons.no_accounts_rounded, texto: mensagem, cor: tema.colorScheme.error),
+    final theme = Theme.of(context);
+    final l10n = context.l10n;
+    return switch (step) {
+      FaceLoginReady() => _Message(icon: Icons.face_rounded, text: l10n.faceLoginIntro),
+      FaceLoginOpeningCamera() || FaceLoginChecking() => Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const CircularProgressIndicator(),
+          const SizedBox(height: 16),
+          Text(step is FaceLoginChecking ? l10n.faceChecking : l10n.openingCamera, style: theme.textTheme.bodyLarge),
+        ],
+      ),
+      FaceLoginCapturing(:final step, :final current, :final total) => StepViewfinder(
+        step: step,
+        current: current,
+        total: total,
+        preview: preview,
+      ),
+      FaceLoginFailed(:final reason) => _Message(
+        icon: Icons.no_accounts_rounded,
+        text: reason.message(l10n),
+        color: theme.colorScheme.error,
+      ),
     };
   }
 }
 
-class _Mensagem extends StatelessWidget {
-  const _Mensagem({required this.icone, required this.texto, this.cor});
+extension FaceLoginFailureText on FaceLoginFailure {
+  String message(AppLocalizations l10n) => switch (this) {
+    FaceLoginFailure.unavailable => l10n.faceLoginUnavailable,
+    FaceLoginFailure.cameraUnavailable => l10n.faceLoginCameraUnavailable,
+    FaceLoginFailure.network => l10n.errorNoConnection,
+    FaceLoginFailure.refused => l10n.faceLoginRefused,
+  };
+}
 
-  final IconData icone;
-  final String texto;
-  final Color? cor;
+class _Message extends StatelessWidget {
+  const _Message({required this.icon, required this.text, this.color});
+
+  final IconData icon;
+  final String text;
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
-    final tema = Theme.of(context);
+    final theme = Theme.of(context);
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Icon(icone, size: 72, color: cor ?? tema.colorScheme.primary),
+        Icon(icon, size: 72, color: color ?? theme.colorScheme.primary),
         const SizedBox(height: 16),
-        Text(texto, textAlign: TextAlign.center, style: tema.textTheme.bodyLarge?.copyWith(color: cor)),
+        Text(
+          text,
+          textAlign: TextAlign.center,
+          style: theme.textTheme.bodyLarge?.copyWith(color: color),
+        ),
       ],
     );
   }

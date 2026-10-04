@@ -2,123 +2,131 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/network/api_error.dart';
+import '../../../l10n/l10n.dart';
 import '../../../router/routes.dart';
 import '../../../shared/ds/ds.dart';
-import '../attendance_providers.dart';
-import '../widgets/room_photos.dart';
+import '../attendance_flow.dart';
+import '../widgets/attendance_labels.dart';
 import '../widgets/attendance_review.dart';
+import '../widgets/room_photos.dart';
 
 /// Chamada facial de um encontro: fotos da sala → análise no Persona → revisão → confirmação.
-class ChamadaScreen extends ConsumerWidget {
-  const ChamadaScreen({super.key, required this.turmaId, required this.encontroId, this.pendenteId});
+class AttendanceScreen extends ConsumerWidget {
+  const AttendanceScreen({super.key, required this.offeringId, required this.meetingId, this.pendingId});
 
-  final String turmaId;
-  final String encontroId;
+  final String offeringId;
+  final String meetingId;
 
   /// Chamada que veio da fila (fotografada sem rede).
-  final String? pendenteId;
+  final String? pendingId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final chave = (turmaId: turmaId, encontroId: encontroId, pendenteId: pendenteId);
-    final etapa = ref.watch(chamadaProvider(chave));
-    final notifier = ref.read(chamadaProvider(chave).notifier);
-    final tema = Theme.of(context);
+    final key = (offeringId: offeringId, meetingId: meetingId, pendingId: pendingId);
+    final step = ref.watch(attendanceFlowProvider(key));
+    final flow = ref.read(attendanceFlowProvider(key).notifier);
+    final l10n = context.l10n;
+    final theme = Theme.of(context);
+    void backToMeetings() => context.go(Routes.attendanceOffering(offeringId));
 
-    Future<void> avisarSeFalhou(Future<String?> acao) async {
-      final mensagens = ScaffoldMessenger.of(context);
-      final erro = await acao;
-      if (erro != null) mensagens.showSnackBar(SnackBar(content: Text(erro)));
+    Future<void> warnIfFailed(Future<Object?> action, String fallback) async {
+      final messenger = ScaffoldMessenger.of(context);
+      final error = await action;
+      if (error != null) messenger.showSnackBar(SnackBar(content: Text(apiErrorMessage(error, l10n, fallback: fallback))));
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Chamada facial')),
-      body: switch (etapa) {
-        AbrindoSessao() => const _Aguarde('Abrindo a chamada…'),
-        SemRede() => _Final(
-            icone: Icons.wifi_off_rounded,
-            texto: 'Sem internet agora. Você pode fotografar a sala: as fotos ficam guardadas (cifradas) no aparelho '
-                'e a chamada é analisada quando a rede voltar.',
-            acao: ('Fotografar e enviar depois', notifier.fotografarSemRede),
-            onVoltar: () => context.go(Rotas.chamadaTurma(turmaId)),
-          ),
-        FotosGuardadas(:final quantidade) => _Final(
-            icone: Icons.cloud_upload_outlined,
-            texto: '$quantidade foto(s) guardada(s). Quando a internet voltar, abra a Chamada facial para enviar e revisar.',
-            onVoltar: () => context.go(Rotas.chamada),
-          ),
-        Processando() => const _Aguarde('Analisando as fotos…'),
-        Confirmando() => const _Aguarde('Gravando a chamada…'),
-        Fotografando() => FotosDaSala(
-            etapa: etapa,
-            visor: notifier.camera?.visor(),
-            onFotografar: (angulo) => avisarSeFalhou(notifier.fotografar(angulo)),
-            onAnalisar: notifier.analisar,
-          ),
-        Revisando() => RevisaoChamada(
-            etapa: etapa,
-            onAlternar: notifier.alternar,
-            onConfirmar: () => avisarSeFalhou(notifier.confirmar()),
-          ),
-        ChamadaConfirmada(:final presentes, :final total) => _Final(
-            icone: Icons.task_alt_rounded,
-            texto: 'Chamada registrada: $presentes presente(s) de $total.',
-            onVoltar: () => context.go(Rotas.chamadaTurma(turmaId)),
-          ),
-        ChamadaFalhou(:final mensagem) => _Final(
-            icone: Icons.error_outline_rounded,
-            texto: mensagem,
-            cor: tema.colorScheme.error,
-            onVoltar: () => context.go(Rotas.chamadaTurma(turmaId)),
-          ),
+      appBar: AppBar(title: Text(l10n.attendanceTitle)),
+      body: switch (step) {
+        AttendanceOpening() => _Wait(l10n.attendanceOpening),
+        AttendanceOffline() => _Outcome(
+          icon: Icons.wifi_off_rounded,
+          text: l10n.attendanceOffline,
+          action: (l10n.attendancePhotographLater, flow.photographOffline),
+          onBack: backToMeetings,
+        ),
+        AttendancePhotosSaved(:final count) => _Outcome(
+          icon: Icons.cloud_upload_outlined,
+          text: l10n.attendancePhotosSaved(count),
+          onBack: () => context.go(Routes.attendance),
+        ),
+        AttendanceProcessing() => _Wait(l10n.attendanceAnalyzing),
+        AttendanceConfirming() => _Wait(l10n.attendanceSaving),
+        AttendancePhotographing() => RoomPhotos(
+          step: step,
+          preview: flow.camera?.preview(),
+          onTakePhoto: (angle) => warnIfFailed(flow.takePhoto(angle), l10n.attendancePhotoFailed),
+          onAnalyze: flow.analyze,
+        ),
+        AttendanceReviewing() => AttendanceReview(
+          step: step,
+          onToggle: flow.toggle,
+          onConfirm: () => warnIfFailed(flow.confirm(), l10n.attendanceConfirmFailed),
+        ),
+        AttendanceConfirmed(:final present, :final total) => _Outcome(
+          icon: Icons.task_alt_rounded,
+          text: l10n.attendanceConfirmed(present, total),
+          onBack: backToMeetings,
+        ),
+        AttendanceFailed() => _Outcome(
+          icon: Icons.error_outline_rounded,
+          text: step.message(l10n),
+          color: theme.colorScheme.error,
+          onBack: backToMeetings,
+        ),
       },
     );
   }
 }
 
-class _Aguarde extends StatelessWidget {
-  const _Aguarde(this.texto);
+class _Wait extends StatelessWidget {
+  const _Wait(this.text);
 
-  final String texto;
+  final String text;
 
   @override
   Widget build(BuildContext context) => Center(
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
-          const Carregando(),
-          const SizedBox(height: 16),
-          Text(texto),
-        ]),
-      );
+    child: Column(mainAxisSize: MainAxisSize.min, children: [const LoadingView(), const SizedBox(height: 16), Text(text)]),
+  );
 }
 
-class _Final extends StatelessWidget {
-  const _Final({required this.icone, required this.texto, required this.onVoltar, this.cor, this.acao});
+class _Outcome extends StatelessWidget {
+  const _Outcome({required this.icon, required this.text, required this.onBack, this.color, this.action});
 
-  final IconData icone;
-  final String texto;
-  final VoidCallback onVoltar;
-  final Color? cor;
+  final IconData icon;
+  final String text;
+  final VoidCallback onBack;
+  final Color? color;
 
   /// Ação principal opcional (rótulo, ação); o voltar vira secundário.
-  final (String, VoidCallback)? acao;
+  final (String, VoidCallback)? action;
 
   @override
   Widget build(BuildContext context) {
-    final tema = Theme.of(context);
+    final theme = Theme.of(context);
+    final l10n = context.l10n;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Icon(icone, size: 72, color: cor ?? tema.colorScheme.primary),
-          const SizedBox(height: 16),
-          Text(texto, textAlign: TextAlign.center, style: tema.textTheme.bodyLarge?.copyWith(color: cor)),
-          const SizedBox(height: 24),
-          if (acao case (final rotulo, final executar)) ...[
-            FilledButton(onPressed: executar, child: Text(rotulo)),
-            TextButton(onPressed: onVoltar, child: const Text('Voltar')),
-          ] else
-            FilledButton(onPressed: onVoltar, child: const Text('Voltar aos encontros')),
-        ]),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 72, color: color ?? theme.colorScheme.primary),
+            const SizedBox(height: 16),
+            Text(
+              text,
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodyLarge?.copyWith(color: color),
+            ),
+            const SizedBox(height: 24),
+            if (action case (final label, final run)) ...[
+              FilledButton(onPressed: run, child: Text(label)),
+              TextButton(onPressed: onBack, child: Text(l10n.back)),
+            ] else
+              FilledButton(onPressed: onBack, child: Text(l10n.attendanceBackToMeetings)),
+          ],
+        ),
       ),
     );
   }

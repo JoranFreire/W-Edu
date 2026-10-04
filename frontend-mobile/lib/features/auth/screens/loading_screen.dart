@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../l10n/l10n.dart';
 import '../../../shared/ds/ds.dart';
 import '../auth_providers.dart';
 
 /// Enquanto o app confere o token salvo. Se não conseguir conferir (sem
 /// rede), fica aqui com "tentar de novo" em vez de mandar para o login: a
 /// sessão pode estar perfeitamente válida.
-class CarregandoScreen extends ConsumerWidget {
-  const CarregandoScreen({super.key});
+class LoadingScreen extends ConsumerWidget {
+  const LoadingScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -20,17 +21,14 @@ class CarregandoScreen extends ConsumerWidget {
             ? Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  ErroView(
-                    erro: auth.error!,
-                    onTentarDeNovo: () => ref.invalidate(authProvider),
-                  ),
+                  ErrorView(error: auth.error!, onRetry: () => ref.invalidate(authProvider)),
                   TextButton(
-                    onPressed: () => ref.read(authProvider.notifier).sair(),
-                    child: const Text('Entrar com outra conta'),
+                    onPressed: () => ref.read(authProvider.notifier).signOut(),
+                    child: Text(context.l10n.signInWithAnotherAccount),
                   ),
                 ],
               )
-            : const Carregando(),
+            : const LoadingView(),
       ),
     );
   }

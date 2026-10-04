@@ -1,101 +1,103 @@
 import '../../../core/format/dates.dart';
 import '../../../core/theme/app_colors.dart';
 
-enum SituacaoRequisicao {
-  pendente('pending', 'Aguardando aprovação', BadgeCor.amarelo),
-  aprovada('approved', 'Aprovada: retirar', BadgeCor.roxo),
-  recusada('rejected', 'Recusada', BadgeCor.vermelho),
-  retirada('delivered', 'Retirada', BadgeCor.azul),
-  concluida('closed', 'Concluída', BadgeCor.verde),
-  cancelada('cancelled', 'Cancelada', BadgeCor.cinza);
+enum MaterialRequestStatus {
+  pending('pending', BadgeColor.yellow),
+  approved('approved', BadgeColor.purple),
+  rejected('rejected', BadgeColor.red),
+  delivered('delivered', BadgeColor.blue),
+  closed('closed', BadgeColor.green),
+  cancelled('cancelled', BadgeColor.gray);
 
-  const SituacaoRequisicao(this.valor, this.nome, this.cor);
-  final String valor;
-  final String nome;
-  final BadgeCor cor;
+  const MaterialRequestStatus(this.value, this.color);
+  final String value;
+  final BadgeColor color;
 
-  static SituacaoRequisicao de(String valor) => values.firstWhere((s) => s.valor == valor, orElse: () => cancelada);
+  static MaterialRequestStatus of(String value) => values.firstWhere((s) => s.value == value, orElse: () => cancelled);
 }
 
-class LinhaRequisicao {
-  const LinhaRequisicao({required this.material, required this.unidade, required this.pedido, this.aprovado, required this.retirado, required this.emprestado});
+class MaterialRequestLine {
+  const MaterialRequestLine({
+    required this.material,
+    required this.unit,
+    required this.requested,
+    this.approved,
+    required this.delivered,
+    required this.onLoan,
+  });
 
   final String material;
-  final String unidade;
-  final int pedido;
-  final int? aprovado;
-  final int retirado;
+  final String unit;
+  final int requested;
+  final int? approved;
+  final int delivered;
 
   /// Permanentes ainda fora do almoxarifado (a devolver).
-  final int emprestado;
+  final int onLoan;
 
   /// O que vale agora: retirado, senão aprovado, senão pedido.
-  String get resumo {
-    final quantidade = retirado > 0 ? retirado : aprovado ?? pedido;
-    final devolver = emprestado > 0 ? ' · devolver $emprestado' : '';
-    return '$material: $quantidade $unidade$devolver';
-  }
+  int get currentQuantity => delivered > 0 ? delivered : approved ?? requested;
 
-  factory LinhaRequisicao.fromJson(Map<String, dynamic> json) => LinhaRequisicao(
-        material: json['item_name'] as String,
-        unidade: json['unit'] as String,
-        pedido: json['quantity_requested'] as int,
-        aprovado: json['quantity_approved'] as int?,
-        retirado: json['quantity_delivered'] as int,
-        emprestado: json['outstanding'] as int,
-      );
+  factory MaterialRequestLine.fromJson(Map<String, dynamic> json) => MaterialRequestLine(
+    material: json['item_name'] as String,
+    unit: json['unit'] as String,
+    requested: json['quantity_requested'] as int,
+    approved: json['quantity_approved'] as int?,
+    delivered: json['quantity_delivered'] as int,
+    onLoan: json['outstanding'] as int,
+  );
 }
 
 /// Requisição de material ao almoxarifado, de quem pediu: aprovada, traz o QR de retirada.
-class Requisicao {
-  const Requisicao({
+class MaterialRequest {
+  const MaterialRequest({
     required this.id,
-    required this.finalidade,
-    required this.paraDia,
-    required this.situacao,
-    required this.linhas,
-    this.turma,
-    this.devolverAte,
-    this.atrasada = false,
-    this.observacao,
-    this.codigoRetirada,
-    this.conteudoQr,
+    required this.purpose,
+    required this.neededOn,
+    required this.status,
+    required this.lines,
+    this.offeringName,
+    this.returnDueOn,
+    this.overdue = false,
+    this.decisionNote,
+    this.pickupCode,
+    this.qrPayload,
   });
 
   final String id;
-  final String finalidade;
-  final DateTime paraDia;
-  final SituacaoRequisicao situacao;
-  final List<LinhaRequisicao> linhas;
-  final String? turma;
-  final DateTime? devolverAte;
-  final bool atrasada;
-  final String? observacao;
-  final String? codigoRetirada;
-  final String? conteudoQr;
+  final String purpose;
+  final DateTime neededOn;
+  final MaterialRequestStatus status;
+  final List<MaterialRequestLine> lines;
+  final String? offeringName;
+  final DateTime? returnDueOn;
+  final bool overdue;
+  final String? decisionNote;
+  final String? pickupCode;
+  final String? qrPayload;
 
-  bool get paraRetirar => situacao == SituacaoRequisicao.aprovada && conteudoQr != null;
+  bool get isReadyForPickup => status == MaterialRequestStatus.approved && qrPayload != null;
 
   /// As aprovadas (para retirar) primeiro; depois na ordem da API (mais recentes).
-  static List<Requisicao> lista(Object? json) {
-    final itens = [for (final item in json as List<dynamic>) Requisicao.fromJson(item as Map<String, dynamic>)];
-    return [...itens.where((r) => r.paraRetirar), ...itens.where((r) => !r.paraRetirar)];
+  static List<MaterialRequest> list(Object? json) {
+    final items = [for (final item in json as List<dynamic>) MaterialRequest.fromJson(item as Map<String, dynamic>)];
+    return [...items.where((r) => r.isReadyForPickup), ...items.where((r) => !r.isReadyForPickup)];
   }
 
-  factory Requisicao.fromJson(Map<String, dynamic> json) {
-    final devolver = json['return_due_on'] as String?;
-    return Requisicao(
+  factory MaterialRequest.fromJson(Map<String, dynamic> json) {
+    final returnDue = json['return_due_on'] as String?;
+    return MaterialRequest(
       id: json['id'] as String,
-      finalidade: json['purpose'] as String,
-      paraDia: lerDia(json['needed_on'] as String),
-      situacao: SituacaoRequisicao.de(json['status'] as String),
-      linhas: [for (final linha in json['lines'] as List<dynamic>) LinhaRequisicao.fromJson(linha as Map<String, dynamic>)],
-      turma: json['class_offering_name'] as String?,
-      devolverAte: devolver == null ? null : lerDia(devolver),
-      atrasada: json['overdue'] as bool? ?? false,
-      observacao: json['decision_note'] as String?,
-      codigoRetirada: json['pickup_code'] as String?,
-      conteudoQr: json['qr_payload'] as String?,
+      purpose: json['purpose'] as String,
+      neededOn: parseDay(json['needed_on'] as String),
+      status: MaterialRequestStatus.of(json['status'] as String),
+      lines: [for (final line in json['lines'] as List<dynamic>) MaterialRequestLine.fromJson(line as Map<String, dynamic>)],
+      offeringName: json['class_offering_name'] as String?,
+      returnDueOn: returnDue == null ? null : parseDay(returnDue),
+      overdue: json['overdue'] as bool? ?? false,
+      decisionNote: json['decision_note'] as String?,
+      pickupCode: json['pickup_code'] as String?,
+      qrPayload: json['qr_payload'] as String?,
     );
   }
 }

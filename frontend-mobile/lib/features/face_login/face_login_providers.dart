@@ -1,108 +1,109 @@
-import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/network/api_error.dart';
 import '../../core/network/network_providers.dart';
-import '../auth/auth_providers.dart';
 import '../../shared/face/face.dart';
+import '../auth/auth_providers.dart';
 import 'data/face_login_repository.dart';
 
 /// Nulo quando o Persona não está configurado (o app fica só com senha).
-final personaRepositoryProvider = Provider<PersonaRepository?>((ref) {
+final faceLoginRepositoryProvider = Provider<FaceLoginRepository?>((ref) {
   final dio = ref.watch(personaDioProvider);
-  return dio == null ? null : PersonaRepository(dio);
+  return dio == null ? null : FaceLoginRepository(dio);
 });
 
+/// Por que o rosto não entrou (a tela traduz). Recusa nunca diz o motivo real: o Persona também não diz.
+enum FaceLoginFailure { unavailable, cameraUnavailable, network, refused }
+
 /// Etapas da tela de login facial.
-sealed class EtapaLoginFacial {
-  const EtapaLoginFacial();
+sealed class FaceLoginStep {
+  const FaceLoginStep();
 }
 
-class Pronto extends EtapaLoginFacial {
-  const Pronto();
+class FaceLoginReady extends FaceLoginStep {
+  const FaceLoginReady();
 }
 
-class AbrindoCamera extends EtapaLoginFacial {
-  const AbrindoCamera();
+class FaceLoginOpeningCamera extends FaceLoginStep {
+  const FaceLoginOpeningCamera();
 }
 
-class Capturando extends EtapaLoginFacial {
-  const Capturando(this.passo, this.numero, this.total);
-  final PassoDesafio passo;
-  final int numero;
+class FaceLoginCapturing extends FaceLoginStep {
+  const FaceLoginCapturing(this.step, this.current, this.total);
+  final ChallengeStep step;
+  final int current;
   final int total;
 }
 
-class Conferindo extends EtapaLoginFacial {
-  const Conferindo();
+class FaceLoginChecking extends FaceLoginStep {
+  const FaceLoginChecking();
 }
 
 /// O rosto não foi aceito (ou deu erro): a senha continua sempre disponível.
-class NaoEntrou extends EtapaLoginFacial {
-  const NaoEntrou(this.mensagem);
-  final String mensagem;
+class FaceLoginFailed extends FaceLoginStep {
+  const FaceLoginFailed(this.reason);
+  final FaceLoginFailure reason;
 }
 
-const _recusado = 'Não foi possível entrar com o rosto. Use a senha.';
-
-final loginFacialProvider = NotifierProvider.autoDispose<LoginFacialNotifier, EtapaLoginFacial>(LoginFacialNotifier.new);
+final faceLoginProvider = NotifierProvider.autoDispose<FaceLoginNotifier, FaceLoginStep>(FaceLoginNotifier.new);
 
 /// Prova de vida e login: desafio do Persona → uma foto por passo → Persona
 /// confere e assina → o W-Edu troca o assertion pelo token. Qualquer recusa
-/// leva à senha, sem dizer o motivo (o Persona também não diz).
-class LoginFacialNotifier extends Notifier<EtapaLoginFacial> {
-  CapturaDeRosto? _captura;
+/// leva à senha, sem dizer o motivo.
+class FaceLoginNotifier extends Notifier<FaceLoginStep> {
+  DeviceCameraCapture? _camera;
 
   @override
-  EtapaLoginFacial build() {
-    ref.onDispose(() => _captura?.fechar());
-    return const Pronto();
+  FaceLoginStep build() {
+    ref.onDispose(() => _camera?.close());
+    return const FaceLoginReady();
   }
 
   /// O que a câmera vê (vazio antes de abrir).
-  CapturaDeRosto? get captura => _captura;
+  DeviceCameraCapture? get camera => _camera;
 
-  Future<void> iniciar() async {
-    if (state is AbrindoCamera || state is Capturando || state is Conferindo) return;
-    final persona = ref.read(personaRepositoryProvider);
-    final conta = await ref.read(contaLembradaProvider.future);
-    if (persona == null || conta == null) {
-      state = const NaoEntrou('Entrar com o rosto não está disponível. Use a senha.');
+  Future<void> start() async {
+    if (state is FaceLoginOpeningCamera || state is FaceLoginCapturing || state is FaceLoginChecking) return;
+    final persona = ref.read(faceLoginRepositoryProvider);
+    final account = await ref.read(rememberedAccountProvider.future);
+    if (persona == null || account == null) {
+      state = const FaceLoginFailed(FaceLoginFailure.unavailable);
       return;
     }
 
-    state = const AbrindoCamera();
-    final CapturaDeRosto captura = _captura ?? ref.read(capturaDeRostoProvider);
-    _captura = captura;
+    state = const FaceLoginOpeningCamera();
+    final DeviceCameraCapture camera = _camera ?? ref.read(faceCameraProvider);
+    _camera = camera;
     try {
-      await captura.abrir();
+      await camera.open();
     } on Object {
-      state = const NaoEntrou('Não foi possível abrir a câmera. Confira a permissão ou use a senha.');
+      state = const FaceLoginFailed(FaceLoginFailure.cameraUnavailable);
       return;
     }
 
     try {
-      final desafio = await persona.desafio(conta.usuarioId);
-      final fotos = await capturarPassos(
-        captura: captura,
-        desafio: desafio,
-        pausa: ref.read(pausaEntrePassosProvider),
-        aoMudarDePasso: (passo, numero, total) => state = Capturando(passo, numero, total),
-        continuar: () => ref.mounted,
+      final challenge = await persona.challenge(account.userId);
+      final photos = await captureSteps(
+        camera: camera,
+        challenge: challenge,
+        pause: ref.read(stepPauseProvider),
+        onStep: (step, current, total) => state = FaceLoginCapturing(step, current, total),
+        keepGoing: () => ref.mounted,
       );
-      if (!ref.mounted || fotos.length < desafio.passos.length) return;
-      state = const Conferindo();
-      final assertion = await persona.verificar(
-        usuarioId: conta.usuarioId, instituicaoId: conta.instituicaoId, desafioId: desafio.id, fotos: fotos,
+      if (!ref.mounted || photos.length < challenge.steps.length) return;
+      state = const FaceLoginChecking();
+      final assertion = await persona.verify(
+        userId: account.userId,
+        institutionId: account.institutionId,
+        challengeId: challenge.id,
+        photos: photos,
       );
       // Deu certo: o router percebe a sessão e sai da tela sozinho.
-      await ref.read(authProvider.notifier).entrarComRosto(assertion);
-    } on DioException catch (erro) {
-      if (ref.mounted) state = NaoEntrou(erroDeRede(erro) ? mensagemDeErro(erro) : _recusado);
-    } on Object {
-      if (ref.mounted) state = const NaoEntrou(_recusado);
+      await ref.read(authProvider.notifier).signInWithFace(assertion);
+    } on Object catch (error) {
+      if (ref.mounted) state = FaceLoginFailed(isNetworkError(error) ? FaceLoginFailure.network : FaceLoginFailure.refused);
     } finally {
-      await captura.fechar();
+      await camera.close();
     }
   }
 }

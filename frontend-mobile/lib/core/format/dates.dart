@@ -1,26 +1,23 @@
 import 'package:intl/intl.dart';
 
-/// Datas no formato brasileiro, iguais às do site.
-final _dia = DateFormat('dd/MM/yyyy', 'pt_BR');
-final _diaHora = DateFormat("dd/MM/yyyy 'às' HH:mm", 'pt_BR');
-final _diaSemana = DateFormat("EEEE, d 'de' MMMM", 'pt_BR');
+/// Datas e números no idioma do app (`Intl.defaultLocale`, definido pelo `WEduApp`).
 
-/// `2026-10-03` (data sem hora, como a API manda prazos) → `03/10/2026`.
-String formatarDia(DateTime data) => _dia.format(data);
+/// Dia (pt-BR `03/10/2026`, en `10/3/2026`).
+String formatDay(DateTime date) => DateFormat.yMd().format(date);
 
-String formatarDiaHora(DateTime data) => _diaHora.format(data.toLocal());
+String formatDayTime(DateTime date) => DateFormat.yMd().add_Hm().format(date.toLocal());
 
-/// "sexta-feira, 3 de outubro" — para agrupar a agenda por dia.
-String formatarDiaPorExtenso(DateTime data) => _diaSemana.format(data);
+/// Dia por extenso (pt-BR "sexta-feira, 3 de outubro") — para agrupar a agenda por dia.
+String formatLongDay(DateTime date) => DateFormat.MMMMEEEEd().format(date);
 
 /// Lê uma data sem hora (`yyyy-MM-dd`) como dia local, sem deslocar pelo fuso.
-DateTime lerDia(String valor) {
-  final partes = valor.split('-').map(int.parse).toList();
-  return DateTime(partes[0], partes[1], partes[2]);
+DateTime parseDay(String value) {
+  final parts = value.split('-').map(int.parse).toList();
+  return DateTime(parts[0], parts[1], parts[2]);
 }
 
 /// Frações da API (0.85) como porcentagem ("85%").
-String formatarPorcentagem(double fracao) => '${(fracao * 100).round()}%';
+String formatPercent(double fraction) => NumberFormat.percentPattern().format(fraction);
 
-/// Notas com uma casa e vírgula ("7,5").
-String formatarNota(double nota) => nota.toStringAsFixed(1).replaceAll('.', ',');
+/// Notas com uma casa (pt-BR "7,5").
+String formatGrade(double grade) => NumberFormat('0.0').format(grade);

@@ -6,32 +6,33 @@ import '../../../shared/face/challenge.dart';
 
 /// API do Persona para o login facial: sorteia o desafio e confere as fotos.
 /// As fotos vão só para o Persona e ficam em memória lá (nunca no W-Edu).
-class PersonaRepository {
-  PersonaRepository(this._dio);
+class FaceLoginRepository {
+  FaceLoginRepository(this._dio);
 
   final Dio _dio;
 
-  Future<Desafio> desafio(String usuarioId) async {
-    final resposta = await _dio.post<Map<String, dynamic>>('liveness/login-challenge', data: {'wedu_user_id': usuarioId});
-    return Desafio.fromJson(resposta.data!);
+  Future<Challenge> challenge(String userId) async {
+    final response = await _dio.post<Map<String, dynamic>>('liveness/login-challenge', data: {'wedu_user_id': userId});
+    return Challenge.fromJson(response.data!);
   }
 
   /// Uma foto por passo, na ordem do desafio. Devolve o assertion assinado.
-  Future<String> verificar({
-    required String usuarioId,
-    required String instituicaoId,
-    required String desafioId,
-    required List<Uint8List> fotos,
+  Future<String> verify({
+    required String userId,
+    required String institutionId,
+    required String challengeId,
+    required List<Uint8List> photos,
   }) async {
-    final corpo = FormData.fromMap({
-      'wedu_user_id': usuarioId,
-      'institution_id': instituicaoId,
-      'challenge_id': desafioId,
+    final body = FormData.fromMap({
+      'wedu_user_id': userId,
+      'institution_id': institutionId,
+      'challenge_id': challengeId,
       'frames': [
-        for (final (indice, foto) in fotos.indexed) MultipartFile.fromBytes(foto, filename: 'passo$indice.jpg', contentType: DioMediaType('image', 'jpeg')),
+        for (final (index, photo) in photos.indexed)
+          MultipartFile.fromBytes(photo, filename: 'step$index.jpg', contentType: DioMediaType('image', 'jpeg')),
       ],
     });
-    final resposta = await _dio.post<Map<String, dynamic>>('auth/face/verify', data: corpo);
-    return resposta.data!['assertion'] as String;
+    final response = await _dio.post<Map<String, dynamic>>('auth/face/verify', data: body);
+    return response.data!['assertion'] as String;
   }
 }

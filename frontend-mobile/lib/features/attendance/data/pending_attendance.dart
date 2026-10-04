@@ -1,70 +1,79 @@
 import 'attendance_result.dart';
 
 /// Foto da sala tirada sem rede: os bytes ficam cifrados no cofre; aqui, só o que é preciso para enviar.
-class FotoPendente {
-  const FotoPendente({required this.angulo, required this.tiradaEm, this.enviada = false});
+class PendingPhoto {
+  const PendingPhoto({required this.angle, required this.takenAt, this.uploaded = false});
 
-  final AnguloFoto angulo;
-  final DateTime tiradaEm;
-  final bool enviada;
+  final PhotoAngle angle;
+  final DateTime takenAt;
+  final bool uploaded;
 
-  FotoPendente marcadaEnviada() => FotoPendente(angulo: angulo, tiradaEm: tiradaEm, enviada: true);
+  PendingPhoto markedUploaded() => PendingPhoto(angle: angle, takenAt: takenAt, uploaded: true);
 
-  Map<String, Object?> toJson() => {'angulo': angulo.valor, 'tirada_em': tiradaEm.toUtc().toIso8601String(), 'enviada': enviada};
+  Map<String, Object?> toJson() => {'angle': angle.value, 'taken_at': takenAt.toUtc().toIso8601String(), 'uploaded': uploaded};
 
-  factory FotoPendente.fromJson(Map<String, dynamic> json) => FotoPendente(
-        angulo: AnguloFoto.values.firstWhere((a) => a.valor == json['angulo']),
-        tiradaEm: DateTime.parse(json['tirada_em'] as String),
-        enviada: json['enviada'] as bool? ?? false,
-      );
+  factory PendingPhoto.fromJson(Map<String, dynamic> json) => PendingPhoto(
+    angle: PhotoAngle.of(json['angle'] as String),
+    takenAt: DateTime.parse(json['taken_at'] as String),
+    uploaded: json['uploaded'] as bool? ?? false,
+  );
 }
 
 /// Chamada fotografada sem rede, esperando o envio (e depois a revisão do professor).
-class ChamadaPendente {
-  const ChamadaPendente({
+class PendingAttendance {
+  const PendingAttendance({
     required this.id,
-    required this.turmaId,
-    required this.encontroId,
-    required this.titulo,
-    required this.criadaEm,
-    this.fotos = const [],
-    this.sessaoId,
+    required this.offeringId,
+    required this.meetingId,
+    required this.title,
+    required this.createdAt,
+    this.photos = const [],
+    this.sessionId,
   });
 
   final String id;
-  final String turmaId;
-  final String encontroId;
+  final String offeringId;
+  final String meetingId;
 
   /// Turma e encontro, para o professor reconhecer na lista.
-  final String titulo;
-  final DateTime criadaEm;
-  final List<FotoPendente> fotos;
+  final String title;
+  final DateTime createdAt;
+  final List<PendingPhoto> photos;
 
   /// Sessão aberta no Persona no envio; com ela, a chamada só espera a revisão.
-  final String? sessaoId;
+  final String? sessionId;
 
-  bool get enviada => sessaoId != null && fotos.every((f) => f.enviada);
+  bool get isUploaded => sessionId != null && photos.every((p) => p.uploaded);
 
-  String nomeDaFoto(AnguloFoto angulo) => 'chamada_${id}_${angulo.valor}';
+  String photoName(PhotoAngle angle) => 'attendance_${id}_${angle.value}';
 
-  ChamadaPendente copiar({List<FotoPendente>? fotos, String? sessaoId}) => ChamadaPendente(
-        id: id, turmaId: turmaId, encontroId: encontroId, titulo: titulo, criadaEm: criadaEm,
-        fotos: fotos ?? this.fotos, sessaoId: sessaoId ?? this.sessaoId,
-      );
+  PendingAttendance copyWith({List<PendingPhoto>? photos, String? sessionId}) => PendingAttendance(
+    id: id,
+    offeringId: offeringId,
+    meetingId: meetingId,
+    title: title,
+    createdAt: createdAt,
+    photos: photos ?? this.photos,
+    sessionId: sessionId ?? this.sessionId,
+  );
 
   Map<String, Object?> toJson() => {
-        'id': id, 'turma_id': turmaId, 'encontro_id': encontroId, 'titulo': titulo,
-        'criada_em': criadaEm.toUtc().toIso8601String(), 'sessao_id': sessaoId,
-        'fotos': [for (final foto in fotos) foto.toJson()],
-      };
+    'id': id,
+    'offering_id': offeringId,
+    'meeting_id': meetingId,
+    'title': title,
+    'created_at': createdAt.toUtc().toIso8601String(),
+    'session_id': sessionId,
+    'photos': [for (final photo in photos) photo.toJson()],
+  };
 
-  factory ChamadaPendente.fromJson(Map<String, dynamic> json) => ChamadaPendente(
-        id: json['id'] as String,
-        turmaId: json['turma_id'] as String,
-        encontroId: json['encontro_id'] as String,
-        titulo: json['titulo'] as String,
-        criadaEm: DateTime.parse(json['criada_em'] as String),
-        sessaoId: json['sessao_id'] as String?,
-        fotos: [for (final foto in json['fotos'] as List<dynamic>) FotoPendente.fromJson(foto as Map<String, dynamic>)],
-      );
+  factory PendingAttendance.fromJson(Map<String, dynamic> json) => PendingAttendance(
+    id: json['id'] as String,
+    offeringId: json['offering_id'] as String,
+    meetingId: json['meeting_id'] as String,
+    title: json['title'] as String,
+    createdAt: DateTime.parse(json['created_at'] as String),
+    sessionId: json['session_id'] as String?,
+    photos: [for (final photo in json['photos'] as List<dynamic>) PendingPhoto.fromJson(photo as Map<String, dynamic>)],
+  );
 }

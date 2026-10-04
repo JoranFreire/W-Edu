@@ -5,27 +5,27 @@ import 'cache_providers.dart';
 
 /// Ao voltar para o app, confere de novo as versões: as telas abertas baixam
 /// só o que mudou enquanto ele estava em segundo plano.
-class RevalidarAoVoltar extends ConsumerStatefulWidget {
-  const RevalidarAoVoltar({super.key, required this.child});
+class RevalidateOnResume extends ConsumerStatefulWidget {
+  const RevalidateOnResume({super.key, required this.child});
 
   final Widget child;
 
   @override
-  ConsumerState<RevalidarAoVoltar> createState() => _RevalidarAoVoltarState();
+  ConsumerState<RevalidateOnResume> createState() => _RevalidateOnResumeState();
 }
 
-class _RevalidarAoVoltarState extends ConsumerState<RevalidarAoVoltar> {
-  late final AppLifecycleListener _ciclo;
+class _RevalidateOnResumeState extends ConsumerState<RevalidateOnResume> {
+  late final AppLifecycleListener _lifecycle;
 
   @override
   void initState() {
     super.initState();
-    _ciclo = AppLifecycleListener(onResume: () => ref.invalidate(versoesRemotasProvider));
+    _lifecycle = AppLifecycleListener(onResume: () => ref.invalidate(remoteVersionsProvider));
   }
 
   @override
   void dispose() {
-    _ciclo.dispose();
+    _lifecycle.dispose();
     super.dispose();
   }
 

@@ -5,24 +5,24 @@ import 'package:dio/dio.dart';
 import '../../../shared/face/challenge.dart';
 
 /// Cadastro do próprio rosto no Persona: desafio de prova de vida e uma foto por passo.
-class CadastroFacialRepository {
-  CadastroFacialRepository(this._dio);
+class FaceEnrollmentRepository {
+  FaceEnrollmentRepository(this._dio);
 
   final Dio _dio;
 
-  Future<Desafio> desafio() async {
-    final resposta = await _dio.post<Map<String, dynamic>>('liveness/challenge');
-    return Desafio.fromJson(resposta.data!);
+  Future<Challenge> challenge() async {
+    final response = await _dio.post<Map<String, dynamic>>('liveness/challenge');
+    return Challenge.fromJson(response.data!);
   }
 
-  Future<void> cadastrar(String desafioId, List<Uint8List> fotos) => _dio.post<void>(
-        'me/enrollment',
-        data: FormData.fromMap({
-          'challenge_id': desafioId,
-          'frames': [
-            for (final (indice, foto) in fotos.indexed)
-              MultipartFile.fromBytes(foto, filename: 'passo$indice.jpg', contentType: DioMediaType('image', 'jpeg')),
-          ],
-        }),
-      );
+  Future<void> enroll(String challengeId, List<Uint8List> photos) => _dio.post<void>(
+    'me/enrollment',
+    data: FormData.fromMap({
+      'challenge_id': challengeId,
+      'frames': [
+        for (final (index, photo) in photos.indexed)
+          MultipartFile.fromBytes(photo, filename: 'step$index.jpg', contentType: DioMediaType('image', 'jpeg')),
+      ],
+    }),
+  );
 }

@@ -1,19 +1,21 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/format/dates.dart';
+import '../../../l10n/l10n.dart';
 import '../../../shared/ds/ds.dart';
 import '../data/report_card.dart';
 
 /// Uma disciplina: média de cada etapa, faltas, frequência e o resultado final.
-class DisciplinaCard extends StatelessWidget {
-  const DisciplinaCard({super.key, required this.disciplina});
+class SubjectCard extends StatelessWidget {
+  const SubjectCard({super.key, required this.subject});
 
-  final DisciplinaBoletim disciplina;
+  final ReportCardSubject subject;
 
   @override
   Widget build(BuildContext context) {
-    final tema = Theme.of(context);
-    final rotulo = tema.textTheme.labelSmall?.copyWith(color: tema.colorScheme.onSurfaceVariant);
+    final theme = Theme.of(context);
+    final l10n = context.l10n;
+    final label = theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.onSurfaceVariant);
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -22,25 +24,25 @@ class DisciplinaCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Expanded(child: Text(disciplina.nome, style: tema.textTheme.titleSmall)),
-                if (disciplina.finalizada) AppBadge(disciplina.resultado.nome, cor: disciplina.resultado.cor),
+                Expanded(child: Text(subject.name, style: theme.textTheme.titleSmall)),
+                if (subject.finalized) AppBadge(subject.result.label(l10n), color: subject.result.color),
               ],
             ),
             const SizedBox(height: 12),
-            if (disciplina.etapas.isEmpty)
-              Text('Nenhuma etapa fechada ainda.', style: rotulo)
+            if (subject.periods.isEmpty)
+              Text(l10n.reportCardNoPeriods, style: label)
             else
               Wrap(
                 spacing: 16,
                 runSpacing: 8,
                 children: [
-                  for (final etapa in disciplina.etapas)
+                  for (final period in subject.periods)
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(etapa.nome, style: rotulo),
-                        Text(etapa.media == null ? '—' : formatarNota(etapa.media!), style: tema.textTheme.titleMedium),
-                        Text('${etapa.faltas} falta${etapa.faltas == 1 ? '' : 's'}', style: rotulo),
+                        Text(period.name, style: label),
+                        Text(period.average == null ? '—' : formatGrade(period.average!), style: theme.textTheme.titleMedium),
+                        Text(l10n.reportCardAbsences(period.absences), style: label),
                       ],
                     ),
                 ],
@@ -50,10 +52,10 @@ class DisciplinaCard extends StatelessWidget {
               spacing: 16,
               runSpacing: 4,
               children: [
-                if (disciplina.notaFinal != null) Text('Média final: ${formatarNota(disciplina.notaFinal!)}'),
-                if (disciplina.recuperacao != null) Text('Recuperação: ${formatarNota(disciplina.recuperacao!)}'),
-                if (disciplina.frequencia != null) Text('Frequência: ${formatarPorcentagem(disciplina.frequencia!)}'),
-                Text('Média para aprovar: ${formatarNota(disciplina.mediaAprovacao)}', style: rotulo),
+                if (subject.finalGrade != null) Text(l10n.reportCardFinalGrade(formatGrade(subject.finalGrade!))),
+                if (subject.recoveryScore != null) Text(l10n.reportCardRecovery(formatGrade(subject.recoveryScore!))),
+                if (subject.attendanceRate != null) Text(l10n.reportCardAttendance(formatPercent(subject.attendanceRate!))),
+                Text(l10n.reportCardPassingGrade(formatGrade(subject.passingGrade)), style: label),
               ],
             ),
           ],
@@ -61,4 +63,14 @@ class DisciplinaCard extends StatelessWidget {
       ),
     );
   }
+}
+
+extension SubjectResultText on SubjectResult {
+  String label(AppLocalizations l10n) => switch (this) {
+    SubjectResult.inProgress => l10n.subjectInProgress,
+    SubjectResult.recovery => l10n.subjectRecovery,
+    SubjectResult.approved => l10n.subjectApproved,
+    SubjectResult.failed => l10n.subjectFailed,
+    SubjectResult.failedAttendance => l10n.subjectFailedAttendance,
+  };
 }

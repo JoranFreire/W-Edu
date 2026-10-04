@@ -1,53 +1,52 @@
 import '../../../core/format/dates.dart';
 import '../../../core/theme/app_colors.dart';
 
-/// Tipos de item da agenda da turma, com os nomes e as cores do site.
-enum TipoAgenda {
-  tarefa('homework', 'Tarefa', BadgeCor.azul),
-  prova('test', 'Prova', BadgeCor.vermelho),
-  evento('event', 'Evento', BadgeCor.roxo),
-  aviso('notice', 'Aviso', BadgeCor.amarelo);
+/// Tipos de item da agenda da turma, com as cores do site.
+enum AgendaItemKind {
+  homework('homework', BadgeColor.blue),
+  test('test', BadgeColor.red),
+  event('event', BadgeColor.purple),
+  notice('notice', BadgeColor.yellow);
 
-  const TipoAgenda(this.valor, this.nome, this.cor);
-  final String valor;
-  final String nome;
-  final BadgeCor cor;
+  const AgendaItemKind(this.value, this.color);
+  final String value;
+  final BadgeColor color;
 
-  static TipoAgenda de(String valor) => values.firstWhere((tipo) => tipo.valor == valor, orElse: () => aviso);
+  static AgendaItemKind of(String value) => values.firstWhere((kind) => kind.value == value, orElse: () => notice);
 }
 
 /// Tarefa, prova, evento ou aviso publicado na agenda da turma.
-class ItemAgenda {
-  const ItemAgenda({
+class AgendaItem {
+  const AgendaItem({
     required this.id,
-    required this.tipo,
-    required this.titulo,
-    required this.data,
-    required this.turma,
-    this.descricao,
-    this.disciplina,
+    required this.kind,
+    required this.title,
+    required this.date,
+    required this.classGroup,
+    this.description,
+    this.subject,
   });
 
   final String id;
-  final TipoAgenda tipo;
-  final String titulo;
-  final DateTime data;
-  final String turma;
-  final String? descricao;
-  final String? disciplina;
+  final AgendaItemKind kind;
+  final String title;
+  final DateTime date;
+  final String classGroup;
+  final String? description;
+  final String? subject;
 
   /// Lista da API (ou do cache), em ordem de data.
-  static List<ItemAgenda> lista(Object? json) =>
-      [for (final item in json as List<dynamic>) ItemAgenda.fromJson(item as Map<String, dynamic>)]
-        ..sort((a, b) => a.data.compareTo(b.data));
+  static List<AgendaItem> list(Object? json) =>
+      [for (final item in json as List<dynamic>) AgendaItem.fromJson(item as Map<String, dynamic>)]
+        ..sort((a, b) => a.date.compareTo(b.date));
 
-  factory ItemAgenda.fromJson(Map<String, dynamic> json) => ItemAgenda(
-        id: json['id'] as String,
-        tipo: TipoAgenda.de(json['kind'] as String),
-        titulo: json['title'] as String,
-        data: lerDia(json['due_on'] as String),
-        turma: json['class_group_name'] as String,
-        descricao: json['description'] as String?,
-        disciplina: json['class_offering_name'] as String?,
-      );
+  factory AgendaItem.fromJson(Map<String, dynamic> json) => AgendaItem(
+    id: json['id'] as String,
+    kind: AgendaItemKind.of(json['kind'] as String),
+    title: json['title'] as String,
+    date: parseDay(json['due_on'] as String),
+    classGroup: json['class_group_name'] as String,
+    description: json['description'] as String?,
+    subject: json['class_offering_name'] as String?,
+  );
 }

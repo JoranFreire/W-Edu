@@ -1,41 +1,33 @@
 /// Aluno vinculado ao responsável logado.
-class Dependente {
-  const Dependente({
-    required this.vinculoId,
-    required this.alunoId,
-    required this.nome,
-    required this.parentesco,
-    required this.responsavelFinanceiro,
+class Dependent {
+  const Dependent({
+    required this.linkId,
+    required this.studentId,
+    required this.name,
+    required this.relationship,
+    required this.isFinancial,
   });
 
-  final String vinculoId;
-  final String alunoId;
-  final String nome;
-  final String parentesco;
-  final bool responsavelFinanceiro;
+  final String linkId;
+  final String studentId;
+  final String name;
 
-  String get primeiroNome => nome.split(' ').first;
+  /// Parentesco do responsável (`mother`, `father`, `legal_guardian`, `grandparent`, `other`).
+  final String relationship;
+  final bool isFinancial;
 
-  static List<Dependente> lista(Object? json) =>
-      [for (final item in json as List<dynamic>) Dependente.fromJson(item as Map<String, dynamic>)];
+  String get firstName => name.split(' ').first;
 
-  factory Dependente.fromJson(Map<String, dynamic> json) {
-    final aluno = json['student'] as Map<String, dynamic>;
-    return Dependente(
-      vinculoId: json['link_id'] as String,
-      alunoId: aluno['id'] as String,
-      nome: aluno['name'] as String,
-      parentesco: json['relationship_kind'] as String,
-      responsavelFinanceiro: json['is_financial'] as bool? ?? false,
+  static List<Dependent> list(Object? json) => [for (final item in json as List<dynamic>) Dependent.fromJson(item as Map<String, dynamic>)];
+
+  factory Dependent.fromJson(Map<String, dynamic> json) {
+    final student = json['student'] as Map<String, dynamic>;
+    return Dependent(
+      linkId: json['link_id'] as String,
+      studentId: student['id'] as String,
+      name: student['name'] as String,
+      relationship: json['relationship_kind'] as String,
+      isFinancial: json['is_financial'] as bool? ?? false,
     );
   }
 }
-
-/// Parentesco visto pelo responsável ("Você é: mãe").
-const nomesDoParentesco = {
-  'mother': 'Mãe',
-  'father': 'Pai',
-  'legal_guardian': 'Responsável legal',
-  'grandparent': 'Avó/avô',
-  'other': 'Responsável',
-};

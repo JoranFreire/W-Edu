@@ -4,10 +4,10 @@
 /// rosto (o app segue só com senha). O app fala direto com o Persona: a imagem
 /// do rosto nunca passa pelo backend do W-Edu (ADR 0012 do Persona).
 class PersonaConfig {
-  static const _definida = String.fromEnvironment('PERSONA_BASE_URL');
+  static const _defined = String.fromEnvironment('PERSONA_BASE_URL');
 
   static String? get baseUrl {
-    if (_definida.isEmpty) return null;
-    return _definida.endsWith('/') ? _definida : '$_definida/';
+    if (_defined.isEmpty) return null;
+    return _defined.endsWith('/') ? _defined : '$_defined/';
   }
 }

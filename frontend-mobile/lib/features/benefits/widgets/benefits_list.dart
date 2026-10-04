@@ -1,25 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../l10n/l10n.dart';
 import '../../../shared/ds/ds.dart';
 import '../data/benefit.dart';
 import 'benefit_card.dart';
 
 /// Benefícios do aluno ou de um dependente: os para retirar (com QR) no topo.
-class BeneficiosLista extends StatelessWidget {
-  const BeneficiosLista({super.key, required this.valor, required this.onRecarregar});
+class BenefitsList extends StatelessWidget {
+  const BenefitsList({super.key, required this.value, required this.onRefresh});
 
-  final AsyncValue<List<Beneficio>> valor;
-  final Future<void> Function() onRecarregar;
+  final AsyncValue<List<Benefit>> value;
+  final Future<void> Function() onRefresh;
 
   @override
   Widget build(BuildContext context) {
-    return ListaRemota<Beneficio>(
-      valor: valor,
-      onRecarregar: onRecarregar,
-      textoVazio: 'Nenhum benefício liberado.',
-      iconeVazio: Icons.redeem_outlined,
-      itemBuilder: (_, beneficio) => BeneficioCard(beneficio: beneficio),
+    return RemoteList<Benefit>(
+      value: value,
+      onRefresh: onRefresh,
+      emptyText: context.l10n.benefitsEmpty,
+      emptyIcon: Icons.redeem_outlined,
+      itemBuilder: (_, benefit) => BenefitCard(benefit: benefit),
     );
   }
 }

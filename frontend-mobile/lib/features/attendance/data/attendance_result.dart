@@ -1,77 +1,79 @@
 /// Ângulo de cada foto da sala (o Persona funde os ângulos para decidir).
-enum AnguloFoto {
-  esquerda('LEFT', 'Lado esquerdo'),
-  centro('CENTER', 'Centro'),
-  direita('RIGHT', 'Lado direito');
+enum PhotoAngle {
+  left('LEFT'),
+  center('CENTER'),
+  right('RIGHT');
 
-  const AnguloFoto(this.valor, this.nome);
-  final String valor;
-  final String nome;
+  const PhotoAngle(this.value);
+  final String value;
+
+  static PhotoAngle of(String value) => values.firstWhere((a) => a.value == value);
 }
 
 /// Sessão de chamada aberta no Persona para um encontro.
-class SessaoChamada {
-  const SessaoChamada({required this.id, required this.comAutorizacao, required this.semAutorizacao});
+class AttendanceSession {
+  const AttendanceSession({required this.id, required this.withConsent, required this.withoutConsent});
 
   final String id;
-  final int comAutorizacao;
-  final int semAutorizacao;
+  final int withConsent;
+  final int withoutConsent;
 
-  factory SessaoChamada.fromJson(Map<String, dynamic> json) => SessaoChamada(
-        id: json['session_id'] as String,
-        comAutorizacao: json['students_with_consent'] as int? ?? 0,
-        semAutorizacao: json['students_without_consent'] as int? ?? 0,
-      );
+  factory AttendanceSession.fromJson(Map<String, dynamic> json) => AttendanceSession(
+    id: json['session_id'] as String,
+    withConsent: json['students_with_consent'] as int? ?? 0,
+    withoutConsent: json['students_without_consent'] as int? ?? 0,
+  );
 }
 
 /// Como o aluno saiu nas fotos. O professor sempre revisa antes de confirmar.
-enum SituacaoNaFoto { presente, conferir, ausente, semAutorizacao }
+enum PhotoOutcome { present, uncertain, absent, withoutConsent }
 
-class AlunoNaChamada {
-  const AlunoNaChamada({required this.pessoaId, required this.nome, required this.situacao, this.recorte, this.fotoCadastro});
+class AttendanceStudent {
+  const AttendanceStudent({required this.personId, required this.name, required this.outcome, this.cropUrl, this.enrollmentPhotoUrl});
 
-  final String pessoaId;
-  final String nome;
-  final SituacaoNaFoto situacao;
+  final String personId;
+  final String name;
+  final PhotoOutcome outcome;
 
   /// Caminhos no Persona do rosto achado na foto e da foto do cadastro (só para conferir).
-  final String? recorte;
-  final String? fotoCadastro;
+  final String? cropUrl;
+  final String? enrollmentPhotoUrl;
 }
 
-class ResultadoChamada {
-  const ResultadoChamada({required this.alunos, required this.fotosPendentes, required this.rostosDetectados});
+class AttendanceResult {
+  const AttendanceResult({required this.students, required this.pendingImages, required this.facesDetected});
 
-  final List<AlunoNaChamada> alunos;
-  final int fotosPendentes;
-  final int rostosDetectados;
+  final List<AttendanceStudent> students;
+  final int pendingImages;
+  final int facesDetected;
 
-  Iterable<AlunoNaChamada> de(SituacaoNaFoto situacao) => alunos.where((a) => a.situacao == situacao);
+  Iterable<AttendanceStudent> withOutcome(PhotoOutcome outcome) => students.where((s) => s.outcome == outcome);
 
-  factory ResultadoChamada.fromJson(Map<String, dynamic> json) {
-    AlunoNaChamada aluno(Object? item, SituacaoNaFoto situacao) {
-      final dados = item as Map<String, dynamic>;
-      return AlunoNaChamada(
-        pessoaId: dados['person_id'] as String,
-        nome: dados['name'] as String,
-        situacao: situacao,
-        recorte: dados['crop_url'] as String?,
-        fotoCadastro: dados['enrollment_photo_url'] as String?,
+  factory AttendanceResult.fromJson(Map<String, dynamic> json) {
+    AttendanceStudent student(Object? item, PhotoOutcome outcome) {
+      final data = item as Map<String, dynamic>;
+      return AttendanceStudent(
+        personId: data['person_id'] as String,
+        name: data['name'] as String,
+        outcome: outcome,
+        cropUrl: data['crop_url'] as String?,
+        enrollmentPhotoUrl: data['enrollment_photo_url'] as String?,
       );
     }
 
-    List<AlunoNaChamada> grupo(String chave, SituacaoNaFoto situacao) =>
-        [for (final item in json[chave] as List<dynamic>? ?? const []) aluno(item, situacao)];
+    List<AttendanceStudent> group(String key, PhotoOutcome outcome) => [
+      for (final item in json[key] as List<dynamic>? ?? const []) student(item, outcome),
+    ];
 
-    return ResultadoChamada(
-      alunos: [
-        ...grupo('present', SituacaoNaFoto.presente),
-        ...grupo('uncertain', SituacaoNaFoto.conferir),
-        ...grupo('absent', SituacaoNaFoto.ausente),
-        ...grupo('without_consent', SituacaoNaFoto.semAutorizacao),
+    return AttendanceResult(
+      students: [
+        ...group('present', PhotoOutcome.present),
+        ...group('uncertain', PhotoOutcome.uncertain),
+        ...group('absent', PhotoOutcome.absent),
+        ...group('without_consent', PhotoOutcome.withoutConsent),
       ],
-      fotosPendentes: json['images_pending'] as int? ?? 0,
-      rostosDetectados: (json['metrics'] as Map<String, dynamic>?)?['faces_detected'] as int? ?? 0,
+      pendingImages: json['images_pending'] as int? ?? 0,
+      facesDetected: (json['metrics'] as Map<String, dynamic>?)?['faces_detected'] as int? ?? 0,
     );
   }
 }

@@ -1,0 +1,573 @@
+{
+  "@@locale": "pt",
+  "agendaTitle": "Agenda escolar",
+  "agendaEmpty": "Nada na agenda por enquanto.",
+  "agendaKindHomework": "Tarefa",
+  "agendaKindTest": "Prova",
+  "agendaKindEvent": "Evento",
+  "agendaKindNotice": "Aviso",
+  "attendanceTitle": "Chamada facial",
+  "attendanceNoClasses": "Nenhuma turma para você.",
+  "attendanceChooseMeeting": "Escolha o encontro",
+  "attendanceNoMeetings": "Nenhum encontro aberto nesta turma.",
+  "attendanceOpening": "Abrindo a chamada…",
+  "attendanceAnalyzing": "Analisando as fotos…",
+  "attendanceSaving": "Gravando a chamada…",
+  "attendanceOffline": "Sem internet agora. Você pode fotografar a sala: as fotos ficam guardadas (cifradas) no aparelho e a chamada é analisada quando a rede voltar.",
+  "attendancePhotographLater": "Fotografar e enviar depois",
+  "attendancePhotosSaved": "{count, plural, =1{1 foto guardada} other{{count} fotos guardadas}}. Quando a internet voltar, abra a Chamada facial para enviar e revisar.",
+  "@attendancePhotosSaved": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "attendanceConfirmed": "Chamada registrada: {present} presente(s) de {total}.",
+  "@attendanceConfirmed": {
+    "placeholders": {
+      "present": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "attendanceBackToMeetings": "Voltar aos encontros",
+  "attendanceNotTeaching": "Você não ministra esta turma.",
+  "attendanceOpenFailed": "Não foi possível abrir a chamada.",
+  "attendanceCameraUnavailable": "Não foi possível abrir a câmera.",
+  "attendanceNotPending": "Esta chamada não está mais guardada no aparelho.",
+  "attendanceStillOffline": "Ainda sem internet: as fotos continuam guardadas para enviar depois.",
+  "attendanceStillProcessing": "As fotos ainda estão sendo analisadas. Tente de novo em instantes.",
+  "attendanceAnalysisFailed": "Não foi possível analisar as fotos.",
+  "attendancePhotoFailed": "Não foi possível enviar a foto.",
+  "attendanceConfirmFailed": "Não foi possível gravar a chamada.",
+  "angleLeft": "Lado esquerdo",
+  "angleCenter": "Centro",
+  "angleRight": "Lado direito",
+  "attendanceOfflineHint": "Sem internet: as fotos ficam guardadas (cifradas) e a chamada é analisada quando a rede voltar.",
+  "attendanceWithConsent": "{count} aluno(s) com reconhecimento autorizado",
+  "@attendanceWithConsent": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "attendanceWithoutConsent": " · {count} sem (você marca na revisão)",
+  "@attendanceWithoutConsent": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "attendanceAnalyze": "Analisar {count, plural, =1{1 foto} other{{count} fotos}}",
+  "@attendanceAnalyze": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "attendanceStore": "Guardar {count, plural, =1{1 foto} other{{count} fotos}}",
+  "@attendanceStore": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "outcomePresent": "Reconhecidos",
+  "outcomeUncertain": "Conferir",
+  "outcomeAbsent": "Não encontrados nas fotos",
+  "outcomeWithoutConsent": "Sem reconhecimento autorizado (marque à mão)",
+  "outcomeSection": "{title} ({count})",
+  "@outcomeSection": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "inThePhoto": "Na foto",
+  "attendanceConfirm": "Confirmar chamada: {present} presente(s) de {total}",
+  "@attendanceConfirm": {
+    "placeholders": {
+      "present": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "pendingDiscardTitle": "Descartar esta chamada?",
+  "pendingDiscardBody": "As fotos de {title} serão apagadas do aparelho, sem enviar.",
+  "@pendingDiscardBody": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "discard": "Descartar",
+  "pendingStored": "Chamadas guardadas no aparelho ({count})",
+  "@pendingStored": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sendNow": "Enviar agora",
+  "pendingSummary": "{count, plural, =1{1 foto} other{{count} fotos}} · {date} · {state}",
+  "@pendingSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "date": {
+        "type": "String"
+      },
+      "state": {
+        "type": "String"
+      }
+    }
+  },
+  "pendingReady": "pronta para revisar",
+  "pendingWaiting": "aguardando internet",
+  "enrollmentPhoto": "Cadastro",
+  "signInWithAnotherAccount": "Entrar com outra conta",
+  "loginSubtitle": "Entre com a conta da sua instituição",
+  "emailLabel": "E-mail",
+  "emailRequired": "Informe o e-mail.",
+  "passwordLabel": "Senha",
+  "passwordRequired": "Informe a senha.",
+  "showPassword": "Mostrar senha",
+  "hidePassword": "Esconder senha",
+  "signIn": "Entrar",
+  "signInError": "Não foi possível entrar.",
+  "faceSignInAs": "Entrar com o rosto como {name}",
+  "@faceSignInAs": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "notYouUseAnotherAccount": "Não é {name}? Usar outra conta",
+  "@notYouUseAnotherAccount": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "faceLoginTitle": "Entrar com o rosto",
+  "faceLoginHello": "Olá, {name}",
+  "@faceLoginHello": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "faceLoginIntro": "Vamos conferir que é você.\nVocê vai olhar para a câmera e virar o rosto para os dois lados.",
+  "faceChecking": "Conferindo…",
+  "signInWithPassword": "Entrar com a senha",
+  "faceLoginUnavailable": "Entrar com o rosto não está disponível. Use a senha.",
+  "faceLoginCameraUnavailable": "Não foi possível abrir a câmera. Confira a permissão ou use a senha.",
+  "faceLoginRefused": "Não foi possível entrar com o rosto. Use a senha.",
+  "benefitsTitle": "Benefícios",
+  "benefitsEmpty": "Nenhum benefício liberado.",
+  "benefitStatusReleased": "Liberado",
+  "benefitStatusRedeemed": "Retirado",
+  "benefitStatusCancelled": "Cancelado",
+  "benefitStatusExpired": "Vencido",
+  "benefitKindSnack": "Lanche",
+  "benefitKindMaterial": "Material",
+  "benefitKindUniform": "Uniforme",
+  "benefitKindTransport": "Transporte",
+  "benefitKindStipend": "Auxílio financeiro",
+  "benefitKindOther": "Outro",
+  "benefitRedeemedOn": "Retirado em {date}",
+  "@benefitRedeemedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "benefitPickUpBy": "Retire até {date}",
+  "@benefitPickUpBy": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "benefitReleasedOn": "Liberado em {date}",
+  "@benefitReleasedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "showQr": "Mostrar QR",
+  "benefitNoExpiry": "Sem data de validade",
+  "benefitValidUntil": "Válido até {date}",
+  "@benefitValidUntil": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "benefitQrFooter": "{validity}\nMostre este QR na retirada.",
+  "@benefitQrFooter": {
+    "placeholders": {
+      "validity": {
+        "type": "String"
+      }
+    }
+  },
+  "purposeLogin": "Entrar no app com o rosto",
+  "purposeLoginHint": "Usar o rosto em vez da senha ao abrir o app.",
+  "purposeAccess": "Catraca",
+  "purposeAccessHint": "Passar pela catraca da instituição com o rosto (o responsável recebe um aviso).",
+  "purposeAttendance": "Presença em aula",
+  "purposeAttendanceHint": "O professor registra a chamada com uma foto da sala. Só para maiores de 18 anos.",
+  "personaAdultOnly": "A presença por reconhecimento facial é só para maiores de 18 anos. Se a data de nascimento estiver errada, fale com a secretaria.",
+  "personaGuardianConsents": "Até os 16 anos, quem autoriza é o responsável. Se a data de nascimento estiver errada, fale com a secretaria.",
+  "personaSubjectDecidesAlone": "A partir de 16 anos, o próprio aluno autoriza pelo app.",
+  "personaSubjectIsAdult": "O aluno é maior de idade: ele mesmo autoriza pelo app.",
+  "personaGuardianPurposeNotAllowed": "O responsável autoriza só o login e a catraca.",
+  "personaTermsOutdated": "O termo foi atualizado. Leia a nova versão e autorize de novo.",
+  "personaInstitutionRequired": "Entre de novo no app e tente outra vez.",
+  "personaNoActiveConsent": "Autorize pelo menos um uso do rosto antes de cadastrá-lo.",
+  "personaChallengeInvalid": "O tempo da conferência acabou. Tente de novo.",
+  "personaFaceNotChecked": "Não deu para conferir o rosto (luz, enquadramento ou movimentos). Tente de novo.",
+  "biometricsTitle": "Reconhecimento facial",
+  "biometricsIntro": "Cada uso é autorizado separadamente e pode ser revogado quando quiser. A senha (e a portaria, na catraca) continua valendo sempre.",
+  "enrollmentTitle": "Cadastrar o rosto",
+  "enrollmentIntro": "Em um lugar bem iluminado, olhe para a câmera e vire o rosto para os dois lados quando pedir. As fotos vão só para a conferência e não ficam no aparelho.",
+  "enrollmentDone": "Rosto cadastrado.",
+  "finish": "Concluir",
+  "enrollmentUnavailable": "O reconhecimento facial não está disponível.",
+  "enrollmentCameraUnavailable": "Não foi possível abrir a câmera. Confira a permissão do app.",
+  "enrollmentError": "Não foi possível cadastrar o rosto.",
+  "faceEnrolled": "Seu rosto está cadastrado.",
+  "faceEnrollmentMissing": "Falta cadastrar o rosto para usar o que foi autorizado.",
+  "faceEnrollmentNeedsConsent": "Autorize pelo menos um uso abaixo para cadastrar o rosto.",
+  "reenrollFace": "Refazer o cadastro do rosto",
+  "enrollMyFace": "Cadastrar meu rosto",
+  "consentAdultsOnly": "Só para maiores de 18 anos.",
+  "consentGuardianDecides": "Até os 16 anos, quem autoriza é o seu responsável, pelo app dele.",
+  "consentGranted": "{purpose}: autorizado.",
+  "@consentGranted": {
+    "placeholders": {
+      "purpose": {
+        "type": "String"
+      }
+    }
+  },
+  "consentRevoked": "{purpose}: revogado.",
+  "@consentRevoked": {
+    "placeholders": {
+      "purpose": {
+        "type": "String"
+      }
+    }
+  },
+  "dependentDecidesAlone": "A partir de 16 anos, o próprio aluno autoriza o uso do rosto pelo app.",
+  "dependentFaceEnrolled": "O rosto de {name} está cadastrado.",
+  "@dependentFaceEnrolled": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "dependentEnrollAfterConsent": "Depois de autorizar, {name} cadastra o próprio rosto no app (Perfil → Reconhecimento facial).",
+  "@dependentEnrollAfterConsent": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "termsOnBehalfOf": "Autorização em nome de {name}",
+  "@termsOnBehalfOf": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "termsVersion": "Termo versão {version}",
+  "@termsVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "termsAgree": "Li e concordo",
+  "notNow": "Agora não",
+  "revokeTitle": "Revogar: {purpose}?",
+  "@revokeTitle": {
+    "placeholders": {
+      "purpose": {
+        "type": "String"
+      }
+    }
+  },
+  "revokeBody": "O rosto deixa de ser usado para isso agora. Se nenhum uso continuar autorizado, o cadastro do rosto é apagado.",
+  "revoke": "Revogar",
+  "dependentsTitle": "Meus dependentes",
+  "dependentsEmpty": "Nenhum aluno vinculado à sua conta. Procure a secretaria.",
+  "dependentFallbackName": "Dependente",
+  "dependentTabFace": "Rosto",
+  "dependentTabBenefits": "Benefícios",
+  "financialBadge": "Financeiro",
+  "relationshipMother": "Mãe",
+  "relationshipFather": "Pai",
+  "relationshipLegalGuardian": "Responsável legal",
+  "relationshipGrandparent": "Avó/avô",
+  "relationshipOther": "Responsável",
+  "tabHome": "Início",
+  "tabNotices": "Avisos",
+  "tabAgenda": "Agenda",
+  "tabReportCard": "Boletim",
+  "tabDependents": "Dependentes",
+  "tabProfile": "Perfil",
+  "homeGreeting": "Olá, {name}!",
+  "@homeGreeting": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeAllRead": "Tudo lido",
+  "homeUnread": "{count} sem ler",
+  "@homeUnread": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeTapToSee": "Toque para ver",
+  "homeNextOnAgenda": "Próximo na agenda",
+  "homeNothingAhead": "Nada pela frente",
+  "homeNextItem": "{title} · {date}",
+  "@homeNextItem": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "homeFaceAttendance": "Chamada facial",
+  "homeAttendanceHint": "Fotografe a sala e revise",
+  "homeAttendancePending": "{count, plural, =1{1 chamada guardada no aparelho} other{{count} chamadas guardadas no aparelho}}",
+  "@homeAttendancePending": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeNothingToPickUp": "Nada para retirar",
+  "homeToPickUp": "{count} para retirar",
+  "@homeToPickUp": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeNoDependents": "Nenhum vinculado",
+  "materialsTitle": "Requisições de material",
+  "materialsEmpty": "Nenhuma requisição. Peça materiais pelo site.",
+  "materialStatusPending": "Aguardando aprovação",
+  "materialStatusApproved": "Aprovada: retirar",
+  "materialStatusRejected": "Recusada",
+  "materialStatusDelivered": "Retirada",
+  "materialStatusClosed": "Concluída",
+  "materialStatusCancelled": "Cancelada",
+  "materialReturnOverdue": "Devolução atrasada",
+  "materialNeededOn": "Para {date}",
+  "@materialNeededOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "materialReturnBy": "devolver até {date}",
+  "@materialReturnBy": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "materialLine": "{material}: {quantity} {unit}",
+  "@materialLine": {
+    "placeholders": {
+      "material": {
+        "type": "String"
+      },
+      "quantity": {
+        "type": "int"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "materialLineToReturn": "{line} · devolver {count}",
+  "@materialLineToReturn": {
+    "placeholders": {
+      "line": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pickupQr": "QR de retirada",
+  "materialQrFooter": "Mostre este QR no almoxarifado. Só você recebe este código.",
+  "noticesTitle": "Avisos",
+  "markAllAsRead": "Marcar todos como lidos",
+  "noNotices": "Nenhum aviso por enquanto.",
+  "profileTitle": "Perfil",
+  "profileEmail": "E-mail",
+  "profileRole": "{count, plural, =1{Papel} other{Papéis}}",
+  "@profileRole": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "profileInstitution": "Instituição",
+  "profileFaceRecognition": "Reconhecimento facial",
+  "profileFaceRecognitionHint": "Entrar com o rosto, catraca e presença: autorizações e cadastro do rosto",
+  "signOut": "Sair",
+  "signOutTitle": "Sair da conta?",
+  "signOutBody": "Você vai precisar entrar de novo com e-mail e senha.",
+  "signOutPendingAttendance": "{count, plural, =1{Há 1 chamada com fotos ainda não enviadas: ela será apagada do aparelho.} other{Há {count} chamadas com fotos ainda não enviadas: elas serão apagadas do aparelho.}}",
+  "@signOutPendingAttendance": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "roleStudent": "Aluno",
+  "roleInstructor": "Instrutor",
+  "roleCoordinator": "Coordenação",
+  "roleSecretary": "Secretaria",
+  "roleGuardian": "Responsável",
+  "roleCompanyManager": "Gestão empresa",
+  "roleInstitutionAdmin": "Admin da instituição",
+  "roleAdmin": "Admin",
+  "roleSuperAdmin": "Admin da plataforma",
+  "reportCardTitle": "Boletim",
+  "reportCardEmpty": "Ainda não há notas publicadas.",
+  "reportCardNoPeriods": "Nenhuma etapa fechada ainda.",
+  "reportCardAbsences": "{count, plural, =1{1 falta} other{{count} faltas}}",
+  "@reportCardAbsences": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reportCardFinalGrade": "Média final: {grade}",
+  "@reportCardFinalGrade": {
+    "placeholders": {
+      "grade": {
+        "type": "String"
+      }
+    }
+  },
+  "reportCardRecovery": "Recuperação: {grade}",
+  "@reportCardRecovery": {
+    "placeholders": {
+      "grade": {
+        "type": "String"
+      }
+    }
+  },
+  "reportCardAttendance": "Frequência: {rate}",
+  "@reportCardAttendance": {
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "reportCardPassingGrade": "Média para aprovar: {grade}",
+  "@reportCardPassingGrade": {
+    "placeholders": {
+      "grade": {
+        "type": "String"
+      }
+    }
+  },
+  "subjectInProgress": "Cursando",
+  "subjectRecovery": "Em recuperação",
+  "subjectApproved": "Aprovado",
+  "subjectFailed": "Reprovado",
+  "subjectFailedAttendance": "Reprovado por falta",
+  "appTitle": "W-Edu",
+  "errorGeneric": "Não foi possível concluir.",
+  "errorNoConnection": "Sem conexão com o servidor. Verifique a internet.",
+  "errorTimeout": "O servidor demorou a responder.",
+  "tryAgain": "Tentar de novo",
+  "back": "Voltar",
+  "cancel": "Cancelar",
+  "keep": "Manter",
+  "close": "Fechar",
+  "errorLoad": "Não foi possível carregar.",
+  "errorRefresh": "Não foi possível atualizar.",
+  "faceStepCenter": "Olhe para a câmera",
+  "faceStepTurnLeft": "Vire o rosto para a esquerda",
+  "faceStepTurnRight": "Vire o rosto para a direita",
+  "faceStepProgress": "Passo {current} de {total}",
+  "@faceStepProgress": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "qrSemanticLabel": "QR de {title}",
+  "@qrSemanticLabel": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "openingCamera": "Abrindo a câmera…",
+  "start": "Começar"
+}

@@ -1,42 +1,45 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../l10n/l10n.dart';
 import '../../../shared/ds/ds.dart';
 import '../biometrics_providers.dart';
 import 'consents_list.dart';
 
 /// Aba do dependente: o responsável autoriza o login e a catraca do menor de 16 anos. O rosto é
 /// cadastrado pelo próprio aluno, no app dele; a partir dos 16, o aluno decide sozinho.
-class AutorizacoesDependente extends ConsumerWidget {
-  const AutorizacoesDependente({super.key, required this.alunoId});
+class DependentConsents extends ConsumerWidget {
+  const DependentConsents({super.key, required this.studentId});
 
-  final String alunoId;
+  final String studentId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final situacao = ref.watch(situacaoDoDependenteProvider(alunoId));
-    final tema = Theme.of(context);
-    return switch (situacao) {
-      AsyncValue(:final error?, hasValue: false) =>
-        ErroView(erro: error, onTentarDeNovo: () => ref.refresh(situacaoDoDependenteProvider(alunoId).future)),
-      AsyncValue(value: final atual?) => atual.decideSozinho
-          ? const EstadoVazio(texto: 'A partir de 16 anos, o próprio aluno autoriza o uso do rosto pelo app.', icone: Icons.person_rounded)
-          : ListView(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Text(
-                    atual.rostoCadastrado
-                        ? 'O rosto de ${atual.nome} está cadastrado.'
-                        : 'Depois de autorizar, ${atual.nome} cadastra o próprio rosto no app (Perfil → Reconhecimento facial).',
-                    style: tema.textTheme.bodyMedium,
+    final status = ref.watch(dependentBiometricStatusProvider(studentId));
+    final theme = Theme.of(context);
+    final l10n = context.l10n;
+    return switch (status) {
+      AsyncValue(:final error?, hasValue: false) => ErrorView(
+        error: error,
+        onRetry: () => ref.refresh(dependentBiometricStatusProvider(studentId).future),
+      ),
+      AsyncValue(value: final current?) =>
+        current.decidesAlone
+            ? EmptyState(text: l10n.dependentDecidesAlone, icon: Icons.person_rounded)
+            : ListView(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Text(
+                      current.faceEnrolled ? l10n.dependentFaceEnrolled(current.name) : l10n.dependentEnrollAfterConsent(current.name),
+                      style: theme.textTheme.bodyMedium,
+                    ),
                   ),
-                ),
-                AutorizacoesLista(situacao: atual, dependenteId: alunoId),
-              ],
-            ),
-      _ => const Carregando(),
+                  ConsentsList(status: current, dependentId: studentId),
+                ],
+              ),
+      _ => const LoadingView(),
     };
   }
 }

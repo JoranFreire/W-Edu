@@ -11,61 +11,61 @@ import 'local_cache.dart';
 ///
 /// Sem rede e com cache, fica com o cache (funciona offline). A versão é lida
 /// antes dos dados: se algo mudar no meio, a próxima conferência baixa de novo.
-class Sincronizador {
-  Sincronizador(this._cache);
+class Synchronizer {
+  Synchronizer(this._cache);
 
-  final CacheLocal _cache;
-  final Set<String> _forcadas = {};
+  final LocalCache _cache;
+  final Set<String> _forced = {};
 
-  /// Na próxima vez, [chave] ignora o cache e a versão (puxar para atualizar).
-  void forcar(String chave) => _forcadas.add(chave);
+  /// Na próxima vez, [key] ignora o cache e a versão (puxar para atualizar).
+  void force(String key) => _forced.add(key);
 
-  /// [dono] separa as contas no mesmo aparelho; [versoes] é a consulta de
+  /// [owner] separa as contas no mesmo aparelho; [versions] é a consulta de
   /// versões compartilhada entre as telas (uma requisição por conferência).
-  Stream<T> observar<T>({
-    required String dono,
-    required String chave,
+  Stream<T> watch<T>({
+    required String owner,
+    required String key,
     required String area,
-    required Future<Map<String, int>> versoes,
-    required Future<Object?> Function() baixar,
-    required T Function(Object? json) ler,
+    required Future<Map<String, int>> versions,
+    required Future<Object?> Function() download,
+    required T Function(Object? json) parse,
   }) async* {
     // A consulta corre enquanto o cache é lido; se falhar antes de ser esperada,
     // o erro não pode escapar como "não tratado" (ele é tratado logo abaixo).
-    versoes.ignore();
-    final caminho = '$dono/$chave';
-    final forcada = _forcadas.remove(chave);
-    final salvo = await _cache.ler(caminho);
-    if (salvo != null && !forcada) yield ler(salvo.dados);
+    versions.ignore();
+    final path = '$owner/$key';
+    final forced = _forced.remove(key);
+    final saved = await _cache.read(path);
+    if (saved != null && !forced) yield parse(saved.data);
 
     try {
-      final versao = await _versaoDaArea(versoes, area);
-      if (salvo != null && !forcada && versao != null && versao == salvo.versao) return;
-      final dados = await baixar();
-      final entrega = ler(dados); // valida antes de gravar
-      await _cache.salvar(caminho, EntradaCache(versao, dados));
-      yield entrega;
+      final version = await _areaVersion(versions, area);
+      if (saved != null && !forced && version != null && version == saved.version) return;
+      final data = await download();
+      final parsed = parse(data); // valida antes de gravar
+      await _cache.save(path, CacheEntry(version, data));
+      yield parsed;
     } catch (_) {
       // Com cache já na tela, a falha é silenciosa; sem ele, a tela mostra o erro.
-      if (salvo == null || forcada) rethrow;
+      if (saved == null || forced) rethrow;
     }
   }
 
   /// Regrava a tela depois de uma mudança local (ex.: aviso marcado como lido),
   /// mantendo a versão: a próxima conferência traz a versão nova do servidor.
-  Future<void> regravar(String dono, String chave, Object? dados) async {
-    final caminho = '$dono/$chave';
-    final salvo = await _cache.ler(caminho);
-    await _cache.salvar(caminho, EntradaCache(salvo?.versao, dados));
+  Future<void> rewrite(String owner, String key, Object? data) async {
+    final path = '$owner/$key';
+    final saved = await _cache.read(path);
+    await _cache.save(path, CacheEntry(saved?.version, data));
   }
 
   /// Sem rede, a falha sobe (fica com o cache); servidor sem `sync/versions`
   /// vira versão desconhecida (baixa sempre).
-  Future<int?> _versaoDaArea(Future<Map<String, int>> versoes, String area) async {
+  Future<int?> _areaVersion(Future<Map<String, int>> versions, String area) async {
     try {
-      return (await versoes)[area];
-    } on DioException catch (erro) {
-      if (erroDeRede(erro) || erro.response?.statusCode == 401) rethrow;
+      return (await versions)[area];
+    } on DioException catch (error) {
+      if (isNetworkError(error) || error.response?.statusCode == 401) rethrow;
       return null;
     }
   }

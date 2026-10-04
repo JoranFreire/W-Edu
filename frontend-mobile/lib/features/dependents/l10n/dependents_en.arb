@@ -1,0 +1,13 @@
+{
+  "dependentsTitle": "My dependents",
+  "dependentsEmpty": "No students linked to your account. Contact the school office.",
+  "dependentFallbackName": "Dependent",
+  "dependentTabFace": "Face",
+  "dependentTabBenefits": "Benefits",
+  "financialBadge": "Financial",
+  "relationshipMother": "Mother",
+  "relationshipFather": "Father",
+  "relationshipLegalGuardian": "Legal guardian",
+  "relationshipGrandparent": "Grandparent",
+  "relationshipOther": "Guardian"
+}

@@ -7,10 +7,10 @@ import 'dart:io' show Platform;
 /// e no emulador Android "localhost" é o próprio emulador, não o Mac: o host
 /// fica em 10.0.2.2.
 class ApiConfig {
-  static const _definida = String.fromEnvironment('API_BASE_URL');
+  static const _defined = String.fromEnvironment('API_BASE_URL');
 
   static String get baseUrl {
-    if (_definida.isNotEmpty) return _definida.endsWith('/') ? _definida : '$_definida/';
+    if (_defined.isNotEmpty) return _defined.endsWith('/') ? _defined : '$_defined/';
     final host = Platform.isAndroid ? '10.0.2.2' : 'localhost';
     return 'http://$host:8000/';
   }

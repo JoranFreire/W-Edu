@@ -1,15 +1,15 @@
 import 'package:dio/dio.dart';
 
 /// Benefícios liberados (QR de retirada) do aluno logado ou de um dependente.
-/// Devolve o JSON da API, que o cache guarda como veio; `Beneficio.lista` lê.
-class BeneficiosRepository {
-  BeneficiosRepository(this._dio);
+/// Devolve o JSON da API, que o cache guarda como veio; `Benefit.list` lê.
+class BenefitsRepository {
+  BenefitsRepository(this._dio);
 
   final Dio _dio;
 
-  Future<Object?> meus() => _buscar('social/my/vouchers');
+  Future<Object?> mine() => _fetch('social/my/vouchers');
 
-  Future<Object?> doDependente(String alunoId) => _buscar('guardians/me/dependents/$alunoId/vouchers');
+  Future<Object?> ofDependent(String studentId) => _fetch('guardians/me/dependents/$studentId/vouchers');
 
-  Future<Object?> _buscar(String caminho) async => (await _dio.get<List<dynamic>>(caminho)).data;
+  Future<Object?> _fetch(String path) async => (await _dio.get<List<dynamic>>(path)).data;
 }

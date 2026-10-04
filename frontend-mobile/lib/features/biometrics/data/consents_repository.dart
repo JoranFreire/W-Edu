@@ -1,36 +1,34 @@
 import 'package:dio/dio.dart';
 
-import 'purpose.dart';
 import 'biometric_status.dart';
+import 'purpose.dart';
 import 'terms.dart';
 
 /// Consentimentos no Persona: os da própria pessoa e, para o responsável, os do dependente menor.
-class ConsentimentosRepository {
-  ConsentimentosRepository(this._dio);
+class ConsentsRepository {
+  ConsentsRepository(this._dio);
 
   final Dio _dio;
 
-  Future<SituacaoBiometrica> minhaSituacao() => _situacao('consent/me/status');
+  Future<BiometricStatus> myStatus() => _status('consent/me/status');
 
-  Future<SituacaoBiometrica> situacaoDoDependente(String alunoId) => _situacao('consent/dependents/$alunoId/status');
+  Future<BiometricStatus> dependentStatus(String studentId) => _status('consent/dependents/$studentId/status');
 
-  Future<Termos> termos(Finalidade finalidade) async {
-    final resposta = await _dio.get<Map<String, dynamic>>('consent/terms/${finalidade.valor}');
-    return Termos.fromJson(resposta.data!);
+  Future<ConsentTerms> terms(Purpose purpose) async {
+    final response = await _dio.get<Map<String, dynamic>>('consent/terms/${purpose.value}');
+    return ConsentTerms.fromJson(response.data!);
   }
 
-  Future<void> autorizar(Termos termos, {String? dependenteId}) => _dio.post<void>(
-        dependenteId == null ? 'consent/grant' : 'consent/dependents/$dependenteId/grant',
-        data: {'purpose': termos.finalidade.valor, 'terms_version': termos.versao, 'terms_hash': termos.hash},
-      );
+  Future<void> grant(ConsentTerms terms, {String? dependentId}) => _dio.post<void>(
+    dependentId == null ? 'consent/grant' : 'consent/dependents/$dependentId/grant',
+    data: {'purpose': terms.purpose.value, 'terms_version': terms.version, 'terms_hash': terms.hash},
+  );
 
-  Future<void> revogar(Finalidade finalidade, {String? dependenteId}) => _dio.post<void>(
-        dependenteId == null ? 'consent/revoke' : 'consent/dependents/$dependenteId/revoke',
-        data: {'purpose': finalidade.valor},
-      );
+  Future<void> revoke(Purpose purpose, {String? dependentId}) =>
+      _dio.post<void>(dependentId == null ? 'consent/revoke' : 'consent/dependents/$dependentId/revoke', data: {'purpose': purpose.value});
 
-  Future<SituacaoBiometrica> _situacao(String caminho) async {
-    final resposta = await _dio.get<Map<String, dynamic>>(caminho);
-    return SituacaoBiometrica.fromJson(resposta.data!);
+  Future<BiometricStatus> _status(String path) async {
+    final response = await _dio.get<Map<String, dynamic>>(path);
+    return BiometricStatus.fromJson(response.data!);
   }
 }

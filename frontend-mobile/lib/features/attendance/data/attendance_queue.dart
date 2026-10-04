@@ -2,55 +2,57 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import '../../../shared/vault/file_vault.dart';
-import 'pending_attendance.dart';
 import 'attendance_result.dart';
+import 'pending_attendance.dart';
 
 /// Chamadas fotografadas sem rede. Tudo no cofre cifrado: o índice (turma, encontro, horários)
 /// e as fotos. Some quando a chamada é confirmada ou descartada.
-class FilaDeChamadas {
-  FilaDeChamadas(this._cofre);
+class AttendanceQueue {
+  AttendanceQueue(this._vault);
 
-  final CofreDeArquivos _cofre;
-  static const _indice = 'chamadas_pendentes.json';
+  final FileVault _vault;
+  static const _index = 'pending_attendances.json';
 
-  Future<List<ChamadaPendente>> listar() async {
-    final bytes = await _cofre.ler(_indice);
+  Future<List<PendingAttendance>> list() async {
+    final bytes = await _vault.read(_index);
     if (bytes == null) return [];
-    final itens = jsonDecode(utf8.decode(bytes)) as List<dynamic>;
-    return [for (final item in itens) ChamadaPendente.fromJson(item as Map<String, dynamic>)];
+    final items = jsonDecode(utf8.decode(bytes)) as List<dynamic>;
+    return [for (final item in items) PendingAttendance.fromJson(item as Map<String, dynamic>)];
   }
 
-  Future<ChamadaPendente?> buscar(String id) async => (await listar()).where((c) => c.id == id).firstOrNull;
+  Future<PendingAttendance?> find(String id) async => (await list()).where((a) => a.id == id).firstOrNull;
 
-  Future<void> salvar(ChamadaPendente chamada) async {
-    final outras = (await listar()).where((c) => c.id != chamada.id);
-    await _gravar([...outras, chamada]);
+  Future<void> save(PendingAttendance attendance) async {
+    final others = (await list()).where((a) => a.id != attendance.id);
+    await _write([...others, attendance]);
   }
 
   /// Guarda a foto (cifrada) e a registra na chamada; a mesma posição substitui a anterior.
-  Future<ChamadaPendente> guardarFoto(ChamadaPendente chamada, AnguloFoto angulo, Uint8List foto, DateTime tiradaEm) async {
-    await _cofre.guardar(chamada.nomeDaFoto(angulo), foto);
-    final atualizada = chamada.copiar(fotos: [
-      ...chamada.fotos.where((f) => f.angulo != angulo),
-      FotoPendente(angulo: angulo, tiradaEm: tiradaEm),
-    ]);
-    await salvar(atualizada);
-    return atualizada;
+  Future<PendingAttendance> storePhoto(PendingAttendance attendance, PhotoAngle angle, Uint8List photo, DateTime takenAt) async {
+    await _vault.store(attendance.photoName(angle), photo);
+    final updated = attendance.copyWith(
+      photos: [
+        ...attendance.photos.where((p) => p.angle != angle),
+        PendingPhoto(angle: angle, takenAt: takenAt),
+      ],
+    );
+    await save(updated);
+    return updated;
   }
 
-  Future<Uint8List?> foto(ChamadaPendente chamada, AnguloFoto angulo) => _cofre.ler(chamada.nomeDaFoto(angulo));
+  Future<Uint8List?> photo(PendingAttendance attendance, PhotoAngle angle) => _vault.read(attendance.photoName(angle));
 
   /// Apaga as fotos e tira a chamada da fila.
-  Future<void> remover(String id) async {
-    final todas = await listar();
-    for (final chamada in todas.where((c) => c.id == id)) {
-      for (final foto in chamada.fotos) {
-        await _cofre.apagar(chamada.nomeDaFoto(foto.angulo));
+  Future<void> remove(String id) async {
+    final all = await list();
+    for (final attendance in all.where((a) => a.id == id)) {
+      for (final photo in attendance.photos) {
+        await _vault.delete(attendance.photoName(photo.angle));
       }
     }
-    await _gravar(todas.where((c) => c.id != id).toList());
+    await _write(all.where((a) => a.id != id).toList());
   }
 
-  Future<void> _gravar(List<ChamadaPendente> chamadas) =>
-      _cofre.guardar(_indice, Uint8List.fromList(utf8.encode(jsonEncode([for (final c in chamadas) c.toJson()]))));
+  Future<void> _write(List<PendingAttendance> attendances) =>
+      _vault.store(_index, Uint8List.fromList(utf8.encode(jsonEncode([for (final a in attendances) a.toJson()]))));
 }

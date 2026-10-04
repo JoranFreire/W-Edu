@@ -8,78 +8,78 @@ import 'package:path_provider/path_provider.dart';
 
 /// Arquivos cifrados no aparelho (ex.: fotos da sala esperando a rede). Nada sai daqui em claro:
 /// cada arquivo é AES-GCM com uma chave que mora só no armazenamento seguro (Keychain/Keystore).
-abstract interface class CofreDeArquivos {
-  Future<void> guardar(String nome, Uint8List conteudo);
+abstract interface class FileVault {
+  Future<void> store(String name, Uint8List content);
 
   /// Nulo se não existe (ou não decifra: arquivo corrompido ou chave trocada).
-  Future<Uint8List?> ler(String nome);
+  Future<Uint8List?> read(String name);
 
-  Future<void> apagar(String nome);
+  Future<void> delete(String name);
 
   /// Ao sair da conta: nada de outra pessoa fica no aparelho.
-  Future<void> apagarTudo();
+  Future<void> deleteAll();
 }
 
-class CofreCifrado implements CofreDeArquivos {
-  CofreCifrado({FlutterSecureStorage? chaves, Future<Directory> Function()? pasta})
-      : _chaves = chaves ?? const FlutterSecureStorage(),
-        _pastaBase = pasta ?? getApplicationSupportDirectory;
+class EncryptedFileVault implements FileVault {
+  EncryptedFileVault({FlutterSecureStorage? keys, Future<Directory> Function()? folder})
+    : _keys = keys ?? const FlutterSecureStorage(),
+      _baseFolder = folder ?? getApplicationSupportDirectory;
 
-  static const _nomeDaChave = 'cofre_aes_gcm';
-  final FlutterSecureStorage _chaves;
-  final Future<Directory> Function() _pastaBase;
+  static const _keyName = 'vault_aes_gcm';
+  final FlutterSecureStorage _keys;
+  final Future<Directory> Function() _baseFolder;
   final _aes = AesGcm.with256bits();
-  SecretKey? _chave;
+  SecretKey? _key;
 
-  Future<SecretKey> _chaveDoCofre() async {
-    if (_chave != null) return _chave!;
-    final guardada = await _chaves.read(key: _nomeDaChave);
-    if (guardada != null) return _chave = SecretKey(base64Decode(guardada));
-    final nova = await _aes.newSecretKey();
-    await _chaves.write(key: _nomeDaChave, value: base64Encode(await nova.extractBytes()));
-    return _chave = nova;
+  Future<SecretKey> _vaultKey() async {
+    if (_key != null) return _key!;
+    final stored = await _keys.read(key: _keyName);
+    if (stored != null) return _key = SecretKey(base64Decode(stored));
+    final fresh = await _aes.newSecretKey();
+    await _keys.write(key: _keyName, value: base64Encode(await fresh.extractBytes()));
+    return _key = fresh;
   }
 
-  Future<File> _arquivo(String nome) async {
-    final pasta = Directory('${(await _pastaBase()).path}/cofre');
-    await pasta.create(recursive: true);
-    return File('${pasta.path}/${nome.replaceAll(RegExp(r'[^A-Za-z0-9_.-]'), '_')}');
-  }
-
-  @override
-  Future<void> guardar(String nome, Uint8List conteudo) async {
-    final caixa = await _aes.encrypt(conteudo, secretKey: await _chaveDoCofre());
-    final arquivo = await _arquivo(nome);
-    final temporario = File('${arquivo.path}.tmp');
-    await temporario.writeAsBytes(caixa.concatenation(), flush: true);
-    await temporario.rename(arquivo.path);
+  Future<File> _file(String name) async {
+    final folder = Directory('${(await _baseFolder()).path}/vault');
+    await folder.create(recursive: true);
+    return File('${folder.path}/${name.replaceAll(RegExp(r'[^A-Za-z0-9_.-]'), '_')}');
   }
 
   @override
-  Future<Uint8List?> ler(String nome) async {
-    final arquivo = await _arquivo(nome);
-    if (!await arquivo.exists()) return null;
+  Future<void> store(String name, Uint8List content) async {
+    final box = await _aes.encrypt(content, secretKey: await _vaultKey());
+    final file = await _file(name);
+    final temp = File('${file.path}.tmp');
+    await temp.writeAsBytes(box.concatenation(), flush: true);
+    await temp.rename(file.path);
+  }
+
+  @override
+  Future<Uint8List?> read(String name) async {
+    final file = await _file(name);
+    if (!await file.exists()) return null;
     try {
-      final caixa = SecretBox.fromConcatenation(
-        await arquivo.readAsBytes(),
+      final box = SecretBox.fromConcatenation(
+        await file.readAsBytes(),
         nonceLength: _aes.nonceLength,
         macLength: _aes.macAlgorithm.macLength,
       );
-      return Uint8List.fromList(await _aes.decrypt(caixa, secretKey: await _chaveDoCofre()));
+      return Uint8List.fromList(await _aes.decrypt(box, secretKey: await _vaultKey()));
     } on Object {
       return null;
     }
   }
 
   @override
-  Future<void> apagar(String nome) async {
-    final arquivo = await _arquivo(nome);
-    if (await arquivo.exists()) await arquivo.delete();
+  Future<void> delete(String name) async {
+    final file = await _file(name);
+    if (await file.exists()) await file.delete();
   }
 
   @override
-  Future<void> apagarTudo() async {
-    final pasta = Directory('${(await _pastaBase()).path}/cofre');
-    if (await pasta.exists()) await pasta.delete(recursive: true);
+  Future<void> deleteAll() async {
+    final folder = Directory('${(await _baseFolder()).path}/vault');
+    if (await folder.exists()) await folder.delete(recursive: true);
   }
 }

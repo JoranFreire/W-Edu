@@ -1,55 +1,63 @@
 import 'package:flutter/material.dart';
 
-import '../attendance_providers.dart';
+import '../../../l10n/l10n.dart';
+import '../attendance_flow.dart';
 import '../data/attendance_result.dart';
+import 'attendance_labels.dart';
 
 /// Fotos da sala: um ângulo por vez (esquerda, centro, direita). Pelo menos uma para analisar.
-class FotosDaSala extends StatelessWidget {
-  const FotosDaSala({super.key, required this.etapa, required this.visor, required this.onFotografar, required this.onAnalisar});
+class RoomPhotos extends StatelessWidget {
+  const RoomPhotos({super.key, required this.step, required this.preview, required this.onTakePhoto, required this.onAnalyze});
 
-  final Fotografando etapa;
-  final Widget? visor;
-  final void Function(AnguloFoto angulo) onFotografar;
-  final VoidCallback onAnalisar;
+  final AttendancePhotographing step;
+  final Widget? preview;
+  final void Function(PhotoAngle angle) onTakePhoto;
+  final VoidCallback onAnalyze;
 
   @override
   Widget build(BuildContext context) {
-    final tema = Theme.of(context);
-    final sessao = etapa.sessao;
+    final theme = Theme.of(context);
+    final l10n = context.l10n;
+    final session = step.session;
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            sessao == null
-                ? 'Sem internet: as fotos ficam guardadas (cifradas) e a chamada é analisada quando a rede voltar.'
-                : '${sessao.comAutorizacao} aluno(s) com reconhecimento autorizado'
-                    '${sessao.semAutorizacao > 0 ? ' · ${sessao.semAutorizacao} sem (você marca na revisão)' : ''}',
-            style: tema.textTheme.bodyMedium,
+            session == null
+                ? l10n.attendanceOfflineHint
+                : l10n.attendanceWithConsent(session.withConsent) +
+                      (session.withoutConsent > 0 ? l10n.attendanceWithoutConsent(session.withoutConsent) : ''),
+            style: theme.textTheme.bodyMedium,
           ),
           const SizedBox(height: 12),
-          Expanded(child: ClipRRect(borderRadius: BorderRadius.circular(16), child: visor ?? const ColoredBox(color: Colors.black))),
+          Expanded(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: preview ?? const ColoredBox(color: Colors.black),
+            ),
+          ),
           const SizedBox(height: 12),
           Wrap(
             spacing: 8,
             runSpacing: 8,
             alignment: WrapAlignment.center,
             children: [
-              for (final angulo in AnguloFoto.values)
+              for (final angle in PhotoAngle.values)
                 FilledButton.tonalIcon(
-                  onPressed: etapa.enviando == null ? () => onFotografar(angulo) : null,
-                  icon: etapa.enviando == angulo
+                  onPressed: step.sending == null ? () => onTakePhoto(angle) : null,
+                  icon: step.sending == angle
                       ? const SizedBox.square(dimension: 16, child: CircularProgressIndicator(strokeWidth: 2))
-                      : Icon(etapa.enviadas.contains(angulo) ? Icons.check_circle_rounded : Icons.photo_camera_rounded),
-                  label: Text(angulo.nome),
+                      : Icon(step.taken.contains(angle) ? Icons.check_circle_rounded : Icons.photo_camera_rounded),
+                  label: Text(angle.label(l10n)),
                 ),
             ],
           ),
           const SizedBox(height: 12),
           FilledButton(
-            onPressed: etapa.enviadas.isNotEmpty && etapa.enviando == null ? onAnalisar : null,
-            child: Text(sessao == null ? 'Guardar ${etapa.enviadas.length} foto(s)' : 'Analisar ${etapa.enviadas.length} foto(s)'),
+            onPressed: step.taken.isNotEmpty && step.sending == null ? onAnalyze : null,
+            child: Text(session == null ? l10n.attendanceStore(step.taken.length) : l10n.attendanceAnalyze(step.taken.length)),
           ),
         ],
       ),

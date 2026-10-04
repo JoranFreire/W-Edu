@@ -1,38 +1,36 @@
 import 'purpose.dart';
 
 /// O que está ativo para uma pessoa no Persona (nunca o rosto em si).
-class SituacaoBiometrica {
-  const SituacaoBiometrica({
-    required this.nome,
-    required this.ehAdulto,
-    required this.decideSozinho,
-    required this.finalidades,
-    required this.rostoCadastrado,
+class BiometricStatus {
+  const BiometricStatus({
+    required this.name,
+    required this.isAdult,
+    required this.decidesAlone,
+    required this.purposes,
+    required this.faceEnrolled,
   });
 
-  final String nome;
+  final String name;
 
   /// 18 anos ou mais: pode autorizar a presença em aula.
-  final bool ehAdulto;
+  final bool isAdult;
 
   /// 16 anos ou mais: autoriza sozinho login e catraca; abaixo disso, o responsável.
-  final bool decideSozinho;
-  final Set<Finalidade> finalidades;
-  final bool rostoCadastrado;
+  final bool decidesAlone;
+  final Set<Purpose> purposes;
+  final bool faceEnrolled;
 
-  bool autorizou(Finalidade finalidade) => finalidades.contains(finalidade);
+  bool consented(Purpose purpose) => purposes.contains(purpose);
 
   /// O cadastro do rosto exige alguma autorização ativa.
-  bool get podeCadastrarRosto => finalidades.isNotEmpty;
+  bool get canEnrollFace => purposes.isNotEmpty;
 
-  factory SituacaoBiometrica.fromJson(Map<String, dynamic> json) => SituacaoBiometrica(
-        nome: json['person_name'] as String? ?? '',
-        ehAdulto: json['is_adult'] as bool? ?? false,
-        // Persona sem o campo: vale a maioridade (regra anterior).
-        decideSozinho: json['decides_alone'] as bool? ?? json['is_adult'] as bool? ?? false,
-        finalidades: {
-          for (final valor in json['active_purposes'] as List<dynamic>? ?? const []) ?Finalidade.de(valor as String),
-        },
-        rostoCadastrado: json['enrollment_status'] == 'active',
-      );
+  factory BiometricStatus.fromJson(Map<String, dynamic> json) => BiometricStatus(
+    name: json['person_name'] as String? ?? '',
+    isAdult: json['is_adult'] as bool? ?? false,
+    // Persona sem o campo: vale a maioridade (regra anterior).
+    decidesAlone: json['decides_alone'] as bool? ?? json['is_adult'] as bool? ?? false,
+    purposes: {for (final value in json['active_purposes'] as List<dynamic>? ?? const []) ?Purpose.of(value as String)},
+    faceEnrolled: json['enrollment_status'] == 'active',
+  );
 }

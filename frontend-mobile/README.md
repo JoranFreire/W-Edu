@@ -13,9 +13,26 @@ lib/
               face_login, biometrics, attendance
               cada uma com data/ (models + repositório), <feature>_providers.dart, screens/, widgets/
   router/     routes.dart (rotas, abas por papel e redirect de autenticação), app_router.dart
+  l10n/       l10n.dart (`context.l10n`), common_<idioma>.arb e generated/ (junção das partes, gerada)
+tool/         merge_arb.dart
 ```
 
-Pastas, arquivos e rotas em inglês; classes, variáveis e textos da tela em português.
+Código em inglês (pastas, arquivos, rotas, classes e variáveis); comentários em português.
+
+## Idiomas (i18n)
+
+Os textos da tela vêm do gen-l10n (`context.l10n.chave`), em português (modelo) e inglês; o app segue o idioma do
+aparelho e cai para o português. Cada funcionalidade guarda os seus textos em `features/<x>/l10n/<x>_pt.arb` e
+`<x>_en.arb` (os comuns em `lib/l10n/common_*.arb`). Depois de mexer numa parte:
+
+```bash
+dart run tool/merge_arb.dart   # junta as partes em lib/l10n/generated/ (chave repetida entre partes é erro)
+flutter gen-l10n               # o flutter run/test também gera
+```
+
+`test/l10n/arb_parts_test.dart` falha se a junção estiver desatualizada ou se um idioma tiver chaves a mais ou a menos.
+Models e providers não têm texto: devolvem enums e erros, e o widget traduz. A mensagem de regra de negócio que vem da
+API (`detail`) aparece como veio.
 
 ## Cache e uso offline
 

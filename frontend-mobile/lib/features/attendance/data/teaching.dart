@@ -1,37 +1,37 @@
 /// Turma que o professor ministra (W-Edu, `assessment/teaching/offerings`).
-class TurmaDocente {
-  const TurmaDocente({required this.id, required this.nome});
+class TeachingOffering {
+  const TeachingOffering({required this.id, required this.name});
 
   final String id;
-  final String nome;
+  final String name;
 
-  static List<TurmaDocente> lista(Object? json) => [
-        for (final item in json as List<dynamic>)
-          TurmaDocente(id: (item as Map<String, dynamic>)['id'] as String, nome: item['name'] as String),
-      ];
+  static List<TeachingOffering> list(Object? json) => [
+    for (final item in json as List<dynamic>)
+      TeachingOffering(id: (item as Map<String, dynamic>)['id'] as String, name: item['name'] as String),
+  ];
 }
 
 /// Encontro (aula) da turma no W-Edu: a chamada facial é de um encontro.
-class Encontro {
-  const Encontro({required this.id, required this.titulo, required this.inicio, required this.encerrado});
+class Meeting {
+  const Meeting({required this.id, required this.title, required this.startsAt, required this.isClosed});
 
   final String id;
-  final String titulo;
-  final DateTime inicio;
-  final bool encerrado;
+  final String title;
+  final DateTime startsAt;
+  final bool isClosed;
 
   /// Abertos, do mais próximo de hoje para trás e para a frente (hoje primeiro).
-  static List<Encontro> abertos(Object? json) {
-    final encontros = [
+  static List<Meeting> open(Object? json) {
+    final meetings = [
       for (final item in json as List<dynamic>)
-        Encontro(
+        Meeting(
           id: (item as Map<String, dynamic>)['id'] as String,
-          titulo: item['title'] as String,
-          inicio: DateTime.parse(item['starts_at'] as String).toLocal(),
-          encerrado: item['is_closed'] as bool? ?? false,
+          title: item['title'] as String,
+          startsAt: DateTime.parse(item['starts_at'] as String).toLocal(),
+          isClosed: item['is_closed'] as bool? ?? false,
         ),
-    ].where((e) => !e.encerrado).toList();
-    final agora = DateTime.now();
-    return encontros..sort((a, b) => a.inicio.difference(agora).abs().compareTo(b.inicio.difference(agora).abs()));
+    ].where((m) => !m.isClosed).toList();
+    final now = DateTime.now();
+    return meetings..sort((a, b) => a.startsAt.difference(now).abs().compareTo(b.startsAt.difference(now).abs()));
   }
 }

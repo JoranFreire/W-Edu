@@ -1,52 +1,55 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/format/dates.dart';
+import '../../../l10n/l10n.dart';
 import '../../../shared/ds/ds.dart';
 import '../data/benefit.dart';
+import 'benefit_labels.dart';
 import 'benefit_qr.dart';
 
-class BeneficioCard extends StatelessWidget {
-  const BeneficioCard({super.key, required this.beneficio});
+class BenefitCard extends StatelessWidget {
+  const BenefitCard({super.key, required this.benefit});
 
-  final Beneficio beneficio;
+  final Benefit benefit;
 
   @override
   Widget build(BuildContext context) {
-    final tema = Theme.of(context);
-    final situacao = beneficio.situacao();
-    final quando = switch (situacao) {
-      SituacaoBeneficio.retirado when beneficio.retiradoEm != null => 'Retirado em ${formatarDia(beneficio.retiradoEm!.toLocal())}',
-      SituacaoBeneficio.liberado when beneficio.validoAte != null => 'Retire até ${formatarDia(beneficio.validoAte!)}',
-      _ => 'Liberado em ${formatarDia(beneficio.liberadoEm.toLocal())}',
+    final theme = Theme.of(context);
+    final l10n = context.l10n;
+    final status = benefit.status();
+    final when = switch (status) {
+      BenefitStatus.redeemed when benefit.redeemedAt != null => l10n.benefitRedeemedOn(formatDay(benefit.redeemedAt!.toLocal())),
+      BenefitStatus.released when benefit.validUntil != null => l10n.benefitPickUpBy(formatDay(benefit.validUntil!)),
+      _ => l10n.benefitReleasedOn(formatDay(benefit.releasedAt.toLocal())),
     };
     return Card(
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
-        onTap: beneficio.paraRetirar ? () => abrirQrDoBeneficio(context, beneficio) : null,
+        onTap: benefit.isReadyForPickup ? () => openBenefitQr(context, benefit) : null,
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Row(
             children: [
-              Icon(beneficio.tipo.icone, color: tema.colorScheme.primary),
+              Icon(benefit.kind.icon, color: theme.colorScheme.primary),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    AppBadge(situacao.nome, cor: situacao.cor),
+                    AppBadge(status.label(l10n), color: status.color),
                     const SizedBox(height: 8),
-                    Text('${beneficio.item} × ${beneficio.quantidade}', style: tema.textTheme.titleSmall),
-                    Text(beneficio.tipo.nome, style: tema.textTheme.bodySmall),
+                    Text('${benefit.item} × ${benefit.quantity}', style: theme.textTheme.titleSmall),
+                    Text(benefit.kind.label(l10n), style: theme.textTheme.bodySmall),
                     const SizedBox(height: 4),
-                    Text(quando, style: tema.textTheme.labelSmall?.copyWith(color: tema.colorScheme.onSurfaceVariant)),
+                    Text(when, style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
                   ],
                 ),
               ),
-              if (beneficio.paraRetirar)
+              if (benefit.isReadyForPickup)
                 FilledButton.tonalIcon(
-                  onPressed: () => abrirQrDoBeneficio(context, beneficio),
+                  onPressed: () => openBenefitQr(context, benefit),
                   icon: const Icon(Icons.qr_code_2_rounded),
-                  label: const Text('Mostrar QR'),
+                  label: Text(l10n.showQr),
                 ),
             ],
           ),

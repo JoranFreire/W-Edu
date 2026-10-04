@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 
 /// Peças das telas de detalhe: um cartão com título e linhas rótulo/valor.
 
-class SecaoDetalhe extends StatelessWidget {
-  const SecaoDetalhe({super.key, required this.titulo, required this.children});
+class DetailSection extends StatelessWidget {
+  const DetailSection({super.key, required this.title, required this.children});
 
-  final String titulo;
+  final String title;
   final List<Widget> children;
 
   @override
@@ -16,7 +16,7 @@ class SecaoDetalhe extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(titulo, style: Theme.of(context).textTheme.titleSmall),
+            Text(title, style: Theme.of(context).textTheme.titleSmall),
             const SizedBox(height: 12),
             ...children,
           ],
@@ -26,16 +26,16 @@ class SecaoDetalhe extends StatelessWidget {
   }
 }
 
-class LinhaDetalhe extends StatelessWidget {
-  const LinhaDetalhe(this.rotulo, this.valor, {super.key, this.destaque});
+class DetailRow extends StatelessWidget {
+  const DetailRow(this.label, this.value, {super.key, this.highlight});
 
-  final String rotulo;
-  final String? valor;
-  final Color? destaque;
+  final String label;
+  final String? value;
+  final Color? highlight;
 
   @override
   Widget build(BuildContext context) {
-    final tema = Theme.of(context);
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Row(
@@ -43,16 +43,10 @@ class LinhaDetalhe extends StatelessWidget {
         children: [
           SizedBox(
             width: 110,
-            child: Text(
-              rotulo,
-              style: tema.textTheme.bodyMedium?.copyWith(color: tema.colorScheme.onSurfaceVariant),
-            ),
+            child: Text(label, style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
           ),
           Expanded(
-            child: Text(
-              valor == null || valor!.isEmpty ? '—' : valor!,
-              style: tema.textTheme.bodyMedium?.copyWith(color: destaque),
-            ),
+            child: Text(value == null || value!.isEmpty ? '—' : value!, style: theme.textTheme.bodyMedium?.copyWith(color: highlight)),
           ),
         ],
       ),

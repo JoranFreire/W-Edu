@@ -31,11 +31,12 @@ Vale para todo código tocado, novo ou antigo. Ao alterar um arquivo que mistura
 
 **Mobile** (`frontend-mobile/`)
 - Riverpod 3 + go_router + dio + flutter_secure_storage, por feature: `features/<x>/{data/, <x>_providers.dart, screens/, widgets/}`; dependências `features` → `shared` → `core`.
-- Pastas, arquivos (`lib/` e `test/`) e rotas do go_router em inglês (`features/attendance/`, `/report-card`); classes, variáveis e textos da tela em português.
-- Repositório só faz HTTP → model; estado remoto em provider com `AsyncValue` (carregando, erro e vazio via `ListaRemota`).
-- Abas por papel em `router/routes.dart` (`Aba.visivelPara`); o redirect bloqueia rota de aba não permitida.
+- Código todo em inglês: pastas, arquivos, rotas do go_router, classes e variáveis (`features/attendance/`, `/report-card`, `AttendanceFlow`); comentários em português.
+- Textos da tela por i18n (gen-l10n, `context.l10n.chave`; português é o modelo, inglês acompanha). Cada funcionalidade tem os seus em `features/<x>/l10n/<x>_<idioma>.arb` (comuns em `lib/l10n/common_*.arb`); `dart run tool/merge_arb.dart` junta tudo em `lib/l10n/generated/` (nunca edite os gerados; `test/l10n/arb_parts_test.dart` cobra). Model e notifier não têm texto: devolvem enum/erro e o widget traduz (`label(l10n)`, `apiErrorMessage(error, l10n)`); o `detail` da API passa como veio.
+- Repositório só faz HTTP → model; estado remoto em provider com `AsyncValue` (carregando, erro e vazio via `RemoteList`).
+- Abas por papel em `router/routes.dart` (`AppTab.isVisibleTo`); o redirect bloqueia rota de aba não permitida.
 - Persona (reconhecimento facial): o app fala direto com a API dele (`personaDioProvider`, `PERSONA_BASE_URL`); as fotos nunca passam pelo backend do W-Edu. Login facial em `features/face_login/` (conta lembrada no aparelho, 1:1); autorizações por finalidade (termo com versão e hash) e cadastro do rosto em `features/biometrics/`; captura com prova de vida em `shared/face/`; chamada facial do professor em `features/attendance/` (o resultado só vale depois da revisão; sem rede, as fotos vão cifradas para a fila em `shared/vault/` e seguem quando a rede volta).
-- Cache versionado (como o catálogo do WS-ServicePortal): telas pessoais usam `observarArea` (`core/cache/watch_area.dart`), que entrega o JSON salvo em disco, confere `sync/versions` e só baixa a área que mudou; offline fica com o salvo. Repositório devolve o JSON bruto e o model o lê (`Model.lista`). Puxar para atualizar: `ref.atualizarDaApi(provider, chave)`. Sair apaga o cache.
+- Cache versionado (como o catálogo do WS-ServicePortal): telas pessoais usam `watchArea` (`core/cache/watch_area.dart`), que entrega o JSON salvo em disco, confere `sync/versions` e só baixa a área que mudou; offline fica com o salvo. Repositório devolve o JSON bruto e o model o lê (`Model.list`). Puxar para atualizar: `ref.refreshFromApi(provider, key)`. Sair apaga o cache.
 
 ## Multi-tenant
 

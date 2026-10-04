@@ -6,102 +6,121 @@ import 'package:wedu_mobile/core/cache/synchronizer.dart';
 import '../helpers/fakes.dart';
 
 void main() {
-  late CacheEmMemoria cache;
-  late Sincronizador sincronizador;
+  late InMemoryCache cache;
+  late Synchronizer synchronizer;
   late int downloads;
 
   setUp(() {
-    cache = CacheEmMemoria();
-    sincronizador = Sincronizador(cache);
+    cache = InMemoryCache();
+    synchronizer = Synchronizer(cache);
     downloads = 0;
   });
 
-  Future<List<List<String>>> observar({
-    Future<Map<String, int>>? versoes,
-    String dono = 'i1_u1',
-    Object? servidor = const ['novo'],
-    bool semRede = false,
+  Future<List<List<String>>> watch({
+    Future<Map<String, int>>? versions,
+    String owner = 'i1_u1',
+    Object? serverData = const ['new'],
+    bool isOffline = false,
   }) {
-    return sincronizador
-        .observar<List<String>>(
-          dono: dono,
-          chave: 'agenda',
+    return synchronizer
+        .watch<List<String>>(
+          owner: owner,
+          key: 'agenda',
           area: 'agenda',
-          versoes: versoes ?? Future.value({'agenda': 2}),
-          baixar: () async {
+          versions: versions ?? Future.value({'agenda': 2}),
+          download: () async {
             downloads++;
-            if (semRede) throw DioException.connectionError(requestOptions: RequestOptions(path: 'x'), reason: 'offline');
-            return servidor;
+            if (isOffline) throw offline(RequestOptions(path: 'x'));
+            return serverData;
           },
-          ler: (json) => [for (final item in json as List<dynamic>) item as String],
+          parse: (json) => [for (final item in json as List<dynamic>) item as String],
         )
         .toList();
   }
 
-  Future<void> salvar(int? versao, List<String> dados, {String dono = 'i1_u1'}) =>
-      cache.salvar('$dono/agenda', EntradaCache(versao, dados));
+  Future<void> store(int? version, List<String> data, {String owner = 'i1_u1'}) => cache.save('$owner/agenda', CacheEntry(version, data));
 
   test('sem cache: baixa, entrega e guarda com a versão da área', () async {
-    expect(await observar(), [['novo']]);
-    expect((await cache.ler('i1_u1/agenda'))!.versao, 2);
+    expect(await watch(), [
+      ['new'],
+    ]);
+    expect((await cache.read('i1_u1/agenda'))!.version, 2);
   });
 
   test('versão igual à salva: entrega o cache e não baixa', () async {
-    await salvar(2, ['salvo']);
-    expect(await observar(), [['salvo']]);
+    await store(2, ['saved']);
+    expect(await watch(), [
+      ['saved'],
+    ]);
     expect(downloads, 0);
   });
 
   test('versão mudou: entrega o cache e depois o novo', () async {
-    await salvar(1, ['salvo']);
-    expect(await observar(), [['salvo'], ['novo']]);
-    expect((await cache.ler('i1_u1/agenda'))!.versao, 2);
+    await store(1, ['saved']);
+    expect(await watch(), [
+      ['saved'],
+      ['new'],
+    ]);
+    expect((await cache.read('i1_u1/agenda'))!.version, 2);
   });
 
   test('sem rede com cache: fica com o salvo, sem erro', () async {
-    await salvar(1, ['salvo']);
-    final semVersoes = Future<Map<String, int>>.delayed(Duration.zero, () => throw semRede(RequestOptions(path: 'sync/versions')));
-    expect(await observar(versoes: semVersoes), [['salvo']]);
+    await store(1, ['saved']);
+    final noVersions = Future<Map<String, int>>.delayed(Duration.zero, () => throw offline(RequestOptions(path: 'sync/versions')));
+    expect(await watch(versions: noVersions), [
+      ['saved'],
+    ]);
   });
 
   test('sem rede e sem cache: a tela recebe o erro', () async {
-    await expectLater(observar(semRede: true), throwsA(isA<DioException>()));
+    await expectLater(watch(isOffline: true), throwsA(isA<DioException>()));
   });
 
   test('forçado (puxar para atualizar): ignora cache e versão', () async {
-    await salvar(2, ['salvo']);
-    sincronizador.forcar('agenda');
-    expect(await observar(), [['novo']]);
+    await store(2, ['saved']);
+    synchronizer.force('agenda');
+    expect(await watch(), [
+      ['new'],
+    ]);
     expect(downloads, 1);
   });
 
   test('forçado sem rede: a falha sobe para a tela avisar', () async {
-    await salvar(2, ['salvo']);
-    sincronizador.forcar('agenda');
-    await expectLater(observar(semRede: true), throwsA(isA<DioException>()));
+    await store(2, ['saved']);
+    synchronizer.force('agenda');
+    await expectLater(watch(isOffline: true), throwsA(isA<DioException>()));
   });
 
   test('servidor sem versões: baixa sempre', () async {
-    await salvar(null, ['salvo']);
+    await store(null, ['saved']);
     final req = RequestOptions(path: 'sync/versions');
-    final semRota = Future<Map<String, int>>.delayed(
+    final noRoute = Future<Map<String, int>>.delayed(
       Duration.zero,
-      () => throw DioException.badResponse(statusCode: 404, requestOptions: req, response: Response(requestOptions: req, statusCode: 404)),
+      () => throw DioException.badResponse(
+        statusCode: 404,
+        requestOptions: req,
+        response: Response(requestOptions: req, statusCode: 404),
+      ),
     );
-    expect(await observar(versoes: semRota), [['salvo'], ['novo']]);
-    expect((await cache.ler('i1_u1/agenda'))!.versao, isNull);
+    expect(await watch(versions: noRoute), [
+      ['saved'],
+      ['new'],
+    ]);
+    expect((await cache.read('i1_u1/agenda'))!.version, isNull);
   });
 
   test('cada conta tem o seu cache', () async {
-    await salvar(2, ['da ana'], dono: 'i1_ana');
-    expect(await observar(dono: 'i1_beto'), [['novo']]);
+    await store(2, ['anas'], owner: 'i1_ana');
+    expect(await watch(owner: 'i1_beto'), [
+      ['new'],
+    ]);
   });
 
   test('regravar mantém a versão (a próxima conferência traz a nova)', () async {
-    await salvar(2, ['a']);
-    await sincronizador.regravar('i1_u1', 'agenda', ['b']);
-    final salvo = await cache.ler('i1_u1/agenda');
-    expect(salvo!.versao, 2);
-    expect(salvo.dados, ['b']);
+    await store(2, ['a']);
+    await synchronizer.rewrite('i1_u1', 'agenda', ['b']);
+    final saved = await cache.read('i1_u1/agenda');
+    expect(saved!.version, 2);
+    expect(saved.data, ['b']);
   });
 }

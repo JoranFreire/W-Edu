@@ -1,0 +1,21 @@
+{
+  "tabHome": "Home",
+  "tabNotices": "Notices",
+  "tabAgenda": "Agenda",
+  "tabReportCard": "Report card",
+  "tabDependents": "Dependents",
+  "tabProfile": "Profile",
+  "homeGreeting": "Hi, {name}!",
+  "homeAllRead": "All read",
+  "homeUnread": "{count} unread",
+  "homeTapToSee": "Tap to see",
+  "homeNextOnAgenda": "Next on the agenda",
+  "homeNothingAhead": "Nothing ahead",
+  "homeNextItem": "{title} · {date}",
+  "homeFaceAttendance": "Face attendance",
+  "homeAttendanceHint": "Photograph the room and review",
+  "homeAttendancePending": "{count, plural, =1{1 attendance saved on the device} other{{count} attendances saved on the device}}",
+  "homeNothingToPickUp": "Nothing to pick up",
+  "homeToPickUp": "{count} to pick up",
+  "homeNoDependents": "None linked"
+}

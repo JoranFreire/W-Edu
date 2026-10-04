@@ -3,29 +3,31 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'cache_providers.dart';
 
 /// Tela com cache versionado: entrega o salvo e confere a versão da [area].
-/// [dono] vem da sessão (cada conta tem o seu cache).
-Stream<T> observarArea<T>(
+/// [owner] vem da sessão (cada conta tem o seu cache).
+Stream<T> watchArea<T>(
   Ref ref, {
-  required String dono,
-  required String chave,
+  required String owner,
+  required String key,
   required String area,
-  required Future<Object?> Function() baixar,
-  required T Function(Object? json) ler,
+  required Future<Object?> Function() download,
+  required T Function(Object? json) parse,
 }) {
-  return ref.watch(sincronizadorProvider).observar(
-        dono: dono,
-        chave: chave,
+  return ref
+      .watch(synchronizerProvider)
+      .watch(
+        owner: owner,
+        key: key,
         area: area,
-        versoes: ref.watch(versoesRemotasProvider(dono).future),
-        baixar: baixar,
-        ler: ler,
+        versions: ref.watch(remoteVersionsProvider(owner).future),
+        download: download,
+        parse: parse,
       );
 }
 
-extension AtualizarDaApi on WidgetRef {
+extension RefreshFromApi on WidgetRef {
   /// Puxar para atualizar: ignora o cache e a versão e baixa de novo.
-  Future<T> atualizarDaApi<T>(StreamProvider<T> provider, String chave) {
-    read(sincronizadorProvider).forcar(chave);
+  Future<T> refreshFromApi<T>(StreamProvider<T> provider, String key) {
+    read(synchronizerProvider).force(key);
     return refresh(provider.future);
   }
 }

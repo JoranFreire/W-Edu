@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/format/dates.dart';
+import '../../../l10n/l10n.dart';
 import '../../../shared/ds/ds.dart';
 import '../data/agenda_item.dart';
 
-class ItemAgendaCard extends StatelessWidget {
-  const ItemAgendaCard({super.key, required this.item});
+class AgendaItemCard extends StatelessWidget {
+  const AgendaItemCard({super.key, required this.item});
 
-  final ItemAgenda item;
+  final AgendaItem item;
 
   @override
   Widget build(BuildContext context) {
-    final tema = Theme.of(context);
-    final detalhe = [item.turma, if (item.disciplina != null) item.disciplina!].join(' · ');
+    final theme = Theme.of(context);
+    final detail = [item.classGroup, if (item.subject != null) item.subject!].join(' · ');
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -21,22 +22,31 @@ class ItemAgendaCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                AppBadge(item.tipo.nome, cor: item.tipo.cor),
+                AppBadge(item.kind.label(context.l10n), color: item.kind.color),
                 const Spacer(),
-                Text(formatarDiaPorExtenso(item.data), style: tema.textTheme.labelMedium),
+                Text(formatLongDay(item.date), style: theme.textTheme.labelMedium),
               ],
             ),
             const SizedBox(height: 8),
-            Text(item.titulo, style: tema.textTheme.titleSmall),
-            if (item.descricao != null && item.descricao!.isNotEmpty) ...[
+            Text(item.title, style: theme.textTheme.titleSmall),
+            if (item.description != null && item.description!.isNotEmpty) ...[
               const SizedBox(height: 4),
-              Text(item.descricao!, style: tema.textTheme.bodyMedium),
+              Text(item.description!, style: theme.textTheme.bodyMedium),
             ],
             const SizedBox(height: 6),
-            Text(detalhe, style: tema.textTheme.labelSmall?.copyWith(color: tema.colorScheme.onSurfaceVariant)),
+            Text(detail, style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
           ],
         ),
       ),
     );
   }
+}
+
+extension AgendaItemKindText on AgendaItemKind {
+  String label(AppLocalizations l10n) => switch (this) {
+    AgendaItemKind.homework => l10n.agendaKindHomework,
+    AgendaItemKind.test => l10n.agendaKindTest,
+    AgendaItemKind.event => l10n.agendaKindEvent,
+    AgendaItemKind.notice => l10n.agendaKindNotice,
+  };
 }

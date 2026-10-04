@@ -3,32 +3,33 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/network/network_providers.dart';
+import '../../../l10n/l10n.dart';
 import '../../../router/routes.dart';
-
 import '../../../shared/ds/ds.dart';
-import '../../auth/auth_providers.dart';
 import '../../attendance/attendance_providers.dart';
-import '../../auth/data/user.dart';
+import '../../auth/auth_providers.dart';
+import '../widgets/role_label.dart';
 
-class PerfilScreen extends ConsumerWidget {
-  const PerfilScreen({super.key});
+class ProfileScreen extends ConsumerWidget {
+  const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final usuario = ref.watch(usuarioProvider);
-    final papeis = usuario.papeis.map((papel) => nomesDosPapeis[papel] ?? papel).join(', ');
+    final user = ref.watch(currentUserProvider);
+    final l10n = context.l10n;
+    final roles = user.roles.map((role) => roleLabel(role, l10n)).join(', ');
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Perfil')),
+      appBar: AppBar(title: Text(l10n.profileTitle)),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          SecaoDetalhe(
-            titulo: usuario.nome,
+          DetailSection(
+            title: user.name,
             children: [
-              LinhaDetalhe('E-mail', usuario.email),
-              LinhaDetalhe(usuario.papeis.length > 1 ? 'Papéis' : 'Papel', papeis),
-              LinhaDetalhe('Instituição', usuario.instituicao.nome),
+              DetailRow(l10n.profileEmail, user.email),
+              DetailRow(l10n.profileRole(user.roles.length), roles),
+              DetailRow(l10n.profileInstitution, user.institution.name),
             ],
           ),
           if (ref.watch(personaBaseUrlProvider) != null) ...[
@@ -36,44 +37,42 @@ class PerfilScreen extends ConsumerWidget {
             Card(
               child: ListTile(
                 leading: const Icon(Icons.face_retouching_natural),
-                title: const Text('Reconhecimento facial'),
-                subtitle: const Text('Entrar com o rosto, catraca e presença: autorizações e cadastro do rosto'),
+                title: Text(l10n.profileFaceRecognition),
+                subtitle: Text(l10n.profileFaceRecognitionHint),
                 trailing: const Icon(Icons.chevron_right),
-                onTap: () => context.go(Rotas.biometria),
+                onTap: () => context.go(Routes.biometrics),
               ),
             ),
           ],
           const SizedBox(height: 24),
           OutlinedButton.icon(
-            onPressed: () => _confirmarSaida(context, ref),
+            onPressed: () => _confirmSignOut(context, ref),
             icon: const Icon(Icons.logout_rounded),
-            label: const Text('Sair'),
+            label: Text(l10n.signOut),
           ),
         ],
       ),
     );
   }
 
-  Future<void> _confirmarSaida(BuildContext context, WidgetRef ref) async {
+  Future<void> _confirmSignOut(BuildContext context, WidgetRef ref) async {
+    final l10n = context.l10n;
     // Fotos de chamada ainda não enviadas são apagadas ao sair: avisa antes.
-    final naoEnviadas = ref.read(usuarioProvider).ministraAulas
-        ? (await ref.read(filaDeChamadasProvider).listar()).where((c) => !c.enviada).length
+    final notUploaded = ref.read(currentUserProvider).teaches
+        ? (await ref.read(attendanceQueueProvider).list()).where((a) => !a.isUploaded).length
         : 0;
     if (!context.mounted) return;
-    final confirmou = await showDialog<bool>(
+    final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Sair da conta?'),
-        content: Text([
-          'Você vai precisar entrar de novo com e-mail e senha.',
-          if (naoEnviadas > 0) 'Há $naoEnviadas chamada(s) com fotos ainda não enviadas: elas serão apagadas do aparelho.',
-        ].join('\n\n')),
+        title: Text(l10n.signOutTitle),
+        content: Text([l10n.signOutBody, if (notUploaded > 0) l10n.signOutPendingAttendance(notUploaded)].join('\n\n')),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancelar')),
-          FilledButton(onPressed: () => Navigator.pop(context, true), child: const Text('Sair')),
+          TextButton(onPressed: () => Navigator.pop(context, false), child: Text(l10n.cancel)),
+          FilledButton(onPressed: () => Navigator.pop(context, true), child: Text(l10n.signOut)),
         ],
       ),
     );
-    if (confirmou == true) await ref.read(authProvider.notifier).sair();
+    if (confirmed == true) await ref.read(authProvider.notifier).signOut();
   }
 }

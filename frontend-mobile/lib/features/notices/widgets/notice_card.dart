@@ -4,15 +4,15 @@ import '../../../core/format/dates.dart';
 import '../data/notice.dart';
 
 /// Um aviso na lista: não lido aparece em destaque, com o ponto da cor principal.
-class AvisoCard extends StatelessWidget {
-  const AvisoCard({super.key, required this.aviso, required this.onTap});
+class NoticeCard extends StatelessWidget {
+  const NoticeCard({super.key, required this.notice, required this.onTap});
 
-  final Aviso aviso;
+  final Notice notice;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final tema = Theme.of(context);
+    final theme = Theme.of(context);
     return Card(
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
@@ -24,17 +24,23 @@ class AvisoCard extends StatelessWidget {
             children: [
               Padding(
                 padding: const EdgeInsets.only(top: 6, right: 12),
-                child: Icon(Icons.circle, size: 10, color: aviso.lido ? Colors.transparent : tema.colorScheme.primary),
+                child: Icon(Icons.circle, size: 10, color: notice.isRead ? Colors.transparent : theme.colorScheme.primary),
               ),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(aviso.titulo, style: tema.textTheme.titleSmall?.copyWith(fontWeight: aviso.lido ? FontWeight.w500 : FontWeight.w700)),
+                    Text(
+                      notice.title,
+                      style: theme.textTheme.titleSmall?.copyWith(fontWeight: notice.isRead ? FontWeight.w500 : FontWeight.w700),
+                    ),
                     const SizedBox(height: 4),
-                    Text(aviso.corpo, maxLines: 2, overflow: TextOverflow.ellipsis, style: tema.textTheme.bodyMedium),
+                    Text(notice.body, maxLines: 2, overflow: TextOverflow.ellipsis, style: theme.textTheme.bodyMedium),
                     const SizedBox(height: 6),
-                    Text(formatarDiaHora(aviso.criadoEm), style: tema.textTheme.labelSmall?.copyWith(color: tema.colorScheme.onSurfaceVariant)),
+                    Text(
+                      formatDayTime(notice.createdAt),
+                      style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                    ),
                   ],
                 ),
               ),
