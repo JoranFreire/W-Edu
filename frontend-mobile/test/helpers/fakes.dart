@@ -5,7 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/widgets.dart';
 import 'package:wedu_mobile/core/cache/cache_local.dart';
 import 'package:wedu_mobile/features/auth/data/conta_lembrada.dart';
-import 'package:wedu_mobile/features/login_facial/data/captura_de_rosto.dart';
+import 'package:wedu_mobile/shared/rosto/captura_de_rosto.dart';
 import 'package:wedu_mobile/core/network/token_store.dart';
 
 /// Resposta programada: recebe a requisição e devolve (status, corpo JSON).

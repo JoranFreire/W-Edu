@@ -2,7 +2,7 @@ import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 
-import 'desafio.dart';
+import '../../../shared/rosto/desafio.dart';
 
 /// API do Persona para o login facial: sorteia o desafio e confere as fotos.
 /// As fotos vão só para o Persona e ficam em memória lá (nunca no W-Edu).

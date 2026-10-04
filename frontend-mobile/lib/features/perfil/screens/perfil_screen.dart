@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../../core/network/network_providers.dart';
+import '../../../router/rotas.dart';
 
 import '../../../shared/ds/ds.dart';
 import '../../auth/auth_providers.dart';
@@ -26,6 +30,18 @@ class PerfilScreen extends ConsumerWidget {
               LinhaDetalhe('Instituição', usuario.instituicao.nome),
             ],
           ),
+          if (ref.watch(personaBaseUrlProvider) != null) ...[
+            const SizedBox(height: 16),
+            Card(
+              child: ListTile(
+                leading: const Icon(Icons.face_retouching_natural),
+                title: const Text('Reconhecimento facial'),
+                subtitle: const Text('Entrar com o rosto, catraca e presença: autorizações e cadastro do rosto'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => context.go(Rotas.biometria),
+              ),
+            ),
+          ],
           const SizedBox(height: 24),
           OutlinedButton.icon(
             onPressed: () => _confirmarSaida(context, ref),

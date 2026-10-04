@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../shared/rosto/rosto.dart';
 import '../login_facial_providers.dart';
 
 /// O meio da tela: orientação, visor da câmera com o passo pedido, conferência ou recusa.
@@ -25,14 +26,7 @@ class EtapaLoginFacialView extends StatelessWidget {
             Text(etapa is Conferindo ? 'Conferindo…' : 'Abrindo a câmera…', style: tema.textTheme.bodyLarge),
           ],
         ),
-      Capturando(:final passo, :final numero, :final total) => Column(
-          children: [
-            Expanded(child: ClipRRect(borderRadius: BorderRadius.circular(24), child: visor ?? const SizedBox.expand())),
-            const SizedBox(height: 16),
-            Text(passo.instrucao, style: tema.textTheme.titleLarge, textAlign: TextAlign.center),
-            Text('Passo $numero de $total', style: tema.textTheme.bodySmall),
-          ],
-        ),
+      Capturando(:final passo, :final numero, :final total) => VisorDoPasso(passo: passo, numero: numero, total: total, visor: visor),
       NaoEntrou(:final mensagem) => _Mensagem(icone: Icons.no_accounts_rounded, texto: mensagem, cor: tema.colorScheme.error),
     };
   }

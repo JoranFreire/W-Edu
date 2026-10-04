@@ -13,6 +13,8 @@ class Rotas {
   static const boletim = '/boletim';
   static const dependentes = '/dependentes';
   static const perfil = '/perfil';
+  static const biometria = '/perfil/biometria';
+  static const cadastroFacial = '/perfil/biometria/cadastro';
   static const beneficios = '/beneficios';
   static const materiais = '/materiais';
 

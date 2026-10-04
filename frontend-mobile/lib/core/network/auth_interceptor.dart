@@ -5,12 +5,18 @@ import 'token_store.dart';
 /// Põe o token em cada requisição e, se a API responder 401 (token vencido ou
 /// conta desativada), esquece a sessão e avisa — não há refresh para tentar.
 class AuthInterceptor extends Interceptor {
-  AuthInterceptor({required this._tokens, required this._onSessaoExpirada});
+  AuthInterceptor({required this._tokens, required this._onSessaoExpirada, this._rotasPublicas = rotasPublicasDoWEdu});
 
   final TokenStore _tokens;
   final void Function() _onSessaoExpirada;
 
-  static const _rotasPublicas = ['auth/login', 'public/'];
+  /// Rotas sem token: quem chama ainda não entrou (e um 401 nelas é recusa, não sessão vencida).
+  final List<String> _rotasPublicas;
+
+  static const rotasPublicasDoWEdu = ['auth/login', 'auth/facial-login', 'public/'];
+
+  /// No Persona, o login facial (desafio e conferência) é sem token; o resto usa o token do W-Edu.
+  static const rotasPublicasDoPersona = ['liveness/login-challenge', 'auth/face/', 'consent/terms/'];
 
   bool _publica(RequestOptions opcoes) => _rotasPublicas.any((rota) => opcoes.path.contains(rota));
 

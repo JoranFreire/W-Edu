@@ -35,7 +35,7 @@ final dioProvider = Provider<Dio>((ref) {
 final personaBaseUrlProvider = Provider<String?>((ref) => PersonaConfig.baseUrl);
 
 /// Cliente do Persona (segundo dio, como na ADR 0012). Nulo quando desligado.
-/// O login facial vai sem token: quem entra ainda não tem sessão.
+/// Usa o mesmo token do W-Edu (o Persona o confere); o login facial vai sem token.
 final personaDioProvider = Provider<Dio?>((ref) {
   final baseUrl = ref.watch(personaBaseUrlProvider);
   if (baseUrl == null) return null;
@@ -48,6 +48,11 @@ final personaDioProvider = Provider<Dio?>((ref) {
   ));
   final adapter = ref.watch(httpAdapterProvider);
   if (adapter != null) dio.httpClientAdapter = adapter;
+  dio.interceptors.add(AuthInterceptor(
+    tokens: ref.watch(tokenStoreProvider),
+    onSessaoExpirada: () => ref.read(sessaoExpiradaProvider.notifier).avisar(),
+    rotasPublicas: AuthInterceptor.rotasPublicasDoPersona,
+  ));
   return dio;
 });
 

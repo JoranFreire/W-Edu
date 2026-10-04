@@ -1,13 +1,10 @@
-import 'dart:typed_data';
-
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/network/api_error.dart';
 import '../../core/network/network_providers.dart';
 import '../auth/auth_providers.dart';
-import 'data/captura_de_rosto.dart';
-import 'data/desafio.dart';
+import '../../shared/rosto/rosto.dart';
 import 'data/persona_repository.dart';
 
 /// Nulo quando o Persona não está configurado (o app fica só com senha).
@@ -15,11 +12,6 @@ final personaRepositoryProvider = Provider<PersonaRepository?>((ref) {
   final dio = ref.watch(personaDioProvider);
   return dio == null ? null : PersonaRepository(dio);
 });
-
-final capturaDeRostoProvider = Provider<CapturaDeRosto>((ref) => CameraFrontal());
-
-/// Tempo para a pessoa fazer cada movimento antes da foto (zero nos testes).
-final pausaEntrePassosProvider = Provider<Duration>((ref) => const Duration(seconds: 2));
 
 /// Etapas da tela de login facial.
 sealed class EtapaLoginFacial {
@@ -91,14 +83,14 @@ class LoginFacialNotifier extends Notifier<EtapaLoginFacial> {
 
     try {
       final desafio = await persona.desafio(conta.usuarioId);
-      final fotos = <Uint8List>[];
-      for (final (indice, passo) in desafio.passos.indexed) {
-        if (!ref.mounted) return;
-        state = Capturando(passo, indice + 1, desafio.passos.length);
-        await Future<void>.delayed(ref.read(pausaEntrePassosProvider));
-        fotos.add(await captura.fotografar());
-      }
-      if (!ref.mounted) return;
+      final fotos = await capturarPassos(
+        captura: captura,
+        desafio: desafio,
+        pausa: ref.read(pausaEntrePassosProvider),
+        aoMudarDePasso: (passo, numero, total) => state = Capturando(passo, numero, total),
+        continuar: () => ref.mounted,
+      );
+      if (!ref.mounted || fotos.length < desafio.passos.length) return;
       state = const Conferindo();
       final assertion = await persona.verificar(
         usuarioId: conta.usuarioId, instituicaoId: conta.instituicaoId, desafioId: desafio.id, fotos: fotos,

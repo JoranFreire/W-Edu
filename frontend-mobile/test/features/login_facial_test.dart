@@ -7,8 +7,8 @@ import 'package:wedu_mobile/app.dart';
 import 'package:wedu_mobile/core/cache/cache_providers.dart';
 import 'package:wedu_mobile/core/network/network_providers.dart';
 import 'package:wedu_mobile/features/auth/auth_providers.dart';
-import 'package:wedu_mobile/features/login_facial/data/desafio.dart';
-import 'package:wedu_mobile/features/login_facial/login_facial_providers.dart';
+import 'package:wedu_mobile/shared/rosto/desafio.dart';
+import 'package:wedu_mobile/shared/rosto/rosto_providers.dart';
 
 import '../helpers/fakes.dart';
 

@@ -7,6 +7,8 @@ import '../features/auth/auth_providers.dart';
 import '../features/auth/screens/carregando_screen.dart';
 import '../features/auth/screens/login_screen.dart';
 import '../features/beneficios/screens/beneficios_screen.dart';
+import '../features/biometria/screens/biometria_screen.dart';
+import '../features/biometria/screens/cadastro_facial_screen.dart';
 import '../features/avisos/screens/avisos_screen.dart';
 import '../features/boletim/screens/boletim_screen.dart';
 import '../features/dependentes/screens/dependente_screen.dart';
@@ -56,7 +58,17 @@ final routerProvider = Provider<GoRouter>((ref) {
               GoRoute(path: ':id', builder: (_, state) => DependenteScreen(alunoId: state.pathParameters['id']!)),
             ],
           )),
-          _aba(GoRoute(path: Rotas.perfil, builder: (_, _) => const PerfilScreen())),
+          _aba(GoRoute(
+            path: Rotas.perfil,
+            builder: (_, _) => const PerfilScreen(),
+            routes: [
+              GoRoute(
+                path: 'biometria',
+                builder: (_, _) => const BiometriaScreen(),
+                routes: [GoRoute(path: 'cadastro', builder: (_, _) => const CadastroFacialScreen())],
+              ),
+            ],
+          )),
         ],
       ),
     ],
