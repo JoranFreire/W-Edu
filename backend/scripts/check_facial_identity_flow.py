@@ -120,13 +120,14 @@ def _b64(data: bytes) -> str:
 
 
 def assertion(user_id: str, institution_id: str, *, key: Ed25519PrivateKey = PERSONA_KEY, aud: str = "wedu",
-              iat_offset: int = 0, lifetime: int = 60, jti: str | None = None) -> str:
+              iat_offset: int = 0, lifetime: int = 60, jti: str | None = None, typ: str | None = "facial_login") -> str:
     """Mesmo formato que o Persona emite: JWS compacto EdDSA."""
     now = int(time.time()) + iat_offset
     header = _b64(json.dumps({"alg": "EdDSA", "typ": "JWT"}).encode())
     payload = _b64(json.dumps({
         "iss": "persona", "aud": aud, "sub": user_id, "inst": institution_id,
         "jti": jti or uuid.uuid4().hex, "iat": now, "exp": now + lifetime,
+        **({"typ": typ} if typ else {}),
     }).encode())
     signature = _b64(key.sign(f"{header}.{payload}".encode()))
     return f"{header}.{payload}.{signature}"
@@ -213,6 +214,9 @@ async def check_facial_login(c: Checker, ids: dict, institution_id: str, other_i
     refusals = {
         "signed by another key": assertion(ids["a1"], institution_id, key=OTHER_KEY),
         "wrong audience": assertion(ids["a1"], institution_id, aud="outro-sistema"),
+        # Aviso de catraca do Persona (mesma chave, mesmos sub/inst): nao vale como login.
+        "gate notice is not a login": assertion(ids["a1"], institution_id, typ="gate_event"),
+        "no message type": assertion(ids["a1"], institution_id, typ=None),
         "expired": assertion(ids["a1"], institution_id, iat_offset=-120),
         "lifetime above 60 s": assertion(ids["a1"], institution_id, lifetime=3600),
         "unknown user": assertion(str(uuid.uuid4()), institution_id),

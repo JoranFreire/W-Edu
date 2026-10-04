@@ -18,6 +18,9 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
 
 ISSUER = "persona"
 AUDIENCE = "wedu"
+# O Persona assina outras mensagens com a mesma chave (aviso de catraca, `gate_event`):
+# so `facial_login` vale como login.
+TYPE = "facial_login"
 MAX_LIFETIME_SECONDS = 60
 CLOCK_SKEW_SECONDS = 5
 
@@ -57,6 +60,8 @@ def verify_assertion(token: str, public_key: Ed25519PublicKey, now: datetime | N
 
     if claims.get("iss") != ISSUER or claims.get("aud") != AUDIENCE:
         raise InvalidAssertion("emissor ou destino inesperado")
+    if claims.get("typ") != TYPE:
+        raise InvalidAssertion("mensagem do Persona que nao e login")
     try:
         issued_at = datetime.fromtimestamp(int(claims["iat"]), timezone.utc)
         expires_at = datetime.fromtimestamp(int(claims["exp"]), timezone.utc)
