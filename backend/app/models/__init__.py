@@ -53,6 +53,7 @@ from app.models.notification import NotificationTemplate, NotificationEvent
 from app.models.finance import BillingPlan, Subscription, Charge
 from app.models.document import Document, DocumentVersion
 from app.models.forum import ForumPost, ForumThread
+from app.models.facial_login import FacialLoginAssertion
 from app.models.schedule import (
     AttendanceRecord,
     CheckinToken,

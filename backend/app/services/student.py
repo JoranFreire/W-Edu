@@ -68,6 +68,7 @@ class StudentService:
             password_hash=hash_password(data.password),
             role=primary,
             organization_id=data.organization_id,
+            birth_date=data.birth_date,
         )
         self.db.add(student)
         self.db.flush()
@@ -92,6 +93,9 @@ class StudentService:
     def update(self, student_id: UUID, data: StudentUpdate) -> Student:
         student = self.get_or_404(student_id)
         payload = data.model_dump(exclude_none=True, exclude={"roles"})
+        # Data de nascimento enviada vazia apaga (data errada nao pode ficar decidindo a maioridade).
+        if "birth_date" in data.model_fields_set:
+            payload["birth_date"] = data.birth_date
         if "email" in payload and payload["email"] != student.email and self.repo.get_by_email(payload["email"]):
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="E-mail já cadastrado")
         if "organization_id" in payload and payload["organization_id"] and not self.org_repo.get_by_id(payload["organization_id"]):

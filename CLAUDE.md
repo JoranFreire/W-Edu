@@ -73,6 +73,7 @@ python scripts/check_multi_roles_flow.py
 python scripts/check_public_site_flow.py
 python scripts/check_sync_flow.py
 python scripts/check_benefit_vouchers_flow.py
+python scripts/check_facial_identity_flow.py
 python scripts/check_rls.py                     # Postgres com superusuario em DATABASE_URL; cria role/banco proprios
 alembic upgrade head && alembic check           # migration alinhada aos models
 ```

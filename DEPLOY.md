@@ -90,6 +90,16 @@ SMTP_FROM_EMAIL=noreply@exemplo.com
 SMTP_USE_TLS=true
 ```
 
+### Login facial (Persona)
+
+O app pode entrar com o rosto: o Persona confere a pessoa e assina um assertion curto (Ed25519), que a API troca pelo token. Configure a chave pública do Persona (32 bytes em base64url); vazia, `POST /auth/facial-login` fica desativado:
+
+```env
+PERSONA_ASSERTION_PUBLIC_KEY=
+```
+
+A maioridade (data de nascimento no cadastro do usuário) decide o uso do reconhecimento facial na presença; sem a data, a pessoa não é tida como adulta.
+
 ### Multi-instituição
 
 Instituição por subdomínio (ex.: `escola.wedu.com.br`): configure DNS curinga `*.wedu.com.br`, inclua `*.wedu.com.br` no `server_name` do nginx (e no certificado TLS) e defina:

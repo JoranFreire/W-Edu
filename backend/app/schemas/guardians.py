@@ -45,6 +45,9 @@ class DependentOut(BaseModel):
     relationship_kind: GuardianRelationship
     is_financial: bool
     can_pick_up: bool
+    # Maioridade do aluno (sem data de nascimento, falso): o login facial de menor
+    # depende da autorizacao do responsavel; a de adulto, so dele (Persona).
+    student_is_adult: bool = False
 
 
 class DependentChargeOut(BaseModel):

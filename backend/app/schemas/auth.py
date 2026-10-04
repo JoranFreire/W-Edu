@@ -9,6 +9,11 @@ class LoginRequest(BaseModel):
     institution: str | None = None
 
 
+class FacialLoginRequest(BaseModel):
+    # Assertion assinado pelo Persona depois de conferir o rosto (app/core/facial_assertion.py).
+    assertion: str
+
+
 class TokenOut(BaseModel):
     access_token: str
     token_type: str = "bearer"

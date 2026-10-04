@@ -1,7 +1,18 @@
 from uuid import UUID
-from datetime import datetime
-from pydantic import BaseModel, EmailStr, Field
+from datetime import date, datetime
+from typing import Annotated
+
+from pydantic import AfterValidator, BaseModel, EmailStr, Field
 from app.models.student import UserRole
+
+
+def _not_in_future(value: date) -> date:
+    if value > date.today():
+        raise ValueError("Data de nascimento no futuro")
+    return value
+
+
+BirthDate = Annotated[date, AfterValidator(_not_in_future)]
 
 
 class StudentCreate(BaseModel):
@@ -12,6 +23,7 @@ class StudentCreate(BaseModel):
     # Todos os papeis na instituicao (aluno e professor, por exemplo); sem a lista, so `role`.
     roles: list[UserRole] | None = None
     organization_id: UUID | None = None
+    birth_date: BirthDate | None = None
 
 
 class StudentUpdate(BaseModel):
@@ -21,6 +33,7 @@ class StudentUpdate(BaseModel):
     roles: list[UserRole] | None = None
     organization_id: UUID | None = None
     is_active: bool | None = None
+    birth_date: BirthDate | None = None
 
 
 class OrganizationCreate(BaseModel):
@@ -138,6 +151,9 @@ class StudentOut(BaseModel):
     roles: list[UserRole] = []
     organization_id: UUID | None
     is_active: bool
+    birth_date: date | None = None
+    # Calculado de `birth_date`; sem a data, falso.
+    is_adult: bool = False
     created_at: datetime
 
     model_config = {"from_attributes": True}

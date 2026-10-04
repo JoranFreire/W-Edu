@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import BirthDateField from '@/components/admin/users/BirthDateField';
 import RolesField, { type RolesValue } from '@/components/admin/users/RolesField';
 import FormActions from '@/components/common/FormActions';
 import Modal from '@/components/common/Modal';
@@ -16,7 +17,7 @@ export default function NewUserModal({ organizations, availableRoles, onClose, o
   onClose: () => void;
   onSave: (data: NewUserInput) => Promise<void>;
 }) {
-  const [form, setForm] = useState({ name: '', email: '', password: '', organizationId: '' });
+  const [form, setForm] = useState({ name: '', email: '', password: '', organizationId: '', birthDate: '' });
   const [roles, setRoles] = useState<RolesValue>({ roles: ['student'], primary: 'student' });
   const [saving, setSaving] = useState(false);
   const set = (patch: Partial<typeof form>) => setForm({ ...form, ...patch });
@@ -27,6 +28,7 @@ export default function NewUserModal({ organizations, availableRoles, onClose, o
     await onSave({
       name: form.name, email: form.email, password: form.password,
       role: roles.primary, roles: roles.roles, organization_id: form.organizationId || null,
+      birth_date: form.birthDate || null,
     });
     setSaving(false);
   };
@@ -37,6 +39,7 @@ export default function NewUserModal({ organizations, availableRoles, onClose, o
         <label className={labelCls}>Nome *<input required value={form.name} onChange={(e) => set({ name: e.target.value })} className={`mt-1 ${inputCls}`} /></label>
         <label className={labelCls}>E-mail *<input required type="email" value={form.email} onChange={(e) => set({ email: e.target.value })} className={`mt-1 ${inputCls}`} /></label>
         <label className={labelCls}>Senha *<input required type="password" minLength={6} value={form.password} onChange={(e) => set({ password: e.target.value })} className={`mt-1 ${inputCls}`} /></label>
+        <BirthDateField value={form.birthDate} onChange={(birthDate) => set({ birthDate })} />
         <RolesField options={availableRoles} value={roles} onChange={setRoles} />
         <label className={labelCls}>Empresa
           <select value={form.organizationId} onChange={(e) => set({ organizationId: e.target.value })} className={`mt-1 ${inputCls}`}>
