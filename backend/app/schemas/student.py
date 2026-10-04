@@ -152,8 +152,9 @@ class StudentOut(BaseModel):
     organization_id: UUID | None
     is_active: bool
     birth_date: date | None = None
-    # Calculado de `birth_date`; sem a data, falso.
+    # Calculados de `birth_date`; sem a data, falsos. 18: presenca facial; 16: decide sozinho login e catraca.
     is_adult: bool = False
+    is_16_or_older: bool = False
     created_at: datetime
 
     model_config = {"from_attributes": True}

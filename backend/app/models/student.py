@@ -5,7 +5,7 @@ import enum
 from sqlalchemy import ForeignKey, String, Boolean, Date, DateTime, Enum as SAEnum, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.core.age import is_adult
+from app.core.age import is_16_or_older, is_adult
 from app.core.ids import new_id
 from app.core.database import Base
 from app.core.tenancy import TenantMixin
@@ -88,6 +88,10 @@ class Student(Base):
     @property
     def is_adult(self) -> bool:
         return is_adult(self.birth_date)
+
+    @property
+    def is_16_or_older(self) -> bool:
+        return is_16_or_older(self.birth_date)
 
 
 User = Student

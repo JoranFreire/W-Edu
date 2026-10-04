@@ -98,7 +98,7 @@ O app pode entrar com o rosto: o Persona confere a pessoa e assina um assertion 
 PERSONA_ASSERTION_PUBLIC_KEY=
 ```
 
-A maioridade (data de nascimento no cadastro do usuário) decide o uso do reconhecimento facial na presença; sem a data, a pessoa não é tida como adulta.
+A data de nascimento no cadastro do usuário decide quem autoriza o uso do rosto: a partir de 16 anos a própria pessoa autoriza login e catraca (abaixo disso, o responsável), e a presença facial exige 18. Sem a data, a pessoa é tratada como menor de 16.
 
 A mesma chave confere os **avisos de passagem na catraca**: o Persona envia `POST /integrations/persona/gate-events` (mensagem assinada com `typ=gate_event`); o W-Edu registra a passagem uma vez só e avisa o aluno e os responsáveis na caixa de avisos. Os horários dos avisos saem no fuso `DISPLAY_TIMEZONE` (padrão `America/Sao_Paulo`).
 

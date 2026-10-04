@@ -4,7 +4,9 @@ import '../../../core/network/api_error.dart';
 
 /// O Persona responde com códigos (`detail`); aqui viram frases para a pessoa.
 const _mensagens = {
-  'adult_only': 'Só maiores de 18 anos autorizam por si. Se a data de nascimento estiver errada, fale com a secretaria.',
+  'adult_only': 'A presença por reconhecimento facial é só para maiores de 18 anos. Se a data de nascimento estiver errada, fale com a secretaria.',
+  'guardian_consents': 'Até os 16 anos, quem autoriza é o responsável. Se a data de nascimento estiver errada, fale com a secretaria.',
+  'subject_decides_alone': 'A partir de 16 anos, o próprio aluno autoriza pelo app.',
   'subject_is_adult': 'O aluno é maior de idade: ele mesmo autoriza pelo app.',
   'guardian_purpose_not_allowed': 'O responsável autoriza só o login e a catraca.',
   'terms_outdated': 'O termo foi atualizado. Leia a nova versão e autorize de novo.',

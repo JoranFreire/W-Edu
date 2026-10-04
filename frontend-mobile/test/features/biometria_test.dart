@@ -17,12 +17,13 @@ void main() {
   late CameraFalsa camera;
   late List<String> ativos;
   late bool adulto;
+  late bool decide;
   late bool cadastrado;
 
   setUpAll(() => initializeDateFormatting('pt_BR'));
 
   Map<String, dynamic> situacao() => {
-        'person_name': 'Ana Souza', 'is_adult': adulto, 'active_purposes': ativos, 'enrollment_status': cadastrado ? 'active' : 'none',
+        'person_name': 'Ana Souza', 'is_adult': adulto, 'decides_alone': decide, 'active_purposes': ativos, 'enrollment_status': cadastrado ? 'active' : 'none',
       };
 
   setUp(() {
@@ -31,6 +32,7 @@ void main() {
     camera = CameraFalsa();
     ativos = [];
     adulto = true;
+    decide = true;
     cadastrado = false;
     servidor
       ..on('GET users/me', (_) => (200, usuarioJson()))
@@ -178,20 +180,47 @@ void main() {
     expect(find.text('Tentar de novo'), findsOneWidget);
   });
 
-  testWidgets('menor não autoriza sozinho', (tester) async {
+  testWidgets('menor de 16 não autoriza sozinho', (tester) async {
     adulto = false;
+    decide = false;
     await abrirApp(tester);
     await abrirBiometria(tester);
-    expect(find.text('Quem autoriza é o seu responsável, pelo app dele.'), findsNWidgets(2));
+    expect(find.text('Até os 16 anos, quem autoriza é o seu responsável, pelo app dele.'), findsNWidgets(2));
     expect(find.text('Só para maiores de 18 anos.'), findsOneWidget);
     expect(tester.widget<SwitchListTile>(find.widgetWithText(SwitchListTile, 'Catraca')).onChanged, isNull);
   });
 
-  testWidgets('responsável autoriza a catraca do dependente menor', (tester) async {
+  testWidgets('com 16 ou 17 anos autoriza login e catraca, mas não a presença', (tester) async {
+    adulto = false;
+    decide = true;
+    await abrirApp(tester);
+    await abrirBiometria(tester);
+    expect(tester.widget<SwitchListTile>(find.widgetWithText(SwitchListTile, 'Entrar no app com o rosto')).onChanged, isNotNull);
+    expect(tester.widget<SwitchListTile>(find.widgetWithText(SwitchListTile, 'Catraca')).onChanged, isNotNull);
+    expect(tester.widget<SwitchListTile>(find.widgetWithText(SwitchListTile, 'Presença em aula')).onChanged, isNull);
+    expect(find.text('Só para maiores de 18 anos.'), findsOneWidget);
+  });
+
+  testWidgets('dependente com 16 anos ou mais decide sozinho', (tester) async {
+    servidor.on('GET consent/dependents/s-1/status', (_) => (200, {
+          'person_name': 'Bruno Souza', 'is_adult': false, 'decides_alone': true, 'active_purposes': <String>[], 'enrollment_status': 'none',
+        }));
+    await abrirApp(tester, papel: 'guardian');
+    await tester.tap(find.descendant(of: find.byType(NavigationBar), matching: find.text('Dependentes')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Bruno Souza').first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Rosto'));
+    await tester.pumpAndSettle();
+    expect(find.text('A partir de 16 anos, o próprio aluno autoriza o uso do rosto pelo app.'), findsOneWidget);
+    expect(find.byType(SwitchListTile), findsNothing);
+  });
+
+  testWidgets('responsável autoriza a catraca do dependente menor de 16', (tester) async {
     Object? enviado;
     servidor
       ..on('GET consent/dependents/s-1/status', (_) => (200, {
-            'person_name': 'Bruno Souza', 'is_adult': false, 'active_purposes': ativos, 'enrollment_status': 'none',
+            'person_name': 'Bruno Souza', 'is_adult': false, 'decides_alone': false, 'active_purposes': ativos, 'enrollment_status': 'none',
           }))
       ..on('POST consent/dependents/s-1/grant', (req) {
         enviado = req.data;

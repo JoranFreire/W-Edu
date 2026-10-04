@@ -68,7 +68,7 @@ anyio.to_thread.run_sync = run_in_threadpool_inline
 PASSWORD = "secret123"
 USERS = (
     ("admin", UserRole.institution_admin), ("coord", UserRole.coordinator), ("prof", UserRole.instructor),
-    ("outro", UserRole.instructor), ("a1", UserRole.student), ("a2", UserRole.student), ("inativo", UserRole.student),
+    ("outro", UserRole.instructor), ("a1", UserRole.student), ("a2", UserRole.student), ("a3", UserRole.student), ("inativo", UserRole.student),
     ("mae", UserRole.guardian),
 )
 
@@ -101,10 +101,10 @@ def enroll(institution_id: str, offering_id: str, ids: dict) -> None:
 
 
 def link_guardian(institution_id: str, ids: dict) -> None:
-    """A mae e responsavel pelos dois alunos: a1 adulto e a2 menor."""
+    """A mae e responsavel por tres alunos: a1 adulto, a2 com 17 anos e a3 com 15."""
     with SessionLocal() as db:
         bind_institution(db, institution_id)
-        for name in ("a1", "a2"):
+        for name in ("a1", "a2", "a3"):
             db.add(StudentGuardian(student_id=ids[name], guardian_id=ids["mae"]))
         db.commit()
 
@@ -158,9 +158,12 @@ async def check_age(c: Checker, h: dict, ids: dict) -> None:
     adult_birth = str(date.today().replace(year=date.today().year - 30))
     turns_18_tomorrow = date.today() + timedelta(days=1)
     minor_birth = str(turns_18_tomorrow.replace(year=turns_18_tomorrow.year - 18))
+    turns_16_tomorrow = date.today() + timedelta(days=1)
+    child_birth = str(turns_16_tomorrow.replace(year=turns_16_tomorrow.year - 16))
 
     await c.call("PATCH", f"/admin/users/{ids['a1']}", 200, "admin sets adult birth date", admin, json={"birth_date": adult_birth})
     await c.call("PATCH", f"/admin/users/{ids['a2']}", 200, "admin sets minor birth date", admin, json={"birth_date": minor_birth})
+    await c.call("PATCH", f"/admin/users/{ids['a3']}", 200, "admin sets child birth date", admin, json={"birth_date": child_birth})
     await c.call("PATCH", f"/admin/users/{ids['a2']}", 422, "birth date in the future",
                  admin, json={"birth_date": str(date.today() + timedelta(days=1))})
 
@@ -168,10 +171,14 @@ async def check_age(c: Checker, h: dict, ids: dict) -> None:
     c.expect(me.get("is_adult") is True and me.get("birth_date") == adult_birth, f"adult: {me}")
     me = await c.call("GET", "/users/me", 200, "a2 me", h["a2"])
     c.expect(me.get("is_adult") is False, f"turns 18 tomorrow is still a minor: {me}")
+    c.expect(me.get("is_16_or_older") is True, f"17 years old decides alone (16+): {me}")
+    me = await c.call("GET", "/users/me", 200, "a3 me", h["a3"])
+    c.expect(me.get("is_16_or_older") is False and me.get("is_adult") is False, f"turns 16 tomorrow: guardian decides: {me}")
     await c.call("PATCH", f"/admin/users/{ids['prof']}", 200, "admin sets a wrong birth date", admin, json={"birth_date": adult_birth})
     await c.call("PATCH", f"/admin/users/{ids['prof']}", 200, "admin clears the birth date", admin, json={"birth_date": None})
     me = await c.call("GET", "/users/me", 200, "prof me", h["prof"])
-    c.expect(me.get("is_adult") is False and me.get("birth_date") is None, f"cleared birth date is not adult: {me}")
+    c.expect(me.get("is_adult") is False and me.get("is_16_or_older") is False and me.get("birth_date") is None,
+             f"cleared birth date is not adult nor 16+: {me}")
 
     # A propria pessoa nao declara a idade (so a secretaria/admin): o PATCH dela ignora o campo.
     await c.call("PATCH", f"/users/{ids['a2']}", 200, "minor edits own profile", h["a2"], json={"birth_date": adult_birth})
@@ -182,8 +189,9 @@ async def check_age(c: Checker, h: dict, ids: dict) -> None:
 async def check_dependents_age(c: Checker, h: dict, ids: dict, institution_id: str) -> None:
     link_guardian(institution_id, ids)
     dependents = await c.call("GET", "/guardians/me/dependents", 200, "guardian dependents", h["mae"])
-    adult = {d["student"]["id"]: d.get("student_is_adult") for d in dependents}
-    c.expect(adult == {ids["a1"]: True, ids["a2"]: False}, f"dependents carry adulthood: {dependents}")
+    ages = {d["student"]["id"]: (d.get("student_is_adult"), d.get("student_is_16_or_older")) for d in dependents}
+    c.expect(ages == {ids["a1"]: (True, True), ids["a2"]: (False, True), ids["a3"]: (False, False)},
+             f"dependents carry adulthood and the age to decide alone: {dependents}")
 
 
 async def check_roster(c: Checker, h: dict, ids: dict, institution_id: str) -> None:

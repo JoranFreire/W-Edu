@@ -7,8 +7,9 @@ import '../data/recusas.dart';
 import '../data/situacao_biometrica.dart';
 import 'termos_sheet.dart';
 
-/// Um interruptor por finalidade. Para si: o adulto autoriza tudo; o menor só vê (quem autoriza é o
-/// responsável). Para o dependente menor: o responsável autoriza login e catraca.
+/// Um interruptor por finalidade. Para si: a partir dos 16 anos autoriza login e catraca, e a partir dos 18
+/// também a presença; abaixo de 16 só vê (quem autoriza é o responsável). Para o dependente menor de 16:
+/// o responsável autoriza login e catraca.
 class AutorizacoesLista extends ConsumerWidget {
   const AutorizacoesLista({super.key, required this.situacao, this.dependenteId});
 
@@ -19,9 +20,8 @@ class AutorizacoesLista extends ConsumerWidget {
 
   String? _bloqueio(Finalidade finalidade) {
     if (_doDependente) return null;
-    if (finalidade == Finalidade.presenca && !situacao.ehAdulto) return 'Só para maiores de 18 anos.';
-    if (!situacao.ehAdulto) return 'Quem autoriza é o seu responsável, pelo app dele.';
-    return null;
+    if (finalidade == Finalidade.presenca) return situacao.ehAdulto ? null : 'Só para maiores de 18 anos.';
+    return situacao.decideSozinho ? null : 'Até os 16 anos, quem autoriza é o seu responsável, pelo app dele.';
   }
 
   Future<void> _alternar(BuildContext context, WidgetRef ref, Finalidade finalidade, bool ligar) async {

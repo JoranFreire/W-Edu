@@ -31,8 +31,8 @@ que confere e assina um assertion, e troca esse assertion pelo token em `POST /a
 não passam pelo W-Edu nem ficam no aparelho. Qualquer recusa volta para a senha. Sem a variável, o app fica só com senha.
 
 Em **Perfil → Reconhecimento facial**, cada pessoa vê e decide os usos do rosto, cada um com o próprio termo: entrar no
-app, catraca e presença (só maiores de 18). O menor não autoriza sozinho: o responsável autoriza o login e a catraca
-na aba **Rosto** do dependente. Com algum uso autorizado, a pessoa cadastra o próprio rosto com a mesma prova de vida
+app, catraca e presença (só maiores de 18). A partir de 16 anos a pessoa autoriza sozinha o login e a catraca; abaixo
+disso, quem autoriza é o responsável, na aba **Rosto** do dependente. Com algum uso autorizado, a pessoa cadastra o próprio rosto com a mesma prova de vida
 do login. Revogar um uso não desliga os outros.
 
 ## Rodar
