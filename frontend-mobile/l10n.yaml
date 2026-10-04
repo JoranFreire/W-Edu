@@ -1,0 +1,7 @@
+# Os ARB daqui são gerados por `dart run tool/merge_arb.dart` a partir das partes de cada
+# funcionalidade (`lib/**/l10n/<parte>_<idioma>.arb`); edite as partes, não estes.
+arb-dir: lib/l10n/generated
+template-arb-file: app_pt.arb
+output-localization-file: app_localizations.dart
+output-class: AppLocalizations
+nullable-getter: false

@@ -1,52 +1,50 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:qr_flutter/qr_flutter.dart';
-import 'package:wedu_mobile/app.dart';
-import 'package:wedu_mobile/core/cache/cache_local.dart';
+import 'package:wedu_mobile/core/cache/local_cache.dart';
 import 'package:wedu_mobile/core/cache/cache_providers.dart';
+import 'package:wedu_mobile/shared/vault/vault_providers.dart';
 import 'package:wedu_mobile/core/network/network_providers.dart';
+import 'package:wedu_mobile/features/auth/auth_providers.dart';
 
+import 'helpers/app_harness.dart';
 import 'helpers/fakes.dart';
 
 void main() {
-  late ServidorFalso servidor;
-  late TokenStoreEmMemoria tokens;
-  late CacheEmMemoria cache;
+  late FakeServer server;
+  late InMemoryTokenStore tokens;
+  late InMemoryCache cache;
 
-  setUpAll(() => initializeDateFormatting('pt_BR'));
+  setUpAll(initializeDateFormatting);
 
   setUp(() {
-    servidor = ServidorFalso();
-    tokens = TokenStoreEmMemoria();
-    cache = CacheEmMemoria();
-    servidor
-      ..on('GET sync/versions', (_) => (200, versoesJson()))
-      ..on('GET institutions/current', (_) => (200, instituicaoJson()))
+    server = FakeServer();
+    tokens = InMemoryTokenStore();
+    cache = InMemoryCache();
+    server
+      ..on('GET sync/versions', (_) => (200, versionsJson()))
+      ..on('GET institutions/current', (_) => (200, institutionJson()))
       ..on('GET notifications/me/summary', (_) => (200, {'unread': 3, 'total': 5}))
-      ..on('GET notifications/me', (_) => (200, [avisoJson('a1')]))
+      ..on('GET notifications/me', (_) => (200, [noticeJson('a1')]))
       ..on('GET school/my/agenda', (_) => (200, [agendaJson('ag1')]))
-      ..on('GET assessment/my/report-card', (_) => (200, [boletimJson()]))
-      ..on('GET guardians/me/dependents', (_) => (200, [dependenteJson()]))
+      ..on('GET assessment/my/report-card', (_) => (200, [reportCardJson()]))
+      ..on('GET guardians/me/dependents', (_) => (200, [dependentJson()]))
       ..on('GET social/my/vouchers', (_) => (200, <Object>[]))
-      ..on('GET access/me', (_) => (200, acessoJson()));
+      ..on('GET access/me', (_) => (200, accessJson()));
   });
 
-  Future<void> abrirApp(WidgetTester tester) async {
-    await tester.pumpWidget(ProviderScope(
-      retry: (_, _) => null,
-      overrides: [
-        tokenStoreProvider.overrideWithValue(tokens),
-        httpAdapterProvider.overrideWithValue(servidor),
-        cacheLocalProvider.overrideWithValue(cache),
-      ],
-      child: const WEduApp(),
-    ));
-    await tester.pumpAndSettle();
+  Future<void> openApp(WidgetTester tester, {Locale locale = const Locale('pt', 'BR')}) async {
+    await pumpWEduApp(locale: locale, tester, [
+      tokenStoreProvider.overrideWithValue(tokens),
+      httpAdapterProvider.overrideWithValue(server),
+      fileVaultProvider.overrideWithValue(InMemoryVault()),
+      localCacheProvider.overrideWithValue(cache),
+      rememberedAccountStoreProvider.overrideWithValue(InMemoryRememberedAccountStore()),
+    ]);
   }
 
-  Future<void> entrar(WidgetTester tester) async {
+  Future<void> signIn(WidgetTester tester) async {
     await tester.enterText(find.widgetWithText(TextFormField, 'E-mail'), 'ana@escola.example.com');
     await tester.enterText(find.widgetWithText(TextFormField, 'Senha'), 'segredo123');
     await tester.tap(find.text('Entrar'));
@@ -54,33 +52,33 @@ void main() {
   }
 
   testWidgets('login recusado mostra a mensagem da API', (tester) async {
-    servidor.on('POST auth/login', (_) => (401, {'detail': 'E-mail ou senha incorretos'}));
-    await abrirApp(tester);
+    server.on('POST auth/login', (_) => (401, {'detail': 'E-mail ou senha incorretos'}));
+    await openApp(tester);
 
-    await entrar(tester);
+    await signIn(tester);
 
     expect(find.text('E-mail ou senha incorretos'), findsOneWidget);
-    expect(tokens.atual, isNull);
+    expect(tokens.current, isNull);
   });
 
   testWidgets('aluno entra e vê as abas de aluno', (tester) async {
-    servidor
+    server
       ..on('POST auth/login', (_) => (200, {'access_token': 't-1', 'token_type': 'bearer'}))
-      ..on('GET users/me', (_) => (200, usuarioJson()));
-    await abrirApp(tester);
+      ..on('GET users/me', (_) => (200, userJson()));
+    await openApp(tester);
 
-    await entrar(tester);
+    await signIn(tester);
 
-    expect(tokens.atual, 't-1');
+    expect(tokens.current, 't-1');
     expect(find.text('Olá, Ana!'), findsOneWidget);
     expect(find.text('Boletim'), findsOneWidget);
     expect(find.text('Dependentes'), findsNothing);
   });
 
   testWidgets('responsável com sessão salva vê os dependentes', (tester) async {
-    tokens.atual = 't-1';
-    servidor.on('GET users/me', (_) => (200, usuarioJson(role: 'guardian')));
-    await abrirApp(tester);
+    tokens.current = 't-1';
+    server.on('GET users/me', (_) => (200, userJson(role: 'guardian')));
+    await openApp(tester);
 
     expect(find.text('Olá, Ana!'), findsOneWidget);
     expect(find.text('Boletim'), findsNothing);
@@ -90,24 +88,30 @@ void main() {
   });
 
   testWidgets('token expirado volta para o login', (tester) async {
-    tokens.atual = 'vencido';
-    servidor.on('GET users/me', (_) => (401, {'detail': 'Token inválido'}));
-    await abrirApp(tester);
+    tokens.current = 'vencido';
+    server.on('GET users/me', (_) => (401, {'detail': 'Token inválido'}));
+    await openApp(tester);
 
     expect(find.text('Entrar'), findsOneWidget);
-    expect(tokens.atual, isNull);
+    expect(tokens.current, isNull);
   });
 
   testWidgets('sem rede, abre com a sessão e as telas salvas', (tester) async {
-    tokens.atual = 't-1';
-    final dono = 'i-1_u-1';
-    await cache.salvar('sessao', EntradaCache(null, {'usuario': usuarioJson(), 'instituicao': instituicaoJson()}));
-    await cache.salvar('$dono/avisos_resumo', const EntradaCache(1, {'unread': 2, 'total': 2}));
-    await cache.salvar('$dono/agenda', EntradaCache(1, [agendaJson('ag1')]));
-    for (final rota in ['GET users/me', 'GET institutions/current', 'GET sync/versions', 'GET notifications/me/summary', 'GET school/my/agenda']) {
-      servidor.on(rota, (req) => throw semRede(req));
+    tokens.current = 't-1';
+    const owner = 'i-1_u-1';
+    await cache.save('session', CacheEntry(null, {'user': userJson(), 'institution': institutionJson()}));
+    await cache.save('$owner/notices_summary', const CacheEntry(1, {'unread': 2, 'total': 2}));
+    await cache.save('$owner/agenda', CacheEntry(1, [agendaJson('ag1')]));
+    for (final route in [
+      'GET users/me',
+      'GET institutions/current',
+      'GET sync/versions',
+      'GET notifications/me/summary',
+      'GET school/my/agenda',
+    ]) {
+      server.on(route, (req) => throw offline(req));
     }
-    await abrirApp(tester);
+    await openApp(tester);
 
     expect(find.text('Olá, Ana!'), findsOneWidget);
     expect(find.text('2 sem ler'), findsOneWidget);
@@ -115,21 +119,21 @@ void main() {
   });
 
   testWidgets('versão igual à salva não baixa a tela de novo', (tester) async {
-    tokens.atual = 't-1';
-    servidor.on('GET users/me', (_) => (200, usuarioJson()));
-    await cache.salvar('i-1_u-1/agenda', EntradaCache(1, [agendaJson('ag1')]));
-    await abrirApp(tester);
+    tokens.current = 't-1';
+    server.on('GET users/me', (_) => (200, userJson()));
+    await cache.save('i-1_u-1/agenda', CacheEntry(1, [agendaJson('ag1')]));
+    await openApp(tester);
 
     expect(find.textContaining('Prova bimestral'), findsOneWidget);
-    expect(servidor.contar('GET school/my/agenda'), 0);
-    expect(servidor.contar('GET notifications/me/summary'), 1);
+    expect(server.count('GET school/my/agenda'), 0);
+    expect(server.count('GET notifications/me/summary'), 1);
   });
 
   testWidgets('sair apaga o cache da conta', (tester) async {
-    tokens.atual = 't-1';
-    servidor.on('GET users/me', (_) => (200, usuarioJson()));
-    await abrirApp(tester);
-    expect(cache.entradas, isNotEmpty);
+    tokens.current = 't-1';
+    server.on('GET users/me', (_) => (200, userJson()));
+    await openApp(tester);
+    expect(cache.entries, isNotEmpty);
 
     await tester.tap(find.descendant(of: find.byType(NavigationBar), matching: find.text('Perfil')));
     await tester.pumpAndSettle();
@@ -139,31 +143,41 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Entrar'), findsOneWidget);
-    expect(cache.entradas, isEmpty);
-    expect(tokens.atual, isNull);
+    expect(cache.entries, isEmpty);
+    expect(tokens.current, isNull);
   });
 
   testWidgets('sessão salva com token recusado volta ao login e apaga o cache', (tester) async {
-    tokens.atual = 'vencido';
-    await cache.salvar('sessao', EntradaCache(null, {'usuario': usuarioJson(), 'instituicao': instituicaoJson()}));
-    for (final rota in ['GET users/me', 'GET sync/versions', 'GET notifications/me/summary', 'GET school/my/agenda']) {
-      servidor.on(rota, (_) => (401, {'detail': 'Token inválido'}));
+    tokens.current = 'vencido';
+    await cache.save('session', CacheEntry(null, {'user': userJson(), 'institution': institutionJson()}));
+    for (final route in ['GET users/me', 'GET sync/versions', 'GET notifications/me/summary', 'GET school/my/agenda']) {
+      server.on(route, (_) => (401, {'detail': 'Token inválido'}));
     }
-    await abrirApp(tester);
+    await openApp(tester);
 
     expect(find.text('Entrar'), findsOneWidget);
-    expect(tokens.atual, isNull);
-    expect(cache.entradas, isEmpty);
+    expect(tokens.current, isNull);
+    expect(cache.entries, isEmpty);
   });
 
   testWidgets('aluno abre o QR do benefício liberado, mesmo sem rede', (tester) async {
-    tokens.atual = 't-1';
-    await cache.salvar('sessao', EntradaCache(null, {'usuario': usuarioJson(), 'instituicao': instituicaoJson()}));
-    await cache.salvar('i-1_u-1/beneficios', EntradaCache(1, [beneficioJson('1', validoAte: '2099-12-31'), beneficioJson('2', status: 'redeemed', item: 'Kit', tipo: 'material')]));
-    for (final rota in ['GET users/me', 'GET institutions/current', 'GET sync/versions', 'GET notifications/me/summary', 'GET school/my/agenda', 'GET social/my/vouchers']) {
-      servidor.on(rota, (req) => throw semRede(req));
+    tokens.current = 't-1';
+    await cache.save('session', CacheEntry(null, {'user': userJson(), 'institution': institutionJson()}));
+    await cache.save(
+      'i-1_u-1/benefits',
+      CacheEntry(1, [benefitJson('1', validUntil: '2099-12-31'), benefitJson('2', status: 'redeemed', item: 'Kit', kind: 'material')]),
+    );
+    for (final route in [
+      'GET users/me',
+      'GET institutions/current',
+      'GET sync/versions',
+      'GET notifications/me/summary',
+      'GET school/my/agenda',
+      'GET social/my/vouchers',
+    ]) {
+      server.on(route, (req) => throw offline(req));
     }
-    await abrirApp(tester);
+    await openApp(tester);
 
     expect(find.text('1 para retirar'), findsOneWidget);
     await tester.tap(find.text('Benefícios'));
@@ -177,25 +191,38 @@ void main() {
   });
 
   testWidgets('sem benefício liberado, o início não mostra o cartão', (tester) async {
-    tokens.atual = 't-1';
-    servidor.on('GET users/me', (_) => (200, usuarioJson()));
-    await abrirApp(tester);
+    tokens.current = 't-1';
+    server.on('GET users/me', (_) => (200, userJson()));
+    await openApp(tester);
     expect(find.text('Olá, Ana!'), findsOneWidget);
     expect(find.text('Benefícios'), findsNothing);
   });
 
   testWidgets('professor abre o QR de retirada da requisição aprovada, mesmo sem rede', (tester) async {
-    tokens.atual = 't-1';
-    await cache.salvar('sessao', EntradaCache(null, {
-      'usuario': usuarioJson(role: 'instructor'),
-      'instituicao': instituicaoJson(),
-      'acesso': acessoJson(permissoes: ['warehouse.request']),
-    }));
-    await cache.salvar('i-1_u-1/requisicoes', EntradaCache(1, [requisicaoJson('r1', codigo: 'RET123'), requisicaoJson('r2', status: 'pending')]));
-    for (final rota in ['GET users/me', 'GET institutions/current', 'GET access/me', 'GET sync/versions', 'GET notifications/me/summary', 'GET warehouse/my/requests']) {
-      servidor.on(rota, (req) => throw semRede(req));
+    tokens.current = 't-1';
+    await cache.save(
+      'session',
+      CacheEntry(null, {
+        'user': userJson(role: 'instructor'),
+        'institution': institutionJson(),
+        'access': accessJson(permissions: ['warehouse.request']),
+      }),
+    );
+    await cache.save(
+      'i-1_u-1/material_requests',
+      CacheEntry(1, [materialRequestJson('r1', code: 'RET123'), materialRequestJson('r2', status: 'pending')]),
+    );
+    for (final route in [
+      'GET users/me',
+      'GET institutions/current',
+      'GET access/me',
+      'GET sync/versions',
+      'GET notifications/me/summary',
+      'GET warehouse/my/requests',
+    ]) {
+      server.on(route, (req) => throw offline(req));
     }
-    await abrirApp(tester);
+    await openApp(tester);
 
     expect(find.text('1 para retirar'), findsOneWidget);
     await tester.tap(find.text('Requisições de material'));
@@ -208,10 +235,20 @@ void main() {
   });
 
   testWidgets('sem permissão de requisitar, o início não mostra materiais', (tester) async {
-    tokens.atual = 't-1';
-    servidor.on('GET users/me', (_) => (200, usuarioJson()));
-    await abrirApp(tester);
+    tokens.current = 't-1';
+    server.on('GET users/me', (_) => (200, userJson()));
+    await openApp(tester);
     expect(find.text('Olá, Ana!'), findsOneWidget);
     expect(find.text('Requisições de material'), findsNothing);
+  });
+
+  testWidgets('em inglês, a tela segue o idioma', (tester) async {
+    tokens.current = 't-1';
+    server.on('GET users/me', (_) => (200, userJson()));
+    await openApp(tester, locale: const Locale('en'));
+
+    expect(find.text('Hi, Ana!'), findsOneWidget);
+    expect(find.text('Report card'), findsOneWidget);
+    expect(find.text('Boletim'), findsNothing);
   });
 }

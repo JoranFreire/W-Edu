@@ -5,28 +5,28 @@ import 'package:wedu_mobile/core/network/auth_interceptor.dart';
 import '../helpers/fakes.dart';
 
 void main() {
-  late ServidorFalso servidor;
-  late TokenStoreEmMemoria tokens;
-  late int expirou;
+  late FakeServer server;
+  late InMemoryTokenStore tokens;
+  late int expired;
   late Dio dio;
 
   setUp(() {
-    servidor = ServidorFalso();
-    tokens = TokenStoreEmMemoria('t-1');
-    expirou = 0;
+    server = FakeServer();
+    tokens = InMemoryTokenStore('t-1');
+    expired = 0;
     dio = Dio(BaseOptions(baseUrl: 'http://api/'))
-      ..httpClientAdapter = servidor
-      ..interceptors.add(AuthInterceptor(tokens: tokens, onSessaoExpirada: () => expirou++));
+      ..httpClientAdapter = server
+      ..interceptors.add(AuthInterceptor(tokens: tokens, onSessionExpired: () => expired++));
   });
 
   test('envia o token nas rotas autenticadas', () async {
-    servidor.on('GET users/me', (req) => (200, {'auth': req.headers['Authorization']}));
-    final resposta = await dio.get<Map<String, dynamic>>('users/me');
-    expect(resposta.data!['auth'], 'Bearer t-1');
+    server.on('GET users/me', (req) => (200, {'auth': req.headers['Authorization']}));
+    final response = await dio.get<Map<String, dynamic>>('users/me');
+    expect(response.data!['auth'], 'Bearer t-1');
   });
 
   test('não envia token no login nem nas rotas públicas', () async {
-    servidor
+    server
       ..on('POST auth/login', (req) => (200, {'auth': req.headers['Authorization']}))
       ..on('GET public/plans', (req) => (200, {'auth': req.headers['Authorization']}));
     expect((await dio.post<Map<String, dynamic>>('auth/login')).data!['auth'], isNull);
@@ -34,23 +34,23 @@ void main() {
   });
 
   test('401 esquece o token e avisa que a sessão acabou', () async {
-    servidor.on('GET users/me', (_) => (401, {'detail': 'Token inválido'}));
+    server.on('GET users/me', (_) => (401, {'detail': 'Token inválido'}));
     await expectLater(dio.get<void>('users/me'), throwsA(isA<DioException>()));
-    expect(tokens.atual, isNull);
-    expect(expirou, 1);
+    expect(tokens.current, isNull);
+    expect(expired, 1);
   });
 
   test('403 não derruba a sessão', () async {
-    servidor.on('GET assessment/my/report-card', (_) => (403, {'detail': 'Acesso restrito'}));
+    server.on('GET assessment/my/report-card', (_) => (403, {'detail': 'Acesso restrito'}));
     await expectLater(dio.get<void>('assessment/my/report-card'), throwsA(isA<DioException>()));
-    expect(tokens.atual, 't-1');
-    expect(expirou, 0);
+    expect(tokens.current, 't-1');
+    expect(expired, 0);
   });
 
   test('falha de rede não derruba a sessão', () async {
-    servidor.on('GET users/me', (req) => throw semRede(req));
+    server.on('GET users/me', (req) => throw offline(req));
     await expectLater(dio.get<void>('users/me'), throwsA(isA<DioException>()));
-    expect(tokens.atual, 't-1');
-    expect(expirou, 0);
+    expect(tokens.current, 't-1');
+    expect(expired, 0);
   });
 }

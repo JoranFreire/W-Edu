@@ -1,10 +1,11 @@
 from uuid import UUID
 
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 import enum
-from sqlalchemy import ForeignKey, String, Boolean, DateTime, Enum as SAEnum, Text, UniqueConstraint
+from sqlalchemy import ForeignKey, String, Boolean, Date, DateTime, Enum as SAEnum, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from app.core.age import is_16_or_older, is_adult
 from app.core.ids import new_id
 from app.core.database import Base
 from app.core.tenancy import TenantMixin
@@ -53,6 +54,8 @@ class Student(Base):
     role: Mapped[UserRole] = mapped_column(SAEnum(UserRole), default=UserRole.student)
     organization_id: Mapped[UUID | None] = mapped_column(ForeignKey("organizations.id"), nullable=True, index=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    # Maioridade decide o que o reconhecimento facial (Persona) pode fazer com a pessoa.
+    birth_date: Mapped[date | None] = mapped_column(Date, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     organization: Mapped["Organization | None"] = relationship(back_populates="users")
@@ -81,6 +84,14 @@ class Student(Base):
         from app.policies.roles import roles_of  # import local: a policy depende deste model
 
         return sorted(roles_of(self), key=lambda role: (role != self.role, role.value))
+
+    @property
+    def is_adult(self) -> bool:
+        return is_adult(self.birth_date)
+
+    @property
+    def is_16_or_older(self) -> bool:
+        return is_16_or_older(self.birth_date)
 
 
 User = Student

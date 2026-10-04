@@ -1,69 +1,76 @@
 import 'package:dio/dio.dart';
 
-import '../../../core/cache/cache_local.dart';
+import '../../../core/cache/local_cache.dart';
 import '../../../core/network/token_store.dart';
-import 'instituicao.dart';
-import 'usuario.dart';
+import '../../../shared/vault/file_vault.dart';
+import 'institution.dart';
+import 'user.dart';
 
 class AuthRepository {
-  AuthRepository(this._dio, this._tokens, this._cache);
+  AuthRepository(this._dio, this._tokens, this._cache, this._vault);
 
   final Dio _dio;
   final TokenStore _tokens;
-  final CacheLocal _cache;
+  final LocalCache _cache;
+  final FileVault _vault;
 
   /// Pessoa e instituição da última conferência: o app abre com elas sem esperar a rede.
-  static const _chaveSessao = 'sessao';
+  static const _sessionKey = 'session';
 
-  Future<bool> temSessao() async => await _tokens.ler() != null;
+  Future<bool> hasSession() async => await _tokens.read() != null;
 
-  Future<Usuario> entrar(String email, String senha) async {
-    final resposta = await _dio.post<Map<String, dynamic>>(
-      'auth/login',
-      data: {'email': email.trim(), 'password': senha},
-    );
-    await _tokens.salvar(resposta.data!['access_token'] as String);
-    return eu();
+  Future<User> signIn(String email, String password) async {
+    final response = await _dio.post<Map<String, dynamic>>('auth/login', data: {'email': email.trim(), 'password': password});
+    await _tokens.save(response.data!['access_token'] as String);
+    return me();
+  }
+
+  /// Login facial: troca o assertion que o Persona emitiu (rosto conferido) pelo token.
+  Future<User> signInWithFace(String assertion) async {
+    final response = await _dio.post<Map<String, dynamic>>('auth/facial-login', data: {'assertion': assertion});
+    await _tokens.save(response.data!['access_token'] as String);
+    return me();
   }
 
   /// A pessoa, a instituição ativa (a do token) e as permissões nela, juntas. `Future.wait` repassa
   /// o próprio erro da API (o `.wait` de record o embrulharia e o 401 se perderia).
-  Future<Usuario> eu() async {
-    final [pessoa, instituicao, acesso] = await Future.wait([
+  Future<User> me() async {
+    final [person, institution, access] = await Future.wait([
       _dio.get<Map<String, dynamic>>('users/me'),
       _dio.get<Map<String, dynamic>>('institutions/current'),
       _dio.get<Map<String, dynamic>>('access/me'),
     ]);
-    final dados = {'usuario': pessoa.data!, 'instituicao': instituicao.data!, 'acesso': acesso.data!};
-    final usuario = _ler(dados);
-    await _cache.salvar(_chaveSessao, EntradaCache(null, dados));
-    return usuario;
+    final data = {'user': person.data!, 'institution': institution.data!, 'access': access.data!};
+    final user = _parse(data);
+    await _cache.save(_sessionKey, CacheEntry(null, data));
+    return user;
   }
 
-  Future<Usuario?> sessaoSalva() async {
-    final salva = await _cache.ler(_chaveSessao);
-    if (salva == null) return null;
+  Future<User?> savedSession() async {
+    final saved = await _cache.read(_sessionKey);
+    if (saved == null) return null;
     try {
-      return _ler(salva.dados);
+      return _parse(saved.data);
     } on Object {
       return null;
     }
   }
 
   /// A API não guarda sessão no servidor: sair é esquecer o token e os dados
-  /// pessoais guardados no aparelho.
-  Future<void> sair() async {
-    await _tokens.limpar();
-    await _cache.limpar();
+  /// pessoais guardados no aparelho (inclusive fotos de chamada ainda não enviadas).
+  Future<void> signOut() async {
+    await _tokens.clear();
+    await _cache.clear();
+    await _vault.deleteAll();
   }
 
-  Usuario _ler(Object? dados) {
-    final json = dados as Map<String, dynamic>;
-    final acesso = json['acesso'] as Map<String, dynamic>? ?? const {};
-    return Usuario.fromJson(
-      json['usuario'] as Map<String, dynamic>,
-      Instituicao.fromJson(json['instituicao'] as Map<String, dynamic>),
-      permissoes: (acesso['permissions'] as List<dynamic>? ?? const []).cast<String>(),
+  User _parse(Object? data) {
+    final json = data as Map<String, dynamic>;
+    final access = json['access'] as Map<String, dynamic>? ?? const {};
+    return User.fromJson(
+      json['user'] as Map<String, dynamic>,
+      Institution.fromJson(json['institution'] as Map<String, dynamic>),
+      permissions: (access['permissions'] as List<dynamic>? ?? const []).cast<String>(),
     );
   }
 }

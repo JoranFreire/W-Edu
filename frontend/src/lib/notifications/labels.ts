@@ -16,6 +16,7 @@ export const notificationEventLabels: Record<NotificationEventType, string> = {
   admission_called: 'Convocação do edital',
   absence_dismissal: 'Desligamento por faltas',
   material_request_decided: 'Requisição de material decidida',
+  gate_passage: 'Passagem na catraca',
 };
 
 export const notificationChannelLabels: Record<NotificationChannel, string> = {

@@ -1,0 +1,43 @@
+{
+  "signInWithAnotherAccount": "Entrar com outra conta",
+  "loginSubtitle": "Entre com a conta da sua instituição",
+  "emailLabel": "E-mail",
+  "emailRequired": "Informe o e-mail.",
+  "passwordLabel": "Senha",
+  "passwordRequired": "Informe a senha.",
+  "showPassword": "Mostrar senha",
+  "hidePassword": "Esconder senha",
+  "signIn": "Entrar",
+  "signInError": "Não foi possível entrar.",
+  "faceSignInAs": "Entrar com o rosto como {name}",
+  "@faceSignInAs": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "notYouUseAnotherAccount": "Não é {name}? Usar outra conta",
+  "@notYouUseAnotherAccount": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "faceLoginTitle": "Entrar com o rosto",
+  "faceLoginHello": "Olá, {name}",
+  "@faceLoginHello": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "faceLoginIntro": "Vamos conferir que é você.\nVocê vai olhar para a câmera e virar o rosto para os dois lados.",
+  "faceChecking": "Conferindo…",
+  "signInWithPassword": "Entrar com a senha",
+  "faceLoginUnavailable": "Entrar com o rosto não está disponível. Use a senha.",
+  "faceLoginCameraUnavailable": "Não foi possível abrir a câmera. Confira a permissão ou use a senha.",
+  "faceLoginRefused": "Não foi possível entrar com o rosto. Use a senha."
+}

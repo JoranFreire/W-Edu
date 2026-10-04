@@ -1,0 +1,17 @@
+{
+  "materialsTitle": "Material requests",
+  "materialsEmpty": "No requests. Request materials on the website.",
+  "materialStatusPending": "Awaiting approval",
+  "materialStatusApproved": "Approved: pick up",
+  "materialStatusRejected": "Rejected",
+  "materialStatusDelivered": "Picked up",
+  "materialStatusClosed": "Closed",
+  "materialStatusCancelled": "Cancelled",
+  "materialReturnOverdue": "Return overdue",
+  "materialNeededOn": "For {date}",
+  "materialReturnBy": "return by {date}",
+  "materialLine": "{material}: {quantity} {unit}",
+  "materialLineToReturn": "{line} · return {count}",
+  "pickupQr": "Pickup QR code",
+  "materialQrFooter": "Show this QR code at the storeroom. Only you receive this code."
+}

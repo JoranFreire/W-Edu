@@ -32,6 +32,11 @@ class TeachingOfferingService:
     def roster(self, offering_id: UUID) -> list[ClassEnrollment]:
         return self.repo.roster(offering_id)
 
+    def roster_for_teaching(self, offering_id: UUID, user: Student) -> list[Student]:
+        """Alunos da turma vistos por quem a ministra (ou pela coordenacao)."""
+        self.get_for_teaching(offering_id, user)
+        return [enrollment.student for enrollment in self.repo.roster(offering_id)]
+
     def sync_group_enrollments(self, offering_id: UUID, user: Student) -> SyncEnrollmentsResult:
         """Inscreve na oferta os alunos da turma-grupo vinculada (escola: a turma herda as disciplinas)."""
         offering = self.get_for_teaching(offering_id, user)

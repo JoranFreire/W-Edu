@@ -1,0 +1,37 @@
+{
+  "appTitle": "W-Edu",
+  "errorGeneric": "Não foi possível concluir.",
+  "errorNoConnection": "Sem conexão com o servidor. Verifique a internet.",
+  "errorTimeout": "O servidor demorou a responder.",
+  "tryAgain": "Tentar de novo",
+  "back": "Voltar",
+  "cancel": "Cancelar",
+  "keep": "Manter",
+  "close": "Fechar",
+  "errorLoad": "Não foi possível carregar.",
+  "errorRefresh": "Não foi possível atualizar.",
+  "faceStepCenter": "Olhe para a câmera",
+  "faceStepTurnLeft": "Vire o rosto para a esquerda",
+  "faceStepTurnRight": "Vire o rosto para a direita",
+  "faceStepProgress": "Passo {current} de {total}",
+  "@faceStepProgress": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "qrSemanticLabel": "QR de {title}",
+  "@qrSemanticLabel": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "openingCamera": "Abrindo a câmera…",
+  "start": "Começar"
+}

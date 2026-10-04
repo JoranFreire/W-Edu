@@ -1,0 +1,59 @@
+{
+  "tabHome": "Início",
+  "tabNotices": "Avisos",
+  "tabAgenda": "Agenda",
+  "tabReportCard": "Boletim",
+  "tabDependents": "Dependentes",
+  "tabProfile": "Perfil",
+  "homeGreeting": "Olá, {name}!",
+  "@homeGreeting": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeAllRead": "Tudo lido",
+  "homeUnread": "{count} sem ler",
+  "@homeUnread": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeTapToSee": "Toque para ver",
+  "homeNextOnAgenda": "Próximo na agenda",
+  "homeNothingAhead": "Nada pela frente",
+  "homeNextItem": "{title} · {date}",
+  "@homeNextItem": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "homeFaceAttendance": "Chamada facial",
+  "homeAttendanceHint": "Fotografe a sala e revise",
+  "homeAttendancePending": "{count, plural, =1{1 chamada guardada no aparelho} other{{count} chamadas guardadas no aparelho}}",
+  "@homeAttendancePending": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeNothingToPickUp": "Nada para retirar",
+  "homeToPickUp": "{count} para retirar",
+  "@homeToPickUp": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeNoDependents": "Nenhum vinculado"
+}

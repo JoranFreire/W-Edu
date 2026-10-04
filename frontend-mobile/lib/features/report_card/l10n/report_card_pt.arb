@@ -1,0 +1,50 @@
+{
+  "reportCardTitle": "Boletim",
+  "reportCardEmpty": "Ainda não há notas publicadas.",
+  "reportCardNoPeriods": "Nenhuma etapa fechada ainda.",
+  "reportCardAbsences": "{count, plural, =1{1 falta} other{{count} faltas}}",
+  "@reportCardAbsences": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "reportCardFinalGrade": "Média final: {grade}",
+  "@reportCardFinalGrade": {
+    "placeholders": {
+      "grade": {
+        "type": "String"
+      }
+    }
+  },
+  "reportCardRecovery": "Recuperação: {grade}",
+  "@reportCardRecovery": {
+    "placeholders": {
+      "grade": {
+        "type": "String"
+      }
+    }
+  },
+  "reportCardAttendance": "Frequência: {rate}",
+  "@reportCardAttendance": {
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "reportCardPassingGrade": "Média para aprovar: {grade}",
+  "@reportCardPassingGrade": {
+    "placeholders": {
+      "grade": {
+        "type": "String"
+      }
+    }
+  },
+  "subjectInProgress": "Cursando",
+  "subjectRecovery": "Em recuperação",
+  "subjectApproved": "Aprovado",
+  "subjectFailed": "Reprovado",
+  "subjectFailedAttendance": "Reprovado por falta"
+}
