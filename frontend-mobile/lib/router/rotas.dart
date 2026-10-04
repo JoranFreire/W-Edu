@@ -17,8 +17,11 @@ class Rotas {
   static const cadastroFacial = '/perfil/biometria/cadastro';
   static const beneficios = '/beneficios';
   static const materiais = '/materiais';
+  static const chamada = '/chamada';
 
   static String dependente(String alunoId) => '$dependentes/$alunoId';
+  static String chamadaTurma(String turmaId) => '$chamada/$turmaId';
+  static String chamadaEncontro(String turmaId, String encontroId) => '$chamada/$turmaId/$encontroId';
 }
 
 /// As abas do app, na ordem dos ramos do router. Cada pessoa vê só as dos papéis
@@ -71,6 +74,8 @@ String? redirecionar(AsyncValue<Usuario?> auth, String local) {
   if (local == Rotas.beneficios && !usuario.ehAluno) return Rotas.inicio;
   // Requisições de material: quem tem a permissão de pedir (professores, por padrão).
   if (local == Rotas.materiais && !usuario.podeRequisitarMaterial) return Rotas.inicio;
+  // Chamada facial: quem ministra aulas.
+  if ((local == Rotas.chamada || local.startsWith('${Rotas.chamada}/')) && !usuario.ministraAulas) return Rotas.inicio;
 
   // Aba de um papel que a pessoa não tem (ex.: link antigo depois de trocar de papel).
   final aba = Aba.doCaminho(local);

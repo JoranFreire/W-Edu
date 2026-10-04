@@ -32,6 +32,7 @@ class Usuario {
   bool get ehAluno => papeis.contains('student');
   bool get ehResponsavel => papeis.contains('guardian');
   bool get podeRequisitarMaterial => permissoes.contains('warehouse.request');
+  bool get ministraAulas => permissoes.contains('teaching.access');
 
   String get primeiroNome => nome.split(' ').first;
 

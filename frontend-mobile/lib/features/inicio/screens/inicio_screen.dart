@@ -10,6 +10,7 @@ import '../../auth/auth_providers.dart';
 import '../../auth/data/usuario.dart';
 import '../../avisos/avisos_providers.dart';
 import '../../beneficios/beneficios_providers.dart';
+import '../../../core/network/network_providers.dart';
 import '../../materiais/materiais_providers.dart';
 import '../../dependentes/dependentes_providers.dart';
 import '../widgets/resumo_card.dart';
@@ -56,6 +57,15 @@ class InicioScreen extends ConsumerWidget {
                 onTap: () => context.go(Rotas.agenda),
               ),
               ..._beneficios(context, ref),
+            ],
+            if (usuario.ministraAulas && ref.watch(personaBaseUrlProvider) != null) ...[
+              const SizedBox(height: 12),
+              ResumoCard(
+                icone: Icons.how_to_reg_rounded,
+                titulo: 'Chamada facial',
+                valor: 'Fotografe a sala e revise',
+                onTap: () => context.go(Rotas.chamada),
+              ),
             ],
             if (usuario.podeRequisitarMaterial) ...[
               const SizedBox(height: 12),

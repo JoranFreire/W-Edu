@@ -4,7 +4,7 @@ import 'dart:typed_data';
 import 'package:camera/camera.dart';
 import 'package:flutter/widgets.dart';
 
-/// A câmera do login facial, atrás de uma interface: os testes usam uma falsa.
+/// Uma câmera do aparelho, atrás de uma interface: os testes usam uma falsa.
 abstract interface class CapturaDeRosto {
   /// Abre a câmera frontal; falha se não houver câmera ou permissão.
   Future<void> abrir();
@@ -18,15 +18,29 @@ abstract interface class CapturaDeRosto {
   Future<void> fechar();
 }
 
-class CameraFrontal implements CapturaDeRosto {
+/// Câmera frontal (login e cadastro do rosto): resolução média, rosto nítido e foto bem
+/// abaixo do limite de 4 MB do Persona.
+class CameraFrontal extends CameraDoAparelho {
+  CameraFrontal() : super(CameraLensDirection.front, ResolutionPreset.medium);
+}
+
+/// Câmera traseira (foto da sala na chamada facial): resolução alta, rostos pequenos ao fundo.
+class CameraTraseira extends CameraDoAparelho {
+  CameraTraseira() : super(CameraLensDirection.back, ResolutionPreset.high);
+}
+
+class CameraDoAparelho implements CapturaDeRosto {
+  CameraDoAparelho(this._lente, this._resolucao);
+
+  final CameraLensDirection _lente;
+  final ResolutionPreset _resolucao;
   CameraController? _controle;
 
   @override
   Future<void> abrir() async {
     final cameras = await availableCameras();
-    final frontal = cameras.where((c) => c.lensDirection == CameraLensDirection.front).firstOrNull ?? cameras.first;
-    // Resolução média: rosto nítido e foto bem abaixo do limite de 4 MB do Persona.
-    final controle = CameraController(frontal, ResolutionPreset.medium, enableAudio: false, imageFormatGroup: ImageFormatGroup.jpeg);
+    final escolhida = cameras.where((c) => c.lensDirection == _lente).firstOrNull ?? cameras.first;
+    final controle = CameraController(escolhida, _resolucao, enableAudio: false, imageFormatGroup: ImageFormatGroup.jpeg);
     await controle.initialize();
     _controle = controle;
   }

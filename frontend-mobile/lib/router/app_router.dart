@@ -7,6 +7,9 @@ import '../features/auth/auth_providers.dart';
 import '../features/auth/screens/carregando_screen.dart';
 import '../features/auth/screens/login_screen.dart';
 import '../features/beneficios/screens/beneficios_screen.dart';
+import '../features/chamada_facial/screens/chamada_encontros_screen.dart';
+import '../features/chamada_facial/screens/chamada_screen.dart';
+import '../features/chamada_facial/screens/chamada_turmas_screen.dart';
 import '../features/biometria/screens/biometria_screen.dart';
 import '../features/biometria/screens/cadastro_facial_screen.dart';
 import '../features/avisos/screens/avisos_screen.dart';
@@ -46,6 +49,25 @@ final routerProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(path: Rotas.beneficios.substring(1), builder: (_, _) => const BeneficiosScreen()),
               GoRoute(path: Rotas.materiais.substring(1), builder: (_, _) => const MateriaisScreen()),
+              GoRoute(
+                path: Rotas.chamada.substring(1),
+                builder: (_, _) => const ChamadaTurmasScreen(),
+                routes: [
+                  GoRoute(
+                    path: ':turma',
+                    builder: (_, state) => ChamadaEncontrosScreen(turmaId: state.pathParameters['turma']!),
+                    routes: [
+                      GoRoute(
+                        path: ':encontro',
+                        builder: (_, state) => ChamadaScreen(
+                          turmaId: state.pathParameters['turma']!,
+                          encontroId: state.pathParameters['encontro']!,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ],
           )),
           _aba(GoRoute(path: Rotas.avisos, builder: (_, _) => const AvisosScreen())),

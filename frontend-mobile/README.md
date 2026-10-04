@@ -35,6 +35,11 @@ app, catraca e presença (só maiores de 18). A partir de 16 anos a pessoa autor
 disso, quem autoriza é o responsável, na aba **Rosto** do dependente. Com algum uso autorizado, a pessoa cadastra o próprio rosto com a mesma prova de vida
 do login. Revogar um uso não desliga os outros.
 
+**Chamada facial** (quem ministra aulas, com o Persona configurado): no Início, escolha a turma e o encontro, fotografe a
+sala (esquerda, centro e direita, com a câmera traseira) e analise. O Persona devolve os reconhecidos, os que precisam de
+conferência (o rosto achado ao lado da foto do cadastro), os não encontrados e os sem reconhecimento autorizado, que o
+professor marca à mão. Nada é gravado antes de o professor revisar e confirmar; o Persona então devolve a chamada ao W-Edu.
+
 ## Rodar
 
 Com a API no ar (ex.: `docker compose up -d` na raiz e `docker compose --profile demo run --rm seed`):

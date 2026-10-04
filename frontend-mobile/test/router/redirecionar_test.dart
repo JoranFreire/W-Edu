@@ -57,4 +57,10 @@ void main() {
     expect(redirecionar(const AsyncData(null), Rotas.loginFacial), isNull);
     expect(redirecionar(AsyncData(_usuario(['student'])), Rotas.loginFacial), Rotas.inicio);
   });
+
+  test('chamada facial só para quem ministra aulas', () {
+    final professor = Usuario.fromJson(usuarioJson(role: 'instructor'), Instituicao.fromJson(instituicaoJson()), permissoes: ['teaching.access']);
+    expect(redirecionar(AsyncData(professor), Rotas.chamadaEncontro('t', 'e')), isNull);
+    expect(redirecionar(AsyncData(_usuario(['student'])), Rotas.chamada), Rotas.inicio);
+  });
 }
