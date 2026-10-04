@@ -6,6 +6,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:wedu_mobile/app.dart';
 import 'package:wedu_mobile/core/cache/cache_local.dart';
 import 'package:wedu_mobile/core/cache/cache_providers.dart';
+import 'package:wedu_mobile/shared/cofre/cofre_providers.dart';
 import 'package:wedu_mobile/core/network/network_providers.dart';
 import 'package:wedu_mobile/features/auth/auth_providers.dart';
 
@@ -40,6 +41,7 @@ void main() {
       overrides: [
         tokenStoreProvider.overrideWithValue(tokens),
         httpAdapterProvider.overrideWithValue(servidor),
+        cofreProvider.overrideWithValue(CofreEmMemoria()),
         cacheLocalProvider.overrideWithValue(cache),
         contaLembradaStoreProvider.overrideWithValue(ContaLembradaEmMemoria()),
       ],

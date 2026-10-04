@@ -11,6 +11,7 @@ import '../../auth/data/usuario.dart';
 import '../../avisos/avisos_providers.dart';
 import '../../beneficios/beneficios_providers.dart';
 import '../../../core/network/network_providers.dart';
+import '../../chamada_facial/chamada_facial_providers.dart';
 import '../../materiais/materiais_providers.dart';
 import '../../dependentes/dependentes_providers.dart';
 import '../widgets/resumo_card.dart';
@@ -63,7 +64,7 @@ class InicioScreen extends ConsumerWidget {
               ResumoCard(
                 icone: Icons.how_to_reg_rounded,
                 titulo: 'Chamada facial',
-                valor: 'Fotografe a sala e revise',
+                valor: _pendentes(ref.watch(chamadasPendentesProvider).value?.length ?? 0),
                 onTap: () => context.go(Rotas.chamada),
               ),
             ],
@@ -125,6 +126,8 @@ class InicioScreen extends ConsumerWidget {
       ),
     ];
   }
+
+  String _pendentes(int quantidade) => quantidade == 0 ? 'Fotografe a sala e revise' : '$quantidade chamada(s) guardada(s) no aparelho';
 
   String _retirar(int aprovadas) => aprovadas == 0 ? 'Nada para retirar' : '$aprovadas para retirar';
 

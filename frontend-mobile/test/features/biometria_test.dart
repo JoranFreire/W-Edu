@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:wedu_mobile/app.dart';
 import 'package:wedu_mobile/core/cache/cache_providers.dart';
+import 'package:wedu_mobile/shared/cofre/cofre_providers.dart';
 import 'package:wedu_mobile/core/network/network_providers.dart';
 import 'package:wedu_mobile/features/auth/auth_providers.dart';
 import 'package:wedu_mobile/shared/rosto/rosto_providers.dart';
@@ -55,6 +56,7 @@ void main() {
       overrides: [
         tokenStoreProvider.overrideWithValue(tokens),
         httpAdapterProvider.overrideWithValue(servidor),
+        cofreProvider.overrideWithValue(CofreEmMemoria()),
         cacheLocalProvider.overrideWithValue(CacheEmMemoria()),
         contaLembradaStoreProvider.overrideWithValue(ContaLembradaEmMemoria()),
         personaBaseUrlProvider.overrideWithValue(persona),

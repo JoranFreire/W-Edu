@@ -21,7 +21,8 @@ class Rotas {
 
   static String dependente(String alunoId) => '$dependentes/$alunoId';
   static String chamadaTurma(String turmaId) => '$chamada/$turmaId';
-  static String chamadaEncontro(String turmaId, String encontroId) => '$chamada/$turmaId/$encontroId';
+  static String chamadaEncontro(String turmaId, String encontroId, {String? pendenteId}) =>
+      '$chamada/$turmaId/$encontroId${pendenteId == null ? '' : '?pendente=$pendenteId'}';
 }
 
 /// As abas do app, na ordem dos ramos do router. Cada pessoa vê só as dos papéis

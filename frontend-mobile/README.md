@@ -40,6 +40,11 @@ sala (esquerda, centro e direita, com a câmera traseira) e analise. O Persona d
 conferência (o rosto achado ao lado da foto do cadastro), os não encontrados e os sem reconhecimento autorizado, que o
 professor marca à mão. Nada é gravado antes de o professor revisar e confirmar; o Persona então devolve a chamada ao W-Edu.
 
+**Sem internet**, turmas e encontros abrem do cache e o professor pode fotografar a sala: as fotos ficam no aparelho
+cifradas (AES-GCM, chave no Keychain/Keystore) com o horário em que foram tiradas. Quando a rede volta (ao abrir a
+chamada facial, ao voltar para o app ou em "Enviar agora"), o app abre a sessão no Persona e envia as fotos; a chamada
+fica pronta para revisar. Confirmada ou descartada, as fotos são apagadas; sair da conta também as apaga (com aviso).
+
 ## Rodar
 
 Com a API no ar (ex.: `docker compose up -d` na raiz e `docker compose --profile demo run --rm seed`):

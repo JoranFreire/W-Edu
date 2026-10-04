@@ -7,6 +7,7 @@ import '../../../router/rotas.dart';
 
 import '../../../shared/ds/ds.dart';
 import '../../auth/auth_providers.dart';
+import '../../chamada_facial/chamada_facial_providers.dart';
 import '../../auth/data/usuario.dart';
 
 class PerfilScreen extends ConsumerWidget {
@@ -54,11 +55,19 @@ class PerfilScreen extends ConsumerWidget {
   }
 
   Future<void> _confirmarSaida(BuildContext context, WidgetRef ref) async {
+    // Fotos de chamada ainda não enviadas são apagadas ao sair: avisa antes.
+    final naoEnviadas = ref.read(usuarioProvider).ministraAulas
+        ? (await ref.read(filaDeChamadasProvider).listar()).where((c) => !c.enviada).length
+        : 0;
+    if (!context.mounted) return;
     final confirmou = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Sair da conta?'),
-        content: const Text('Você vai precisar entrar de novo com e-mail e senha.'),
+        content: Text([
+          'Você vai precisar entrar de novo com e-mail e senha.',
+          if (naoEnviadas > 0) 'Há $naoEnviadas chamada(s) com fotos ainda não enviadas: elas serão apagadas do aparelho.',
+        ].join('\n\n')),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancelar')),
           FilledButton(onPressed: () => Navigator.pop(context, true), child: const Text('Sair')),

@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:wedu_mobile/app.dart';
 import 'package:wedu_mobile/core/cache/cache_providers.dart';
+import 'package:wedu_mobile/shared/cofre/cofre_providers.dart';
 import 'package:wedu_mobile/core/network/network_providers.dart';
 import 'package:wedu_mobile/features/auth/auth_providers.dart';
 import 'package:wedu_mobile/features/chamada_facial/chamada_facial_providers.dart';
@@ -16,6 +17,9 @@ void main() {
   late ServidorFalso servidor;
   late CameraFalsa camera;
   late int consultas;
+  late CofreEmMemoria cofre;
+  late CacheEmMemoria cache;
+  late bool semInternet;
 
   setUpAll(() => initializeDateFormatting('pt_BR'));
 
@@ -26,6 +30,9 @@ void main() {
     servidor = ServidorFalso();
     camera = CameraFalsa();
     consultas = 0;
+    cofre = CofreEmMemoria();
+    cache = CacheEmMemoria();
+    semInternet = false;
     servidor
       ..on('GET users/me', (_) => (200, usuarioJson(role: 'instructor')))
       ..on('GET institutions/current', (_) => (200, instituicaoJson()))
@@ -37,8 +44,8 @@ void main() {
             {'id': 'e-1', 'title': 'Aula de hoje', 'starts_at': DateTime.now().toUtc().toIso8601String(), 'is_closed': false},
             {'id': 'e-0', 'title': 'Aula encerrada', 'starts_at': '2026-01-01T10:00:00Z', 'is_closed': true},
           ]))
-      ..on('POST sessions', (_) => (201, {'session_id': 's-1', 'status': 'OPEN', 'students_with_consent': 3, 'students_without_consent': 1}))
-      ..on('POST sessions/s-1/images', (_) => (202, {'image_id': 'i-1', 'task_id': 'k'}))
+      ..on('POST sessions', (req) => semInternet ? throw semRede(req) : (201, {'session_id': 's-1', 'status': 'OPEN', 'students_with_consent': 3, 'students_without_consent': 1}))
+      ..on('POST sessions/s-1/images', (req) => semInternet ? throw semRede(req) : (202, {'image_id': 'i-1', 'task_id': 'k'}))
       ..on('GET sessions/s-1/result', (_) {
         consultas++;
         return (200, {
@@ -65,7 +72,8 @@ void main() {
       overrides: [
         tokenStoreProvider.overrideWithValue(TokenStoreEmMemoria('t-prof')),
         httpAdapterProvider.overrideWithValue(servidor),
-        cacheLocalProvider.overrideWithValue(CacheEmMemoria()),
+        cofreProvider.overrideWithValue(cofre),
+        cacheLocalProvider.overrideWithValue(cache),
         contaLembradaStoreProvider.overrideWithValue(ContaLembradaEmMemoria()),
         personaBaseUrlProvider.overrideWithValue(persona),
         cameraDeSalaProvider.overrideWithValue(camera),
@@ -160,5 +168,91 @@ void main() {
   testWidgets('sem o Persona, sem chamada facial', (tester) async {
     await abrirApp(tester, persona: null);
     expect(find.text('Chamada facial'), findsNothing);
+  });
+
+  testWidgets('sem internet: fotografa, guarda cifrado e envia quando a rede volta', (tester) async {
+    semInternet = true;
+    final fotos = <FormData>[];
+    Object? confirmada;
+    servidor
+      ..on('POST sessions/s-1/images', (req) {
+        if (semInternet) throw semRede(req);
+        fotos.add(req.data as FormData);
+        return (202, {'image_id': 'i', 'task_id': 'k'});
+      })
+      ..on('POST sessions/s-1/confirm', (req) {
+        confirmada = req.data;
+        return (200, {'session_id': 's-1', 'status': 'CONFIRMED', 'records_saved': 4});
+      });
+    await abrirApp(tester);
+    await abrirEncontro(tester);
+
+    expect(find.textContaining('Sem internet agora'), findsOneWidget);
+    await tester.tap(find.text('Fotografar e enviar depois'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Lado esquerdo'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Centro'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Guardar 2 foto(s)'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('2 foto(s) guardada(s)'), findsOneWidget);
+    expect(cofre.arquivos.keys.where((nome) => nome.startsWith('chamada_')), hasLength(2));
+    expect(servidor.contar('POST sessions/s-1/images'), 0);
+    expect(camera.aberta, isFalse);
+
+    // A rede volta: ao abrir a chamada facial, o app envia sozinho e a chamada fica pronta para revisar.
+    semInternet = false;
+    await tester.tap(find.text('Voltar aos encontros'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('pronta para revisar'), findsOneWidget);
+    expect(fotos.map((f) => f.fields.firstWhere((c) => c.key == 'angle').value).toSet(), {'LEFT', 'CENTER'});
+    expect(fotos.every((f) => f.fields.any((c) => c.key == 'captured_at')), isTrue);
+
+    await tester.tap(find.textContaining('Matemática 6A · Aula de hoje'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Confirmar chamada: 1 presente(s) de 4'));
+    await tester.pumpAndSettle();
+    expect((confirmada! as Map<String, dynamic>)['present'], ['p-ana']);
+    expect(cofre.arquivos.keys.where((nome) => nome.startsWith('chamada_')), isEmpty, reason: 'confirmada, as fotos somem do aparelho');
+  });
+
+  testWidgets('turmas e encontros abrem do cache sem internet', (tester) async {
+    await abrirApp(tester);
+    await abrirEncontro(tester);
+
+    // Outra abertura do app, agora sem rede: lista do cache.
+    for (final rota in ['GET users/me', 'GET institutions/current', 'GET access/me', 'GET sync/versions', 'GET assessment/teaching/offerings', 'GET schedule/classes/t-1/meetings']) {
+      servidor.on(rota, (req) => throw semRede(req));
+    }
+    await tester.pumpWidget(const SizedBox());
+    await abrirApp(tester);
+    await tester.tap(find.text('Chamada facial'));
+    await tester.pumpAndSettle();
+    expect(find.text('Matemática 6A'), findsOneWidget);
+    await tester.tap(find.text('Matemática 6A'));
+    await tester.pumpAndSettle();
+    expect(find.text('Aula de hoje'), findsOneWidget);
+  });
+
+  testWidgets('sair avisa e apaga as fotos não enviadas', (tester) async {
+    semInternet = true;
+    await abrirApp(tester);
+    await abrirEncontro(tester);
+    await tester.tap(find.text('Fotografar e enviar depois'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Centro'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Guardar 1 foto(s)'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.descendant(of: find.byType(NavigationBar), matching: find.text('Perfil')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Sair'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('1 chamada(s) com fotos ainda não enviadas'), findsOneWidget);
+    await tester.tap(find.text('Sair').last);
+    await tester.pumpAndSettle();
+    expect(cofre.arquivos, isEmpty);
   });
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/cache/observar_area.dart';
 import '../../../core/format/datas.dart';
 import '../../../router/rotas.dart';
 import '../../../shared/ds/ds.dart';
@@ -20,7 +21,7 @@ class ChamadaEncontrosScreen extends ConsumerWidget {
       appBar: AppBar(title: const Text('Escolha o encontro')),
       body: ListaRemota<Encontro>(
         valor: ref.watch(encontrosProvider(turmaId)),
-        onRecarregar: () => ref.refresh(encontrosProvider(turmaId).future),
+        onRecarregar: () => ref.atualizarDaApi(encontrosProvider(turmaId), ChavesDocencia.encontros(turmaId)),
         textoVazio: 'Nenhum encontro aberto nesta turma.',
         iconeVazio: Icons.event_busy_outlined,
         itemBuilder: (context, encontro) => Card(

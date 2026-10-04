@@ -22,8 +22,10 @@ class FotosDaSala extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            '${sessao.comAutorizacao} aluno(s) com reconhecimento autorizado'
-            '${sessao.semAutorizacao > 0 ? ' · ${sessao.semAutorizacao} sem (você marca na revisão)' : ''}',
+            sessao == null
+                ? 'Sem internet: as fotos ficam guardadas (cifradas) e a chamada é analisada quando a rede voltar.'
+                : '${sessao.comAutorizacao} aluno(s) com reconhecimento autorizado'
+                    '${sessao.semAutorizacao > 0 ? ' · ${sessao.semAutorizacao} sem (você marca na revisão)' : ''}',
             style: tema.textTheme.bodyMedium,
           ),
           const SizedBox(height: 12),
@@ -47,7 +49,7 @@ class FotosDaSala extends StatelessWidget {
           const SizedBox(height: 12),
           FilledButton(
             onPressed: etapa.enviadas.isNotEmpty && etapa.enviando == null ? onAnalisar : null,
-            child: Text('Analisar ${etapa.enviadas.length} foto(s)'),
+            child: Text(sessao == null ? 'Guardar ${etapa.enviadas.length} foto(s)' : 'Analisar ${etapa.enviadas.length} foto(s)'),
           ),
         ],
       ),

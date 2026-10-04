@@ -62,6 +62,7 @@ final routerProvider = Provider<GoRouter>((ref) {
                         builder: (_, state) => ChamadaScreen(
                           turmaId: state.pathParameters['turma']!,
                           encontroId: state.pathParameters['encontro']!,
+                          pendenteId: state.uri.queryParameters['pendente'],
                         ),
                       ),
                     ],

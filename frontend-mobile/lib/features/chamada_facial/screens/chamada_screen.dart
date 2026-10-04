@@ -10,14 +10,17 @@ import '../widgets/revisao_chamada.dart';
 
 /// Chamada facial de um encontro: fotos da sala → análise no Persona → revisão → confirmação.
 class ChamadaScreen extends ConsumerWidget {
-  const ChamadaScreen({super.key, required this.turmaId, required this.encontroId});
+  const ChamadaScreen({super.key, required this.turmaId, required this.encontroId, this.pendenteId});
 
   final String turmaId;
   final String encontroId;
 
+  /// Chamada que veio da fila (fotografada sem rede).
+  final String? pendenteId;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final chave = (turmaId: turmaId, encontroId: encontroId);
+    final chave = (turmaId: turmaId, encontroId: encontroId, pendenteId: pendenteId);
     final etapa = ref.watch(chamadaProvider(chave));
     final notifier = ref.read(chamadaProvider(chave).notifier);
     final tema = Theme.of(context);
@@ -32,6 +35,18 @@ class ChamadaScreen extends ConsumerWidget {
       appBar: AppBar(title: const Text('Chamada facial')),
       body: switch (etapa) {
         AbrindoSessao() => const _Aguarde('Abrindo a chamada…'),
+        SemRede() => _Final(
+            icone: Icons.wifi_off_rounded,
+            texto: 'Sem internet agora. Você pode fotografar a sala: as fotos ficam guardadas (cifradas) no aparelho '
+                'e a chamada é analisada quando a rede voltar.',
+            acao: ('Fotografar e enviar depois', notifier.fotografarSemRede),
+            onVoltar: () => context.go(Rotas.chamadaTurma(turmaId)),
+          ),
+        FotosGuardadas(:final quantidade) => _Final(
+            icone: Icons.cloud_upload_outlined,
+            texto: '$quantidade foto(s) guardada(s). Quando a internet voltar, abra a Chamada facial para enviar e revisar.',
+            onVoltar: () => context.go(Rotas.chamada),
+          ),
         Processando() => const _Aguarde('Analisando as fotos…'),
         Confirmando() => const _Aguarde('Gravando a chamada…'),
         Fotografando() => FotosDaSala(
@@ -77,12 +92,15 @@ class _Aguarde extends StatelessWidget {
 }
 
 class _Final extends StatelessWidget {
-  const _Final({required this.icone, required this.texto, required this.onVoltar, this.cor});
+  const _Final({required this.icone, required this.texto, required this.onVoltar, this.cor, this.acao});
 
   final IconData icone;
   final String texto;
   final VoidCallback onVoltar;
   final Color? cor;
+
+  /// Ação principal opcional (rótulo, ação); o voltar vira secundário.
+  final (String, VoidCallback)? acao;
 
   @override
   Widget build(BuildContext context) {
@@ -95,7 +113,11 @@ class _Final extends StatelessWidget {
           const SizedBox(height: 16),
           Text(texto, textAlign: TextAlign.center, style: tema.textTheme.bodyLarge?.copyWith(color: cor)),
           const SizedBox(height: 24),
-          FilledButton(onPressed: onVoltar, child: const Text('Voltar aos encontros')),
+          if (acao case (final rotulo, final executar)) ...[
+            FilledButton(onPressed: executar, child: Text(rotulo)),
+            TextButton(onPressed: onVoltar, child: const Text('Voltar')),
+          ] else
+            FilledButton(onPressed: onVoltar, child: const Text('Voltar aos encontros')),
         ]),
       ),
     );

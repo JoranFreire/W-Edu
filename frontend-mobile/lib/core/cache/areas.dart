@@ -6,4 +6,5 @@ abstract final class Areas {
   static const dependentes = 'dependents';
   static const beneficios = 'benefits';
   static const materiais = 'materials';
+  static const docencia = 'teaching';
 }

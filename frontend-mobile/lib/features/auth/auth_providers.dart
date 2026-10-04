@@ -3,12 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/cache/cache_providers.dart';
 import '../../core/network/network_providers.dart';
+import '../../shared/cofre/cofre_providers.dart';
 import 'data/auth_repository.dart';
 import 'data/conta_lembrada.dart';
 import 'data/usuario.dart';
 
 final authRepositoryProvider = Provider<AuthRepository>(
-  (ref) => AuthRepository(ref.watch(dioProvider), ref.watch(tokenStoreProvider), ref.watch(cacheLocalProvider)),
+  (ref) => AuthRepository(ref.watch(dioProvider), ref.watch(tokenStoreProvider), ref.watch(cacheLocalProvider), ref.watch(cofreProvider)),
 );
 
 final contaLembradaStoreProvider = Provider<ContaLembradaStore>((ref) => SecureContaLembradaStore());

@@ -2,15 +2,17 @@ import 'package:dio/dio.dart';
 
 import '../../../core/cache/cache_local.dart';
 import '../../../core/network/token_store.dart';
+import '../../../shared/cofre/cofre_de_arquivos.dart';
 import 'instituicao.dart';
 import 'usuario.dart';
 
 class AuthRepository {
-  AuthRepository(this._dio, this._tokens, this._cache);
+  AuthRepository(this._dio, this._tokens, this._cache, this._cofre);
 
   final Dio _dio;
   final TokenStore _tokens;
   final CacheLocal _cache;
+  final CofreDeArquivos _cofre;
 
   /// Pessoa e instituição da última conferência: o app abre com elas sem esperar a rede.
   static const _chaveSessao = 'sessao';
@@ -58,10 +60,11 @@ class AuthRepository {
   }
 
   /// A API não guarda sessão no servidor: sair é esquecer o token e os dados
-  /// pessoais guardados no aparelho.
+  /// pessoais guardados no aparelho (inclusive fotos de chamada ainda não enviadas).
   Future<void> sair() async {
     await _tokens.limpar();
     await _cache.limpar();
+    await _cofre.apagarTudo();
   }
 
   Usuario _ler(Object? dados) {
