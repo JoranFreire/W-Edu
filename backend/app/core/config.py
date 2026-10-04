@@ -20,6 +20,8 @@ class Settings(BaseSettings):
     # Login facial: chave publica Ed25519 (32 bytes, base64url) com que o Persona assina o
     # assertion de rosto conferido. Vazio desativa `POST /auth/facial-login`.
     PERSONA_ASSERTION_PUBLIC_KEY: str | None = None
+    # Fuso dos horarios escritos nos avisos (ex.: passagem na catraca).
+    DISPLAY_TIMEZONE: str = "America/Sao_Paulo"
 
     BEVOX_URL: str = "http://localhost:8001"
     BEVOX_PUBLIC_URL: str | None = None

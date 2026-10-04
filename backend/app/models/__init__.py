@@ -36,6 +36,8 @@ from app.models.access import AccessRole, AccessRoleAssignment
 from app.models.warehouse import MaterialRequest, MaterialRequestLine, MaterialReturn, WarehouseEntry, WarehouseItem
 from app.models.guardians import StudentGuardian
 from app.models.data_version import DataVersion
+from app.models.gate_passage import GatePassage
+from app.models.membership_event import MembershipEvent
 from app.models.school_life import AgendaItem, StudentOccurrence
 from app.models.secretariat import AcademicDeclaration, CreditTransfer, ProgramEnrollmentEvent, TermRegistration
 from app.models.course import Course, CourseModule, LearningPath, LearningPathCourse, CoursePrerequisite
@@ -69,6 +71,7 @@ from app.models.schedule import (
 from app.core.database import Base as _Base
 from app.core.tenant_rls import install_create_hooks as _install_rls, tenant_tables as _tenant_tables
 
+import app.core.membership_events  # noqa: E402,F401 — registra o fim de vinculo para os sistemas integrados
 import app.services.sync.areas  # noqa: E402,F401 — registra as tabelas de cada area do cache dos apps
 
 # Politicas de RLS criadas junto com as tabelas de instituicao (create_all); em producao, via migration.
@@ -84,7 +87,7 @@ __all__ = [
     "AcademicUnit", "Program", "Subject", "SubjectPrerequisite", "SubjectEquivalence", "Curriculum", "CurriculumComponent",
     "AcademicTerm", "GradingPeriod", "CalendarEvent", "ProgramEnrollment", "ClassGroup", "ClassGroupMember",
     "GradingScheme", "AssessmentItem", "GradeEntry", "ClassDiaryEntry", "DiaryAttendance",
-    "OfferingPeriodClosure", "PeriodResult", "ProgramEnrollmentEvent", "TermRegistration", "CreditTransfer", "AcademicDeclaration", "StudentGuardian", "DataVersion", "StudentOccurrence", "AgendaItem",
+    "OfferingPeriodClosure", "PeriodResult", "ProgramEnrollmentEvent", "TermRegistration", "CreditTransfer", "AcademicDeclaration", "StudentGuardian", "DataVersion", "GatePassage", "MembershipEvent", "StudentOccurrence", "AgendaItem",
     "RegistrationWindow", "OfferingTimeSlot", "ComplementaryActivity", "Internship", "InternshipLog", "FinalProject",
     "TuitionPlan", "StudentDiscount", "ContractTemplate", "EnrollmentContract",
     "SaasPlan", "SalesLead", "LeadStatus", "InstitutionSubscription", "PlatformInvoice",

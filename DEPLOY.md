@@ -100,6 +100,10 @@ PERSONA_ASSERTION_PUBLIC_KEY=
 
 A maioridade (data de nascimento no cadastro do usuário) decide o uso do reconhecimento facial na presença; sem a data, a pessoa não é tida como adulta.
 
+A mesma chave confere os **avisos de passagem na catraca**: o Persona envia `POST /integrations/persona/gate-events` (mensagem assinada com `typ=gate_event`); o W-Edu registra a passagem uma vez só e avisa o aluno e os responsáveis na caixa de avisos. Os horários dos avisos saem no fuso `DISPLAY_TIMEZONE` (padrão `America/Sao_Paulo`).
+
+Em cada instituição que usa o Persona, crie uma **conta de serviço** de coordenação e configure o e-mail e a senha dela no Persona. Ela devolve a chamada facial (`POST /schedule/meetings/{id}/attendance`) e lê os **fins de vínculo** (`GET /integrations/persona/membership-events?since=<último horário visto>`), para o Persona tirar da catraca quem saiu da instituição ou teve a conta desativada.
+
 ### Multi-instituição
 
 Instituição por subdomínio (ex.: `escola.wedu.com.br`): configure DNS curinga `*.wedu.com.br`, inclua `*.wedu.com.br` no `server_name` do nginx (e no certificado TLS) e defina:

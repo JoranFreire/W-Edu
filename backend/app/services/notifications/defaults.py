@@ -58,6 +58,10 @@ DEFAULT_TEMPLATES = {
         "Requisição de material {status_label}",
         "Sua requisição para {needed_on} ({purpose}) foi {status_label}.{note}",
     ),
+    (NotificationEventType.gate_passage, NotificationChannel.internal): (
+        "{student_name}: {direction_label} na catraca",
+        "{student_name} passou pela catraca {gate} ({direction_label}) às {time} de {date}.",
+    ),
     (NotificationEventType.meeting_reminder, NotificationChannel.internal): (
         "Lembrete de encontro",
         "Você tem um encontro em {starts_at}: {meeting_title}.",

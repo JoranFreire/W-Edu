@@ -2,7 +2,8 @@ from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
-from app.core.facial_assertion import InvalidAssertion, load_public_key, verify_assertion
+from app.core.facial_assertion import verify_assertion
+from app.core.persona_message import InvalidPersonaMessage, load_public_key
 from app.models.institution import Institution
 from app.repositories.facial_login import FacialLoginAssertionRepository
 from app.repositories.student import StudentRepository
@@ -25,7 +26,7 @@ class FacialLoginService:
             raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Login facial desativado")
         try:
             assertion = verify_assertion(token, load_public_key(settings.PERSONA_ASSERTION_PUBLIC_KEY))
-        except InvalidAssertion:
+        except InvalidPersonaMessage:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=_REFUSED)
 
         user = self.users.get_by_id(assertion.user_id)
