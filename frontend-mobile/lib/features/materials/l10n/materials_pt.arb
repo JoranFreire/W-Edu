@@ -1,0 +1,54 @@
+{
+  "materialsTitle": "Requisições de material",
+  "materialsEmpty": "Nenhuma requisição. Peça materiais pelo site.",
+  "materialStatusPending": "Aguardando aprovação",
+  "materialStatusApproved": "Aprovada: retirar",
+  "materialStatusRejected": "Recusada",
+  "materialStatusDelivered": "Retirada",
+  "materialStatusClosed": "Concluída",
+  "materialStatusCancelled": "Cancelada",
+  "materialReturnOverdue": "Devolução atrasada",
+  "materialNeededOn": "Para {date}",
+  "@materialNeededOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "materialReturnBy": "devolver até {date}",
+  "@materialReturnBy": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "materialLine": "{material}: {quantity} {unit}",
+  "@materialLine": {
+    "placeholders": {
+      "material": {
+        "type": "String"
+      },
+      "quantity": {
+        "type": "int"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "materialLineToReturn": "{line} · devolver {count}",
+  "@materialLineToReturn": {
+    "placeholders": {
+      "line": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "pickupQr": "QR de retirada",
+  "materialQrFooter": "Mostre este QR no almoxarifado. Só você recebe este código."
+}

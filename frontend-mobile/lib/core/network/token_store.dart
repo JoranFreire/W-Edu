@@ -5,9 +5,9 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 /// A API do W-Edu emite só um token de acesso (sem refresh): ele já leva a
 /// instituição ativa e vale até expirar; ao trocar de instituição, vem outro.
 abstract interface class TokenStore {
-  Future<String?> ler();
-  Future<void> salvar(String token);
-  Future<void> limpar();
+  Future<String?> read();
+  Future<void> save(String token);
+  Future<void> clear();
 }
 
 /// Keychain no iOS, Keystore no Android. Guarda uma cópia em memória porque
@@ -15,32 +15,32 @@ abstract interface class TokenStore {
 class SecureTokenStore implements TokenStore {
   SecureTokenStore([FlutterSecureStorage? storage]) : _storage = storage ?? const FlutterSecureStorage();
 
-  static const _chave = 'access_token';
+  static const _key = 'access_token';
 
   final FlutterSecureStorage _storage;
   String? _token;
-  bool _carregado = false;
+  bool _loaded = false;
 
   @override
-  Future<String?> ler() async {
-    if (!_carregado) {
-      _token = await _storage.read(key: _chave);
-      _carregado = true;
+  Future<String?> read() async {
+    if (!_loaded) {
+      _token = await _storage.read(key: _key);
+      _loaded = true;
     }
     return _token;
   }
 
   @override
-  Future<void> salvar(String token) async {
+  Future<void> save(String token) async {
     _token = token;
-    _carregado = true;
-    await _storage.write(key: _chave, value: token);
+    _loaded = true;
+    await _storage.write(key: _key, value: token);
   }
 
   @override
-  Future<void> limpar() async {
+  Future<void> clear() async {
     _token = null;
-    _carregado = true;
-    await _storage.delete(key: _chave);
+    _loaded = true;
+    await _storage.delete(key: _key);
   }
 }

@@ -1,217 +1,233 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:qr_flutter/qr_flutter.dart';
-import 'package:wedu_mobile/app.dart';
-import 'package:wedu_mobile/core/cache/cache_local.dart';
-import 'package:wedu_mobile/core/cache/cache_providers.dart';
-import 'package:wedu_mobile/core/network/network_providers.dart';
+import 'package:wedu_mobile/core/cache/local_cache.dart';
 
 import 'helpers/fakes.dart';
+import 'helpers/session_harness.dart';
 
 void main() {
-  late ServidorFalso servidor;
-  late TokenStoreEmMemoria tokens;
-  late CacheEmMemoria cache;
+  late SessionHarness h;
 
-  setUpAll(() => initializeDateFormatting('pt_BR'));
+  setUpAll(initializeDateFormatting);
+  setUp(() => h = SessionHarness());
 
-  setUp(() {
-    servidor = ServidorFalso();
-    tokens = TokenStoreEmMemoria();
-    cache = CacheEmMemoria();
-    servidor
-      ..on('GET sync/versions', (_) => (200, versoesJson()))
-      ..on('GET institutions/current', (_) => (200, instituicaoJson()))
-      ..on('GET notifications/me/summary', (_) => (200, {'unread': 3, 'total': 5}))
-      ..on('GET notifications/me', (_) => (200, [avisoJson('a1')]))
-      ..on('GET school/my/agenda', (_) => (200, [agendaJson('ag1')]))
-      ..on('GET assessment/my/report-card', (_) => (200, [boletimJson()]))
-      ..on('GET guardians/me/dependents', (_) => (200, [dependenteJson()]))
-      ..on('GET social/my/vouchers', (_) => (200, <Object>[]))
-      ..on('GET access/me', (_) => (200, acessoJson()));
-  });
+  testWidgets('login recusado mostra a mensagem da API', (tester) => _rejectedLoginShowsApiMessage(tester, h));
+  testWidgets('aluno entra e vê as abas de aluno', (tester) => _studentSeesStudentTabs(tester, h));
+  testWidgets('responsável com sessão salva vê os dependentes', (tester) => _guardianWithSavedSessionSeesDependents(tester, h));
+  testWidgets('token expirado volta para o login', (tester) => _expiredTokenBackToLogin(tester, h));
+  testWidgets('sem rede, abre com a sessão e as telas salvas', (tester) => _offlineOpensSavedSessionAndScreens(tester, h));
+  testWidgets('versão igual à salva não baixa a tela de novo', (tester) => _sameVersionDoesNotRefetch(tester, h));
+  testWidgets('sair apaga o cache da conta', (tester) => _signOutClearsAccountCache(tester, h));
+  testWidgets('sessão salva com token recusado volta ao login e apaga o cache', (tester) => _rejectedSavedTokenClearsCache(tester, h));
+  testWidgets('aluno abre o QR do benefício liberado, mesmo sem rede', (tester) => _studentOpensBenefitQrOffline(tester, h));
+  testWidgets('sem benefício liberado, o início não mostra o cartão', (tester) => _noBenefitNoHomeCard(tester, h));
+  testWidgets(
+    'professor abre o QR de retirada da requisição aprovada, mesmo sem rede',
+    (tester) => _teacherOpensPickupQrOffline(tester, h),
+  );
+  testWidgets('sem permissão de requisitar, o início não mostra materiais', (tester) => _noRequestPermissionNoMaterials(tester, h));
+  testWidgets('em inglês, a tela segue o idioma', (tester) => _englishFollowsLocale(tester, h));
+}
 
-  Future<void> abrirApp(WidgetTester tester) async {
-    await tester.pumpWidget(ProviderScope(
-      retry: (_, _) => null,
-      overrides: [
-        tokenStoreProvider.overrideWithValue(tokens),
-        httpAdapterProvider.overrideWithValue(servidor),
-        cacheLocalProvider.overrideWithValue(cache),
-      ],
-      child: const WEduApp(),
-    ));
-    await tester.pumpAndSettle();
+Future<void> _rejectedLoginShowsApiMessage(WidgetTester tester, SessionHarness h) async {
+  h.server.on('POST auth/login', (_) => (401, {'detail': 'E-mail ou senha incorretos'}));
+  await h.openApp(tester);
+
+  await h.signIn(tester);
+
+  expect(find.text('E-mail ou senha incorretos'), findsOneWidget);
+  expect(h.tokens.current, isNull);
+}
+
+Future<void> _studentSeesStudentTabs(WidgetTester tester, SessionHarness h) async {
+  h.server
+    ..on('POST auth/login', (_) => (200, {'access_token': 't-1', 'token_type': 'bearer'}))
+    ..on('GET users/me', (_) => (200, userJson()));
+  await h.openApp(tester);
+
+  await h.signIn(tester);
+
+  expect(h.tokens.current, 't-1');
+  expect(find.text('Olá, Ana!'), findsOneWidget);
+  expect(find.text('Boletim'), findsOneWidget);
+  expect(find.text('Dependentes'), findsNothing);
+}
+
+Future<void> _guardianWithSavedSessionSeesDependents(WidgetTester tester, SessionHarness h) async {
+  h.tokens.current = 't-1';
+  h.server.on('GET users/me', (_) => (200, userJson(role: 'guardian')));
+  await h.openApp(tester);
+
+  expect(find.text('Olá, Ana!'), findsOneWidget);
+  expect(find.text('Boletim'), findsNothing);
+  await tester.tap(find.descendant(of: find.byType(NavigationBar), matching: find.text('Dependentes')));
+  await tester.pumpAndSettle();
+  expect(find.text('Bruno Souza'), findsWidgets);
+}
+
+Future<void> _expiredTokenBackToLogin(WidgetTester tester, SessionHarness h) async {
+  h.tokens.current = 'vencido';
+  h.server.on('GET users/me', (_) => (401, {'detail': 'Token inválido'}));
+  await h.openApp(tester);
+
+  expect(find.text('Entrar'), findsOneWidget);
+  expect(h.tokens.current, isNull);
+}
+
+Future<void> _offlineOpensSavedSessionAndScreens(WidgetTester tester, SessionHarness h) async {
+  h.tokens.current = 't-1';
+  const owner = 'i-1_u-1';
+  await h.cache.save('session', CacheEntry(null, {'user': userJson(), 'institution': institutionJson()}));
+  await h.cache.save('$owner/notices_summary', const CacheEntry(1, {'unread': 2, 'total': 2}));
+  await h.cache.save('$owner/agenda', CacheEntry(1, [agendaJson('ag1')]));
+  for (final route in [
+    'GET users/me',
+    'GET institutions/current',
+    'GET sync/versions',
+    'GET notifications/me/summary',
+    'GET school/my/agenda',
+  ]) {
+    h.server.on(route, (req) => throw offline(req));
   }
+  await h.openApp(tester);
 
-  Future<void> entrar(WidgetTester tester) async {
-    await tester.enterText(find.widgetWithText(TextFormField, 'E-mail'), 'ana@escola.example.com');
-    await tester.enterText(find.widgetWithText(TextFormField, 'Senha'), 'segredo123');
-    await tester.tap(find.text('Entrar'));
-    await tester.pumpAndSettle();
+  expect(find.text('Olá, Ana!'), findsOneWidget);
+  expect(find.text('2 sem ler'), findsOneWidget);
+  expect(find.textContaining('Prova bimestral'), findsOneWidget);
+}
+
+Future<void> _sameVersionDoesNotRefetch(WidgetTester tester, SessionHarness h) async {
+  h.tokens.current = 't-1';
+  h.server.on('GET users/me', (_) => (200, userJson()));
+  await h.cache.save('i-1_u-1/agenda', CacheEntry(1, [agendaJson('ag1')]));
+  await h.openApp(tester);
+
+  expect(find.textContaining('Prova bimestral'), findsOneWidget);
+  expect(h.server.count('GET school/my/agenda'), 0);
+  expect(h.server.count('GET notifications/me/summary'), 1);
+}
+
+Future<void> _signOutClearsAccountCache(WidgetTester tester, SessionHarness h) async {
+  h.tokens.current = 't-1';
+  h.server.on('GET users/me', (_) => (200, userJson()));
+  await h.openApp(tester);
+  expect(h.cache.entries, isNotEmpty);
+
+  await tester.tap(find.descendant(of: find.byType(NavigationBar), matching: find.text('Perfil')));
+  await tester.pumpAndSettle();
+  await tester.tap(find.text('Sair'));
+  await tester.pumpAndSettle();
+  await tester.tap(find.text('Sair').last);
+  await tester.pumpAndSettle();
+
+  expect(find.text('Entrar'), findsOneWidget);
+  expect(h.cache.entries, isEmpty);
+  expect(h.tokens.current, isNull);
+}
+
+Future<void> _rejectedSavedTokenClearsCache(WidgetTester tester, SessionHarness h) async {
+  h.tokens.current = 'vencido';
+  await h.cache.save('session', CacheEntry(null, {'user': userJson(), 'institution': institutionJson()}));
+  for (final route in ['GET users/me', 'GET sync/versions', 'GET notifications/me/summary', 'GET school/my/agenda']) {
+    h.server.on(route, (_) => (401, {'detail': 'Token inválido'}));
   }
+  await h.openApp(tester);
 
-  testWidgets('login recusado mostra a mensagem da API', (tester) async {
-    servidor.on('POST auth/login', (_) => (401, {'detail': 'E-mail ou senha incorretos'}));
-    await abrirApp(tester);
+  expect(find.text('Entrar'), findsOneWidget);
+  expect(h.tokens.current, isNull);
+  expect(h.cache.entries, isEmpty);
+}
 
-    await entrar(tester);
+Future<void> _studentOpensBenefitQrOffline(WidgetTester tester, SessionHarness h) async {
+  h.tokens.current = 't-1';
+  await h.cache.save('session', CacheEntry(null, {'user': userJson(), 'institution': institutionJson()}));
+  await h.cache.save(
+    'i-1_u-1/benefits',
+    CacheEntry(1, [benefitJson('1', validUntil: '2099-12-31'), benefitJson('2', status: 'redeemed', item: 'Kit', kind: 'material')]),
+  );
+  for (final route in [
+    'GET users/me',
+    'GET institutions/current',
+    'GET sync/versions',
+    'GET notifications/me/summary',
+    'GET school/my/agenda',
+    'GET social/my/vouchers',
+  ]) {
+    h.server.on(route, (req) => throw offline(req));
+  }
+  await h.openApp(tester);
 
-    expect(find.text('E-mail ou senha incorretos'), findsOneWidget);
-    expect(tokens.atual, isNull);
-  });
+  expect(find.text('1 para retirar'), findsOneWidget);
+  await tester.tap(find.text('Benefícios'));
+  await tester.pumpAndSettle();
+  expect(find.text('Retirado'), findsOneWidget);
+  expect(find.text('Material'), findsOneWidget);
+  await tester.tap(find.text('Mostrar QR'));
+  await tester.pumpAndSettle();
+  expect(find.byType(QrImageView), findsOneWidget);
+  expect(find.text('COD1'), findsOneWidget);
+}
 
-  testWidgets('aluno entra e vê as abas de aluno', (tester) async {
-    servidor
-      ..on('POST auth/login', (_) => (200, {'access_token': 't-1', 'token_type': 'bearer'}))
-      ..on('GET users/me', (_) => (200, usuarioJson()));
-    await abrirApp(tester);
+Future<void> _noBenefitNoHomeCard(WidgetTester tester, SessionHarness h) async {
+  h.tokens.current = 't-1';
+  h.server.on('GET users/me', (_) => (200, userJson()));
+  await h.openApp(tester);
+  expect(find.text('Olá, Ana!'), findsOneWidget);
+  expect(find.text('Benefícios'), findsNothing);
+}
 
-    await entrar(tester);
+Future<void> _teacherOpensPickupQrOffline(WidgetTester tester, SessionHarness h) async {
+  h.tokens.current = 't-1';
+  await h.cache.save(
+    'session',
+    CacheEntry(null, {
+      'user': userJson(role: 'instructor'),
+      'institution': institutionJson(),
+      'access': accessJson(permissions: ['warehouse.request']),
+    }),
+  );
+  await h.cache.save(
+    'i-1_u-1/material_requests',
+    CacheEntry(1, [materialRequestJson('r1', code: 'RET123'), materialRequestJson('r2', status: 'pending')]),
+  );
+  for (final route in [
+    'GET users/me',
+    'GET institutions/current',
+    'GET access/me',
+    'GET sync/versions',
+    'GET notifications/me/summary',
+    'GET warehouse/my/requests',
+  ]) {
+    h.server.on(route, (req) => throw offline(req));
+  }
+  await h.openApp(tester);
 
-    expect(tokens.atual, 't-1');
-    expect(find.text('Olá, Ana!'), findsOneWidget);
-    expect(find.text('Boletim'), findsOneWidget);
-    expect(find.text('Dependentes'), findsNothing);
-  });
+  expect(find.text('1 para retirar'), findsOneWidget);
+  await tester.tap(find.text('Requisições de material'));
+  await tester.pumpAndSettle();
+  expect(find.text('Aguardando aprovação'), findsOneWidget);
+  await tester.tap(find.text('QR de retirada'));
+  await tester.pumpAndSettle();
+  expect(find.byType(QrImageView), findsOneWidget);
+  expect(find.text('RET123'), findsOneWidget);
+}
 
-  testWidgets('responsável com sessão salva vê os dependentes', (tester) async {
-    tokens.atual = 't-1';
-    servidor.on('GET users/me', (_) => (200, usuarioJson(role: 'guardian')));
-    await abrirApp(tester);
+Future<void> _noRequestPermissionNoMaterials(WidgetTester tester, SessionHarness h) async {
+  h.tokens.current = 't-1';
+  h.server.on('GET users/me', (_) => (200, userJson()));
+  await h.openApp(tester);
+  expect(find.text('Olá, Ana!'), findsOneWidget);
+  expect(find.text('Requisições de material'), findsNothing);
+}
 
-    expect(find.text('Olá, Ana!'), findsOneWidget);
-    expect(find.text('Boletim'), findsNothing);
-    await tester.tap(find.descendant(of: find.byType(NavigationBar), matching: find.text('Dependentes')));
-    await tester.pumpAndSettle();
-    expect(find.text('Bruno Souza'), findsWidgets);
-  });
+Future<void> _englishFollowsLocale(WidgetTester tester, SessionHarness h) async {
+  h.tokens.current = 't-1';
+  h.server.on('GET users/me', (_) => (200, userJson()));
+  await h.openApp(tester, locale: const Locale('en'));
 
-  testWidgets('token expirado volta para o login', (tester) async {
-    tokens.atual = 'vencido';
-    servidor.on('GET users/me', (_) => (401, {'detail': 'Token inválido'}));
-    await abrirApp(tester);
-
-    expect(find.text('Entrar'), findsOneWidget);
-    expect(tokens.atual, isNull);
-  });
-
-  testWidgets('sem rede, abre com a sessão e as telas salvas', (tester) async {
-    tokens.atual = 't-1';
-    final dono = 'i-1_u-1';
-    await cache.salvar('sessao', EntradaCache(null, {'usuario': usuarioJson(), 'instituicao': instituicaoJson()}));
-    await cache.salvar('$dono/avisos_resumo', const EntradaCache(1, {'unread': 2, 'total': 2}));
-    await cache.salvar('$dono/agenda', EntradaCache(1, [agendaJson('ag1')]));
-    for (final rota in ['GET users/me', 'GET institutions/current', 'GET sync/versions', 'GET notifications/me/summary', 'GET school/my/agenda']) {
-      servidor.on(rota, (req) => throw semRede(req));
-    }
-    await abrirApp(tester);
-
-    expect(find.text('Olá, Ana!'), findsOneWidget);
-    expect(find.text('2 sem ler'), findsOneWidget);
-    expect(find.textContaining('Prova bimestral'), findsOneWidget);
-  });
-
-  testWidgets('versão igual à salva não baixa a tela de novo', (tester) async {
-    tokens.atual = 't-1';
-    servidor.on('GET users/me', (_) => (200, usuarioJson()));
-    await cache.salvar('i-1_u-1/agenda', EntradaCache(1, [agendaJson('ag1')]));
-    await abrirApp(tester);
-
-    expect(find.textContaining('Prova bimestral'), findsOneWidget);
-    expect(servidor.contar('GET school/my/agenda'), 0);
-    expect(servidor.contar('GET notifications/me/summary'), 1);
-  });
-
-  testWidgets('sair apaga o cache da conta', (tester) async {
-    tokens.atual = 't-1';
-    servidor.on('GET users/me', (_) => (200, usuarioJson()));
-    await abrirApp(tester);
-    expect(cache.entradas, isNotEmpty);
-
-    await tester.tap(find.descendant(of: find.byType(NavigationBar), matching: find.text('Perfil')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Sair'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Sair').last);
-    await tester.pumpAndSettle();
-
-    expect(find.text('Entrar'), findsOneWidget);
-    expect(cache.entradas, isEmpty);
-    expect(tokens.atual, isNull);
-  });
-
-  testWidgets('sessão salva com token recusado volta ao login e apaga o cache', (tester) async {
-    tokens.atual = 'vencido';
-    await cache.salvar('sessao', EntradaCache(null, {'usuario': usuarioJson(), 'instituicao': instituicaoJson()}));
-    for (final rota in ['GET users/me', 'GET sync/versions', 'GET notifications/me/summary', 'GET school/my/agenda']) {
-      servidor.on(rota, (_) => (401, {'detail': 'Token inválido'}));
-    }
-    await abrirApp(tester);
-
-    expect(find.text('Entrar'), findsOneWidget);
-    expect(tokens.atual, isNull);
-    expect(cache.entradas, isEmpty);
-  });
-
-  testWidgets('aluno abre o QR do benefício liberado, mesmo sem rede', (tester) async {
-    tokens.atual = 't-1';
-    await cache.salvar('sessao', EntradaCache(null, {'usuario': usuarioJson(), 'instituicao': instituicaoJson()}));
-    await cache.salvar('i-1_u-1/beneficios', EntradaCache(1, [beneficioJson('1', validoAte: '2099-12-31'), beneficioJson('2', status: 'redeemed', item: 'Kit', tipo: 'material')]));
-    for (final rota in ['GET users/me', 'GET institutions/current', 'GET sync/versions', 'GET notifications/me/summary', 'GET school/my/agenda', 'GET social/my/vouchers']) {
-      servidor.on(rota, (req) => throw semRede(req));
-    }
-    await abrirApp(tester);
-
-    expect(find.text('1 para retirar'), findsOneWidget);
-    await tester.tap(find.text('Benefícios'));
-    await tester.pumpAndSettle();
-    expect(find.text('Retirado'), findsOneWidget);
-    expect(find.text('Material'), findsOneWidget);
-    await tester.tap(find.text('Mostrar QR'));
-    await tester.pumpAndSettle();
-    expect(find.byType(QrImageView), findsOneWidget);
-    expect(find.text('COD1'), findsOneWidget);
-  });
-
-  testWidgets('sem benefício liberado, o início não mostra o cartão', (tester) async {
-    tokens.atual = 't-1';
-    servidor.on('GET users/me', (_) => (200, usuarioJson()));
-    await abrirApp(tester);
-    expect(find.text('Olá, Ana!'), findsOneWidget);
-    expect(find.text('Benefícios'), findsNothing);
-  });
-
-  testWidgets('professor abre o QR de retirada da requisição aprovada, mesmo sem rede', (tester) async {
-    tokens.atual = 't-1';
-    await cache.salvar('sessao', EntradaCache(null, {
-      'usuario': usuarioJson(role: 'instructor'),
-      'instituicao': instituicaoJson(),
-      'acesso': acessoJson(permissoes: ['warehouse.request']),
-    }));
-    await cache.salvar('i-1_u-1/requisicoes', EntradaCache(1, [requisicaoJson('r1', codigo: 'RET123'), requisicaoJson('r2', status: 'pending')]));
-    for (final rota in ['GET users/me', 'GET institutions/current', 'GET access/me', 'GET sync/versions', 'GET notifications/me/summary', 'GET warehouse/my/requests']) {
-      servidor.on(rota, (req) => throw semRede(req));
-    }
-    await abrirApp(tester);
-
-    expect(find.text('1 para retirar'), findsOneWidget);
-    await tester.tap(find.text('Requisições de material'));
-    await tester.pumpAndSettle();
-    expect(find.text('Aguardando aprovação'), findsOneWidget);
-    await tester.tap(find.text('QR de retirada'));
-    await tester.pumpAndSettle();
-    expect(find.byType(QrImageView), findsOneWidget);
-    expect(find.text('RET123'), findsOneWidget);
-  });
-
-  testWidgets('sem permissão de requisitar, o início não mostra materiais', (tester) async {
-    tokens.atual = 't-1';
-    servidor.on('GET users/me', (_) => (200, usuarioJson()));
-    await abrirApp(tester);
-    expect(find.text('Olá, Ana!'), findsOneWidget);
-    expect(find.text('Requisições de material'), findsNothing);
-  });
+  expect(find.text('Hi, Ana!'), findsOneWidget);
+  expect(find.text('Report card'), findsOneWidget);
+  expect(find.text('Boletim'), findsNothing);
 }

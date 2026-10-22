@@ -311,3 +311,12 @@ A caixa lista os eventos internos ja entregues ao usuario na instituicao ativa; 
 | Financeiro | Nao | Nao | Nao | Empresa propria | Sim |
 | Documentos/GED | Nao | Nao | Nao | Empresa propria | Sim |
 | Analytics operacional/corporativo | Proprio | Nao | Nao | Empresa propria | Sim |
+
+## Integração com o Persona (`/integrations/persona`, `/auth/facial-login`)
+
+| Recurso | Permissao |
+| --- | --- |
+| Login facial (`POST /auth/facial-login`) | publico; vale so mensagem assinada pelo Persona com `typ=facial_login` |
+| Aviso de passagem na catraca (`POST /integrations/persona/gate-events`) | publico; vale so mensagem assinada pelo Persona com `typ=gate_event` |
+| Fins de vinculo da instituicao (`GET /integrations/persona/membership-events`) | `academic.manage` (conta de servico do Persona) |
+| Alunos da turma para a chamada facial (`GET /assessment/offerings/{id}/roster`) | `teaching.access`, so turmas que ministra (salvo coordenacao) |

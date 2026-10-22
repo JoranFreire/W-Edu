@@ -1,0 +1,139 @@
+{
+  "attendanceTitle": "Chamada facial",
+  "attendanceNoClasses": "Nenhuma turma para você.",
+  "attendanceChooseMeeting": "Escolha o encontro",
+  "attendanceNoMeetings": "Nenhum encontro aberto nesta turma.",
+  "attendanceOpening": "Abrindo a chamada…",
+  "attendanceAnalyzing": "Analisando as fotos…",
+  "attendanceSaving": "Gravando a chamada…",
+  "attendanceOffline": "Sem internet agora. Você pode fotografar a sala: as fotos ficam guardadas (cifradas) no aparelho e a chamada é analisada quando a rede voltar.",
+  "attendancePhotographLater": "Fotografar e enviar depois",
+  "attendancePhotosSaved": "{count, plural, =1{1 foto guardada} other{{count} fotos guardadas}}. Quando a internet voltar, abra a Chamada facial para enviar e revisar.",
+  "@attendancePhotosSaved": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "attendanceConfirmed": "Chamada registrada: {present} presente(s) de {total}.",
+  "@attendanceConfirmed": {
+    "placeholders": {
+      "present": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "attendanceBackToMeetings": "Voltar aos encontros",
+  "attendanceNotTeaching": "Você não ministra esta turma.",
+  "attendanceOpenFailed": "Não foi possível abrir a chamada.",
+  "attendanceCameraUnavailable": "Não foi possível abrir a câmera.",
+  "attendanceNotPending": "Esta chamada não está mais guardada no aparelho.",
+  "attendanceStillOffline": "Ainda sem internet: as fotos continuam guardadas para enviar depois.",
+  "attendanceStillProcessing": "As fotos ainda estão sendo analisadas. Tente de novo em instantes.",
+  "attendanceAnalysisFailed": "Não foi possível analisar as fotos.",
+  "attendancePhotoFailed": "Não foi possível enviar a foto.",
+  "attendanceConfirmFailed": "Não foi possível gravar a chamada.",
+  "angleLeft": "Lado esquerdo",
+  "angleCenter": "Centro",
+  "angleRight": "Lado direito",
+  "attendanceOfflineHint": "Sem internet: as fotos ficam guardadas (cifradas) e a chamada é analisada quando a rede voltar.",
+  "attendanceWithConsent": "{count} aluno(s) com reconhecimento autorizado",
+  "@attendanceWithConsent": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "attendanceWithoutConsent": " · {count} sem (você marca na revisão)",
+  "@attendanceWithoutConsent": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "attendanceAnalyze": "Analisar {count, plural, =1{1 foto} other{{count} fotos}}",
+  "@attendanceAnalyze": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "attendanceStore": "Guardar {count, plural, =1{1 foto} other{{count} fotos}}",
+  "@attendanceStore": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "outcomePresent": "Reconhecidos",
+  "outcomeUncertain": "Conferir",
+  "outcomeAbsent": "Não encontrados nas fotos",
+  "outcomeWithoutConsent": "Sem reconhecimento autorizado (marque à mão)",
+  "outcomeSection": "{title} ({count})",
+  "@outcomeSection": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "inThePhoto": "Na foto",
+  "attendanceConfirm": "Confirmar chamada: {present} presente(s) de {total}",
+  "@attendanceConfirm": {
+    "placeholders": {
+      "present": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "pendingDiscardTitle": "Descartar esta chamada?",
+  "pendingDiscardBody": "As fotos de {title} serão apagadas do aparelho, sem enviar.",
+  "@pendingDiscardBody": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "discard": "Descartar",
+  "pendingStored": "Chamadas guardadas no aparelho ({count})",
+  "@pendingStored": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sendNow": "Enviar agora",
+  "pendingSummary": "{count, plural, =1{1 foto} other{{count} fotos}} · {date} · {state}",
+  "@pendingSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "date": {
+        "type": "String"
+      },
+      "state": {
+        "type": "String"
+      }
+    }
+  },
+  "pendingReady": "pronta para revisar",
+  "pendingWaiting": "aguardando internet",
+  "enrollmentPhoto": "Cadastro"
+}

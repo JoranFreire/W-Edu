@@ -90,6 +90,20 @@ SMTP_FROM_EMAIL=noreply@exemplo.com
 SMTP_USE_TLS=true
 ```
 
+### Login facial (Persona)
+
+O app pode entrar com o rosto: o Persona confere a pessoa e assina um assertion curto (Ed25519), que a API troca pelo token. Configure a chave pública do Persona (32 bytes em base64url); vazia, `POST /auth/facial-login` fica desativado:
+
+```env
+PERSONA_ASSERTION_PUBLIC_KEY=
+```
+
+A data de nascimento no cadastro do usuário decide quem autoriza o uso do rosto: a partir de 16 anos a própria pessoa autoriza login e catraca (abaixo disso, o responsável), e a presença facial exige 18. Sem a data, a pessoa é tratada como menor de 16.
+
+A mesma chave confere os **avisos de passagem na catraca**: o Persona envia `POST /integrations/persona/gate-events` (mensagem assinada com `typ=gate_event`); o W-Edu registra a passagem uma vez só e avisa o aluno e os responsáveis na caixa de avisos. Os horários dos avisos saem no fuso `DISPLAY_TIMEZONE` (padrão `America/Sao_Paulo`).
+
+Em cada instituição que usa o Persona, crie uma **conta de serviço** de coordenação e configure o e-mail e a senha dela no Persona. Ela devolve a chamada facial (`POST /schedule/meetings/{id}/attendance`) e lê os **fins de vínculo** (`GET /integrations/persona/membership-events?since=<último horário visto>`), para o Persona tirar da catraca quem saiu da instituição ou teve a conta desativada.
+
 ### Multi-instituição
 
 Instituição por subdomínio (ex.: `escola.wedu.com.br`): configure DNS curinga `*.wedu.com.br`, inclua `*.wedu.com.br` no `server_name` do nginx (e no certificado TLS) e defina:

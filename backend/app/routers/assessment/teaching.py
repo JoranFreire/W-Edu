@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.dependencies import get_current_admin_or_coordinator, get_current_teaching_staff
 from app.models.student import Student
+from app.schemas.academic_groups import PersonSummary
 from app.schemas.assessment import SyncEnrollmentsResult, TeachingOfferingOut
 from app.services.assessment import TeachingOfferingService
 
@@ -20,6 +21,12 @@ def list_teaching_offerings(db: Session = Depends(get_db), current: Student = De
 @router.get("/offerings/{offering_id}", response_model=TeachingOfferingOut)
 def get_teaching_offering(offering_id: UUID, db: Session = Depends(get_db), current: Student = Depends(get_current_teaching_staff)):
     return TeachingOfferingService(db).get_for_teaching(offering_id, current)
+
+
+@router.get("/offerings/{offering_id}/roster", response_model=list[PersonSummary])
+def get_teaching_roster(offering_id: UUID, db: Session = Depends(get_db), current: Student = Depends(get_current_teaching_staff)):
+    """Alunos da turma para quem a ministra (usado pela chamada facial do Persona)."""
+    return TeachingOfferingService(db).roster_for_teaching(offering_id, current)
 
 
 @router.post("/offerings/{offering_id}/sync-group-enrollments", response_model=SyncEnrollmentsResult)

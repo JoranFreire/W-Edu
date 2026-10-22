@@ -6,7 +6,7 @@ from app.models.academic_groups import ClassGroup, ClassGroupMember
 from app.models.assessment import GradingScheme, PeriodResult
 from app.models.guardians import StudentGuardian
 from app.models.notification import NotificationEvent
-from app.models.schedule import ClassEnrollment, ClassOffering
+from app.models.schedule import ClassEnrollment, ClassOffering, ScheduledMeeting
 from app.models.social_programs import BenefitItem, BenefitVoucher
 from app.models.school_life import AgendaItem
 from app.models.student import Student
@@ -18,14 +18,16 @@ REPORT_CARD = "report_card"
 DEPENDENTS = "dependents"
 BENEFITS = "benefits"
 MATERIALS = "materials"
+# Turmas e encontros de quem ministra: a chamada facial escolhe o encontro mesmo sem rede.
+TEACHING = "teaching"
 
-AREAS = (NOTIFICATIONS, AGENDA, REPORT_CARD, DEPENDENTS, BENEFITS, MATERIALS)
+AREAS = (NOTIFICATIONS, AGENDA, REPORT_CARD, DEPENDENTS, BENEFITS, MATERIALS, TEACHING)
 
 track(NotificationEvent, NOTIFICATIONS)
 track(AgendaItem, AGENDA)
 track(ClassGroup, AGENDA)
 track(ClassGroupMember, AGENDA)
-track(ClassOffering, AGENDA, REPORT_CARD, BENEFITS)
+track(ClassOffering, AGENDA, REPORT_CARD, BENEFITS, TEACHING)
 track(ClassEnrollment, REPORT_CARD)
 track(PeriodResult, REPORT_CARD)
 track(GradingPeriod, REPORT_CARD)
@@ -39,3 +41,4 @@ track(MaterialRequest, MATERIALS)
 track(MaterialRequestLine, MATERIALS)
 track(MaterialReturn, MATERIALS)
 track(WarehouseItem, MATERIALS, columns=("name", "unit", "kind"))
+track(ScheduledMeeting, TEACHING)

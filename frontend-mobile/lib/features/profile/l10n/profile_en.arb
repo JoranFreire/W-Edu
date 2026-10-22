@@ -1,0 +1,21 @@
+{
+  "profileTitle": "Profile",
+  "profileEmail": "Email",
+  "profileRole": "{count, plural, =1{Role} other{Roles}}",
+  "profileInstitution": "Institution",
+  "profileFaceRecognition": "Face recognition",
+  "profileFaceRecognitionHint": "Face sign-in, turnstile and attendance: consents and face enrollment",
+  "signOut": "Sign out",
+  "signOutTitle": "Sign out?",
+  "signOutBody": "You will need to sign in again with email and password.",
+  "signOutPendingAttendance": "{count, plural, =1{There is 1 attendance with photos not yet sent: it will be deleted from the device.} other{There are {count} attendances with photos not yet sent: they will be deleted from the device.}}",
+  "roleStudent": "Student",
+  "roleInstructor": "Instructor",
+  "roleCoordinator": "Coordinator",
+  "roleSecretary": "School office",
+  "roleGuardian": "Guardian",
+  "roleCompanyManager": "Company manager",
+  "roleInstitutionAdmin": "Institution admin",
+  "roleAdmin": "Admin",
+  "roleSuperAdmin": "Platform admin"
+}

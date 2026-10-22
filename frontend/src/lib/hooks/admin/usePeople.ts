@@ -12,6 +12,7 @@ export interface NewUserInput {
   role: UserRole;
   roles: UserRole[];
   organization_id: string | null;
+  birth_date: string | null;
 }
 
 export interface UserUpdateInput {
@@ -21,6 +22,8 @@ export interface UserUpdateInput {
   roles: UserRole[];
   organization_id: string | null;
   is_active: boolean;
+  /** Nulo mantem a data atual. */
+  birth_date: string | null;
 }
 
 export interface OrganizationInput {

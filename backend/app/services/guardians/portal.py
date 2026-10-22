@@ -31,7 +31,8 @@ class GuardianPortalService:
         return [
             DependentOut(
                 link_id=link.id, student=PersonSummary.model_validate(link.student), relationship_kind=link.relationship_kind,
-                is_financial=link.is_financial, can_pick_up=link.can_pick_up,
+                is_financial=link.is_financial, can_pick_up=link.can_pick_up, student_is_adult=link.student.is_adult,
+                student_is_16_or_older=link.student.is_16_or_older,
             )
             for link in self.repo.list_by_guardian(guardian.id)
         ]

@@ -1,0 +1,21 @@
+{
+  "benefitsTitle": "Benefits",
+  "benefitsEmpty": "No benefits released.",
+  "benefitStatusReleased": "Released",
+  "benefitStatusRedeemed": "Picked up",
+  "benefitStatusCancelled": "Cancelled",
+  "benefitStatusExpired": "Expired",
+  "benefitKindSnack": "Snack",
+  "benefitKindMaterial": "Material",
+  "benefitKindUniform": "Uniform",
+  "benefitKindTransport": "Transport",
+  "benefitKindStipend": "Stipend",
+  "benefitKindOther": "Other",
+  "benefitRedeemedOn": "Picked up on {date}",
+  "benefitPickUpBy": "Pick up by {date}",
+  "benefitReleasedOn": "Released on {date}",
+  "showQr": "Show QR code",
+  "benefitNoExpiry": "No expiry date",
+  "benefitValidUntil": "Valid until {date}",
+  "benefitQrFooter": "{validity}\nShow this QR code at pickup."
+}

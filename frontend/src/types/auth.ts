@@ -54,6 +54,10 @@ export interface Student {
   roles?: UserRole[];
   organization_id: string | null;
   is_active: boolean;
+  /** AAAA-MM-DD; define a maioridade. */
+  birth_date?: string | null;
+  /** Calculado no backend a partir de `birth_date` (sem data = falso). */
+  is_adult?: boolean;
   created_at: string;
 }
 

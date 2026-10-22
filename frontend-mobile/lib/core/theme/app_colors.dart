@@ -25,14 +25,14 @@ class AppColors {
 }
 
 /// As cores dos selos (`StatusBadge`/selos do web).
-enum BadgeCor {
-  azul(AppColors.sky600),
-  verde(AppColors.emerald600),
-  amarelo(AppColors.amber700),
-  vermelho(AppColors.red600),
-  cinza(AppColors.gray500),
-  roxo(AppColors.violet600);
+enum BadgeColor {
+  blue(AppColors.sky600),
+  green(AppColors.emerald600),
+  yellow(AppColors.amber700),
+  red(AppColors.red600),
+  gray(AppColors.gray500),
+  purple(AppColors.violet600);
 
-  const BadgeCor(this.cor);
-  final Color cor;
+  const BadgeColor(this.color);
+  final Color color;
 }

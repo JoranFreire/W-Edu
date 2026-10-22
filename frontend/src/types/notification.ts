@@ -15,7 +15,8 @@ export type NotificationEventType =
   | 'activity_reviewed'
   | 'admission_called'
   | 'absence_dismissal'
-  | 'material_request_decided';
+  | 'material_request_decided'
+  | 'gate_passage';
 
 export interface NotificationTemplate {
   id: string;

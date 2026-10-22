@@ -1,0 +1,20 @@
+{
+  "appTitle": "W-Edu",
+  "errorGeneric": "Something went wrong.",
+  "errorNoConnection": "No connection to the server. Check your internet.",
+  "errorTimeout": "The server took too long to respond.",
+  "tryAgain": "Try again",
+  "back": "Back",
+  "cancel": "Cancel",
+  "keep": "Keep",
+  "close": "Close",
+  "errorLoad": "Could not load.",
+  "errorRefresh": "Could not refresh.",
+  "faceStepCenter": "Look at the camera",
+  "faceStepTurnLeft": "Turn your face to the left",
+  "faceStepTurnRight": "Turn your face to the right",
+  "faceStepProgress": "Step {current} of {total}",
+  "qrSemanticLabel": "QR code for {title}",
+  "openingCamera": "Opening the camera…",
+  "start": "Start"
+}

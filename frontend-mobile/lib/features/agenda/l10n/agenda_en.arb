@@ -1,0 +1,8 @@
+{
+  "agendaTitle": "School agenda",
+  "agendaEmpty": "Nothing on the agenda yet.",
+  "agendaKindHomework": "Homework",
+  "agendaKindTest": "Test",
+  "agendaKindEvent": "Event",
+  "agendaKindNotice": "Notice"
+}

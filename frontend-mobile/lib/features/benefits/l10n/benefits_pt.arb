@@ -1,0 +1,56 @@
+{
+  "benefitsTitle": "Benefícios",
+  "benefitsEmpty": "Nenhum benefício liberado.",
+  "benefitStatusReleased": "Liberado",
+  "benefitStatusRedeemed": "Retirado",
+  "benefitStatusCancelled": "Cancelado",
+  "benefitStatusExpired": "Vencido",
+  "benefitKindSnack": "Lanche",
+  "benefitKindMaterial": "Material",
+  "benefitKindUniform": "Uniforme",
+  "benefitKindTransport": "Transporte",
+  "benefitKindStipend": "Auxílio financeiro",
+  "benefitKindOther": "Outro",
+  "benefitRedeemedOn": "Retirado em {date}",
+  "@benefitRedeemedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "benefitPickUpBy": "Retire até {date}",
+  "@benefitPickUpBy": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "benefitReleasedOn": "Liberado em {date}",
+  "@benefitReleasedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "showQr": "Mostrar QR",
+  "benefitNoExpiry": "Sem data de validade",
+  "benefitValidUntil": "Válido até {date}",
+  "@benefitValidUntil": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "benefitQrFooter": "{validity}\nMostre este QR na retirada.",
+  "@benefitQrFooter": {
+    "placeholders": {
+      "validity": {
+        "type": "String"
+      }
+    }
+  }
+}

@@ -3,83 +3,99 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/cache/cache_providers.dart';
 import '../../core/network/network_providers.dart';
+import '../../shared/vault/vault_providers.dart';
 import 'data/auth_repository.dart';
-import 'data/usuario.dart';
+import 'data/remembered_account.dart';
+import 'data/user.dart';
 
 final authRepositoryProvider = Provider<AuthRepository>(
-  (ref) => AuthRepository(ref.watch(dioProvider), ref.watch(tokenStoreProvider), ref.watch(cacheLocalProvider)),
+  (ref) =>
+      AuthRepository(ref.watch(dioProvider), ref.watch(tokenStoreProvider), ref.watch(localCacheProvider), ref.watch(fileVaultProvider)),
 );
+
+final rememberedAccountStoreProvider = Provider<RememberedAccountStore>((ref) => SecureRememberedAccountStore());
+
+/// A conta que pode entrar com o rosto neste aparelho (nula: só senha).
+final rememberedAccountProvider = FutureProvider<RememberedAccount?>((ref) => ref.watch(rememberedAccountStoreProvider).read());
 
 /// Quem está logado. `null` é "ninguém"; carregando é "ainda não sei" (o app
 /// acabou de abrir e está conferindo o token salvo); erro é "não consegui
 /// conferir" — sem rede, por exemplo, e aí a pessoa não deve ser jogada no
 /// login só porque o servidor não respondeu.
-final authProvider = AsyncNotifierProvider<AuthNotifier, Usuario?>(AuthNotifier.new);
+final authProvider = AsyncNotifierProvider<AuthNotifier, User?>(AuthNotifier.new);
 
-class AuthNotifier extends AsyncNotifier<Usuario?> {
+class AuthNotifier extends AsyncNotifier<User?> {
   @override
-  Future<Usuario?> build() async {
+  Future<User?> build() async {
     final repo = ref.read(authRepositoryProvider);
     // A API recusou o token em alguma requisição: a sessão acabou (e o cache dela).
-    ref.listen(sessaoExpiradaProvider, (_, _) {
-      repo.sair();
+    ref.listen(sessionExpiredProvider, (_, _) {
+      repo.signOut();
       state = const AsyncData(null);
     });
 
-    if (!await repo.temSessao()) return null;
+    if (!await repo.hasSession()) return null;
 
     // Com a sessão salva, abre na hora (inclusive offline) e confere em segundo plano.
-    final salva = await repo.sessaoSalva();
-    if (salva != null) {
-      _conferir(repo);
-      return salva;
+    final saved = await repo.savedSession();
+    if (saved != null) {
+      _revalidate(repo);
+      return saved;
     }
 
     try {
-      return await repo.eu();
+      return await repo.me();
     } on DioException catch (e) {
       if (e.response?.statusCode != 401) rethrow;
-      await repo.sair();
+      await repo.signOut();
       return null;
     }
   }
 
   /// Atualiza nome, papéis e instituição. Sem rede, fica com a salva; token
   /// recusado cai no aviso de sessão expirada (acima).
-  Future<void> _conferir(AuthRepository repo) async {
+  Future<void> _revalidate(AuthRepository repo) async {
     try {
-      final usuario = await repo.eu();
-      if (ref.mounted) state = AsyncData(usuario);
+      final user = await repo.me();
+      if (ref.mounted) state = AsyncData(user);
     } on Object {
       // Mantém a sessão salva.
     }
   }
 
   /// Lança o erro da API em caso de falha — a tela de login mostra o motivo.
-  Future<void> entrar(String email, String senha) async {
-    final usuario = await ref.read(authRepositoryProvider).entrar(email, senha);
-    state = AsyncData(usuario);
+  Future<void> signIn(String email, String password) => _signedIn(ref.read(authRepositoryProvider).signIn(email, password));
+
+  /// Com o assertion do Persona (rosto conferido); falha igual ao login com senha.
+  Future<void> signInWithFace(String assertion) => _signedIn(ref.read(authRepositoryProvider).signInWithFace(assertion));
+
+  /// Lembra a conta para o próximo login facial.
+  Future<void> _signedIn(Future<User> signIn) async {
+    final user = await signIn;
+    await ref.read(rememberedAccountStoreProvider).save(RememberedAccount.of(user));
+    ref.invalidate(rememberedAccountProvider);
+    state = AsyncData(user);
   }
 
-  Future<void> sair() async {
-    await ref.read(authRepositoryProvider).sair();
+  Future<void> signOut() async {
+    await ref.read(authRepositoryProvider).signOut();
     state = const AsyncData(null);
   }
 }
 
 /// Dono do cache das telas: cada conta (e instituição) tem o seu.
-final donoDoCacheProvider = Provider<String>((ref) => ref.watch(usuarioProvider.select((usuario) => usuario.chaveDoCache)));
+final cacheOwnerProvider = Provider<String>((ref) => ref.watch(currentUserProvider.select((user) => user.cacheOwner)));
 
 /// Atalho para as telas que só existem com alguém logado.
-final usuarioProvider = NotifierProvider<UsuarioLogado, Usuario>(UsuarioLogado.new);
+final currentUserProvider = NotifierProvider<CurrentUser, User>(CurrentUser.new);
 
-class UsuarioLogado extends Notifier<Usuario> {
+class CurrentUser extends Notifier<User> {
   @override
-  Usuario build() {
+  User build() {
     // Ao sair, as telas logadas ainda desenham um frame antes de o router
     // tirá-las da tela. Nesse frame elas veem o último usuário, não um erro.
-    final usuario = ref.watch(authProvider).value ?? stateOrNull;
-    if (usuario == null) throw StateError('Tela autenticada sem ninguém logado.');
-    return usuario;
+    final user = ref.watch(authProvider).value ?? stateOrNull;
+    if (user == null) throw StateError('Authenticated screen without a signed-in user.');
+    return user;
   }
 }

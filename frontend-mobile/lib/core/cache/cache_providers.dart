@@ -1,19 +1,19 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../network/network_providers.dart';
-import 'cache_local.dart';
-import 'sincronizador.dart';
-import 'versoes_repository.dart';
+import 'local_cache.dart';
+import 'synchronizer.dart';
+import 'versions_repository.dart';
 
 /// Nos testes, troca-se por um cache em memória.
-final cacheLocalProvider = Provider<CacheLocal>((ref) => CacheEmArquivo());
+final localCacheProvider = Provider<LocalCache>((ref) => FileCache());
 
-final sincronizadorProvider = Provider<Sincronizador>((ref) => Sincronizador(ref.watch(cacheLocalProvider)));
+final synchronizerProvider = Provider<Synchronizer>((ref) => Synchronizer(ref.watch(localCacheProvider)));
 
-final versoesRepositoryProvider = Provider<VersoesRepository>((ref) => VersoesRepository(ref.watch(dioProvider)));
+final versionsRepositoryProvider = Provider<VersionsRepository>((ref) => VersionsRepository(ref.watch(dioProvider)));
 
-/// Versões das áreas para a conta [dono]. Uma consulta serve a todas as telas;
+/// Versões das áreas para a conta [owner]. Uma consulta serve a todas as telas;
 /// invalidar (ao voltar para o app, ao atualizar) faz cada tela conferir de novo.
-final versoesRemotasProvider = FutureProvider.autoDispose.family<Map<String, int>, String>(
-  (ref, dono) => ref.watch(versoesRepositoryProvider).atuais(),
+final remoteVersionsProvider = FutureProvider.autoDispose.family<Map<String, int>, String>(
+  (ref, owner) => ref.watch(versionsRepositoryProvider).current(),
 );

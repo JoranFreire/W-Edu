@@ -7,7 +7,7 @@ import 'core/network/retry.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await initializeDateFormatting('pt_BR');
+  await initializeDateFormatting();
 
-  runApp(const ProviderScope(retry: repetirSoFalhaDeRede, child: WEduApp()));
+  runApp(const ProviderScope(retry: retryOnlyNetworkErrors, child: WEduApp()));
 }
