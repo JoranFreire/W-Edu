@@ -14,10 +14,15 @@ import 'package:wedu_mobile/l10n/l10n.dart';
 
 import '../helpers/fakes.dart';
 
-void main() {
-  final pt = lookupAppLocalizations(const Locale('pt'));
-  final en = lookupAppLocalizations(const Locale('en'));
+final pt = lookupAppLocalizations(const Locale('pt'));
+final en = lookupAppLocalizations(const Locale('en'));
 
+void main() {
+  group('conta, instituição e permissões', _accountModels);
+  group('telas do aluno e do responsável', _screenModels);
+}
+
+void _accountModels() {
   test('instituição usa o nome exibido e a cor da marca', () {
     final institution = Institution.fromJson(institutionJson());
     expect(institution.name, 'Colégio Alfa');
@@ -34,6 +39,13 @@ void main() {
     expect(user.firstName, 'Ana');
   });
 
+  test('permissões vêm do acesso', () {
+    final user = User.fromJson(userJson(role: 'instructor'), Institution.fromJson(institutionJson()), permissions: ['warehouse.request']);
+    expect(user.canRequestMaterials, isTrue);
+  });
+}
+
+void _screenModels() {
   test('aviso lido e não lido', () {
     expect(Notice.fromJson(noticeJson('a1')).isRead, isFalse);
     expect(Notice.fromJson(noticeJson('a1')).markedAsRead().isRead, isTrue);
@@ -82,10 +94,5 @@ void main() {
     expect(list.first.isReadyForPickup, isTrue);
     expect(lineSummary(list.first.lines.single, pt), 'Papel A4: 2 resma');
     expect(list.last.status, MaterialRequestStatus.pending);
-  });
-
-  test('permissões vêm do acesso', () {
-    final user = User.fromJson(userJson(role: 'instructor'), Institution.fromJson(institutionJson()), permissions: ['warehouse.request']);
-    expect(user.canRequestMaterials, isTrue);
   });
 }

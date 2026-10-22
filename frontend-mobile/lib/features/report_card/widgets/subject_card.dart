@@ -15,7 +15,6 @@ class SubjectCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = context.l10n;
-    final label = theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.onSurfaceVariant);
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -29,38 +28,66 @@ class SubjectCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 12),
-            if (subject.periods.isEmpty)
-              Text(l10n.reportCardNoPeriods, style: label)
-            else
-              Wrap(
-                spacing: 16,
-                runSpacing: 8,
-                children: [
-                  for (final period in subject.periods)
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(period.name, style: label),
-                        Text(period.average == null ? '—' : formatGrade(period.average!), style: theme.textTheme.titleMedium),
-                        Text(l10n.reportCardAbsences(period.absences), style: label),
-                      ],
-                    ),
-                ],
-              ),
+            _PeriodGrades(subject: subject),
             const Divider(height: 24),
-            Wrap(
-              spacing: 16,
-              runSpacing: 4,
-              children: [
-                if (subject.finalGrade != null) Text(l10n.reportCardFinalGrade(formatGrade(subject.finalGrade!))),
-                if (subject.recoveryScore != null) Text(l10n.reportCardRecovery(formatGrade(subject.recoveryScore!))),
-                if (subject.attendanceRate != null) Text(l10n.reportCardAttendance(formatPercent(subject.attendanceRate!))),
-                Text(l10n.reportCardPassingGrade(formatGrade(subject.passingGrade)), style: label),
-              ],
-            ),
+            _Totals(subject: subject),
           ],
         ),
       ),
+    );
+  }
+}
+
+TextStyle? _labelStyle(ThemeData theme) => theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.onSurfaceVariant);
+
+/// Média e faltas de cada etapa.
+class _PeriodGrades extends StatelessWidget {
+  const _PeriodGrades({required this.subject});
+
+  final ReportCardSubject subject;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = context.l10n;
+    final label = _labelStyle(theme);
+    if (subject.periods.isEmpty) return Text(l10n.reportCardNoPeriods, style: label);
+    return Wrap(
+      spacing: 16,
+      runSpacing: 8,
+      children: [
+        for (final period in subject.periods)
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(period.name, style: label),
+              Text(period.average == null ? '—' : formatGrade(period.average!), style: theme.textTheme.titleMedium),
+              Text(l10n.reportCardAbsences(period.absences), style: label),
+            ],
+          ),
+      ],
+    );
+  }
+}
+
+/// Nota final, recuperação, frequência e a média para passar.
+class _Totals extends StatelessWidget {
+  const _Totals({required this.subject});
+
+  final ReportCardSubject subject;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return Wrap(
+      spacing: 16,
+      runSpacing: 4,
+      children: [
+        if (subject.finalGrade != null) Text(l10n.reportCardFinalGrade(formatGrade(subject.finalGrade!))),
+        if (subject.recoveryScore != null) Text(l10n.reportCardRecovery(formatGrade(subject.recoveryScore!))),
+        if (subject.attendanceRate != null) Text(l10n.reportCardAttendance(formatPercent(subject.attendanceRate!))),
+        Text(l10n.reportCardPassingGrade(formatGrade(subject.passingGrade)), style: _labelStyle(Theme.of(context))),
+      ],
     );
   }
 }

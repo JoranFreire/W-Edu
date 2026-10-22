@@ -26,57 +26,62 @@ class AttendanceScreen extends ConsumerWidget {
     final key = (offeringId: offeringId, meetingId: meetingId, pendingId: pendingId);
     final step = ref.watch(attendanceFlowProvider(key));
     final flow = ref.read(attendanceFlowProvider(key).notifier);
-    final l10n = context.l10n;
-    final theme = Theme.of(context);
-    void backToMeetings() => context.go(Routes.attendanceOffering(offeringId));
-
-    Future<void> warnIfFailed(Future<Object?> action, String fallback) async {
-      final messenger = ScaffoldMessenger.of(context);
-      final error = await action;
-      if (error != null) messenger.showSnackBar(SnackBar(content: Text(apiErrorMessage(error, l10n, fallback: fallback))));
-    }
-
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.attendanceTitle)),
-      body: switch (step) {
-        AttendanceOpening() => _Wait(l10n.attendanceOpening),
-        AttendanceOffline() => _Outcome(
-          icon: Icons.wifi_off_rounded,
-          text: l10n.attendanceOffline,
-          action: (l10n.attendancePhotographLater, flow.photographOffline),
-          onBack: backToMeetings,
-        ),
-        AttendancePhotosSaved(:final count) => _Outcome(
-          icon: Icons.cloud_upload_outlined,
-          text: l10n.attendancePhotosSaved(count),
-          onBack: () => context.go(Routes.attendance),
-        ),
-        AttendanceProcessing() => _Wait(l10n.attendanceAnalyzing),
-        AttendanceConfirming() => _Wait(l10n.attendanceSaving),
-        AttendancePhotographing() => RoomPhotos(
-          step: step,
-          preview: flow.camera?.preview(),
-          onTakePhoto: (angle) => warnIfFailed(flow.takePhoto(angle), l10n.attendancePhotoFailed),
-          onAnalyze: flow.analyze,
-        ),
-        AttendanceReviewing() => AttendanceReview(
-          step: step,
-          onToggle: flow.toggle,
-          onConfirm: () => warnIfFailed(flow.confirm(), l10n.attendanceConfirmFailed),
-        ),
-        AttendanceConfirmed(:final present, :final total) => _Outcome(
-          icon: Icons.task_alt_rounded,
-          text: l10n.attendanceConfirmed(present, total),
-          onBack: backToMeetings,
-        ),
-        AttendanceFailed() => _Outcome(
-          icon: Icons.error_outline_rounded,
-          text: step.message(l10n),
-          color: theme.colorScheme.error,
-          onBack: backToMeetings,
-        ),
-      },
+      appBar: AppBar(title: Text(context.l10n.attendanceTitle)),
+      body: _stepView(context, step, flow),
     );
+  }
+
+  /// Uma tela por etapa da chamada.
+  Widget _stepView(BuildContext context, AttendanceStep step, AttendanceFlow flow) {
+    final l10n = context.l10n;
+    void backToMeetings() => context.go(Routes.attendanceOffering(offeringId));
+    return switch (step) {
+      AttendanceOpening() => _Wait(l10n.attendanceOpening),
+      AttendanceOffline() => _Outcome(
+        icon: Icons.wifi_off_rounded,
+        text: l10n.attendanceOffline,
+        action: (l10n.attendancePhotographLater, flow.photographOffline),
+        onBack: backToMeetings,
+      ),
+      AttendancePhotosSaved(:final count) => _Outcome(
+        icon: Icons.cloud_upload_outlined,
+        text: l10n.attendancePhotosSaved(count),
+        onBack: () => context.go(Routes.attendance),
+      ),
+      AttendanceProcessing() => _Wait(l10n.attendanceAnalyzing),
+      AttendanceConfirming() => _Wait(l10n.attendanceSaving),
+      AttendancePhotographing() => RoomPhotos(
+        step: step,
+        preview: flow.camera?.preview(),
+        onTakePhoto: (angle) => _warnIfFailed(context, flow.takePhoto(angle), l10n.attendancePhotoFailed),
+        onAnalyze: flow.analyze,
+      ),
+      AttendanceReviewing() => AttendanceReview(
+        step: step,
+        onToggle: flow.toggle,
+        onConfirm: () => _warnIfFailed(context, flow.confirm(), l10n.attendanceConfirmFailed),
+      ),
+      AttendanceConfirmed(:final present, :final total) => _Outcome(
+        icon: Icons.task_alt_rounded,
+        text: l10n.attendanceConfirmed(present, total),
+        onBack: backToMeetings,
+      ),
+      AttendanceFailed() => _Outcome(
+        icon: Icons.error_outline_rounded,
+        text: step.message(l10n),
+        color: Theme.of(context).colorScheme.error,
+        onBack: backToMeetings,
+      ),
+    };
+  }
+
+  /// Avisa embaixo se a ação devolveu erro (a etapa continua a mesma).
+  Future<void> _warnIfFailed(BuildContext context, Future<Object?> action, String fallback) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final l10n = context.l10n;
+    final error = await action;
+    if (error != null) messenger.showSnackBar(SnackBar(content: Text(apiErrorMessage(error, l10n, fallback: fallback))));
   }
 }
 

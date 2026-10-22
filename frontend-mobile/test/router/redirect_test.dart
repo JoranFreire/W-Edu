@@ -13,6 +13,11 @@ User _user(List<String> roles, {List<String> permissions = const []}) => User.fr
 );
 
 void main() {
+  group('sessão', _sessionRedirects);
+  group('papéis e permissões', _roleRedirects);
+}
+
+void _sessionRedirects() {
   test('conferindo a sessão espera no carregamento', () {
     expect(redirect(const AsyncLoading(), Routes.home), Routes.loading);
     expect(redirect(const AsyncLoading(), Routes.loading), isNull);
@@ -30,7 +35,9 @@ void main() {
   test('logado sai das telas de entrada', () {
     expect(redirect(AsyncData(_user(['student'])), Routes.login), Routes.home);
   });
+}
 
+void _roleRedirects() {
   test('abas seguem os papéis: aluno, responsável e os dois', () {
     final student = _user(['student']);
     final guardian = _user(['guardian']);
