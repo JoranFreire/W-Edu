@@ -1,9 +1,9 @@
-FROM node:24-alpine AS deps
+FROM node:26-alpine AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 
-FROM node:24-alpine AS build
+FROM node:26-alpine AS build
 WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1
 # Destino do proxy /api/* (os rewrites do Next sao fixados no build).
@@ -13,7 +13,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npm run build
 
-FROM node:24-alpine
+FROM node:26-alpine
 WORKDIR /app
 # Paginas publicas (contratacao e instituicao) sao renderizadas no servidor e chamam a API direto.
 ARG API_INTERNAL_URL=http://backend:8000

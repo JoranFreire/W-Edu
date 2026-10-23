@@ -1,5 +1,8 @@
 {
   "name": "w-edu-frontend",
+  "engines": {
+    "node": ">=26 <27"
+  },
   "version": "0.1.0",
   "private": true,
   "scripts": {

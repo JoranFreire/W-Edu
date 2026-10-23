@@ -14,9 +14,9 @@ apt-get install -y -qq \
   postgresql postgresql-client \
   nginx
 
-# --- Node.js 20 ---
+# --- Node.js 26 ---
 if ! command -v node &>/dev/null; then
-  curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+  curl -fsSL https://deb.nodesource.com/setup_26.x | bash -
   apt-get install -y nodejs
 fi
 
